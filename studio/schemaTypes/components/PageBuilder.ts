@@ -7,6 +7,7 @@ import {
   TiersIcon,
   DocumentTextIcon,
   TextIcon,
+  EllipsisHorizontalIcon,
   AddCommentIcon,
   BlockContentIcon,
   BoltIcon,
@@ -19,6 +20,25 @@ export const pageBuilderType = defineType({
   icon: DocumentIcon,
   description: 'Bygg siden med komponenter og innhold',
   of: [
+    // Kolonnelayout-komponent
+    {
+      type: 'columnLayout',
+      title: 'Kolonnelayout',
+      icon: EllipsisHorizontalIcon,
+      preview: {
+        select: {
+          cols: 'columns',
+          count: 'items.length',
+        },
+        prepare({cols, count}) {
+          return {
+            title: `Kolonnelayout: ${cols} kolonne${cols === '1' ? '' : 'r'}`,
+            subtitle: `${count || 0} element(er)`,
+            media: EllipsisHorizontalIcon,
+          }
+        },
+      },
+    },
     // Bilde-komponent
     {
       type: 'imageComponent',
@@ -181,6 +201,27 @@ export const pageBuilderType = defineType({
             title: displayTitle,
             subtitle: displaySubtitle,
             media: TextIcon,
+          }
+        },
+      },
+    },
+    // Horisontal Scroll Container
+    {
+      type: 'horizontalScrollContainer',
+      title: 'Horisontal Scroll Container',
+      icon: EllipsisHorizontalIcon,
+      preview: {
+        select: {
+          title: 'title',
+          items: 'items',
+          spacing: 'spacing',
+        },
+        prepare({title, items, spacing}) {
+          const itemCount = items?.length || 0
+          return {
+            title: title || 'Horisontal Scroll Container',
+            subtitle: `${itemCount} elementer • ${spacing || 'medium'} avstand`,
+            media: EllipsisHorizontalIcon,
           }
         },
       },

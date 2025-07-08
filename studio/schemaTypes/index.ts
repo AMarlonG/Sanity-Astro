@@ -4,11 +4,14 @@ import {genresType} from './documents/genres'
 import {siteSettingsType} from './documents/siteSettings'
 import {eventsType} from './documents/events'
 import {venuesType} from './documents/venues'
+import eventDates from './documents/eventDates'
 import pages from './documents/pages'
 import articles from './documents/articles'
 
 // Importer komponenter
 import * as components from './components'
+// Importer seksjoner
+import * as sections from './sections'
 
 export const schemaTypes = [
   homepagesType,
@@ -17,6 +20,7 @@ export const schemaTypes = [
   siteSettingsType,
   eventsType,
   venuesType,
+  eventDates,
   pages,
   articles,
   // Komponenter - sørg for at alle er registrert
@@ -31,4 +35,7 @@ export const schemaTypes = [
   components.linkComponentType,
   components.accordionComponentType,
   components.pageBuilderType,
+  components.columnLayoutType,
+  // Seksjoner
+  sections.horizontalScrollContainerType,
 ]

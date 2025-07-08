@@ -1,9 +1,11 @@
 import {defineField, defineType} from 'sanity'
+import {CogIcon} from '@sanity/icons'
 
 export const siteSettingsType = defineType({
   name: 'siteSettings',
   title: 'Nettsideinnstillinger',
   type: 'document',
+  icon: CogIcon,
   groups: [
     {
       name: 'general',
@@ -66,6 +68,7 @@ export const siteSettingsType = defineType({
           type: 'date',
           validation: (rule) => rule.required(),
         }),
+
       ],
       preview: {
         select: {
@@ -155,6 +158,14 @@ export const siteSettingsType = defineType({
       group: 'general',
       description: 'Navnet på organisasjonen/festivalen',
       validation: (rule) => rule.required(),
+    }),
+    defineField({
+      name: 'festivalNumber',
+      title: 'Festivalnummer',
+      type: 'number',
+      group: 'general',
+      description: 'Hvilket nummer festivalen er (f.eks. 1, 2, 3 for første, andre, tredje festival)',
+      validation: (rule) => rule.required().positive().integer(),
     }),
     defineField({
       name: 'logos',

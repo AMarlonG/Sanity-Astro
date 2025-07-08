@@ -8,12 +8,6 @@ export const portableTextBlockType = defineType({
   icon: TextIcon,
   fields: [
     defineField({
-      name: 'title',
-      title: 'Tittel (valgfritt)',
-      type: 'string',
-      description: 'En valgfri tittel for denne tekstblokken',
-    }),
-    defineField({
       name: 'content',
       title: 'Innhold',
       type: 'portableText',
@@ -22,13 +16,12 @@ export const portableTextBlockType = defineType({
   ],
   preview: {
     select: {
-      title: 'title',
       content: 'content',
     },
-    prepare({title, content}) {
+    prepare({content}) {
       // Hent første tekst fra portable text
       const firstText = content?.[0]?.children?.[0]?.text || ''
-      const displayTitle = title || 'Legg til tekst'
+      const displayTitle = 'Legg til tekst'
       const displaySubtitle = firstText ? `${firstText.substring(0, 50)}...` : 'Ingen innhold'
 
       return {

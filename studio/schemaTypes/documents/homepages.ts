@@ -15,13 +15,20 @@ export const homepagesType = defineType({
     }),
     defineField({
       name: 'slug',
-      title: 'Slug',
+      title: 'URL',
       type: 'slug',
+      description: 'URL-en som brukes for å finne denne forsiden på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'content',
+      title: 'Sideinnhold',
+      type: 'pageBuilder',
+      description: 'Bygg forsiden med komponenter og innhold',
     }),
   ],
 })

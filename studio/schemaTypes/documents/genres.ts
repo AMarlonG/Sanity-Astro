@@ -15,8 +15,9 @@ export const genresType = defineType({
     }),
     defineField({
       name: 'slug',
-      title: 'Slug',
+      title: 'URL',
       type: 'slug',
+      description: 'URL-en som brukes for å finne denne sjangeren på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,

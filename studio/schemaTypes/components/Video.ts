@@ -74,11 +74,25 @@ export const videoComponentType = defineType({
         }),
     }),
     defineField({
+      name: 'aspectRatio',
+      title: 'Videoformat',
+      type: 'string',
+      description: 'Velg format for videoen (bredde:høyde)',
+      options: {
+        list: [
+          {title: 'Portrett (4:5)', value: '4:5'},
+          {title: 'Kvadrat (1:1)', value: '1:1'},
+          {title: 'Landskap (16:9)', value: '16:9'},
+          {title: 'Portrett (9:16)', value: '9:16'},
+        ],
+      },
+      initialValue: '16:9',
+    }),
+    defineField({
       name: 'title',
       title: 'Tittel',
       type: 'string',
-      description: 'Tittel for videoen',
-      validation: (Rule) => Rule.required().error('Tittel er påkrevd'),
+      description: 'Tittel for videoen (valgfritt)',
     }),
     defineField({
       name: 'description',
@@ -121,11 +135,30 @@ export const videoComponentType = defineType({
       subtitle: 'description',
       videoType: 'videoType',
       media: 'video',
+      aspectRatio: 'aspectRatio',
+      youtubeUrl: 'youtubeUrl',
+      vimeoUrl: 'vimeoUrl',
+      externalUrl: 'externalUrl',
     },
-    prepare({title, subtitle, videoType, media}) {
+    prepare({title, subtitle, videoType, media, aspectRatio, youtubeUrl, vimeoUrl, externalUrl}) {
+      const formatText = aspectRatio ? ` • Format: ${aspectRatio}` : ''
+
+      // Bestem hvilken video som skal vises i preview
+      let previewVideo = null
+      if (videoType === 'sanity' && media) {
+        previewVideo = media
+      } else if (videoType === 'youtube' && youtubeUrl) {
+        previewVideo = {url: youtubeUrl, type: 'youtube'}
+      } else if (videoType === 'vimeo' && vimeoUrl) {
+        previewVideo = {url: vimeoUrl, type: 'vimeo'}
+      } else if (videoType === 'external' && externalUrl) {
+        previewVideo = {url: externalUrl, type: 'external'}
+      }
+
       return {
-        title: title || 'Video uten tittel',
-        subtitle: subtitle ? `${subtitle} (${videoType})` : videoType || 'Ukjent type',
+        title: title || 'Video',
+        subtitle:
+          (subtitle ? `${subtitle} (${videoType})` : videoType || 'Ukjent type') + formatText,
         media: media || PlayIcon,
       }
     },
@@ -139,22 +172,36 @@ export function generateVideoHtml(data: {
   youtubeUrl?: string
   vimeoUrl?: string
   externalUrl?: string
-  title: string
+  title?: string
   description?: string
   autoplay?: boolean
   muted?: boolean
   controls?: boolean
   loop?: boolean
+  aspectRatio?: string
 }): string {
-  if (!data.title) {
+  // Sjekk at vi har en video-URL først
+  const hasVideo =
+    (data.videoType === 'sanity' && data.video?.asset?.url) ||
+    (data.videoType === 'youtube' && data.youtubeUrl) ||
+    (data.videoType === 'vimeo' && data.vimeoUrl) ||
+    (data.videoType === 'external' && data.externalUrl)
+
+  if (!hasVideo) {
     return ''
   }
 
-  const escapedTitle = escapeHtml(data.title)
+  const escapedTitle = data.title ? escapeHtml(data.title) : ''
   const escapedDescription = data.description ? escapeHtml(data.description) : ''
+  const aspectRatioClass = data.aspectRatio
+    ? `video-aspect-${data.aspectRatio.replace(':', '-')}`
+    : 'video-aspect-16-9'
 
-  let html = `<div class="video-container">`
-  html += `\n  <h3>${escapedTitle}</h3>`
+  let html = `<div class="video-container ${aspectRatioClass}">`
+
+  if (escapedTitle) {
+    html += `\n  <h3>${escapedTitle}</h3>`
+  }
 
   if (escapedDescription) {
     html += `\n  <p>${escapedDescription}</p>`

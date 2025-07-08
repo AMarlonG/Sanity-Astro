@@ -6,12 +6,12 @@ export const portableTextType = defineType({
   title: 'Portable Text',
   type: 'array',
   icon: DocumentTextIcon,
+
   of: [
     defineArrayMember({
       type: 'block',
       styles: [
         {title: 'Normal', value: 'normal'},
-        {title: 'H1', value: 'h1'},
         {title: 'H2', value: 'h2'},
         {title: 'H3', value: 'h3'},
         {title: 'H4', value: 'h4'},
@@ -112,7 +112,6 @@ export interface PortableTextMarkDefinition {
 // Default components for rendering PortableText to HTML
 export const defaultComponents = {
   block: {
-    h1: (children: string) => `<h1>${children}</h1>`,
     h2: (children: string) => `<h2>${children}</h2>`,
     h3: (children: string) => `<h3>${children}</h3>`,
     h4: (children: string) => `<h4>${children}</h4>`,

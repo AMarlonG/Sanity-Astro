@@ -8,23 +8,61 @@ export const imageComponentType = defineType({
   icon: DocumentIcon,
   fields: [
     defineField({
+      name: 'imageSource',
+      title: 'Bildekilde',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Last opp bilde', value: 'upload'},
+          {title: 'Velg fra media library', value: 'library'},
+        ],
+      },
+      initialValue: 'upload',
+      validation: (Rule) => Rule.required().error('Velg en bildekilde'),
+    }),
+    defineField({
       name: 'image',
       title: 'Bilde',
       type: 'image',
-      description: 'Last opp eller velg et bilde',
+      description:
+        'Last opp eller velg et bilde. Sanity optimaliserer bildet automatisk for nettsiden.',
       validation: (Rule) => Rule.required().error('Bilde er påkrevd'),
       options: {
         hotspot: true,
         crop: true,
         accept: 'image/*',
       },
+      hidden: ({parent}) => parent?.imageSource !== 'upload',
+    }),
+    defineField({
+      name: 'libraryImage',
+      title: 'Velg fra media library',
+      type: 'string',
+      description: 'Media library kommer snart - dette feltet er midlertidig deaktivert',
+      readOnly: true,
+      hidden: ({parent}) => parent?.imageSource !== 'library',
     }),
     defineField({
       name: 'alt',
       title: 'Alt-tekst',
       type: 'string',
-      description: 'Beskrivende tekst for tilgjengelighet og SEO',
-      validation: (Rule) => Rule.required().error('Alt-tekst er påkrevd for tilgjengelighet'),
+      description:
+        'Valgfritt: Beskriv bildet for tilgjengelighet og SEO. La stå tomt hvis bildet er dekorativt eller ikke har informasjonsverdi.',
+    }),
+    defineField({
+      name: 'aspectRatio',
+      title: 'Bildeformat',
+      type: 'string',
+      description: 'Velg format for bildet (bredde:høyde)',
+      options: {
+        list: [
+          {title: 'Portrett (4:5)', value: '4:5'},
+          {title: 'Kvadrat (1:1)', value: '1:1'},
+          {title: 'Landskap (16:9)', value: '16:9'},
+          {title: 'Portrett (9:16)', value: '9:16'},
+        ],
+      },
+      initialValue: '16:9',
     }),
     defineField({
       name: 'caption',
@@ -64,6 +102,8 @@ export const imageComponentType = defineType({
       title: 'Bilde-metadata',
       type: 'object',
       readOnly: true,
+      hidden: true, // Skjul metadata-feltet helt fra brukergrensesnittet
+      description: 'Sanity håndterer bildeoptimalisering automatisk i bakgrunnen',
       fields: [
         {
           name: 'dimensions',
@@ -126,12 +166,26 @@ export const imageComponentType = defineType({
       title: 'alt',
       subtitle: 'caption',
       media: 'image',
+      imageSource: 'imageSource',
+      libraryImage: 'libraryImage',
+      aspectRatio: 'aspectRatio',
     },
-    prepare({title, subtitle, media}) {
+    prepare({title, subtitle, media, imageSource, libraryImage, aspectRatio}) {
+      let previewMedia = media || DocumentIcon
+      let sourceText = ''
+
+      if (imageSource === 'library') {
+        sourceText = ' (Media Library - ikke tilgjengelig ennå)'
+      } else if (imageSource === 'upload') {
+        sourceText = ' (Opplastet)'
+      }
+
+      const formatText = aspectRatio ? ` • Format: ${aspectRatio}` : ''
+
       return {
-        title: title || 'Bilde uten alt-tekst',
-        subtitle: subtitle || 'Ingen bildetekst',
-        media: media || DocumentIcon,
+        title: (title || 'Bilde uten alt-tekst') + sourceText,
+        subtitle: (subtitle || 'Ingen bildetekst') + formatText,
+        media: previewMedia,
       }
     },
   },
@@ -139,31 +193,45 @@ export const imageComponentType = defineType({
 
 // Funksjon for å generere HTML fra bilde-data
 export function generateImageHtml(data: {
-  image: any
+  imageSource: string
+  image?: any
+  libraryImage?: any
   alt: string
   caption?: string
   alignment?: string
   size?: string
+  aspectRatio?: string
 }): string {
-  if (!data.image || !data.alt) {
+  if (!data.alt) {
     return ''
   }
 
-  const imageUrl = data.image.asset?.url
+  let imageUrl = ''
+  let crop = null
+  let hotspot = null
+
+  if (data.imageSource === 'upload' && data.image) {
+    imageUrl = data.image.asset?.url
+    crop = data.image.crop
+    hotspot = data.image.hotspot
+  } else if (data.imageSource === 'library' && data.libraryImage) {
+    // Midlertidig: Media library er ikke implementert ennå
+    return '<div class="image-placeholder">Media library kommer snart</div>'
+  }
+
   if (!imageUrl) {
     return ''
   }
 
   const alignmentClass = data.alignment ? `image-${data.alignment}` : 'image-center'
   const sizeClass = data.size ? `image-${data.size}` : 'image-medium'
+  const aspectRatioClass = data.aspectRatio
+    ? `image-aspect-${data.aspectRatio.replace(':', '-')}`
+    : 'image-aspect-16-9'
 
-  // Hent crop og hotspot data hvis tilgjengelig
-  const crop = data.image.crop
-  const hotspot = data.image.hotspot
-
-  // Generer CSS for crop/hotspot hvis tilgjengelig
+  // Generer CSS for crop/hotspot hvis tilgjengelig (kun for opplastede og library-bilder)
   let imageStyle = ''
-  if (crop && hotspot) {
+  if (crop && hotspot && (data.imageSource === 'upload' || data.imageSource === 'library')) {
     const {x, y} = hotspot
     const {left, top, right, bottom} = crop
 
@@ -173,7 +241,7 @@ export function generateImageHtml(data: {
     imageStyle = `object-position: ${cropX * 100}% ${cropY * 100}%;`
   }
 
-  let html = `<div class="image-container ${alignmentClass} ${sizeClass}">`
+  let html = `<div class="image-container ${alignmentClass} ${sizeClass} ${aspectRatioClass}">`
 
   // Bruk picture-element for bedre responsivitet og format-støtte
   html += `\n  <picture>`

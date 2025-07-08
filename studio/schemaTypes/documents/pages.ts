@@ -13,13 +13,20 @@ export default defineType({
     }),
     defineField({
       name: 'slug',
-      title: 'Slug',
+      title: 'URL',
       type: 'slug',
+      description: 'URL-en som brukes for å finne denne siden på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'content',
+      title: 'Sideinnhold',
+      type: 'pageBuilder',
+      description: 'Bygg siden med komponenter og innhold',
     }),
   ],
 })

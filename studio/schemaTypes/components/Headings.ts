@@ -21,7 +21,6 @@ export const headingsType = defineType({
       description: 'Velg overskriftens nivå (H1-H6)',
       options: {
         list: [
-          {title: 'H1 - Hovedoverskrift', value: 'h1'},
           {title: 'H2 - Underskrift', value: 'h2'},
           {title: 'H3 - Mindre underskrift', value: 'h3'},
           {title: 'H4 - Liten overskrift', value: 'h4'},
@@ -40,20 +39,19 @@ export const headingsType = defineType({
     }),
     defineField({
       name: 'id',
-      title: 'ID (valgfritt)',
+      title: 'Anker-ID (valgfritt)',
       type: 'slug',
-      description: 'Unik ID for overskriften (brukes for ankler og navigasjon)',
+      description:
+        'Unik ID for overskriften som brukes for direkte lenker til denne seksjonen. Trykk "Generer" for å lage automatisk fra overskriftsteksten.',
       options: {
-        source: 'text',
+        source: (doc: any, options: any) => {
+          // Hent tekst fra parent objekt
+          const parent = options.parent
+          return parent?.text || ''
+        },
         maxLength: 96,
+        isUnique: () => true,
       },
-    }),
-    defineField({
-      name: 'className',
-      title: 'CSS-klasse (valgfritt)',
-      type: 'string',
-      description: 'Ekstra CSS-klasser for styling',
-      validation: (Rule) => Rule.max(100),
     }),
   ],
   preview: {
@@ -65,7 +63,7 @@ export const headingsType = defineType({
     prepare({level, text, id}) {
       const displayLevel = level ? level.toUpperCase() : 'H?'
       const displayText = text || 'Ingen overskriftstekst'
-      const displayId = id?.current ? `#${id.current}` : ''
+      const displayId = id?.current ? `Anker: #${id.current}` : ''
 
       return {
         title: `${displayLevel}: ${displayText}`,
@@ -81,7 +79,6 @@ export function generateHeadingHtml(data: {
   level: 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   text: string
   id?: {current: string}
-  className?: string
 }): string {
   if (!data.text || !data.level) {
     return ''
@@ -89,17 +86,12 @@ export function generateHeadingHtml(data: {
 
   const escapedText = escapeHtml(data.text)
   const escapedId = data.id?.current ? escapeHtml(data.id.current) : ''
-  const escapedClassName = data.className ? escapeHtml(data.className) : ''
 
   // Build attributes
   const attributes: string[] = []
 
   if (escapedId) {
     attributes.push(`id="${escapedId}"`)
-  }
-
-  if (escapedClassName) {
-    attributes.push(`class="${escapedClassName}"`)
   }
 
   const attributesString = attributes.length > 0 ? ` ${attributes.join(' ')}` : ''
@@ -134,13 +126,13 @@ export function validateHeadingHierarchy(
   }
 
   // Check for proper hierarchy (H2 -> H3 -> H4 -> H5 -> H6)
-  let previousLevel = 0
+  let previousLevel = 2 // Start with H2 since H1 is not available in Headings
   headings.forEach((heading, index) => {
     const currentLevel = parseInt(heading.level.slice(1))
 
     if (currentLevel - previousLevel > 1) {
       errors.push(
-        `Heading hierarchy error at "${heading.text}": Cannot skip from H${previousLevel || 1} to H${currentLevel}`,
+        `Heading hierarchy error at "${heading.text}": Cannot skip from H${previousLevel} to H${currentLevel}`,
       )
     }
 

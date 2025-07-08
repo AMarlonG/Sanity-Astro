@@ -7,14 +7,22 @@ export default defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Tittel',
+      title: 'Hovedtittel',
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'subtitle',
+      title: 'Undertittel',
+      type: 'string',
+      description: 'Valgfri undertittel som vises som H2',
+      validation: (Rule) => Rule.max(200),
+    }),
+    defineField({
       name: 'slug',
-      title: 'Slug',
+      title: 'URL',
       type: 'slug',
+      description: 'URL-en som brukes for å finne denne artikkelen på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,
