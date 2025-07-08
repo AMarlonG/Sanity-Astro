@@ -37,5 +37,7 @@ export const schemaTypes = [
   components.pageBuilderType,
   components.columnLayoutType,
   // Seksjoner
-  sections.horizontalScrollContainerType,
+  sections.contentScrollContainerType,
+  sections.artistScrollContainerType,
+  sections.eventScrollContainerType,
 ]

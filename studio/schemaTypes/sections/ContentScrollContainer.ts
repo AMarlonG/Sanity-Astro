@@ -1,9 +1,9 @@
 import {defineField, defineType} from 'sanity'
 import {EllipsisHorizontalIcon} from '@sanity/icons'
 
-export const horizontalScrollContainerType = defineType({
-  name: 'horizontalScrollContainer',
-  title: 'Horisontal Scroll Container',
+export const contentScrollContainerType = defineType({
+  name: 'contentScrollContainer',
+  title: 'Content Scroll Container',
   type: 'object',
   icon: EllipsisHorizontalIcon,
   fields: [
@@ -55,7 +55,7 @@ export const horizontalScrollContainerType = defineType({
       const itemCount = items?.length || 0
       const scrollbarStatus = showScrollbar ? 'med scrollbar' : 'uten scrollbar'
       return {
-        title: title || 'Horisontal Scroll Container',
+        title: title || 'Content Scroll Container',
         subtitle: `${itemCount} elementer • ${scrollbarStatus}`,
         media: EllipsisHorizontalIcon,
       }
@@ -63,8 +63,8 @@ export const horizontalScrollContainerType = defineType({
   },
 })
 
-// Funksjon for å generere HTML fra horisontal scroll container data
-export function generateHorizontalScrollHtml(data: {
+// Funksjon for å generere HTML fra content scroll container data
+export function generateContentScrollHtml(data: {
   title?: string
   items?: any[]
   showScrollbar?: boolean
@@ -74,7 +74,7 @@ export function generateHorizontalScrollHtml(data: {
     return ''
   }
 
-  const containerClass = 'horizontal-scroll-container'
+  const containerClass = 'content-scroll-container'
   const scrollbarClass = data.showScrollbar ? '' : 'hide-scrollbar'
   const formatClass = data.format ? `format-${data.format.replace(':', '-')}` : 'format-16-9'
 

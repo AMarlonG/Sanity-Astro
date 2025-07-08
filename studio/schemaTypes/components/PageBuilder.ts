@@ -11,6 +11,7 @@ import {
   AddCommentIcon,
   BlockContentIcon,
   BoltIcon,
+  CalendarIcon,
 } from '@sanity/icons'
 
 export const pageBuilderType = defineType({
@@ -205,10 +206,10 @@ export const pageBuilderType = defineType({
         },
       },
     },
-    // Horisontal Scroll Container
+    // Content Scroll Container
     {
-      type: 'horizontalScrollContainer',
-      title: 'Horisontal Scroll Container',
+      type: 'contentScrollContainer',
+      title: 'Content Scroll Container',
       icon: EllipsisHorizontalIcon,
       preview: {
         select: {
@@ -219,9 +220,53 @@ export const pageBuilderType = defineType({
         prepare({title, items, spacing}) {
           const itemCount = items?.length || 0
           return {
-            title: title || 'Horisontal Scroll Container',
+            title: title || 'Content Scroll Container',
             subtitle: `${itemCount} elementer • ${spacing || 'medium'} avstand`,
             media: EllipsisHorizontalIcon,
+          }
+        },
+      },
+    },
+    // Artist Scroll Container
+    {
+      type: 'artistScrollContainer',
+      title: 'Artist Scroll Container',
+      icon: DocumentIcon,
+      preview: {
+        select: {
+          title: 'title',
+          items: 'items',
+          cardStyle: 'cardStyle',
+          cardSize: 'cardSize',
+        },
+        prepare({title, items, cardStyle, cardSize}) {
+          const itemCount = items?.length || 0
+          return {
+            title: title || 'Artist Scroll Container',
+            subtitle: `${itemCount} artister • ${cardStyle} • ${cardSize}`,
+            media: DocumentIcon,
+          }
+        },
+      },
+    },
+    // Event Scroll Container
+    {
+      type: 'eventScrollContainer',
+      title: 'Event Scroll Container',
+      icon: CalendarIcon,
+      preview: {
+        select: {
+          title: 'title',
+          events: 'events',
+          cardStyle: 'cardStyle',
+          cardSize: 'cardSize',
+        },
+        prepare({title, events, cardStyle, cardSize}) {
+          const eventCount = events?.length || 0
+          return {
+            title: title || 'Event Scroll Container',
+            subtitle: `${eventCount} arrangementer • ${cardStyle} • ${cardSize}`,
+            media: CalendarIcon,
           }
         },
       },
