@@ -162,20 +162,20 @@ export const pageBuilderType = defineType({
         },
       },
     },
-    // Quotes-komponent
+    // Sitat-komponent
     {
-      type: 'quotes',
-      title: 'Sitat',
+      type: 'quotesComponent',
+      title: 'Legg til sitat',
       icon: AddCommentIcon,
       preview: {
         select: {
-          title: 'quote',
-          subtitle: 'author',
+          quote: 'quote',
+          author: 'author',
         },
-        prepare({title, subtitle}) {
+        prepare({quote, author}) {
           return {
-            title: title ? `${title.substring(0, 50)}...` : 'Ingen sitat',
-            subtitle: subtitle || 'Ingen forfatter',
+            title: quote || 'Sitat',
+            subtitle: author ? `– ${author}` : '',
             media: AddCommentIcon,
           }
         },

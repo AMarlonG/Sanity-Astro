@@ -19,12 +19,7 @@ export const horizontalScrollContainerType = defineType({
       title: 'Elementer',
       type: 'array',
       description: 'Legg til mellom 3 og 6 elementer som skal vises i horisontal scroll',
-      of: [
-        {type: 'imageComponent'},
-        {type: 'videoComponent'},
-        {type: 'quotes'},
-        {type: 'portableTextBlock'},
-      ],
+      of: [{type: 'imageComponent'}, {type: 'videoComponent'}, {type: 'quotesComponent'}],
       validation: (Rule) => Rule.max(6).min(3),
     }),
     defineField({
@@ -96,7 +91,7 @@ export function generateHorizontalScrollHtml(data: {
           return `<div class="scroll-item">${generateImageHtml(item)}</div>`
         case 'videoComponent':
           return `<div class="scroll-item">${generateVideoHtml(item)}</div>`
-        case 'quotes':
+        case 'quotesComponent':
           return `<div class="scroll-item">${generateQuoteHtml(item)}</div>`
         case 'portableTextBlock':
           return `<div class="scroll-item">${renderPortableText(item.content)}</div>`

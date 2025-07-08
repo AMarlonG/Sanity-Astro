@@ -1,6 +1,6 @@
 // Eksporter alle komponenter
 export {titleType, generateTitleHtml, escapeHtml} from './Title'
-export {quotesType, generateQuoteHtml} from './Quotes'
+export {quotesComponentType} from './Quotes'
 export {
   headingsType,
   generateHeadingHtml,

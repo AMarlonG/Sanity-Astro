@@ -25,7 +25,7 @@ export const schemaTypes = [
   articles,
   // Komponenter - sørg for at alle er registrert
   components.titleType,
-  components.quotesType,
+  components.quotesComponentType,
   components.headingsType,
   components.portableTextType,
   components.portableTextBlockType,

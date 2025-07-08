@@ -41,7 +41,7 @@ export const columnLayoutType = defineType({
         {type: 'linkComponent'},
         {type: 'accordionComponent'},
         {type: 'headings'},
-        {type: 'quotes'},
+        {type: 'quotesComponent'},
         {type: 'portableTextBlock'},
       ],
       options: {

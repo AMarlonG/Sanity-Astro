@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, TiersIcon} from '@sanity/icons'
+import {generateQuoteHtml} from './Quotes'
 
 export const accordionComponentType = defineType({
   name: 'accordionComponent',
@@ -49,11 +50,10 @@ export const accordionComponentType = defineType({
                 {type: 'videoComponent'},
                 {type: 'buttonComponent'},
                 {type: 'title'},
-                {type: 'quotes'},
+                {type: 'quotesComponent'},
                 {type: 'headings'},
               ],
             },
-
           ],
           preview: {
             select: {
@@ -135,7 +135,7 @@ export function generateAccordionHtml(data: {
 
   html += '\n  <div class="accordion-panels">'
 
-    data.panels.forEach((panel, index) => {
+  data.panels.forEach((panel, index) => {
     const escapedPanelTitle = escapeHtml(panel.title)
     const panelId = `panel-${index}`
     const buttonId = `button-${index}`
@@ -146,10 +146,21 @@ export function generateAccordionHtml(data: {
     html += `\n        <span class="accordion-icon" aria-hidden="true"></span>`
     html += `\n      </button>`
     html += `\n      <div class="accordion-content" id="${panelId}" aria-labelledby="${buttonId}" aria-hidden="true">`
-    
+
     // Her kan du legge til logikk for å generere innhold fra panel.content
-    html += `\n        <div class="panel-content">Innhold kommer her</div>`
-    
+    if (panel.content && panel.content.length > 0) {
+      html += `\n        <div class="panel-content">`
+      panel.content.forEach((item) => {
+        if (item._type === 'quotesComponent') {
+          html += generateQuoteHtml(item)
+        }
+        // Legg til andre komponenter her etter behov
+      })
+      html += `\n        </div>`
+    } else {
+      html += `\n        <div class="panel-content">Ingen innhold</div>`
+    }
+
     html += `\n      </div>`
     html += `\n    </div>`
   })
