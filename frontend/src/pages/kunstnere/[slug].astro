@@ -1,0 +1,100 @@
+---
+import type { SanityDocument } from "@sanity/client";
+import { sanityClient } from "sanity:client";
+import { PortableText } from "astro-portabletext";
+
+const ARTIST_QUERY = `*[_type == "artist" && slug.current == $slug][0]{
+  _id,
+  name,
+  instrument,
+  country,
+  image,
+  website,
+  socialMedia,
+  content
+}`;
+
+const artist = await sanityClient.fetch<SanityDocument>(ARTIST_QUERY, Astro.params);
+
+// Hvis kunstneren ikke finnes, returner 404
+if (!artist) {
+  return Astro.redirect('/404');
+}
+
+export async function getStaticPaths() {
+  const SLUGS_QUERY = `*[_type == "artist" && defined(slug.current)]{
+    "params": {"slug": slug.current}
+  }`;
+  return await sanityClient.fetch(SLUGS_QUERY);
+}
+---
+
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{artist.name} - Sanity + Astro</title>
+</head>
+<body>
+  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <a href="/kunstnere" style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;">
+      ← Tilbake til kunstnere
+    </a>
+    
+    <article>
+      <header style="margin-bottom: 2rem;">
+        <h1 style="margin: 0 0 1rem 0; color: #333;">{artist.name}</h1>
+        
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          {artist.instrument && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>🎵 Instrument:</strong> {artist.instrument}
+            </p>
+          )}
+          
+          {artist.country && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>🌍 Land:</strong> {artist.country}
+            </p>
+          )}
+          
+          {artist.website && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>🌐 Nettside:</strong> 
+              <a href={artist.website} target="_blank" rel="noopener noreferrer" style="color: #007acc;">
+                {artist.website}
+              </a>
+            </p>
+          )}
+          
+          {artist.socialMedia && artist.socialMedia.length > 0 && (
+            <div style="margin: 0 0 0.5rem 0;">
+              <strong>📱 Sosiale medier:</strong>
+              <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
+                {artist.socialMedia.map((social: any) => (
+                  <li style="margin-bottom: 0.25rem;">
+                    <a 
+                      href={social.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style="color: #007acc;"
+                    >
+                      {social.customLabel || social.platform} - {social.url}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </header>
+      
+      {artist.content && (
+        <div style="line-height: 1.6;">
+          <PortableText value={artist.content} />
+        </div>
+      )}
+    </article>
+  </main>
+</body>
+</html> 

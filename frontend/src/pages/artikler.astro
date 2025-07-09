@@ -1,0 +1,53 @@
+---
+import type { SanityDocument } from "@sanity/client";
+import { sanityClient } from "sanity:client";
+
+const ARTICLES_QUERY = `*[_type == "article" && defined(slug.current)]|order(_createdAt desc)[0...20]{
+  _id, 
+  title, 
+  subtitle,
+  slug, 
+  _createdAt
+}`;
+
+const articles = await sanityClient.fetch<SanityDocument[]>(ARTICLES_QUERY);
+---
+
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Artikler - Sanity + Astro</title>
+</head>
+<body>
+  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <h1>Artikler fra Sanity</h1>
+    
+    {articles.length > 0 ? (
+      <ul style="list-style: none; padding: 0;">
+        {articles.map((article) => (
+          <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+            <a href={`/artikler/${article.slug.current}`} style="text-decoration: none; color: inherit;">
+              <h2 style="margin: 0 0 0.5rem 0; color: #333;">{article.title}</h2>
+              {article.subtitle && (
+                <p style="margin: 0 0 0.5rem 0; color: #666; font-style: italic;">
+                  {article.subtitle}
+                </p>
+              )}
+              <p style="margin: 0; color: #999; font-size: 0.9rem;">
+                Publisert: {new Date(article._createdAt).toLocaleDateString('nb-NO')}
+              </p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>Ingen artikler funnet. Opprett noen artikler i Sanity Studio først.</p>
+    )}
+    
+    <p style="margin-top: 2rem;">
+      <a href="/" style="color: #007acc;">← Tilbake til forsiden</a>
+    </p>
+  </main>
+</body>
+</html> 

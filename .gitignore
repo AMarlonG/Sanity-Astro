@@ -41,4 +41,7 @@ pids
 coverage/
 
 # Sanity specific
-.sanity/ 
+.sanity/
+
+# Astro specific
+.astro/ 

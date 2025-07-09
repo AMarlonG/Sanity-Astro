@@ -1,0 +1,62 @@
+---
+import type { SanityDocument } from "@sanity/client";
+import { sanityClient } from "sanity:client";
+import { PortableText } from "astro-portabletext";
+
+const ARTICLE_QUERY = `*[_type == "article" && slug.current == $slug][0]{
+  _id,
+  title,
+  subtitle,
+  content,
+  _createdAt
+}`;
+
+const article = await sanityClient.fetch<SanityDocument>(ARTICLE_QUERY, Astro.params);
+
+// Hvis artikkelen ikke finnes, returner 404
+if (!article) {
+  return Astro.redirect('/404');
+}
+
+export async function getStaticPaths() {
+  const SLUGS_QUERY = `*[_type == "article" && defined(slug.current)]{
+    "params": {"slug": slug.current}
+  }`;
+  return await sanityClient.fetch(SLUGS_QUERY);
+}
+---
+
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{article.title} - Sanity + Astro</title>
+</head>
+<body>
+  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <a href="/artikler" style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;">
+      ← Tilbake til artikler
+    </a>
+    
+    <article>
+      <header style="margin-bottom: 2rem;">
+        <h1 style="margin: 0 0 0.5rem 0; color: #333;">{article.title}</h1>
+        {article.subtitle && (
+          <h2 style="margin: 0 0 1rem 0; color: #666; font-weight: normal; font-style: italic;">
+            {article.subtitle}
+          </h2>
+        )}
+        <p style="margin: 0; color: #999; font-size: 0.9rem;">
+          Publisert: {new Date(article._createdAt).toLocaleDateString('nb-NO')}
+        </p>
+      </header>
+      
+      {article.content && (
+        <div style="line-height: 1.6;">
+          <PortableText value={article.content} />
+        </div>
+      )}
+    </article>
+  </main>
+</body>
+</html> 

@@ -1,0 +1,116 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Sanity + Astro + HTMX">
+  <header>
+    <nav>
+      <div>
+        <h1>Sanity + Astro + HTMX</h1>
+      </div>
+      <ul>
+        <li><a href="/">Hjem</a></li>
+        <li><a href="/artikler">Artikler</a></li>
+        <li><a href="/arrangementer">Arrangementer</a></li>
+        <li><a href="/kunstnere">Kunstnere</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="hero">
+        <h2>Velkommen til vår moderne web-applikasjon</h2>
+        <p>
+          Dette er en moderne web-applikasjon bygget med Sanity CMS, Astro og HTMX. 
+          Vi bruker basic CSS-styling uten Tailwind for en ren og enkel tilnærming.
+        </p>
+        <button onclick="alert('HTMX kommer snart!')">Test Knapp</button>
+      </section>
+
+      <section class="features">
+        <h3>Funksjoner</h3>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h4>Sanity CMS</h4>
+            <p>Kraftig headless CMS for innholdsstyring</p>
+          </div>
+          <div class="feature-card">
+            <h4>Astro</h4>
+            <p>Rask og moderne web-framework</p>
+          </div>
+          <div class="feature-card">
+            <h4>HTMX</h4>
+            <p>Moderne interaktivitet uten JavaScript</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Sanity + Astro + HTMX Prosjekt</p>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin: -2rem -1rem 2rem -1rem;
+    border-radius: 0 0 1rem 1rem;
+  }
+
+  .hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+
+  .features {
+    margin: 3rem 0;
+  }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .feature-card {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    text-align: center;
+  }
+
+  .feature-card h4 {
+    color: #0066cc;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .hero h2 {
+      font-size: 2rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+    }
+
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

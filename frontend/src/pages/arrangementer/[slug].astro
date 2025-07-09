@@ -1,0 +1,133 @@
+---
+import type { SanityDocument } from "@sanity/client";
+import { sanityClient } from "sanity:client";
+import { PortableText } from "astro-portabletext";
+
+const EVENT_QUERY = `*[_type == "event" && slug.current == $slug][0]{
+  _id,
+  title,
+  eventTime,
+  eventDate->{
+    title,
+    date
+  },
+  venue->{
+    title,
+    address
+  },
+  genre->{
+    title
+  },
+  artists[]->{
+    name,
+    instrument,
+    country
+  },
+  image,
+  buttonText,
+  buttonUrl,
+  buttonOpenInNewTab,
+  content
+}`;
+
+const event = await sanityClient.fetch<SanityDocument>(EVENT_QUERY, Astro.params);
+
+// Hvis arrangementet ikke finnes, returner 404
+if (!event) {
+  return Astro.redirect('/404');
+}
+
+export async function getStaticPaths() {
+  const SLUGS_QUERY = `*[_type == "event" && defined(slug.current)]{
+    "params": {"slug": slug.current}
+  }`;
+  return await sanityClient.fetch(SLUGS_QUERY);
+}
+---
+
+<html lang="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{event.title} - Sanity + Astro</title>
+</head>
+<body>
+  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+    <a href="/arrangementer" style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;">
+      ← Tilbake til arrangementer
+    </a>
+    
+    <article>
+      <header style="margin-bottom: 2rem;">
+        <h1 style="margin: 0 0 1rem 0; color: #333;">{event.title}</h1>
+        
+        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+          {event.eventDate && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>📅 Dato:</strong> {event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})
+            </p>
+          )}
+          
+          {event.eventTime && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>🕐 Klokkeslett:</strong> {event.eventTime}
+            </p>
+          )}
+          
+          {event.venue && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>🏢 Sted:</strong> {event.venue.title}
+              {event.venue.address && ` - ${event.venue.address}`}
+            </p>
+          )}
+          
+          {event.genre && (
+            <p style="margin: 0 0 0.5rem 0;">
+              <strong>🎼 Sjanger:</strong> {event.genre.title}
+            </p>
+          )}
+          
+          {event.artists && event.artists.length > 0 && (
+            <div style="margin: 0 0 0.5rem 0;">
+              <strong>🎵 Artister:</strong>
+              <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
+                {event.artists.map((artist: any) => (
+                  <li style="margin-bottom: 0.25rem;">
+                    {artist.name} ({artist.instrument}, {artist.country})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+        
+        {event.buttonText && event.buttonUrl && (
+          <a 
+            href={event.buttonUrl} 
+            target={event.buttonOpenInNewTab ? "_blank" : "_self"}
+            rel={event.buttonOpenInNewTab ? "noopener noreferrer" : ""}
+            style="
+              display: inline-block;
+              background: #0066cc;
+              color: white;
+              padding: 0.75rem 1.5rem;
+              text-decoration: none;
+              border-radius: 4px;
+              font-weight: bold;
+              margin-top: 1rem;
+            "
+          >
+            {event.buttonText}
+          </a>
+        )}
+      </header>
+      
+      {event.content && (
+        <div style="line-height: 1.6;">
+          <PortableText value={event.content} />
+        </div>
+      )}
+    </article>
+  </main>
+</body>
+</html> 

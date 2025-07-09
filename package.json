@@ -1,8 +1,19 @@
 {
-  "dependencies": {
-    "prop-types": "^15.8.1",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-is": "^19.1.0"
+  "name": "sanity-project",
+  "private": true,
+  "workspaces": [
+    "studio",
+    "frontend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:studio": "cd studio && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:studio\" \"npm run dev:frontend\"",
+    "build": "npm run build --workspaces",
+    "clean": "rm -rf studio/dist frontend/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }
