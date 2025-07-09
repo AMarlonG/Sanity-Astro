@@ -1,0 +1,208 @@
+---
+export interface Props {
+  videoType: 'sanity' | 'youtube' | 'vimeo' | 'external'
+  video?: any
+  youtubeUrl?: string
+  vimeoUrl?: string
+  externalUrl?: string
+  aspectRatio?: string
+  title?: string
+  description?: string
+  autoplay?: boolean
+  muted?: boolean
+  controls?: boolean
+  loop?: boolean
+  className?: string
+}
+
+const {
+  videoType,
+  video,
+  youtubeUrl,
+  vimeoUrl,
+  externalUrl,
+  aspectRatio = '16:9',
+  title,
+  description,
+  autoplay = false,
+  muted = true,
+  controls = true,
+  loop = false,
+  className = ''
+} = Astro.props
+
+// Beregn aspect ratio
+const [width, height] = aspectRatio.split(':').map(Number)
+const aspectRatioPercent = (height / width) * 100
+
+// Hjelpefunksjoner for å ekstrahere video-IDer
+function extractYouTubeId(url: string): string | null {
+  if (!url) return null
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)
+  return match ? match[1] : null
+}
+
+function extractVimeoId(url: string): string | null {
+  if (!url) return null
+  const match = url.match(/vimeo\.com\/(\d+)/)
+  return match ? match[1] : null
+}
+
+// Generer video-kilde basert på type
+let videoSource = ''
+let videoId = ''
+
+switch (videoType) {
+  case 'youtube':
+    if (youtubeUrl) {
+      videoId = extractYouTubeId(youtubeUrl) || ''
+      videoSource = `https://www.youtube.com/embed/${videoId}`
+    }
+    break
+  case 'vimeo':
+    if (vimeoUrl) {
+      videoId = extractVimeoId(vimeoUrl) || ''
+      videoSource = `https://player.vimeo.com/video/${videoId}`
+    }
+    break
+  case 'external':
+    videoSource = externalUrl || ''
+    break
+  case 'sanity':
+    videoSource = video?.asset?.url || ''
+    break
+}
+---
+
+<div class={`video-component ${className}`}>
+  {title && <h3 class="video-title">{title}</h3>}
+  {description && <p class="video-description">{description}</p>}
+  
+  <div class="video-container" style={`padding-bottom: ${aspectRatioPercent}%;`}>
+    {videoType === 'sanity' && videoSource ? (
+      <video
+        src={videoSource}
+        controls={controls}
+        autoplay={autoplay}
+        muted={muted}
+        loop={loop}
+        class="video-element"
+        title={title}
+      >
+        <track kind="captions" />
+        Din nettleser støtter ikke video-elementet.
+      </video>
+    ) : videoType === 'youtube' && videoSource ? (
+      <iframe
+        src={`${videoSource}?autoplay=${autoplay ? 1 : 0}&mute=${muted ? 1 : 0}&controls=${controls ? 1 : 0}&loop=${loop ? 1 : 0}`}
+        title={title || 'YouTube video'}
+        class="video-element"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    ) : videoType === 'vimeo' && videoSource ? (
+      <iframe
+        src={`${videoSource}?autoplay=${autoplay ? 1 : 0}&muted=${muted ? 1 : 0}&controls=${controls ? 1 : 0}&loop=${loop ? 1 : 0}`}
+        title={title || 'Vimeo video'}
+        class="video-element"
+        frameborder="0"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowfullscreen
+      ></iframe>
+    ) : videoType === 'external' && videoSource ? (
+      <video
+        src={videoSource}
+        controls={controls}
+        autoplay={autoplay}
+        muted={muted}
+        loop={loop}
+        class="video-element"
+        title={title}
+      >
+        <track kind="captions" />
+        Din nettleser støtter ikke video-elementet.
+      </video>
+    ) : (
+      <div class="video-error">
+        <p>Kunne ikke laste video</p>
+      </div>
+    )}
+  </div>
+</div>
+
+<style>
+  .video-component {
+    margin: 2rem 0;
+    max-width: 100%;
+  }
+
+  .video-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .video-description {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .video-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .video-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 8px;
+  }
+
+  /* For video-elementer (Sanity og ekstern) */
+  .video-element[src] {
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .video-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    color: #666;
+    border-radius: 8px;
+  }
+
+  /* Responsivt design */
+  @media (max-width: 768px) {
+    .video-component {
+      margin: 1.5rem 0;
+    }
+
+    .video-title {
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Tilgjengelighet */
+  .video-element:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+</style> 

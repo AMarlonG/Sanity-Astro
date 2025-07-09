@@ -1,0 +1,151 @@
+---
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { sanityClient } from "sanity:client";
+
+interface Props {
+  image: SanityImageSource;
+  alt: string;
+  caption?: string;
+  credit?: string;
+  alignment?: 'left' | 'center' | 'right';
+  size?: 'small' | 'medium' | 'large' | 'full';
+  aspectRatio?: '4:5' | '1:1' | '16:9' | '9:16';
+  className?: string;
+}
+
+const { 
+  image, 
+  alt, 
+  caption, 
+  credit, 
+  alignment = 'center', 
+  size = 'medium',
+  aspectRatio = '16:9',
+  className = '' 
+} = Astro.props;
+
+// Opprett Sanity Image URL Builder
+const { projectId, dataset } = sanityClient.config();
+const urlFor = (source: SanityImageSource) =>
+  projectId && dataset
+    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    : null;
+
+// Beregn aspect ratio for høyde-beregning
+const getAspectRatioValue = (ratio: string) => {
+  const [width, height] = ratio.split(':').map(Number);
+  return height / width;
+};
+
+// Generer bilde-URL med riktig høyde basert på aspect ratio
+const getImageUrl = (width: number) => {
+  if (!image || !urlFor) return '';
+  const aspectValue = getAspectRatioValue(aspectRatio);
+  const height = Math.round(width * aspectValue);
+  return urlFor(image).width(width).height(height).url() || '';
+};
+
+// Generer object-position for crop/hotspot
+const getObjectPosition = () => {
+  if (!image || !image.hotspot || !image.crop) return '';
+  const {x, y} = image.hotspot;
+  const {left, top, right, bottom} = image.crop;
+  const cropX = left + (right - left) * x;
+  const cropY = top + (bottom - top) * y;
+  return `object-position: ${cropX * 100}% ${cropY * 100}%;`;
+};
+---
+
+<div class={`image-container image-${alignment} image-${size} ${className}`}>
+  {image && urlFor ? (
+    <picture>
+      <source srcset={getImageUrl(800)} media="(min-width: 768px)" />
+      <source srcset={getImageUrl(600)} media="(min-width: 480px)" />
+      <img 
+        src={getImageUrl(400)} 
+        alt={alt} 
+        style={getObjectPosition()}
+        loading="lazy"
+        class="image"
+      />
+    </picture>
+  ) : (
+    <div class="image-placeholder">
+      <span>Bilde ikke funnet</span>
+    </div>
+  )}
+  
+  {(caption || credit) && (
+    <figcaption class="image-caption">
+      {caption && <span class="caption-text">{caption}</span>}
+      {credit && <span class="credit-text">{credit}</span>}
+    </figcaption>
+  )}
+</div>
+
+<style>
+  .image-container {
+    margin: 2rem 0;
+  }
+  
+  .image-container.image-left {
+    text-align: left;
+  }
+  
+  .image-container.image-center {
+    text-align: center;
+  }
+  
+  .image-container.image-right {
+    text-align: right;
+  }
+  
+  .image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .image-small .image {
+    max-width: 300px;
+  }
+  
+  .image-medium .image {
+    max-width: 600px;
+  }
+  
+  .image-large .image {
+    max-width: 800px;
+  }
+  
+  .image-full .image {
+    width: 100%;
+  }
+  
+  .image-caption {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .caption-text {
+    display: block;
+  }
+  
+  .credit-text {
+    display: block;
+    font-style: italic;
+    margin-top: 0.25rem;
+  }
+  
+  .image-placeholder {
+    background: #f5f5f5;
+    border: 2px dashed #ddd;
+    padding: 2rem;
+    text-align: center;
+    color: #999;
+    border-radius: 8px;
+  }
+</style> 

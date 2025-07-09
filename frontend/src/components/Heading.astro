@@ -1,0 +1,81 @@
+---
+interface Props {
+  level: 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  text: string;
+  id?: string;
+  className?: string;
+}
+
+const { level, text, id, className = '' } = Astro.props;
+---
+
+<div class={`heading-component ${className}`}>
+  {level === 'h2' && <h2 id={id}>{text}</h2>}
+  {level === 'h3' && <h3 id={id}>{text}</h3>}
+  {level === 'h4' && <h4 id={id}>{text}</h4>}
+  {level === 'h5' && <h5 id={id}>{text}</h5>}
+  {level === 'h6' && <h6 id={id}>{text}</h6>}
+</div>
+
+<style>
+  .heading-component {
+    margin: 2rem 0 1rem 0;
+  }
+  
+  .heading-component h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .heading-component h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .heading-component h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .heading-component h5 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  .heading-component h6 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .heading-component h2 {
+      font-size: 1.75rem;
+    }
+    
+    .heading-component h3 {
+      font-size: 1.5rem;
+    }
+    
+    .heading-component h4 {
+      font-size: 1.25rem;
+    }
+    
+    .heading-component h5 {
+      font-size: 1.125rem;
+    }
+    
+    .heading-component h6 {
+      font-size: 1rem;
+    }
+  }
+</style> 

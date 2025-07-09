@@ -1,0 +1,44 @@
+---
+interface Props {
+  mainTitle: string;
+  subtitle?: string;
+  className?: string;
+}
+
+const { mainTitle, subtitle, className = '' } = Astro.props;
+---
+
+<div class={`title-component ${className}`}>
+  <h1 class="main-title">{mainTitle}</h1>
+  {subtitle && <h2 class="subtitle">{subtitle}</h2>}
+</div>
+
+<style>
+  .title-component {
+    margin-bottom: 2rem;
+  }
+  
+  .main-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #1a1a1a;
+  }
+  
+  .subtitle {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #666;
+    margin: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .main-title {
+      font-size: 2rem;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+    }
+  }
+</style> 

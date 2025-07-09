@@ -1,0 +1,99 @@
+---
+import { PortableText } from 'astro-portabletext';
+
+interface Props {
+  value?: any[];
+  content?: any[];
+  className?: string;
+}
+
+const { value, content, className = '' } = Astro.props;
+
+// Håndter både 'value' og 'content' props for kompatibilitet
+const contentToRender = value || content || [];
+
+// Custom components for PortableText - følger Sanity's anbefalte struktur
+const components = {
+  types: {
+    // Custom types kan legges til her
+  },
+  marks: {
+    // Custom marks hvis nødvendig
+  },
+  block: {
+    // Custom block rendering hvis nødvendig
+  }
+};
+---
+
+<div class={`portable-text ${className}`}>
+  {contentToRender && contentToRender.length > 0 && (
+    <PortableText value={contentToRender} components={components} />
+  )}
+</div>
+
+<style>
+  .portable-text {
+    line-height: 1.6;
+    color: #333;
+  }
+  
+  .portable-text h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    color: #1a1a1a;
+  }
+  
+  .portable-text h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+    color: #1a1a1a;
+  }
+  
+  .portable-text h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1.25rem 0 0.5rem 0;
+    color: #1a1a1a;
+  }
+  
+  .portable-text p {
+    margin: 1rem 0;
+  }
+  
+  .portable-text blockquote {
+    border-left: 4px solid #e5e5e5;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    font-style: italic;
+    color: #666;
+  }
+  
+  .portable-text ul,
+  .portable-text ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+  }
+  
+  .portable-text li {
+    margin: 0.5rem 0;
+  }
+  
+  .portable-text code {
+    background: #f5f5f5;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+  }
+  
+  .portable-text strong {
+    font-weight: 600;
+  }
+  
+  .portable-text em {
+    font-style: italic;
+  }
+</style> 

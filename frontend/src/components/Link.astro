@@ -1,0 +1,107 @@
+---
+export interface Props {
+  text: string
+  linkType: 'internal' | 'url' | 'email' | 'phone'
+  internalLink?: {
+    slug?: {
+      current: string
+    }
+  }
+  url?: string
+  email?: string
+  phone?: string
+  openInNewTab?: boolean
+  accessibility?: {
+    ariaLabel?: string
+    ariaDescribedBy?: string
+  }
+  className?: string
+}
+
+const {
+  text,
+  linkType,
+  internalLink,
+  url,
+  email,
+  phone,
+  openInNewTab = false,
+  accessibility,
+  className = ''
+} = Astro.props
+
+// Generer href basert på lenketype
+let href = '#'
+let target = ''
+let rel = ''
+
+switch (linkType) {
+  case 'internal':
+    if (internalLink?.slug?.current) {
+      href = `/${internalLink.slug.current}`
+    }
+    break
+  case 'url':
+    if (url) {
+      href = url
+      if (openInNewTab) {
+        target = '_blank'
+        rel = 'noopener noreferrer'
+      }
+    }
+    break
+  case 'email':
+    if (email) {
+      href = `mailto:${email}`
+    }
+    break
+  case 'phone':
+    if (phone) {
+      href = `tel:${phone}`
+    }
+    break
+}
+
+// Bygg ARIA-attributter
+const ariaAttributes: Record<string, string> = {}
+if (accessibility?.ariaLabel) {
+  ariaAttributes['aria-label'] = accessibility.ariaLabel
+}
+if (accessibility?.ariaDescribedBy) {
+  ariaAttributes['aria-describedby'] = accessibility.ariaDescribedBy
+}
+---
+
+<a 
+  href={href}
+  {target}
+  {rel}
+  class={`link-component ${className}`}
+  {...ariaAttributes}
+>
+  {text}
+</a>
+
+<style>
+  .link-component {
+    color: #0066cc;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .link-component:hover {
+    color: #004499;
+    text-decoration: underline;
+  }
+
+  .link-component:focus {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+
+  /* Tilgjengelighet for tastaturnavigasjon */
+  .link-component:focus-visible {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+</style> 

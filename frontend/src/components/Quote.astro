@@ -1,0 +1,105 @@
+---
+export interface Props {
+  quote: string
+  author?: string
+  source?: string
+  cite?: string
+  className?: string
+}
+
+const {
+  quote,
+  author,
+  source,
+  cite,
+  className = ''
+} = Astro.props
+---
+
+<blockquote 
+  class={`quote-component ${className}`}
+  cite={cite}
+>
+  <div class="quote-text">{quote}</div>
+  {(author || source) && (
+    <cite class="quote-attribution">
+      {author && <span class="quote-author">{author}</span>}
+      {author && source && <span class="quote-separator">, </span>}
+      {source && <span class="quote-source">{source}</span>}
+    </cite>
+  )}
+</blockquote>
+
+<style>
+  .quote-component {
+    margin: 2rem 0;
+    padding: 1.5rem 2rem;
+    background: #f8f9fa;
+    border-left: 4px solid #0066cc;
+    border-radius: 0 8px 8px 0;
+    position: relative;
+  }
+
+  .quote-component::before {
+    content: '"';
+    position: absolute;
+    top: -10px;
+    left: -15px;
+    font-size: 4rem;
+    color: #0066cc;
+    font-family: serif;
+    line-height: 1;
+  }
+
+  .quote-text {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #333;
+    margin-bottom: 1rem;
+    font-style: italic;
+  }
+
+  .quote-attribution {
+    display: block;
+    font-size: 0.9rem;
+    color: #666;
+    font-style: normal;
+  }
+
+  .quote-author {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .quote-separator {
+    color: #666;
+  }
+
+  .quote-source {
+    color: #666;
+  }
+
+  /* Responsivt design */
+  @media (max-width: 768px) {
+    .quote-component {
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .quote-text {
+      font-size: 1.1rem;
+    }
+
+    .quote-component::before {
+      font-size: 3rem;
+      top: -8px;
+      left: -12px;
+    }
+  }
+
+  /* Tilgjengelighet */
+  .quote-component:focus-within {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+</style> 

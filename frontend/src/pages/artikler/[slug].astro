@@ -1,7 +1,15 @@
 ---
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
-import { PortableText } from "astro-portabletext";
+import Title from "../../components/Title.astro";
+import Image from "../../components/Image.astro";
+import PortableText from "../../components/PortableText.astro";
+import Button from "../../components/Button.astro";
+import Heading from "../../components/Heading.astro";
+import Link from "../../components/Link.astro";
+import Accordion from "../../components/Accordion.astro";
+import Quote from "../../components/Quote.astro";
+import Video from "../../components/Video.astro";
 
 const ARTICLE_QUERY = `*[_type == "article" && slug.current == $slug][0]{
   _id,
@@ -22,41 +30,106 @@ export async function getStaticPaths() {
   const SLUGS_QUERY = `*[_type == "article" && defined(slug.current)]{
     "params": {"slug": slug.current}
   }`;
-  return await sanityClient.fetch(SLUGS_QUERY);
+  
+  const articles = await sanityClient.fetch(SLUGS_QUERY);
+  return articles;
 }
 ---
 
 <html lang="no">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{article.title} - Sanity + Astro</title>
-</head>
-<body>
-  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
-    <a href="/artikler" style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;">
-      ← Tilbake til artikler
-    </a>
-    
-    <article>
-      <header style="margin-bottom: 2rem;">
-        <h1 style="margin: 0 0 0.5rem 0; color: #333;">{article.title}</h1>
-        {article.subtitle && (
-          <h2 style="margin: 0 0 1rem 0; color: #666; font-weight: normal; font-style: italic;">
-            {article.subtitle}
-          </h2>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{article.title}</title>
+  </head>
+  <body>
+    <main>
+      <article>
+        <Title mainTitle={article.title} subtitle={article.subtitle} />
+        
+        {article.content && (
+          <div class="content">
+            {article.content.map((component: any) => {
+              switch (component._type) {
+                case 'title':
+                  return <Title mainTitle={component.mainTitle} subtitle={component.subtitle} />;
+                case 'imageComponent':
+                  return <Image 
+                    image={component.image} 
+                    alt={component.alt || ''} 
+                    caption={component.caption} 
+                    credit={component.credit}
+                    aspectRatio={component.aspectRatio || '16:9'}
+                    alignment={component.alignment || 'center'}
+                    size={component.size || 'medium'}
+                  />;
+                case 'portableTextBlock':
+                  return <PortableText value={component.content} />;
+                case 'buttonComponent':
+                  return <Button text={component.text} url={component.url} style={component.style} size={component.size} />;
+                case 'heading':
+                  return <Heading level={component.level} text={component.text} id={component.id?.current} />;
+                case 'linkComponent':
+                  return <Link 
+                    text={component.text} 
+                    linkType={component.linkType} 
+                    internalLink={component.internalLink}
+                    url={component.url}
+                    email={component.email}
+                    phone={component.phone}
+                    openInNewTab={component.openInNewTab}
+                    accessibility={component.accessibility}
+                  />;
+                case 'accordionComponent':
+                  return <Accordion 
+                    title={component.title} 
+                    description={component.description} 
+                    panels={component.panels} 
+                    accessibility={component.accessibility}
+                  />;
+                case 'quoteComponent':
+                  return <Quote 
+                    quote={component.quote} 
+                    author={component.author} 
+                    source={component.source} 
+                    cite={component.cite}
+                  />;
+                case 'videoComponent':
+                  return <Video 
+                    videoType={component.videoType} 
+                    video={component.video}
+                    youtubeUrl={component.youtubeUrl}
+                    vimeoUrl={component.vimeoUrl}
+                    externalUrl={component.externalUrl}
+                    aspectRatio={component.aspectRatio}
+                    title={component.title}
+                    description={component.description}
+                    autoplay={component.autoplay}
+                    muted={component.muted}
+                    controls={component.controls}
+                    loop={component.loop}
+                  />;
+                default:
+                  return <div>Ukjent komponent: {component._type}</div>;
+              }
+            })}
+          </div>
         )}
-        <p style="margin: 0; color: #999; font-size: 0.9rem;">
-          Publisert: {new Date(article._createdAt).toLocaleDateString('nb-NO')}
-        </p>
-      </header>
-      
-      {article.content && (
-        <div style="line-height: 1.6;">
-          <PortableText value={article.content} />
-        </div>
-      )}
-    </article>
-  </main>
-</body>
-</html> 
+      </article>
+    </main>
+  </body>
+</html>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .content {
+    margin-top: 2rem;
+  }
+</style> 
