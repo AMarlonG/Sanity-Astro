@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
 
-export const linkComponentType = defineType({
+export const linkComponent = defineType({
   name: 'linkComponent',
   title: 'Lenke',
   type: 'object',
@@ -34,7 +34,7 @@ export const linkComponentType = defineType({
       type: 'reference',
       description: 'Velg en side fra nettstedet',
       hidden: ({parent}) => parent?.linkType !== 'internal',
-      to: [{type: 'homepages'}, {type: 'pages'}, {type: 'articles'}, {type: 'events'}],
+              to: [{type: 'homepage'}, {type: 'page'}, {type: 'article'}, {type: 'event'}],
     }),
     defineField({
       name: 'url',

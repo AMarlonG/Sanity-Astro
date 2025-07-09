@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {TextIcon} from '@sanity/icons'
 
-export const portableTextBlockType = defineType({
+export const portableTextBlock = defineType({
   name: 'portableTextBlock',
   title: 'Legg til tekst',
   type: 'object',

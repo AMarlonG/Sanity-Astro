@@ -1,12 +1,12 @@
-import {homepagesType} from './documents/homepages'
-import {artistsType} from './documents/artists'
-import {genresType} from './documents/genres'
-import {siteSettingsType} from './documents/siteSettings'
-import {eventsType} from './documents/events'
-import {venuesType} from './documents/venues'
-import eventDates from './documents/eventDates'
-import pages from './documents/pages'
-import articles from './documents/articles'
+import {homepage} from './documents/homepage'
+import {artist} from './documents/artist'
+import {genre} from './documents/genres'
+import {siteSettings} from './documents/siteSettings'
+import {event} from './documents/event'
+import {venue} from './documents/venue'
+import eventDate from './documents/eventDate'
+import page from './documents/page'
+import article from './documents/article'
 
 // Importer komponenter
 import * as components from './components'
@@ -14,30 +14,30 @@ import * as components from './components'
 import * as sections from './sections'
 
 export const schemaTypes = [
-  homepagesType,
-  artistsType,
-  genresType,
-  siteSettingsType,
-  eventsType,
-  venuesType,
-  eventDates,
-  pages,
-  articles,
+  homepage,
+  artist,
+  genre,
+  siteSettings,
+  event,
+  venue,
+  eventDate,
+  page,
+  article,
   // Komponenter - sørg for at alle er registrert
-  components.titleType,
-  components.quotesComponentType,
-  components.headingsType,
-  components.portableTextType,
-  components.portableTextBlockType,
-  components.imageComponentType,
-  components.videoComponentType,
-  components.buttonComponentType,
-  components.linkComponentType,
-  components.accordionComponentType,
-  components.pageBuilderType,
-  components.columnLayoutType,
+  components.title,
+  components.quoteComponent,
+  components.heading,
+  components.portableText,
+  components.portableTextBlock,
+  components.imageComponent,
+  components.videoComponent,
+  components.buttonComponent,
+  components.linkComponent,
+  components.accordionComponent,
+  components.pageBuilder,
+  components.columnLayout,
   // Seksjoner
-  sections.contentScrollContainerType,
-  sections.artistScrollContainerType,
-  sections.eventScrollContainerType,
+  sections.contentScrollContainer,
+  sections.artistScrollContainer,
+  sections.eventScrollContainer,
 ]

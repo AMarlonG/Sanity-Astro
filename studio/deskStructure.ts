@@ -25,25 +25,25 @@ export const structure = (S: StructureBuilder) =>
       S.divider(),
 
       // Nettsideinnhold
-      S.listItem().title('Forsider').icon(EarthGlobeIcon).child(S.documentTypeList('homepages')),
-      S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('pages')),
-      S.listItem().title('Artikler').icon(DocumentTextIcon).child(S.documentTypeList('articles')),
+      S.listItem().title('Forsider').icon(EarthGlobeIcon).child(S.documentTypeList('homepage')),
+      S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('page')),
+      S.listItem().title('Artikler').icon(DocumentTextIcon).child(S.documentTypeList('article')),
 
       // Skillelinje
       S.divider(),
 
       // Artister & Arrangementer
-      S.listItem().title('Arrangementer').icon(CalendarIcon).child(S.documentTypeList('events')),
-      S.listItem().title('Artister').icon(UserIcon).child(S.documentTypeList('artists')),
+      S.listItem().title('Arrangementer').icon(CalendarIcon).child(S.documentTypeList('event')),
+      S.listItem().title('Artister').icon(UserIcon).child(S.documentTypeList('artist')),
 
       // Skillelinje
       S.divider(),
 
       // Sjangre & Spillesteder
-      S.listItem().title('Spillesteder').icon(HomeIcon).child(S.documentTypeList('venues')),
+      S.listItem().title('Spillesteder').icon(HomeIcon).child(S.documentTypeList('venue')),
       S.listItem()
         .title('Arrangementsdatoer')
         .icon(CalendarIcon)
-        .child(S.documentTypeList('eventDates')),
-      S.listItem().title('Sjangre').icon(TagIcon).child(S.documentTypeList('genres')),
+        .child(S.documentTypeList('eventDate')),
+      S.listItem().title('Sjangre').icon(TagIcon).child(S.documentTypeList('genre')),
     ])

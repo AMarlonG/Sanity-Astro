@@ -1,9 +1,11 @@
 import {defineField, defineType} from 'sanity'
+import {DocumentIcon} from '@sanity/icons'
 
-export default defineType({
-  name: 'pages',
-  title: 'Faste sider',
+export const homepage = defineType({
+  name: 'homepage',
+  title: 'Forsider',
   type: 'document',
+  icon: DocumentIcon,
   fields: [
     defineField({
       name: 'title',
@@ -15,7 +17,7 @@ export default defineType({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'URL-en som brukes for å finne denne siden på nettsiden',
+      description: 'URL-en som brukes for å finne denne forsiden på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,
@@ -26,7 +28,7 @@ export default defineType({
       name: 'content',
       title: 'Sideinnhold',
       type: 'pageBuilder',
-      description: 'Bygg siden med komponenter og innhold',
+      description: 'Bygg forsiden med komponenter og innhold',
     }),
   ],
 })

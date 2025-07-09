@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {EllipsisHorizontalIcon} from '@sanity/icons'
 
-export const contentScrollContainerType = defineType({
+export const contentScrollContainer = defineType({
   name: 'contentScrollContainer',
   title: 'Content Scroll Container',
   type: 'object',
@@ -19,7 +19,7 @@ export const contentScrollContainerType = defineType({
       title: 'Elementer',
       type: 'array',
       description: 'Legg til mellom 3 og 6 elementer som skal vises i horisontal scroll',
-      of: [{type: 'imageComponent'}, {type: 'videoComponent'}, {type: 'quotesComponent'}],
+              of: [{type: 'imageComponent'}, {type: 'videoComponent'}, {type: 'quoteComponent'}],
       validation: (Rule) => Rule.max(6).min(3),
     }),
     defineField({
@@ -81,7 +81,7 @@ export function generateContentScrollHtml(data: {
   // Importer funksjoner fra eksisterende komponenter
   const {generateImageHtml} = require('../components/Image')
   const {generateVideoHtml} = require('../components/Video')
-  const {generateQuoteHtml} = require('../components/Quotes')
+  const {generateQuoteHtml} = require('../components/Quote')
   const {renderPortableText} = require('../components/PortableText')
 
   const itemsHtml = data.items
@@ -91,7 +91,7 @@ export function generateContentScrollHtml(data: {
           return `<div class="scroll-item">${generateImageHtml(item)}</div>`
         case 'videoComponent':
           return `<div class="scroll-item">${generateVideoHtml(item)}</div>`
-        case 'quotesComponent':
+        case 'quoteComponent':
           return `<div class="scroll-item">${generateQuoteHtml(item)}</div>`
         case 'portableTextBlock':
           return `<div class="scroll-item">${renderPortableText(item.content)}</div>`

@@ -8,8 +8,8 @@ export function escapeHtml(text: string): string {
   return div.innerHTML
 }
 
-export const headingsType = defineType({
-  name: 'headings',
+export const heading = defineType({
+  name: 'heading',
   title: 'Overskrifter',
   type: 'object',
   icon: BlockContentIcon,

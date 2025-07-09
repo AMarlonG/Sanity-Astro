@@ -1,14 +1,9 @@
 // Eksporter alle komponenter
-export {titleType, generateTitleHtml, escapeHtml} from './Title'
-export {quotesComponentType} from './Quotes'
+export {title, generateTitleHtml, escapeHtml} from './Title'
+export {quoteComponent} from './Quote'
+export {heading, generateHeadingHtml, generateHeadingId, validateHeadingHierarchy} from './Heading'
 export {
-  headingsType,
-  generateHeadingHtml,
-  generateHeadingId,
-  validateHeadingHierarchy,
-} from './Headings'
-export {
-  portableTextType,
+  portableText,
   renderPortableText,
   toPlainText,
   findHeadings,
@@ -19,11 +14,11 @@ export {
   type PortableTextSpan,
   type PortableTextMarkDefinition,
 } from './PortableText'
-export {portableTextBlockType} from './PortableTextBlock'
-export {imageComponentType, generateImageHtml, generateOptimizedImageUrl} from './Image'
-export {videoComponentType, generateVideoHtml} from './Video'
-export {buttonComponentType, generateButtonHtml} from './Button'
-export {linkComponentType, generateLinkHtml} from './Link'
-export {accordionComponentType, generateAccordionHtml} from './Accordion'
-export {pageBuilderType} from './PageBuilder'
-export {columnLayoutType} from './ColumnLayout'
+export {portableTextBlock} from './PortableTextBlock'
+export {imageComponent, generateImageHtml, generateOptimizedImageUrl} from './Image'
+export {videoComponent, generateVideoHtml} from './Video'
+export {buttonComponent, generateButtonHtml} from './Button'
+export {linkComponent, generateLinkHtml} from './Link'
+export {accordionComponent, generateAccordionHtml} from './Accordion'
+export {pageBuilder} from './PageBuilder'
+export {columnLayout} from './ColumnLayout'

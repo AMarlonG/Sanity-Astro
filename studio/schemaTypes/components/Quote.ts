@@ -8,8 +8,8 @@ export function escapeHtml(text: string): string {
   return div.innerHTML
 }
 
-export const quotesComponentType = defineType({
-  name: 'quotesComponent',
+export const quoteComponent = defineType({
+  name: 'quoteComponent',
   title: 'Sitater',
   type: 'object',
   icon: AddCommentIcon,

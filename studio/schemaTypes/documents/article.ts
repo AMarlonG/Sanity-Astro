@@ -1,23 +1,28 @@
 import {defineField, defineType} from 'sanity'
-import {DocumentIcon} from '@sanity/icons'
 
-export const homepagesType = defineType({
-  name: 'homepages',
-  title: 'Forsider',
+export default defineType({
+  name: 'article',
+  title: 'Artikler',
   type: 'document',
-  icon: DocumentIcon,
   fields: [
     defineField({
       name: 'title',
-      title: 'Tittel',
+      title: 'Hovedtittel',
       type: 'string',
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'subtitle',
+      title: 'Undertittel',
+      type: 'string',
+      description: 'Valgfri undertittel som vises som H2',
+      validation: (Rule) => Rule.max(200),
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'URL-en som brukes for å finne denne forsiden på nettsiden',
+      description: 'URL-en som brukes for å finne denne artikkelen på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,
@@ -26,9 +31,9 @@ export const homepagesType = defineType({
     }),
     defineField({
       name: 'content',
-      title: 'Sideinnhold',
+      title: 'Artikkelinnhold',
       type: 'pageBuilder',
-      description: 'Bygg forsiden med komponenter og innhold',
+      description: 'Bygg artikkelen med komponenter og innhold',
     }),
   ],
 })

@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {CogIcon} from '@sanity/icons'
 
-export const siteSettingsType = defineType({
+export const siteSettings = defineType({
   name: 'siteSettings',
   title: 'Nettsideinnstillinger',
   type: 'document',
@@ -99,7 +99,7 @@ export const siteSettingsType = defineType({
       name: 'homepage',
       title: 'Standard forside',
       type: 'reference',
-      to: [{type: 'homepages'}],
+      to: [{type: 'homepage'}],
       validation: (rule) => rule.required(),
       group: 'homepage',
       description: 'Denne siden brukes som forside når ingen planlagte perioder er aktive.',
@@ -118,7 +118,7 @@ export const siteSettingsType = defineType({
               name: 'page',
               title: 'Forside',
               type: 'reference',
-              to: [{type: 'homepages'}],
+              to: [{type: 'homepage'}],
               validation: (rule) => rule.required(),
             },
             {

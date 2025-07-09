@@ -1,8 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, TiersIcon} from '@sanity/icons'
-import {generateQuoteHtml} from './Quotes'
+import {generateQuoteHtml} from './Quote'
 
-export const accordionComponentType = defineType({
+export const accordionComponent = defineType({
   name: 'accordionComponent',
   title: 'Sammenleggbar seksjon',
   type: 'object',
@@ -50,8 +50,8 @@ export const accordionComponentType = defineType({
                 {type: 'videoComponent'},
                 {type: 'buttonComponent'},
                 {type: 'title'},
-                {type: 'quotesComponent'},
-                {type: 'headings'},
+                {type: 'quoteComponent'},
+                {type: 'heading'},
               ],
             },
           ],
@@ -151,7 +151,7 @@ export function generateAccordionHtml(data: {
     if (panel.content && panel.content.length > 0) {
       html += `\n        <div class="panel-content">`
       panel.content.forEach((item) => {
-        if (item._type === 'quotesComponent') {
+        if (item._type === 'quoteComponent') {
           html += generateQuoteHtml(item)
         }
         // Legg til andre komponenter her etter behov

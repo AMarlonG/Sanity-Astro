@@ -14,7 +14,7 @@ import {
   CalendarIcon,
 } from '@sanity/icons'
 
-export const pageBuilderType = defineType({
+export const pageBuilder = defineType({
   name: 'pageBuilder',
   title: 'Sideinnhold',
   type: 'array',
@@ -141,7 +141,7 @@ export const pageBuilderType = defineType({
     },
     // Headings-komponent
     {
-      type: 'headings',
+      type: 'heading',
       title: 'Overskrifter',
       icon: BlockContentIcon,
       preview: {
@@ -165,7 +165,7 @@ export const pageBuilderType = defineType({
     },
     // Sitat-komponent
     {
-      type: 'quotesComponent',
+      type: 'quoteComponent',
       title: 'Legg til sitat',
       icon: AddCommentIcon,
       preview: {

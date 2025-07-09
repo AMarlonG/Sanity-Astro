@@ -8,7 +8,7 @@ export function escapeHtml(text: string): string {
   return div.innerHTML
 }
 
-export const titleType = defineType({
+export const title = defineType({
   name: 'title',
   title: 'Title',
   type: 'object',

@@ -1,16 +1,32 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, PlayIcon} from '@sanity/icons'
 
-export const videoComponentType = defineType({
+export const videoComponent = defineType({
   name: 'videoComponent',
   title: 'Video',
   type: 'object',
   icon: DocumentIcon,
+  groups: [
+    {
+      name: 'content',
+      title: 'Innhold',
+      default: true,
+    },
+    {
+      name: 'display',
+      title: 'Visning',
+    },
+    {
+      name: 'playback',
+      title: 'Avspilling',
+    },
+  ],
   fields: [
     defineField({
       name: 'videoType',
       title: 'Video-type',
       type: 'string',
+      group: 'content',
       options: {
         list: [
           {title: 'Sanity Video', value: 'sanity'},
@@ -26,6 +42,7 @@ export const videoComponentType = defineType({
       name: 'video',
       title: 'Sanity Video',
       type: 'file',
+      group: 'content',
       description: 'Last opp en video-fil',
       hidden: ({parent}) => parent?.videoType !== 'sanity',
       options: {
@@ -36,6 +53,7 @@ export const videoComponentType = defineType({
       name: 'youtubeUrl',
       title: 'YouTube URL',
       type: 'url',
+      group: 'content',
       description: 'Lim inn YouTube video URL (f.eks. https://www.youtube.com/watch?v=...)',
       hidden: ({parent}) => parent?.videoType !== 'youtube',
       validation: (Rule) =>
@@ -52,6 +70,7 @@ export const videoComponentType = defineType({
       name: 'vimeoUrl',
       title: 'Vimeo URL',
       type: 'url',
+      group: 'content',
       description: 'Lim inn Vimeo video URL (f.eks. https://vimeo.com/...)',
       hidden: ({parent}) => parent?.videoType !== 'vimeo',
       validation: (Rule) =>
@@ -66,6 +85,7 @@ export const videoComponentType = defineType({
       name: 'externalUrl',
       title: 'Ekstern Video URL',
       type: 'url',
+      group: 'content',
       description: 'Lim inn URL til video-fil (MP4, WebM, etc.)',
       hidden: ({parent}) => parent?.videoType !== 'external',
       validation: (Rule) =>
@@ -77,6 +97,7 @@ export const videoComponentType = defineType({
       name: 'aspectRatio',
       title: 'Videoformat',
       type: 'string',
+      group: 'display',
       description: 'Velg format for videoen (bredde:høyde)',
       options: {
         list: [
@@ -92,18 +113,21 @@ export const videoComponentType = defineType({
       name: 'title',
       title: 'Tittel',
       type: 'string',
+      group: 'content',
       description: 'Tittel for videoen (valgfritt)',
     }),
     defineField({
       name: 'description',
       title: 'Beskrivelse',
       type: 'text',
+      group: 'content',
       description: 'Valgfri beskrivelse av videoen',
     }),
     defineField({
       name: 'autoplay',
       title: 'Autoplay',
       type: 'boolean',
+      group: 'playback',
       description: 'Start video automatisk når siden lastes',
       initialValue: false,
     }),
@@ -111,6 +135,7 @@ export const videoComponentType = defineType({
       name: 'muted',
       title: 'Dempet',
       type: 'boolean',
+      group: 'playback',
       description: 'Start video dempet (kreves for autoplay)',
       initialValue: true,
     }),
@@ -118,6 +143,7 @@ export const videoComponentType = defineType({
       name: 'controls',
       title: 'Kontroller',
       type: 'boolean',
+      group: 'playback',
       description: 'Vis video-kontroller',
       initialValue: true,
     }),
@@ -125,6 +151,7 @@ export const videoComponentType = defineType({
       name: 'loop',
       title: 'Loop',
       type: 'boolean',
+      group: 'playback',
       description: 'Spill video på nytt når den er ferdig',
       initialValue: false,
     }),

@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {BoltIcon} from '@sanity/icons'
 
-export const buttonComponentType = defineType({
+export const buttonComponent = defineType({
   name: 'buttonComponent',
   title: 'Knapp',
   type: 'object',

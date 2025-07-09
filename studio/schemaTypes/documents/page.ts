@@ -1,28 +1,21 @@
 import {defineField, defineType} from 'sanity'
 
 export default defineType({
-  name: 'articles',
-  title: 'Artikler',
+  name: 'page',
+  title: 'Faste sider',
   type: 'document',
   fields: [
     defineField({
       name: 'title',
-      title: 'Hovedtittel',
+      title: 'Tittel',
       type: 'string',
       validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'subtitle',
-      title: 'Undertittel',
-      type: 'string',
-      description: 'Valgfri undertittel som vises som H2',
-      validation: (Rule) => Rule.max(200),
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'URL-en som brukes for å finne denne artikkelen på nettsiden',
+      description: 'URL-en som brukes for å finne denne siden på nettsiden',
       options: {
         source: 'title',
         maxLength: 96,
@@ -31,9 +24,9 @@ export default defineType({
     }),
     defineField({
       name: 'content',
-      title: 'Artikkelinnhold',
+      title: 'Sideinnhold',
       type: 'pageBuilder',
-      description: 'Bygg artikkelen med komponenter og innhold',
+      description: 'Bygg siden med komponenter og innhold',
     }),
   ],
 })

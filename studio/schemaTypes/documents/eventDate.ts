@@ -2,7 +2,7 @@ import {defineField, defineType} from 'sanity'
 import {CalendarIcon} from '@sanity/icons'
 
 export default defineType({
-  name: 'eventDates',
+  name: 'eventDate',
   title: 'Arrangementsdatoer',
   type: 'document',
   icon: CalendarIcon,

@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {CalendarIcon} from '@sanity/icons'
 
-export const eventScrollContainerType = defineType({
+export const eventScrollContainer = defineType({
   name: 'eventScrollContainer',
   title: 'Event Scroll Container',
   type: 'object',
@@ -19,7 +19,7 @@ export const eventScrollContainerType = defineType({
       title: 'Arrangementer',
       type: 'array',
       description: 'Legg til mellom 2 og 8 arrangementer som skal vises i horisontal scroll',
-      of: [{type: 'reference', to: [{type: 'events'}]}],
+              of: [{type: 'reference', to: [{type: 'event'}]}],
       validation: (Rule) => Rule.max(8).min(2),
     }),
     defineField({

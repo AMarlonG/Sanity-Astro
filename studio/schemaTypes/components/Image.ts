@@ -1,51 +1,45 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
 
-export const imageComponentType = defineType({
+export const imageComponent = defineType({
   name: 'imageComponent',
   title: 'Bilde',
   type: 'object',
   icon: DocumentIcon,
+  groups: [
+    {
+      name: 'content',
+      title: 'Innhold',
+      default: true,
+    },
+    {
+      name: 'display',
+      title: 'Visning',
+    },
+    {
+      name: 'accessibility',
+      title: 'Tilgjengelighet',
+    },
+  ],
   fields: [
-    defineField({
-      name: 'imageSource',
-      title: 'Bildekilde',
-      type: 'string',
-      options: {
-        list: [
-          {title: 'Last opp bilde', value: 'upload'},
-          {title: 'Velg fra media library', value: 'library'},
-        ],
-      },
-      initialValue: 'upload',
-      validation: (Rule) => Rule.required().error('Velg en bildekilde'),
-    }),
     defineField({
       name: 'image',
       title: 'Bilde',
       type: 'image',
+      group: 'content',
       description:
         'Last opp eller velg et bilde. Sanity optimaliserer bildet automatisk for nettsiden.',
       validation: (Rule) => Rule.required().error('Bilde er påkrevd'),
       options: {
         hotspot: true,
-        crop: true,
         accept: 'image/*',
       },
-      hidden: ({parent}) => parent?.imageSource !== 'upload',
-    }),
-    defineField({
-      name: 'libraryImage',
-      title: 'Velg fra media library',
-      type: 'string',
-      description: 'Media library kommer snart - dette feltet er midlertidig deaktivert',
-      readOnly: true,
-      hidden: ({parent}) => parent?.imageSource !== 'library',
     }),
     defineField({
       name: 'alt',
       title: 'Alt-tekst',
       type: 'string',
+      group: 'accessibility',
       description:
         'Valgfritt: Beskriv bildet for tilgjengelighet og SEO. La stå tomt hvis bildet er dekorativt eller ikke har informasjonsverdi.',
     }),
@@ -53,6 +47,7 @@ export const imageComponentType = defineType({
       name: 'aspectRatio',
       title: 'Bildeformat',
       type: 'string',
+      group: 'display',
       description: 'Velg format for bildet (bredde:høyde)',
       options: {
         list: [
@@ -68,12 +63,23 @@ export const imageComponentType = defineType({
       name: 'caption',
       title: 'Bildetekst',
       type: 'string',
+      group: 'content',
       description: 'Valgfri tekst som vises under bildet',
+    }),
+    defineField({
+      name: 'credit',
+      title: 'Kreditering',
+      type: 'string',
+      group: 'content',
+      description:
+        'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
+      validation: (Rule) => Rule.required().error('Kreditering er påkrevd'),
     }),
     defineField({
       name: 'alignment',
       title: 'Justering',
       type: 'string',
+      group: 'display',
       options: {
         list: [
           {title: 'Venstre', value: 'left'},
@@ -87,6 +93,7 @@ export const imageComponentType = defineType({
       name: 'size',
       title: 'Størrelse',
       type: 'string',
+      group: 'display',
       options: {
         list: [
           {title: 'Liten', value: 'small'},
@@ -97,95 +104,21 @@ export const imageComponentType = defineType({
       },
       initialValue: 'medium',
     }),
-    defineField({
-      name: 'metadata',
-      title: 'Bilde-metadata',
-      type: 'object',
-      readOnly: true,
-      hidden: true, // Skjul metadata-feltet helt fra brukergrensesnittet
-      description: 'Sanity håndterer bildeoptimalisering automatisk i bakgrunnen',
-      fields: [
-        {
-          name: 'dimensions',
-          title: 'Dimensjoner',
-          type: 'object',
-          fields: [
-            {name: 'width', type: 'number', title: 'Bredde'},
-            {name: 'height', type: 'number', title: 'Høyde'},
-          ],
-        },
-        {
-          name: 'palette',
-          title: 'Fargepalett',
-          type: 'object',
-          fields: [
-            {
-              name: 'dominant',
-              type: 'object',
-              title: 'Dominant farge',
-              fields: [
-                {name: 'background', type: 'string', title: 'Bakgrunnsfarge'},
-                {name: 'foreground', type: 'string', title: 'Forgrunnsfarge'},
-              ],
-            },
-            {
-              name: 'vibrant',
-              type: 'object',
-              title: 'Vibrant farge',
-              fields: [
-                {name: 'background', type: 'string', title: 'Bakgrunnsfarge'},
-                {name: 'foreground', type: 'string', title: 'Forgrunnsfarge'},
-              ],
-            },
-            {
-              name: 'muted',
-              type: 'object',
-              title: 'Dempet farge',
-              fields: [
-                {name: 'background', type: 'string', title: 'Bakgrunnsfarge'},
-                {name: 'foreground', type: 'string', title: 'Forgrunnsfarge'},
-              ],
-            },
-          ],
-        },
-        {
-          name: 'lqip',
-          title: 'LQIP (Low Quality Image Placeholder)',
-          type: 'string',
-        },
-        {
-          name: 'blurhash',
-          title: 'Blurhash',
-          type: 'string',
-        },
-      ],
-    }),
   ],
   preview: {
     select: {
       title: 'alt',
       subtitle: 'caption',
       media: 'image',
-      imageSource: 'imageSource',
-      libraryImage: 'libraryImage',
       aspectRatio: 'aspectRatio',
     },
-    prepare({title, subtitle, media, imageSource, libraryImage, aspectRatio}) {
-      let previewMedia = media || DocumentIcon
-      let sourceText = ''
-
-      if (imageSource === 'library') {
-        sourceText = ' (Media Library - ikke tilgjengelig ennå)'
-      } else if (imageSource === 'upload') {
-        sourceText = ' (Opplastet)'
-      }
-
+    prepare({title, subtitle, media, aspectRatio}) {
       const formatText = aspectRatio ? ` • Format: ${aspectRatio}` : ''
 
       return {
-        title: (title || 'Bilde uten alt-tekst') + sourceText,
+        title: title || 'Bilde uten alt-tekst',
         subtitle: (subtitle || 'Ingen bildetekst') + formatText,
-        media: previewMedia,
+        media: media || DocumentIcon,
       }
     },
   },
@@ -193,9 +126,7 @@ export const imageComponentType = defineType({
 
 // Funksjon for å generere HTML fra bilde-data
 export function generateImageHtml(data: {
-  imageSource: string
   image?: any
-  libraryImage?: any
   alt: string
   caption?: string
   alignment?: string
@@ -210,13 +141,10 @@ export function generateImageHtml(data: {
   let crop = null
   let hotspot = null
 
-  if (data.imageSource === 'upload' && data.image) {
+  if (data.image) {
     imageUrl = data.image.asset?.url
     crop = data.image.crop
     hotspot = data.image.hotspot
-  } else if (data.imageSource === 'library' && data.libraryImage) {
-    // Midlertidig: Media library er ikke implementert ennå
-    return '<div class="image-placeholder">Media library kommer snart</div>'
   }
 
   if (!imageUrl) {
@@ -229,9 +157,9 @@ export function generateImageHtml(data: {
     ? `image-aspect-${data.aspectRatio.replace(':', '-')}`
     : 'image-aspect-16-9'
 
-  // Generer CSS for crop/hotspot hvis tilgjengelig (kun for opplastede og library-bilder)
+  // Generer CSS for crop/hotspot hvis tilgjengelig
   let imageStyle = ''
-  if (crop && hotspot && (data.imageSource === 'upload' || data.imageSource === 'library')) {
+  if (crop && hotspot) {
     const {x, y} = hotspot
     const {left, top, right, bottom} = crop
 

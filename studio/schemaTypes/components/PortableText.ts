@@ -1,7 +1,7 @@
 import {defineType, defineArrayMember} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons'
 
-export const portableTextType = defineType({
+export const portableText = defineType({
   name: 'portableText',
   title: 'Portable Text',
   type: 'array',

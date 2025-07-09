@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {EllipsisHorizontalIcon} from '@sanity/icons'
 
-export const columnLayoutType = defineType({
+export const columnLayout = defineType({
   name: 'columnLayout',
   title: 'Kolonnelayout',
   type: 'object',
@@ -40,8 +40,8 @@ export const columnLayoutType = defineType({
         {type: 'buttonComponent'},
         {type: 'linkComponent'},
         {type: 'accordionComponent'},
-        {type: 'headings'},
-        {type: 'quotesComponent'},
+        {type: 'heading'},
+        {type: 'quoteComponent'},
         {type: 'portableTextBlock'},
       ],
       options: {

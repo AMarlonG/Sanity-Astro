@@ -1,7 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
 
-export const artistScrollContainerType = defineType({
+export const artistScrollContainer = defineType({
   name: 'artistScrollContainer',
   title: 'Artist Scroll Container',
   type: 'object',
@@ -19,7 +19,7 @@ export const artistScrollContainerType = defineType({
       title: 'Artister',
       type: 'array',
       description: 'Legg til mellom 2 og 8 artister som skal vises i horisontal scroll',
-      of: [{type: 'reference', to: [{type: 'artists'}]}],
+      of: [{type: 'reference', to: [{type: 'artist'}]}],
       validation: (Rule) => Rule.max(8).min(2),
     }),
     defineField({
