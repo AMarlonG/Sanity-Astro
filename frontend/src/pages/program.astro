@@ -123,5 +123,51 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       <a href="/" style="color: #007acc;">← Tilbake til forsiden</a>
     </p>
   </main>
+
+  <!-- 
+    URL-OPPDATERING FOR FILTRERING
+    ===============================
+    
+    Denne JavaScript-koden oppdaterer URL-en med query-parametere etter HTMX-filtrering,
+    slik at URL-en blir bookmarkbar og delbar. Eksempel: /program?eventDate=2026-06-23
+    
+    Hvordan det fungerer:
+    1. Lytter på 'htmx:afterRequest' event (når filtrering er ferdig)
+    2. Henter valgte filtre fra skjemaet
+    3. Bygger ny URL med query-parametere
+    4. Oppdaterer browser-historikk uten å laste siden på nytt
+    
+    Dette gjør at:
+    - URL-en viser valgte filtre (bookmarkbar/delbar)
+    - Refresh fungerer (siden leser URL-parametere)
+    - Filtrering fungerer fortsatt (HTMX sender til API)
+    - Browser-historikk fungerer (tilbake/frem-knapper)
+  -->
+  <script>
+    // Lytter på HTMX-filtrering og oppdaterer URL-en
+    document.addEventListener('htmx:afterRequest', function(event) {
+      // Sjekk at dette er filtrerings-forespørselen (ikke andre HTMX-kall)
+      if (event.detail.xhr.responseURL.includes('/api/filter-events')) {
+        
+        // Hent valgte filtre fra skjemaet
+        const eventDateSelect = document.getElementById('eventDate');
+        const selectedEventDate = eventDateSelect ? eventDateSelect.value : '';
+        
+        // Bygg ny URL med query-parametere
+        const currentUrl = new URL(window.location);
+        
+        // Legg til eller fjern eventDate-parameter basert på valg
+        if (selectedEventDate) {
+          currentUrl.searchParams.set('eventDate', selectedEventDate);
+        } else {
+          currentUrl.searchParams.delete('eventDate');
+        }
+        
+        // Oppdater browser-historikk uten å laste siden på nytt
+        // Dette gjør URL-en bookmarkbar og delbar
+        window.history.pushState({}, '', currentUrl.toString());
+      }
+    });
+  </script>
 </body>
 </html> 

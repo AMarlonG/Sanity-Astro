@@ -26,130 +26,95 @@ const currentFilters = {
     hx-target="#results-container"
     hx-indicator="#loading-indicator"
     hx-trigger="change"
-    hx-push-url="true"
-    hx-history="true"
+    hx-push-url="/program"
     hx-swap="innerHTML"
     class="filter-form"
   >
     <!-- Dato-filter -->
     <div class="filter-group">
-      <label for="eventDate">Dato:</label>
-      <select name="eventDate" id="eventDate">
+      <label for="eventDate">Velg dato:</label>
+      <select 
+        name="eventDate" 
+        id="eventDate"
+        class="filter-select"
+      >
         <option value="">Alle datoer</option>
-        {filterOptions.eventDates?.map(date => (
+        {filterOptions.eventDates?.map((date) => (
           <option 
             value={date.date} 
             selected={currentFilters.eventDate === date.date}
           >
-            {date.title} ({new Date(date.date).toLocaleDateString('nb-NO')})
+            {date.title}
           </option>
         ))}
       </select>
     </div>
 
-    <div class="filter-actions">
-      <button 
-        type="button" 
-        class="reset-button"
-        onclick="
-          document.getElementById('eventDate').value = '';
-          htmx.trigger(document.querySelector('.filter-form'), 'change');
-        "
-      >
-        Nullstill
-      </button>
+    <!-- Loading indikator -->
+    <div id="loading-indicator" class="htmx-indicator">
+      <span>Laster...</span>
     </div>
-  </form>
 
-  <!-- Loading indicator -->
-  <div id="loading-indicator" class="loading-indicator" style="display: none;">
-    <div class="spinner"></div>
-    <span>Laster...</span>
-  </div>
+    <!-- Nullstill-knapp -->
+    <button 
+      type="button" 
+      onclick="htmx.trigger('#eventDate', 'change')"
+      class="reset-button"
+    >
+      Nullstill filter
+    </button>
+  </form>
 </div>
 
 <style>
   .event-filter {
     margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
   }
 
   .filter-form {
     display: flex;
     gap: 1rem;
     align-items: end;
+    flex-wrap: wrap;
   }
 
   .filter-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    min-width: 200px;
   }
 
   .filter-group label {
-    font-weight: 600;
-    color: #333;
+    font-weight: 500;
+    font-size: 0.9rem;
   }
 
-  .filter-group select {
+  .filter-select {
     padding: 0.5rem;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 4px;
-    font-size: 1rem;
+    min-width: 200px;
   }
 
-  .filter-actions {
-    display: flex;
-    gap: 1rem;
+  .htmx-indicator {
+    display: none;
+    color: #666;
+    font-style: italic;
   }
 
-  .filter-button, .reset-button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-
-  .filter-button {
-    background: #007acc;
-    color: white;
+  .htmx-request .htmx-indicator {
+    display: inline;
   }
 
   .reset-button {
-    background: #6c757d;
-    color: white;
+    padding: 0.5rem 1rem;
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
   }
 
-  .loading-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    color: #666;
-  }
-
-  .spinner {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #007acc;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-
-  @media (max-width: 768px) {
-    .filter-form {
-      flex-direction: column;
-      align-items: stretch;
-    }
+  .reset-button:hover {
+    background: #e0e0e0;
   }
 </style> 
