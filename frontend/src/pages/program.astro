@@ -30,17 +30,17 @@ const events = await sanityClient.fetch<SanityDocument[]>(EVENTS_QUERY);
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Arrangementer - Sanity + Astro</title>
+  <title>Program - Sanity + Astro</title>
 </head>
 <body>
   <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
-    <h1>Arrangementer fra Sanity</h1>
+    <h1>Program fra Sanity</h1>
     
     {events.length > 0 ? (
       <ul style="list-style: none; padding: 0;">
         {events.map((event) => (
           <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-            <a href={`/arrangementer/${event.slug.current}`} style="text-decoration: none; color: inherit;">
+            <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit;">
               <h2 style="margin: 0 0 0.5rem 0; color: #333;">{event.title}</h2>
               
               <div style="margin-bottom: 0.5rem; color: #666;">
