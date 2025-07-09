@@ -6,12 +6,6 @@ import EventFilter from '../components/EventFilter.astro';
 // Hent filter-opsjoner (bare eventDates)
 const eventDates = await sanityClient.fetch(`*[_type == "eventDate" && isActive == true] | order(date asc)`);
 
-// Debug: Sjekk alle eventDates (også inaktive)
-const allEventDates = await sanityClient.fetch(`*[_type == "eventDate"] | order(date asc)`);
-
-// Debug: Sjekk alle events (også upubliserte)
-const allEvents = await sanityClient.fetch(`*[_type == "event"] | order(eventDate->date asc)`);
-
 // Hent URL-parametere for initial state
 const url = new URL(Astro.request.url);
 const initialFilters = {
@@ -63,35 +57,6 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
   <script is:inline src="/htmx.min.js"></script>
 </head>
 <body>
-  <!-- Debug script -->
-  <script>
-    // Vent til HTMX er lastet
-    document.addEventListener('DOMContentLoaded', function() {
-      if (typeof htmx !== 'undefined') {
-        // Aktiver HTMX logging
-        htmx.logAll();
-        
-        // Debug events
-        document.body.addEventListener('htmx:beforeRequest', function(evt) {
-          console.log('HTMX før forespørsel:', evt.detail);
-        });
-        
-        document.body.addEventListener('htmx:afterRequest', function(evt) {
-          console.log('HTMX etter forespørsel:', evt.detail);
-        });
-        
-        document.body.addEventListener('htmx:beforeSwap', function(evt) {
-          console.log('HTMX før swap:', evt.detail);
-        });
-        
-        document.body.addEventListener('htmx:afterSwap', function(evt) {
-          console.log('HTMX etter swap:', evt.detail);
-        });
-      } else {
-        console.error('HTMX er ikke lastet');
-      }
-    });
-  </script>
   <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
     <h1>Program fra Sanity</h1>
     
@@ -103,63 +68,8 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       }}
     />
     
-    <!-- Test HTMX-knapp -->
-    <div style="margin-bottom: 2rem; padding: 1rem; background: #e9ecef; border-radius: 4px;">
-      <h3>HTMX Test</h3>
-      <form hx-post="/api/filter-events" hx-target="#test-results" hx-swap="innerHTML">
-        <input type="hidden" name="eventDate" value="2026-06-23">
-        <button 
-          type="submit"
-          style="padding: 0.5rem 1rem; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer;"
-        >
-          Test HTMX (2026-06-23)
-        </button>
-      </form>
-      <div id="test-results" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
-        <p>Klikk knappen over for å teste HTMX</p>
-      </div>
-    </div>
-    
-    <!-- Resultater og debug info -->
+    <!-- Resultater -->
     <div id="results-container">
-      <!-- Debug info -->
-      <div id="debug-info" style="background: #f0f0f0; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
-        <h3>Debug info:</h3>
-        <p>Antall tilgjengelige datoer: {eventDates.length}</p>
-        <p>Antall alle datoer (inkl. inaktive): {allEventDates.length}</p>
-        <p>Antall alle arrangementer (inkl. upubliserte): {allEvents.length}</p>
-        <p>Valgt dato: {initialFilters.eventDate || 'Ingen'}</p>
-        <p>Antall arrangementer: {events.length}</p>
-        
-        {allEventDates.length > 0 && (
-          <details style="margin-top: 1rem;">
-            <summary>Alle datoer i databasen:</summary>
-            <ul style="margin: 0; padding-left: 1rem;">
-              {allEventDates.map((date: any) => (
-                <li>
-                  {date.title} - {new Date(date.date).toLocaleDateString('nb-NO')} 
-                  ({date.isActive ? 'Aktiv' : 'Inaktiv'})
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
-        
-        {allEvents.length > 0 && (
-          <details style="margin-top: 1rem;">
-            <summary>Alle arrangementer i databasen:</summary>
-            <ul style="margin: 0; padding-left: 1rem;">
-              {allEvents.map((event: any) => (
-                <li>
-                  {event.title} ({event.isPublished ? 'Publisert' : 'Ikke publisert'})
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
-      </div>
-      
-      <!-- Resultater -->
       <div id="event-results">
         {events.length > 0 ? (
           <ul style="list-style: none; padding: 0;">

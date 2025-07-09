@@ -6,6 +6,7 @@ interface FilterOptions {
   eventDate?: string;
 }
 
+// Type for arrangement hentet fra Sanity
 interface Event {
   _id: string;
   title: string;
@@ -36,16 +37,14 @@ interface Event {
 // Validering av filter-parametere
 function validateFilters(filters: FilterOptions): FilterOptions {
   const validated: FilterOptions = {};
-
   // Valider eventDate (må være ISO-dato)
   if (filters.eventDate && /^\d{4}-\d{2}-\d{2}$/.test(filters.eventDate)) {
     validated.eventDate = filters.eventDate;
   }
-
   return validated;
 }
 
-// Sanitize HTML for sikkerhet
+// Escape HTML for sikkerhet
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -55,61 +54,36 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#x27;');
 }
 
-// Generer HTML for et arrangement
+// Generer HTML for et enkelt arrangement
 function generateEventHtml(event: Event): string {
   return `
     <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
       <a href="/program/${event.slug.current}" style="text-decoration: none; color: inherit;">
         <h2 style="margin: 0 0 0.5rem 0; color: #333;">${escapeHtml(event.title)}</h2>
-        
         <div style="margin-bottom: 0.5rem; color: #666;">
           ${
             event.eventDate
-              ? `
-            <p style="margin: 0 0 0.25rem 0;">
-              📅 ${escapeHtml(event.eventDate.title)} (${new Date(event.eventDate.date).toLocaleDateString('nb-NO')})
-            </p>
-          `
+              ? `<p style=\"margin: 0 0 0.25rem 0;\">📅 ${escapeHtml(event.eventDate.title)} (${new Date(event.eventDate.date).toLocaleDateString('nb-NO')})</p>`
               : ''
           }
-          
           ${
             event.eventTime
-              ? `
-            <p style="margin: 0 0 0.25rem 0;">
-              🕐 ${escapeHtml(event.eventTime.startTime)} - ${escapeHtml(event.eventTime.endTime)}
-            </p>
-          `
+              ? `<p style=\"margin: 0 0 0.25rem 0;\">🕐 ${escapeHtml(event.eventTime.startTime)} - ${escapeHtml(event.eventTime.endTime)}</p>`
               : ''
           }
-          
           ${
             event.venue
-              ? `
-            <p style="margin: 0 0 0.25rem 0;">
-              🏢 ${escapeHtml(event.venue.title)}
-            </p>
-          `
+              ? `<p style=\"margin: 0 0 0.25rem 0;\">🏢 ${escapeHtml(event.venue.title)}</p>`
               : ''
           }
-          
           ${
             event.artists && event.artists.length > 0
-              ? `
-            <p style="margin: 0 0 0.25rem 0;">
-              🎵 ${event.artists.map((artist) => escapeHtml(artist.name)).join(', ')}
-            </p>
-          `
+              ? `<p style=\"margin: 0 0 0.25rem 0;\">🎵 ${event.artists.map((artist) => escapeHtml(artist.name)).join(', ')}</p>`
               : ''
           }
-          
           ${
             event.genre
-              ? `
-            <p style="margin: 0; color: #999; font-size: 0.9rem;">
-              🎼 ${escapeHtml(event.genre.title)}
-            </p>
-          `
+              ? `<p style=\"margin: 0; color: #999; font-size: 0.9rem;\">🎼 ${escapeHtml(event.genre.title)}</p>`
               : ''
           }
         </div>
@@ -122,21 +96,19 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Hent rå data fra request
     const rawData = await request.text();
+    // Parse form-data manuelt
     const formData = new URLSearchParams(rawData);
-
+    // Hent og valider filtre
     const filters = validateFilters({
       eventDate: formData.get('eventDate') || undefined,
     });
-
     // Bygg GROQ-spørring
     let query = `*[_type == "event" && isPublished == true`;
     let queryParams: any = {};
-
     if (filters.eventDate) {
       query += ` && eventDate->date == $eventDate`;
       queryParams.eventDate = filters.eventDate;
     }
-
     query += `] | order(eventDate->date asc) {
       _id,
       title,
@@ -163,22 +135,19 @@ export const POST: APIRoute = async ({ request }) => {
       },
       image
     }`;
-
     const events: Event[] = await sanityClient.fetch(query, queryParams);
-
-    // Generer HTML-resultater
+    // Generer HTML for arrangementene
     const resultsHtml = `
       <div id="event-results">
         ${
           events.length > 0
             ? `<ul style="list-style: none; padding: 0;">
-              ${events.map(generateEventHtml).join('')}
-            </ul>`
+                ${events.map(generateEventHtml).join('')}
+              </ul>`
             : `<p>Ingen arrangementer funnet med de valgte filtrene.</p>`
         }
       </div>
     `;
-
     return new Response(resultsHtml, {
       headers: {
         'Content-Type': 'text/html',
@@ -186,9 +155,9 @@ export const POST: APIRoute = async ({ request }) => {
       },
     });
   } catch (error) {
-    console.error('Filter error:', error);
+    // Feilhåndtering: vis en tydelig feilmelding til bruker
     return new Response(
-      `<p style="color: #dc3545; text-align: center;">Beklager, det oppstod en feil ved filtrering. Prøv igjen senere.</p>`,
+      `<p style=\"color: #dc3545; text-align: center;\">Beklager, det oppstod en feil ved filtrering. Prøv igjen senere.</p>`,
       {
         status: 500,
         headers: {
