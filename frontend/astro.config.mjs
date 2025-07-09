@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 
 import sanity from '@sanity/astro';
+import htmx from 'astro-htmx';
 
 // https://astro.build/config
 export default defineConfig({
@@ -25,5 +26,6 @@ export default defineConfig({
       dataset: 'production',
       useCdn: false, // for statiske builds
     }),
+    htmx(),
   ],
 });

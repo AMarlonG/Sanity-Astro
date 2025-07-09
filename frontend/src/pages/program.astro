@@ -1,12 +1,40 @@
 ---
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
+import EventFilter from '../components/EventFilter.astro';
 
-const EVENTS_QUERY = `*[_type == "event" && defined(slug.current)]|order(eventDate.date asc)[0...20]{
+// Hent filter-opsjoner (bare eventDates)
+const eventDates = await sanityClient.fetch(`*[_type == "eventDate" && isActive == true] | order(date asc)`);
+
+// Debug: Sjekk alle eventDates (også inaktive)
+const allEventDates = await sanityClient.fetch(`*[_type == "eventDate"] | order(date asc)`);
+
+// Debug: Sjekk alle events (også upubliserte)
+const allEvents = await sanityClient.fetch(`*[_type == "event"] | order(eventDate->date asc)`);
+
+// Hent URL-parametere for initial state
+const url = new URL(Astro.request.url);
+const initialFilters = {
+  eventDate: url.searchParams.get('eventDate') || '',
+};
+
+// Hent arrangementer basert på filtre
+let eventsQuery = `*[_type == "event" && isPublished == true`;
+const queryParams: any = {};
+
+if (initialFilters.eventDate) {
+  eventsQuery += ` && eventDate->date == $eventDate`;
+  queryParams.eventDate = initialFilters.eventDate;
+}
+
+eventsQuery += `] | order(eventDate->date asc) {
   _id, 
   title, 
   slug,
-  eventTime,
+  eventTime{
+    startTime,
+    endTime
+  },
   eventDate->{
     title,
     date
@@ -23,7 +51,7 @@ const EVENTS_QUERY = `*[_type == "event" && defined(slug.current)]|order(eventDa
   image
 }`;
 
-const events = await sanityClient.fetch<SanityDocument[]>(EVENTS_QUERY);
+const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryParams);
 ---
 
 <html lang="no">
@@ -31,56 +59,155 @@ const events = await sanityClient.fetch<SanityDocument[]>(EVENTS_QUERY);
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Program - Sanity + Astro</title>
+  <!-- HTMX -->
+  <script is:inline src="/htmx.min.js"></script>
 </head>
 <body>
-  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+  <!-- Debug script -->
+  <script>
+    // Vent til HTMX er lastet
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof htmx !== 'undefined') {
+        // Aktiver HTMX logging
+        htmx.logAll();
+        
+        // Debug events
+        document.body.addEventListener('htmx:beforeRequest', function(evt) {
+          console.log('HTMX før forespørsel:', evt.detail);
+        });
+        
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+          console.log('HTMX etter forespørsel:', evt.detail);
+        });
+        
+        document.body.addEventListener('htmx:beforeSwap', function(evt) {
+          console.log('HTMX før swap:', evt.detail);
+        });
+        
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+          console.log('HTMX etter swap:', evt.detail);
+        });
+      } else {
+        console.error('HTMX er ikke lastet');
+      }
+    });
+  </script>
+  <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
     <h1>Program fra Sanity</h1>
     
-    {events.length > 0 ? (
-      <ul style="list-style: none; padding: 0;">
-        {events.map((event) => (
-          <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-            <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit;">
-              <h2 style="margin: 0 0 0.5rem 0; color: #333;">{event.title}</h2>
-              
-              <div style="margin-bottom: 0.5rem; color: #666;">
-                {event.eventDate && (
-                  <p style="margin: 0 0 0.25rem 0;">
-                    📅 {event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})
-                  </p>
-                )}
-                
-                {event.eventTime && (
-                  <p style="margin: 0 0 0.25rem 0;">
-                    🕐 {event.eventTime}
-                  </p>
-                )}
-                
-                {event.venue && (
-                  <p style="margin: 0 0 0.25rem 0;">
-                    🏢 {event.venue.title}
-                  </p>
-                )}
-                
-                {event.artists && event.artists.length > 0 && (
-                  <p style="margin: 0 0 0.25rem 0;">
-                    🎵 {event.artists.map((artist: any) => artist.name).join(', ')}
-                  </p>
-                )}
-                
-                {event.genre && (
-                  <p style="margin: 0; color: #999; font-size: 0.9rem;">
-                    🎼 {event.genre.title}
-                  </p>
-                )}
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>Ingen arrangementer funnet. Opprett noen arrangementer i Sanity Studio først.</p>
-    )}
+    <!-- Filter-komponent -->
+    <EventFilter 
+      initialFilters={initialFilters}
+      filterOptions={{
+        eventDates
+      }}
+    />
+    
+    <!-- Test HTMX-knapp -->
+    <div style="margin-bottom: 2rem; padding: 1rem; background: #e9ecef; border-radius: 4px;">
+      <h3>HTMX Test</h3>
+      <form hx-post="/api/filter-events" hx-target="#test-results" hx-swap="innerHTML">
+        <input type="hidden" name="eventDate" value="2026-06-23">
+        <button 
+          type="submit"
+          style="padding: 0.5rem 1rem; background: #007acc; color: white; border: none; border-radius: 4px; cursor: pointer;"
+        >
+          Test HTMX (2026-06-23)
+        </button>
+      </form>
+      <div id="test-results" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 4px;">
+        <p>Klikk knappen over for å teste HTMX</p>
+      </div>
+    </div>
+    
+    <!-- Resultater og debug info -->
+    <div id="results-container">
+      <!-- Debug info -->
+      <div id="debug-info" style="background: #f0f0f0; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+        <h3>Debug info:</h3>
+        <p>Antall tilgjengelige datoer: {eventDates.length}</p>
+        <p>Antall alle datoer (inkl. inaktive): {allEventDates.length}</p>
+        <p>Antall alle arrangementer (inkl. upubliserte): {allEvents.length}</p>
+        <p>Valgt dato: {initialFilters.eventDate || 'Ingen'}</p>
+        <p>Antall arrangementer: {events.length}</p>
+        
+        {allEventDates.length > 0 && (
+          <details style="margin-top: 1rem;">
+            <summary>Alle datoer i databasen:</summary>
+            <ul style="margin: 0; padding-left: 1rem;">
+              {allEventDates.map((date: any) => (
+                <li>
+                  {date.title} - {new Date(date.date).toLocaleDateString('nb-NO')} 
+                  ({date.isActive ? 'Aktiv' : 'Inaktiv'})
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+        
+        {allEvents.length > 0 && (
+          <details style="margin-top: 1rem;">
+            <summary>Alle arrangementer i databasen:</summary>
+            <ul style="margin: 0; padding-left: 1rem;">
+              {allEvents.map((event: any) => (
+                <li>
+                  {event.title} ({event.isPublished ? 'Publisert' : 'Ikke publisert'})
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+      </div>
+      
+      <!-- Resultater -->
+      <div id="event-results">
+        {events.length > 0 ? (
+          <ul style="list-style: none; padding: 0;">
+            {events.map((event) => (
+              <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+                <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit;">
+                  <h2 style="margin: 0 0 0.5rem 0; color: #333;">{event.title}</h2>
+                  
+                  <div style="margin-bottom: 0.5rem; color: #666;">
+                    {event.eventDate && (
+                      <p style="margin: 0 0 0.25rem 0;">
+                        📅 {event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})
+                      </p>
+                    )}
+                    
+                    {event.eventTime && (
+                      <p style="margin: 0 0 0.25rem 0;">
+                        🕐 {event.eventTime.startTime} - {event.eventTime.endTime}
+                      </p>
+                    )}
+                    
+                    {event.venue && (
+                      <p style="margin: 0 0 0.25rem 0;">
+                        🏢 {event.venue.title}
+                      </p>
+                    )}
+                    
+                    {event.artists && event.artists.length > 0 && (
+                      <p style="margin: 0 0 0.25rem 0;">
+                        🎵 {event.artists.map((artist: any) => artist.name).join(', ')}
+                      </p>
+                    )}
+                    
+                    {event.genre && (
+                      <p style="margin: 0; color: #999; font-size: 0.9rem;">
+                        🎼 {event.genre.title}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>Ingen arrangementer funnet med de valgte filtrene.</p>
+        )}
+      </div>
+    </div>
     
     <p style="margin-top: 2rem;">
       <a href="/" style="color: #007acc;">← Tilbake til forsiden</a>

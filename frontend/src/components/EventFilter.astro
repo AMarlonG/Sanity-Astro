@@ -1,0 +1,155 @@
+---
+export interface Props {
+  initialFilters?: {
+    eventDate?: string;
+  };
+  filterOptions?: {
+    eventDates?: any[];
+  };
+}
+
+const { 
+  initialFilters = {}, 
+  filterOptions = {} 
+} = Astro.props;
+
+// Hent URL-parametere for å opprettholde state
+const url = new URL(Astro.request.url);
+const currentFilters = {
+  eventDate: url.searchParams.get('eventDate') || initialFilters.eventDate || '',
+};
+---
+
+<div class="event-filter" data-filter-container>
+  <form 
+    hx-post="/api/filter-events" 
+    hx-target="#results-container"
+    hx-indicator="#loading-indicator"
+    hx-trigger="change"
+    hx-push-url="true"
+    hx-history="true"
+    hx-swap="innerHTML"
+    class="filter-form"
+  >
+    <!-- Dato-filter -->
+    <div class="filter-group">
+      <label for="eventDate">Dato:</label>
+      <select name="eventDate" id="eventDate">
+        <option value="">Alle datoer</option>
+        {filterOptions.eventDates?.map(date => (
+          <option 
+            value={date.date} 
+            selected={currentFilters.eventDate === date.date}
+          >
+            {date.title} ({new Date(date.date).toLocaleDateString('nb-NO')})
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button 
+        type="button" 
+        class="reset-button"
+        onclick="
+          document.getElementById('eventDate').value = '';
+          htmx.trigger(document.querySelector('.filter-form'), 'change');
+        "
+      >
+        Nullstill
+      </button>
+    </div>
+  </form>
+
+  <!-- Loading indicator -->
+  <div id="loading-indicator" class="loading-indicator" style="display: none;">
+    <div class="spinner"></div>
+    <span>Laster...</span>
+  </div>
+</div>
+
+<style>
+  .event-filter {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .filter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+  }
+
+  .filter-group label {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .filter-button, .reset-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .filter-button {
+    background: #007acc;
+    color: white;
+  }
+
+  .reset-button {
+    background: #6c757d;
+    color: white;
+  }
+
+  .loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    color: #666;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007acc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 768px) {
+    .filter-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style> 
