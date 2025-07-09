@@ -1,7 +1,12 @@
 // Eksporter alle komponenter
 export {title, generateTitleHtml, escapeHtml} from './Title'
 export {quoteComponent} from './Quote'
-export {heading, generateHeadingHtml, generateHeadingId, validateHeadingHierarchy} from './Heading'
+export {
+  heading as headingComponent,
+  generateHeadingHtml,
+  generateHeadingId,
+  validateHeadingHierarchy,
+} from './Heading'
 export {
   portableText,
   renderPortableText,

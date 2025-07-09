@@ -14,7 +14,7 @@ export const eventScrollContainer = defineType({
       description: 'Tittel for event scroll-containeren (valgfritt)',
       validation: (Rule) => Rule.max(100),
     }),
-    defineField({
+        defineField({
       name: 'events',
       title: 'Arrangementer',
       type: 'array',
@@ -23,57 +23,11 @@ export const eventScrollContainer = defineType({
       validation: (Rule) => Rule.max(8).min(2),
     }),
     defineField({
-      name: 'cardStyle',
-      title: 'Event-kort stil',
-      type: 'string',
-      description: 'Velg stil for event-kortene',
-      options: {
-        list: [
-          {title: 'Standard kort', value: 'standard'},
-          {title: 'Avrundede hjørner', value: 'rounded'},
-          {title: 'Med skygge', value: 'shadowed'},
-          {title: 'Minimalistisk', value: 'minimal'},
-          {title: 'Med dato-fokus', value: 'date-focused'},
-        ],
-      },
-      initialValue: 'standard',
-    }),
-    defineField({
-      name: 'cardSize',
-      title: 'Event-kort størrelse',
-      type: 'string',
-      description: 'Velg størrelse for event-kortene',
-      options: {
-        list: [
-          {title: 'Liten (250px)', value: 'small'},
-          {title: 'Medium (350px)', value: 'medium'},
-          {title: 'Stor (450px)', value: 'large'},
-          {title: 'Ekstra stor (550px)', value: 'xlarge'},
-        ],
-      },
-      initialValue: 'medium',
-    }),
-    defineField({
       name: 'showScrollbar',
       title: 'Vis scrollbar',
       type: 'boolean',
       description: 'Om scrollbaren skal være synlig eller skjult',
       initialValue: false,
-    }),
-    defineField({
-      name: 'gap',
-      title: 'Mellomrom mellom arrangementer',
-      type: 'string',
-      description: 'Velg mellomrom mellom event-kortene',
-      options: {
-        list: [
-          {title: 'Liten (12px)', value: 'small'},
-          {title: 'Medium (20px)', value: 'medium'},
-          {title: 'Stor (28px)', value: 'large'},
-          {title: 'Ekstra stor (36px)', value: 'xlarge'},
-        ],
-      },
-      initialValue: 'medium',
     }),
     defineField({
       name: 'showDate',
@@ -118,19 +72,31 @@ export const eventScrollContainer = defineType({
       },
       initialValue: 'date-asc',
     }),
+    defineField({
+      name: 'cardFormat',
+      title: 'Kortformat',
+      type: 'string',
+      description: 'Velg format for event-kortene (bredde:høyde)',
+      options: {
+        list: [
+          {title: 'Landskap (16:9)', value: '16:9'},
+          {title: 'Portrett (4:5)', value: '4:5'},
+        ],
+      },
+      initialValue: '16:9',
+    }),
   ],
   preview: {
     select: {
       title: 'title',
       events: 'events',
-      cardStyle: 'cardStyle',
-      cardSize: 'cardSize',
+      cardFormat: 'cardFormat',
     },
-    prepare({title, events, cardStyle, cardSize}) {
+    prepare({title, events, cardFormat}) {
       const eventCount = events?.length || 0
       return {
         title: title || 'Event Scroll Container',
-        subtitle: `${eventCount} arrangementer • ${cardStyle} • ${cardSize}`,
+        subtitle: `${eventCount} arrangementer • ${cardFormat}`,
         media: CalendarIcon,
       }
     },
@@ -141,15 +107,13 @@ export const eventScrollContainer = defineType({
 export function generateEventScrollHtml(data: {
   title?: string
   events?: any[]
-  cardStyle?: string
-  cardSize?: string
   showScrollbar?: boolean
-  gap?: string
   showDate?: boolean
   showTime?: boolean
   showVenue?: boolean
   showArtists?: boolean
   sortBy?: string
+  cardFormat?: string
 }): string {
   if (!data.events || data.events.length === 0) {
     return ''
@@ -157,9 +121,9 @@ export function generateEventScrollHtml(data: {
 
   const containerClass = 'event-scroll-container'
   const scrollbarClass = data.showScrollbar ? '' : 'hide-scrollbar'
-  const cardStyleClass = data.cardStyle ? `card-style-${data.cardStyle}` : 'card-style-standard'
-  const cardSizeClass = data.cardSize ? `card-size-${data.cardSize}` : 'card-size-medium'
-  const gapClass = data.gap ? `gap-${data.gap}` : 'gap-medium'
+  const cardFormatClass = data.cardFormat
+    ? `card-format-${data.cardFormat.replace(':', '-')}`
+    : 'card-format-16-9'
 
   // Sorter arrangementer basert på valgt sortering
   let sortedEvents = [...data.events]
@@ -234,7 +198,7 @@ export function generateEventScrollHtml(data: {
     : ''
 
   return `
-    <div class="${containerClass} ${scrollbarClass} ${cardStyleClass} ${cardSizeClass} ${gapClass}">
+    <div class="${containerClass} ${scrollbarClass} ${cardFormatClass}">
       ${titleHtml}
       <div class="event-scroll-wrapper">
         ${eventsHtml}

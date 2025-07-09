@@ -17,10 +17,6 @@ export const siteSettings = defineType({
       title: 'Festivalinfo',
     },
     {
-      name: 'homepage',
-      title: 'Forside-konfigurasjon',
-    },
-    {
       name: 'contact',
       title: 'Kontaktinformasjon',
     },
@@ -95,70 +91,7 @@ export const siteSettings = defineType({
         'Hvilket nummer festivalen er (f.eks. 1, 2, 3 for første, andre, tredje festival)',
       validation: (rule) => rule.required().positive().integer(),
     }),
-    defineField({
-      name: 'homepage',
-      title: 'Standard forside',
-      type: 'reference',
-      to: [{type: 'homepage'}],
-      validation: (rule) => rule.required(),
-      group: 'homepage',
-      description: 'Denne siden brukes som forside når ingen planlagte perioder er aktive.',
-    }),
-    defineField({
-      name: 'scheduledHomepages',
-      title: 'Planlagte forsider',
-      type: 'array',
-      group: 'homepage',
-      description: 'Angi perioder hvor en annen side skal være forside.',
-      of: [
-        {
-          type: 'object',
-          fields: [
-            {
-              name: 'page',
-              title: 'Forside',
-              type: 'reference',
-              to: [{type: 'homepage'}],
-              validation: (rule) => rule.required(),
-            },
-            {
-              name: 'start',
-              title: 'Starttidspunkt',
-              type: 'datetime',
-              validation: (rule) => rule.required(),
-            },
-            {
-              name: 'end',
-              title: 'Sluttidspunkt',
-              type: 'datetime',
-              validation: (rule) => rule.required(),
-            },
-            {
-              name: 'description',
-              title: 'Beskrivelse',
-              type: 'string',
-              description: 'Valgfri beskrivelse for denne perioden',
-            },
-          ],
-          preview: {
-            select: {
-              title: 'page.title',
-              start: 'start',
-              end: 'end',
-              description: 'description',
-            },
-            prepare({title, start, end, description}) {
-              const startDate = start ? new Date(start).toLocaleDateString('nb-NO') : 'Ingen start'
-              const endDate = end ? new Date(end).toLocaleDateString('nb-NO') : 'Ingen slutt'
-              return {
-                title: title || 'Uten tittel',
-                subtitle: `${startDate} → ${endDate}${description ? ` (${description})` : ''}`,
-              }
-            },
-          },
-        },
-      ],
-    }),
+
     defineField({
       name: 'organizationName',
       title: 'Organisasjonsnavn',

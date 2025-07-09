@@ -23,36 +23,6 @@ export const artistScrollContainer = defineType({
       validation: (Rule) => Rule.max(8).min(2),
     }),
     defineField({
-      name: 'cardStyle',
-      title: 'Artist-kort stil',
-      type: 'string',
-      description: 'Velg stil for artist-kortene',
-      options: {
-        list: [
-          {title: 'Standard kort', value: 'standard'},
-          {title: 'Avrundede hjørner', value: 'rounded'},
-          {title: 'Med skygge', value: 'shadowed'},
-          {title: 'Minimalistisk', value: 'minimal'},
-        ],
-      },
-      initialValue: 'standard',
-    }),
-    defineField({
-      name: 'cardSize',
-      title: 'Artist-kort størrelse',
-      type: 'string',
-      description: 'Velg størrelse for artist-kortene',
-      options: {
-        list: [
-          {title: 'Liten (200px)', value: 'small'},
-          {title: 'Medium (300px)', value: 'medium'},
-          {title: 'Stor (400px)', value: 'large'},
-          {title: 'Ekstra stor (500px)', value: 'xlarge'},
-        ],
-      },
-      initialValue: 'medium',
-    }),
-    defineField({
       name: 'showScrollbar',
       title: 'Vis scrollbar',
       type: 'boolean',
@@ -60,33 +30,30 @@ export const artistScrollContainer = defineType({
       initialValue: false,
     }),
     defineField({
-      name: 'gap',
-      title: 'Mellomrom mellom artister',
+      name: 'cardFormat',
+      title: 'Kortformat',
       type: 'string',
-      description: 'Velg mellomrom mellom artist-kortene',
+      description: 'Velg format for artist-kortene (bredde:høyde)',
       options: {
         list: [
-          {title: 'Liten (8px)', value: 'small'},
-          {title: 'Medium (16px)', value: 'medium'},
-          {title: 'Stor (24px)', value: 'large'},
-          {title: 'Ekstra stor (32px)', value: 'xlarge'},
+          {title: 'Landskap (16:9)', value: '16:9'},
+          {title: 'Portrett (4:5)', value: '4:5'},
         ],
       },
-      initialValue: 'medium',
+      initialValue: '16:9',
     }),
   ],
   preview: {
     select: {
       title: 'title',
       items: 'items',
-      cardStyle: 'cardStyle',
-      cardSize: 'cardSize',
+      cardFormat: 'cardFormat',
     },
-    prepare({title, items, cardStyle, cardSize}) {
+    prepare({title, items, cardFormat}) {
       const itemCount = items?.length || 0
       return {
         title: title || 'Artist Scroll Container',
-        subtitle: `${itemCount} artister • ${cardStyle} • ${cardSize}`,
+        subtitle: `${itemCount} artister • ${cardFormat}`,
         media: DocumentIcon,
       }
     },
@@ -97,10 +64,8 @@ export const artistScrollContainer = defineType({
 export function generateArtistScrollHtml(data: {
   title?: string
   items?: any[]
-  cardStyle?: string
-  cardSize?: string
   showScrollbar?: boolean
-  gap?: string
+  cardFormat?: string
 }): string {
   if (!data.items || data.items.length === 0) {
     return ''
@@ -108,9 +73,9 @@ export function generateArtistScrollHtml(data: {
 
   const containerClass = 'artist-scroll-container'
   const scrollbarClass = data.showScrollbar ? '' : 'hide-scrollbar'
-  const cardStyleClass = data.cardStyle ? `card-style-${data.cardStyle}` : 'card-style-standard'
-  const cardSizeClass = data.cardSize ? `card-size-${data.cardSize}` : 'card-size-medium'
-  const gapClass = data.gap ? `gap-${data.gap}` : 'gap-medium'
+  const cardFormatClass = data.cardFormat
+    ? `card-format-${data.cardFormat.replace(':', '-')}`
+    : 'card-format-16-9'
 
   const itemsHtml = data.items
     .map((artist) => {
@@ -142,7 +107,7 @@ export function generateArtistScrollHtml(data: {
     : ''
 
   return `
-    <div class="${containerClass} ${scrollbarClass} ${cardStyleClass} ${cardSizeClass} ${gapClass}">
+    <div class="${containerClass} ${scrollbarClass} ${cardFormatClass}">
       ${titleHtml}
       <div class="artist-scroll-wrapper">
         ${itemsHtml}

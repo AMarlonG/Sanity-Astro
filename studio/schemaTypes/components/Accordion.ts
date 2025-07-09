@@ -51,7 +51,7 @@ export const accordionComponent = defineType({
                 {type: 'buttonComponent'},
                 {type: 'title'},
                 {type: 'quoteComponent'},
-                {type: 'heading'},
+                {type: 'headingComponent'},
               ],
             },
           ],

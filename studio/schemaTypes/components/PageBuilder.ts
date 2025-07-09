@@ -141,7 +141,7 @@ export const pageBuilder = defineType({
     },
     // Headings-komponent
     {
-      type: 'heading',
+      type: 'headingComponent',
       title: 'Overskrifter',
       icon: BlockContentIcon,
       preview: {
@@ -236,14 +236,13 @@ export const pageBuilder = defineType({
         select: {
           title: 'title',
           items: 'items',
-          cardStyle: 'cardStyle',
-          cardSize: 'cardSize',
+          cardFormat: 'cardFormat',
         },
-        prepare({title, items, cardStyle, cardSize}) {
+        prepare({title, items, cardFormat}) {
           const itemCount = items?.length || 0
           return {
             title: title || 'Artist Scroll Container',
-            subtitle: `${itemCount} artister • ${cardStyle} • ${cardSize}`,
+            subtitle: `${itemCount} artister • ${cardFormat}`,
             media: DocumentIcon,
           }
         },
@@ -258,14 +257,13 @@ export const pageBuilder = defineType({
         select: {
           title: 'title',
           events: 'events',
-          cardStyle: 'cardStyle',
-          cardSize: 'cardSize',
+          cardFormat: 'cardFormat',
         },
-        prepare({title, events, cardStyle, cardSize}) {
+        prepare({title, events, cardFormat}) {
           const eventCount = events?.length || 0
           return {
             title: title || 'Event Scroll Container',
-            subtitle: `${eventCount} arrangementer • ${cardStyle} • ${cardSize}`,
+            subtitle: `${eventCount} arrangementer • ${cardFormat}`,
             media: CalendarIcon,
           }
         },

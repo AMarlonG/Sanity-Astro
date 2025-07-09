@@ -1,0 +1,124 @@
+---
+import Image from './Image.astro'
+import Video from './Video.astro'
+import Quote from './Quote.astro'
+import PortableText from './PortableText.astro'
+
+interface Props {
+  title?: string
+  items?: any[]
+  showScrollbar?: boolean
+  format?: '4:5' | '1:1' | '16:9' | '9:16'
+}
+
+const {
+  title,
+  items = [],
+  showScrollbar = false,
+  format = '16:9'
+} = Astro.props
+
+// CSS-klasser basert på props
+const containerClass = 'content-scroll-container'
+const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
+const formatClass = `format-${format.replace(':', '-')}`
+---
+
+<div class={`${containerClass} ${scrollbarClass} ${formatClass}`}>
+  {title && <h3 class="scroll-container-title">{title}</h3>}
+  <div class="scroll-wrapper">
+    {items.map((item) => {
+      if (!item) return null
+      
+      return (
+        <div class="scroll-item">
+          {item._type === 'imageComponent' && <Image {...item} />}
+          {item._type === 'videoComponent' && <Video {...item} />}
+          {item._type === 'quoteComponent' && <Quote {...item} />}
+          {item._type === 'portableTextBlock' && <PortableText content={item.content} />}
+        </div>
+      )
+    })}
+  </div>
+</div>
+
+<style>
+  .content-scroll-container {
+    width: 100%;
+    margin: 2rem 0;
+  }
+
+  .scroll-container-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .scroll-wrapper {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+
+  .scroll-item {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Format variants */
+  .format-4-5 .scroll-item {
+    width: 200px;
+    aspect-ratio: 4/5;
+  }
+
+  .format-1-1 .scroll-item {
+    width: 250px;
+    aspect-ratio: 1/1;
+  }
+
+  .format-16-9 .scroll-item {
+    width: 300px;
+    aspect-ratio: 16/9;
+  }
+
+  .format-9-16 .scroll-item {
+    width: 150px;
+    aspect-ratio: 9/16;
+  }
+
+  /* Hide scrollbar */
+  .hide-scrollbar .scroll-wrapper {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar .scroll-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .scroll-wrapper {
+      gap: 0.75rem;
+    }
+    
+    .format-16-9 .scroll-item {
+      width: 250px;
+    }
+    
+    .format-1-1 .scroll-item {
+      width: 200px;
+    }
+    
+    .format-4-5 .scroll-item {
+      width: 150px;
+    }
+    
+    .format-9-16 .scroll-item {
+      width: 120px;
+    }
+  }
+</style> 

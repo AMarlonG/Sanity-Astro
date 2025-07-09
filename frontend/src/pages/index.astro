@@ -1,116 +1,68 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { getActiveHomepage } from '../lib/homepage.js';
+import PortableText from '../components/PortableText.astro';
+import Heading from '../components/Heading.astro';
+import Image from '../components/Image.astro';
+import Video from '../components/Video.astro';
+import Button from '../components/Button.astro';
+import Link from '../components/Link.astro';
+import Quote from '../components/Quote.astro';
+import Accordion from '../components/Accordion.astro';
+import ContentScrollContainer from '../components/ContentScrollContainer.astro';
+import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
+import EventScrollContainer from '../components/EventScrollContainer.astro';
+
+// Hent aktiv forside basert på gjeldende tid
+const homepage = await getActiveHomepage();
+
+// Smart caching basert på innholdstype
+if (homepage?.scheduledPeriod) {
+  const timeUntilExpiry = new Date(homepage.scheduledPeriod.endDate).getTime() - Date.now();
+  const cacheTime = Math.min(timeUntilExpiry / 1000, 300); // Maks 5 minutter
+  
+  Astro.response.headers.set('Cache-Control', `public, max-age=${cacheTime}`);
+} else {
+  Astro.response.headers.set('Cache-Control', 'public, max-age=3600'); // 1 time
+}
+
+console.log('Aktiv forside:', homepage);
 ---
 
-<Layout title="Sanity + Astro + HTMX">
-  <header>
-    <nav>
-      <div>
-        <h1>Sanity + Astro + HTMX</h1>
-      </div>
-      <ul>
-        <li><a href="/">Hjem</a></li>
-        <li><a href="/artikler">Artikler</a></li>
-        <li><a href="/arrangementer">Arrangementer</a></li>
-        <li><a href="/kunstnere">Kunstnere</a></li>
-      </ul>
-    </nav>
-  </header>
-
+<Layout title={homepage?.title || "Forside"}>
   <main>
-    <div class="container">
-      <section class="hero">
-        <h2>Velkommen til vår moderne web-applikasjon</h2>
-        <p>
-          Dette er en moderne web-applikasjon bygget med Sanity CMS, Astro og HTMX. 
-          Vi bruker basic CSS-styling uten Tailwind for en ren og enkel tilnærming.
-        </p>
-        <button onclick="alert('HTMX kommer snart!')">Test Knapp</button>
-      </section>
-
-      <section class="features">
-        <h3>Funksjoner</h3>
-        <div class="feature-grid">
-          <div class="feature-card">
-            <h4>Sanity CMS</h4>
-            <p>Kraftig headless CMS for innholdsstyring</p>
+    {homepage ? (
+      <div>
+        <h1>{homepage.title}</h1>
+        {homepage.content && Array.isArray(homepage.content) && (
+          <div>
+            {homepage.content.map((block) => (
+              <div key={block._key || block._id}>
+                {block._type === 'portableTextBlock' && <PortableText content={block.content} />}
+                {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} />}
+                {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} />}
+                {block._type === 'videoComponent' && <Video url={block.url} title={block.title} thumbnail={block.thumbnail} />}
+                {block._type === 'buttonComponent' && <Button text={block.text} style={block.style} size={block.size} action={block.action} />}
+                {block._type === 'linkComponent' && <Link text={block.text} url={block.url} openInNewTab={block.openInNewTab} />}
+                {block._type === 'quoteComponent' && <Quote quote={block.quote} author={block.author} />}
+                {block._type === 'accordionComponent' && <Accordion title={block.title} content={block.content} />}
+                {block._type === 'contentScrollContainer' && <ContentScrollContainer title={block.title} items={block.items} spacing={block.spacing} />}
+                {block._type === 'artistScrollContainer' && <ArtistScrollContainer title={block.title} items={block.items} cardFormat={block.cardFormat} />}
+                {block._type === 'eventScrollContainer' && <EventScrollContainer title={block.title} events={block.events} cardFormat={block.cardFormat} />}
+                {/* Fallback for ukjent type */}
+                {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer' ].indexOf(block._type) === -1 && (
+                  <div>Ukjent komponent: {block._type}</div>
+                )}
+              </div>
+            ))}
           </div>
-          <div class="feature-card">
-            <h4>Astro</h4>
-            <p>Rask og moderne web-framework</p>
-          </div>
-          <div class="feature-card">
-            <h4>HTMX</h4>
-            <p>Moderne interaktivitet uten JavaScript</p>
-          </div>
-        </div>
-      </section>
-    </div>
+        )}
+      </div>
+    ) : (
+      <div>
+        <h1>Velkommen til forsiden</h1>
+        <p>Ingen forside er konfigurert ennå. Gå til Sanity Studio for å opprette en forside.</p>
+      </div>
+    )}
   </main>
-
-  <footer>
-    <div class="container">
-      <p>&copy; 2024 Sanity + Astro + HTMX Prosjekt</p>
-    </div>
-  </footer>
 </Layout>
-
-<style>
-  .hero {
-    text-align: center;
-    padding: 3rem 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    margin: -2rem -1rem 2rem -1rem;
-    border-radius: 0 0 1rem 1rem;
-  }
-
-  .hero h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .hero p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
-  }
-
-  .features {
-    margin: 3rem 0;
-  }
-
-  .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-
-  .feature-card {
-    background: #f8f9fa;
-    padding: 2rem;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    text-align: center;
-  }
-
-  .feature-card h4 {
-    color: #0066cc;
-    margin-bottom: 1rem;
-  }
-
-  @media (max-width: 768px) {
-    .hero h2 {
-      font-size: 2rem;
-    }
-
-    .hero p {
-      font-size: 1rem;
-    }
-
-    .feature-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>

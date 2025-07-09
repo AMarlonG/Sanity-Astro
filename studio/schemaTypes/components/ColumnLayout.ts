@@ -40,7 +40,7 @@ export const columnLayout = defineType({
         {type: 'buttonComponent'},
         {type: 'linkComponent'},
         {type: 'accordionComponent'},
-        {type: 'heading'},
+        {type: 'headingComponent'},
         {type: 'quoteComponent'},
         {type: 'portableTextBlock'},
       ],

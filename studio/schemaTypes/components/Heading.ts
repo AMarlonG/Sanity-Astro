@@ -9,7 +9,7 @@ export function escapeHtml(text: string): string {
 }
 
 export const heading = defineType({
-  name: 'heading',
+  name: 'headingComponent',
   title: 'Overskrifter',
   type: 'object',
   icon: BlockContentIcon,
@@ -18,7 +18,7 @@ export const heading = defineType({
       name: 'level',
       title: 'Nivå',
       type: 'string',
-      description: 'Velg overskriftens nivå (H1-H6)',
+      description: 'Velg overskriftens nivå (H2-H6)',
       options: {
         list: [
           {title: 'H2 - Underskrift', value: 'h2'},

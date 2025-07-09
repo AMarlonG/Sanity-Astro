@@ -38,22 +38,12 @@ const getAspectRatioValue = (ratio: string) => {
   return height / width;
 };
 
-// Generer bilde-URL med riktig høyde basert på aspect ratio
+// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
 const getImageUrl = (width: number) => {
   if (!image || !urlFor) return '';
   const aspectValue = getAspectRatioValue(aspectRatio);
   const height = Math.round(width * aspectValue);
   return urlFor(image).width(width).height(height).url() || '';
-};
-
-// Generer object-position for crop/hotspot
-const getObjectPosition = () => {
-  if (!image || !image.hotspot || !image.crop) return '';
-  const {x, y} = image.hotspot;
-  const {left, top, right, bottom} = image.crop;
-  const cropX = left + (right - left) * x;
-  const cropY = top + (bottom - top) * y;
-  return `object-position: ${cropX * 100}% ${cropY * 100}%;`;
 };
 ---
 
@@ -65,7 +55,6 @@ const getObjectPosition = () => {
       <img 
         src={getImageUrl(400)} 
         alt={alt} 
-        style={getObjectPosition()}
         loading="lazy"
         class="image"
       />

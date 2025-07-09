@@ -25,6 +25,10 @@ export const artist = defineType({
       name: 'content',
       title: 'Innhold',
     },
+    {
+      name: 'scheduling',
+      title: 'Tidsstyring',
+    },
   ],
   fields: [
     defineField({
@@ -123,7 +127,7 @@ export const artist = defineType({
               customLabel: 'customLabel',
             },
             prepare({platform, url, customLabel}) {
-              const platformLabels = {
+              const platformLabels: Record<string, string> = {
                 facebook: 'Facebook',
                 instagram: 'Instagram',
                 twitter: 'Twitter/X',
@@ -134,8 +138,9 @@ export const artist = defineType({
                 linkedin: 'LinkedIn',
                 other: 'Annet',
               }
-              
-              const label = customLabel || platformLabels[platform] || platform
+
+              const label =
+                customLabel || platformLabels[platform as keyof typeof platformLabels] || platform
               return {
                 title: label,
                 subtitle: url,
@@ -153,6 +158,43 @@ export const artist = defineType({
       type: 'pageBuilder',
       description: 'Bygg artist-siden med komponenter og innhold',
       group: 'content',
+    }),
+    defineField({
+      name: 'isPublished',
+      title: 'Publisert',
+      type: 'boolean',
+      description: 'Denne artisten er synlig på nettsiden',
+      group: 'scheduling',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'scheduledPeriod',
+      title: 'Planlagt periode',
+      type: 'object',
+      hidden: ({document}) => document?.isPublished === true,
+      group: 'scheduling',
+      fieldsets: [
+        {
+          name: 'timing',
+          options: {columns: 2},
+        },
+      ],
+      fields: [
+        {
+          name: 'startDate',
+          title: 'Startdato',
+          type: 'datetime',
+          description: 'Når denne artisten blir synlig på nettsiden',
+          fieldset: 'timing',
+        },
+        {
+          name: 'endDate',
+          title: 'Sluttdato',
+          type: 'datetime',
+          description: 'Når denne artisten slutter å være synlig på nettsiden',
+          fieldset: 'timing',
+        },
+      ],
     }),
   ],
   preview: {

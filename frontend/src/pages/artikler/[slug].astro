@@ -10,6 +10,9 @@ import Link from "../../components/Link.astro";
 import Accordion from "../../components/Accordion.astro";
 import Quote from "../../components/Quote.astro";
 import Video from "../../components/Video.astro";
+import ArtistScrollContainer from "../../components/ArtistScrollContainer.astro";
+import EventScrollContainer from "../../components/EventScrollContainer.astro";
+import ContentScrollContainer from "../../components/ContentScrollContainer.astro";
 
 const ARTICLE_QUERY = `*[_type == "article" && slug.current == $slug][0]{
   _id,
@@ -110,6 +113,32 @@ export async function getStaticPaths() {
                     muted={component.muted}
                     controls={component.controls}
                     loop={component.loop}
+                  />;
+                case 'artistScrollContainer':
+                  return <ArtistScrollContainer 
+                    title={component.title}
+                    items={component.items}
+                    showScrollbar={component.showScrollbar}
+                    cardFormat={component.cardFormat}
+                  />;
+                case 'eventScrollContainer':
+                  return <EventScrollContainer 
+                    title={component.title}
+                    events={component.events}
+                    showScrollbar={component.showScrollbar}
+                    showDate={component.showDate}
+                    showTime={component.showTime}
+                    showVenue={component.showVenue}
+                    showArtists={component.showArtists}
+                    sortBy={component.sortBy}
+                    cardFormat={component.cardFormat}
+                  />;
+                case 'contentScrollContainer':
+                  return <ContentScrollContainer 
+                    title={component.title}
+                    items={component.items}
+                    showScrollbar={component.showScrollbar}
+                    format={component.format}
                   />;
                 default:
                   return <div>Ukjent komponent: {component._type}</div>;

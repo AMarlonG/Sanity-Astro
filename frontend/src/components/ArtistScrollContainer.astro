@@ -1,0 +1,241 @@
+---
+import { sanityClient } from "sanity:client";
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+
+interface Props {
+  title?: string
+  items?: any[]
+  showScrollbar?: boolean
+  cardFormat?: '16:9' | '4:5'
+}
+
+const {
+  title,
+  items = [],
+  showScrollbar = false,
+  cardFormat = '16:9'
+} = Astro.props
+
+// Opprett Sanity Image URL Builder
+const { projectId, dataset } = sanityClient.config();
+const urlFor = (source: SanityImageSource) =>
+  projectId && dataset
+    ? imageUrlBuilder({ projectId, dataset }).image(source)
+    : null;
+
+// Hent faktiske artist-data fra referansene
+let artistData = []
+if (items && items.length > 0) {
+  const artistIds = items.map((item: any) => item._ref).filter(Boolean)
+  if (artistIds.length > 0) {
+    const ARTIST_QUERY = `*[_type == "artist" && _id in $artistIds]{
+      _id,
+      name,
+      slug,
+      "image": image.image,
+      "imageAlt": image.alt,
+      instrument,
+      country
+    }`
+    artistData = await sanityClient.fetch(ARTIST_QUERY, { artistIds })
+  }
+}
+
+// Hjelpefunksjon for å escape HTML
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
+const getImageUrl = (image: any, width: number, height: number) => {
+  if (!image || !urlFor) return '';
+  return urlFor(image).width(width).height(height).url() || '';
+};
+
+// CSS-klasser basert på props
+const containerClass = 'artist-scroll-container'
+const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
+const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
+---
+
+<div class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
+  {title && <h3 class="artist-scroll-title">{title}</h3>}
+  <div class="artist-scroll-wrapper">
+    {artistData.map((artist) => {
+      if (!artist) return null
+      
+      const artistName = artist.name || ''
+      const artistImage = artist.image || null
+      const artistImageAlt = artist.imageAlt || artistName || ''
+      const artistInstrument = artist.instrument || ''
+      const artistCountry = artist.country || ''
+      const artistSlug = artist.slug?.current || ''
+      
+      // Beregn høyde basert på cardFormat
+      const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
+      const cardWidth = cardFormat === '16:9' ? 320 : 280
+      const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
+      
+      return (
+        <div class="artist-item">
+          {artistSlug ? (
+            <a href={`/kunstnere/${artistSlug}`} class="artist-card-link">
+              <div class="artist-card">
+                {artistImage && (
+                  <div class="artist-image">
+                    <img 
+                      src={getImageUrl(artistImage, cardWidth, cardHeight)} 
+                      alt={artistImageAlt}
+                    />
+                  </div>
+                )}
+                <div class="artist-content">
+                  <h4 class="artist-name">{artistName}</h4>
+                  {artistInstrument && <div class="artist-instrument">{artistInstrument}</div>}
+                  {artistCountry && <div class="artist-country">{artistCountry}</div>}
+                </div>
+              </div>
+            </a>
+          ) : (
+            <div class="artist-card">
+              {artistImage && (
+                <div class="artist-image">
+                  <img 
+                    src={getImageUrl(artistImage, cardWidth, cardHeight)} 
+                    alt={artistImageAlt}
+                  />
+                </div>
+              )}
+              <div class="artist-content">
+                <h4 class="artist-name">{artistName}</h4>
+                {artistInstrument && <div class="artist-instrument">{artistInstrument}</div>}
+                {artistCountry && <div class="artist-country">{artistCountry}</div>}
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    })}
+  </div>
+</div>
+
+<style>
+  .artist-scroll-container {
+    width: 100%;
+    margin: 2rem 0;
+  }
+
+  .artist-scroll-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .artist-scroll-wrapper {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 0.5rem 0;
+  }
+
+  .artist-item {
+    flex-shrink: 0;
+  }
+
+  .artist-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .artist-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Format variants */
+  .card-format-16-9 .artist-card {
+    aspect-ratio: 16/9;
+    width: 320px;
+  }
+
+  .card-format-4-5 .artist-card {
+    aspect-ratio: 4/5;
+    width: 280px;
+  }
+
+  .artist-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .artist-image {
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .artist-content {
+    padding: 0.75rem;
+    background: white;
+  }
+
+  .artist-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: #333;
+    line-height: 1.2;
+  }
+
+  .artist-instrument {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+  }
+
+  .artist-country {
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  /* Hide scrollbar */
+  .hide-scrollbar .artist-scroll-wrapper {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar .artist-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .artist-scroll-wrapper {
+      gap: 0.75rem;
+    }
+    
+    .card-size-medium .artist-card,
+    .card-size-large .artist-card,
+    .card-size-xlarge .artist-card {
+      width: 250px;
+    }
+  }
+</style> 
