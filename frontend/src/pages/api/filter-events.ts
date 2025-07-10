@@ -6,6 +6,8 @@ import type { SanityImageSource } from '@sanity/image-url/lib/types/types';
 
 interface FilterOptions {
   eventDate?: string;
+  genre?: string;
+  venue?: string;
 }
 
 // Type for arrangement hentet fra Sanity
@@ -58,6 +60,14 @@ function validateFilters(filters: FilterOptions): FilterOptions {
   if (filters.eventDate && /^\d{4}-\d{2}-\d{2}$/.test(filters.eventDate)) {
     validated.eventDate = filters.eventDate;
   }
+  // Valider genre (må være en slug)
+  if (filters.genre && /^[a-z0-9-]+$/.test(filters.genre)) {
+    validated.genre = filters.genre;
+  }
+  // Valider venue (må være en slug)
+  if (filters.venue && /^[a-z0-9-]+$/.test(filters.venue)) {
+    validated.venue = filters.venue;
+  }
   return validated;
 }
 
@@ -108,7 +118,10 @@ function formatDate(dateString: string): string {
 // Generer bilde-URL med Sanity's automatiske hotspot-håndtering
 const getImageUrl = (image: any, width: number, height: number) => {
   if (!image || !urlFor) return '';
-  return urlFor(image).width(width).height(height).url() || '';
+  const imageBuilder = urlFor(image);
+  return imageBuilder
+    ? imageBuilder.width(width).height(height).url() || ''
+    : '';
 };
 
 // Generer HTML for et enkelt arrangement
@@ -181,6 +194,8 @@ export const POST: APIRoute = async ({ request }) => {
     // Hent og valider filtre
     const filters = validateFilters({
       eventDate: formData.get('eventDate') || undefined,
+      genre: formData.get('genre') || undefined,
+      venue: formData.get('venue') || undefined,
     });
 
     // Hent eventDates for å generere faner
@@ -191,10 +206,22 @@ export const POST: APIRoute = async ({ request }) => {
     // Bygg GROQ-spørring
     let query = `*[_type == "event" && isPublished == true`;
     let queryParams: any = {};
+
     if (filters.eventDate) {
       query += ` && eventDate->date == $eventDate`;
       queryParams.eventDate = filters.eventDate;
     }
+
+    if (filters.genre) {
+      query += ` && genre->slug.current == $genre`;
+      queryParams.genre = filters.genre;
+    }
+
+    if (filters.venue) {
+      query += ` && venue->slug.current == $venue`;
+      queryParams.venue = filters.venue;
+    }
+
     query += `] | order(eventDate->date asc) {
       _id,
       title,
@@ -250,7 +277,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Bestem riktig URL basert på valgt filter
     let pushUrl = '/program';
     if (filters.eventDate) {
-              pushUrl = `/program#tab-${filters.eventDate}`;
+      pushUrl = `/program#tab-${filters.eventDate}`;
     } else {
       pushUrl = '/program#tab-all-days';
     }

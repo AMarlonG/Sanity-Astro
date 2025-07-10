@@ -2,9 +2,13 @@
 export interface Props {
   initialFilters?: {
     eventDate?: string;
+    genre?: string;
+    venue?: string;
   };
   filterOptions?: {
     eventDates?: any[];
+    genres?: any[];
+    venues?: any[];
   };
 }
 
@@ -17,6 +21,8 @@ const {
 const url = new URL(Astro.request.url);
 const currentFilters = {
   eventDate: url.searchParams.get('eventDate') || initialFilters.eventDate || '',
+  genre: url.searchParams.get('genre') || initialFilters.genre || '',
+  venue: url.searchParams.get('venue') || initialFilters.venue || '',
 };
 
 // Hjelpefunksjon for å formatere dato
@@ -31,10 +37,25 @@ function formatDate(dateString: string): string {
   
   return `${dayName}, ${day}. ${month}`;
 }
+
+// Hjelpefunksjon for å finne aktivt filter-navn
+function getActiveFilterName(filterType: string, filterValue: string, filterOptions: any[]): string {
+  if (!filterValue) return '';
+  
+  const activeFilter = filterOptions.find(option => 
+    option.slug?.current === filterValue || option.date === filterValue
+  );
+  
+  if (filterType === 'date' && activeFilter) {
+    return formatDate(activeFilter.date);
+  }
+  
+  return activeFilter?.title || '';
+}
 ---
 
 <div class="event-filter" data-filter-container>
-  <!-- Scrollbare faner -->
+  <!-- Scrollbare faner for datoer -->
   <div class="tabs-container">
     <div class="tabs-scroll">
       <!-- "Alle dager" fane -->
@@ -45,7 +66,7 @@ function formatDate(dateString: string): string {
         hx-target="#results-container"
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
-        hx-vals='{"eventDate": ""}'
+        hx-vals='{"eventDate": "", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}'
         title="Vis alle arrangementer"
       >
         📅 Alle dager
@@ -60,7 +81,7 @@ function formatDate(dateString: string): string {
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${date.date}"}`}
+          hx-vals={`{"eventDate": "${date.date}", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}`}
           title={`Vis arrangementer ${formatDate(date.date)}`}
         >
           📅 {formatDate(date.date)}
@@ -68,6 +89,100 @@ function formatDate(dateString: string): string {
       ))}
     </div>
   </div>
+
+  <!-- Scrollbare faner for sjangre -->
+  <div class="tabs-container">
+    <div class="tabs-scroll">
+      <!-- "Alle sjangre" fane -->
+      <button 
+        id="tab-all-genres"
+        class="tab-button ${!currentFilters.genre ? 'active' : ''}"
+        hx-post="/api/filter-events"
+        hx-target="#results-container"
+        hx-indicator="#loading-indicator"
+        hx-swap="innerHTML"
+        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "", "venue": "${currentFilters.venue}"}`}
+        title="Vis alle sjangre"
+      >
+        🎼 Alle sjangre
+      </button>
+      
+      <!-- Sjanger-faner -->
+      {filterOptions.genres?.map((genre) => (
+        <button 
+          id={`tab-${genre.slug.current}`}
+          class="tab-button ${currentFilters.genre === genre.slug.current ? 'active' : ''}"
+          hx-post="/api/filter-events"
+          hx-target="#results-container"
+          hx-indicator="#loading-indicator"
+          hx-swap="innerHTML"
+          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${genre.slug.current}", "venue": "${currentFilters.venue}"}`}
+          title={`Vis ${genre.title} arrangementer`}
+        >
+          🎼 {genre.title}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- Scrollbare faner for spillesteder -->
+  <div class="tabs-container">
+    <div class="tabs-scroll">
+      <!-- "Alle spillesteder" fane -->
+      <button 
+        id="tab-all-venues"
+        class="tab-button ${!currentFilters.venue ? 'active' : ''}"
+        hx-post="/api/filter-events"
+        hx-target="#results-container"
+        hx-indicator="#loading-indicator"
+        hx-swap="innerHTML"
+        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": ""}`}
+        title="Vis alle spillesteder"
+      >
+        🏢 Alle spillesteder
+      </button>
+      
+      <!-- Spillested-faner -->
+      {filterOptions.venues?.map((venue) => (
+        <button 
+          id={`tab-${venue.slug.current}`}
+          class="tab-button ${currentFilters.venue === venue.slug.current ? 'active' : ''}"
+          hx-post="/api/filter-events"
+          hx-target="#results-container"
+          hx-indicator="#loading-indicator"
+          hx-swap="innerHTML"
+          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": "${venue.slug.current}"}`}
+          title={`Vis arrangementer på ${venue.title}`}
+        >
+          🏢 {venue.title}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <!-- Aktive filtre visning -->
+  {(currentFilters.eventDate || currentFilters.genre || currentFilters.venue) && (
+    <div class="active-filters">
+      <div class="active-filters-title">🔍 Aktive filtre:</div>
+      <div class="active-filters-list">
+        {currentFilters.eventDate && (
+          <span class="active-filter-tag">
+            📅 {getActiveFilterName('date', currentFilters.eventDate, filterOptions.eventDates || [])}
+          </span>
+        )}
+        {currentFilters.genre && (
+          <span class="active-filter-tag">
+            🎼 {getActiveFilterName('genre', currentFilters.genre, filterOptions.genres || [])}
+          </span>
+        )}
+        {currentFilters.venue && (
+          <span class="active-filter-tag">
+            🏢 {getActiveFilterName('venue', currentFilters.venue, filterOptions.venues || [])}
+          </span>
+        )}
+      </div>
+    </div>
+  )}
 
   <!-- Loading indikator -->
   <div id="loading-indicator" class="htmx-indicator">
@@ -86,6 +201,10 @@ function formatDate(dateString: string): string {
 
   .tabs-container {
     margin-bottom: 1rem;
+  }
+
+  .tabs-container:last-of-type {
+    margin-bottom: 0;
   }
 
   .tabs-scroll {
@@ -117,7 +236,7 @@ function formatDate(dateString: string): string {
 
   .tab-button {
     padding: 0.75rem 1.25rem;
-    border: 1px solid #ced4da;
+    border: 2px solid #ced4da;
     border-radius: 6px;
     background: white;
     color: #495057;
@@ -136,16 +255,67 @@ function formatDate(dateString: string): string {
     color: #212529;
   }
 
+  .tab-button:active {
+    background: #dee2e6;
+    border-color: #6c757d;
+    color: #212529;
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
   .tab-button.active {
-    background: #007acc;
-    border-color: #007acc;
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 122, 204, 0.2);
+    background: white;
+    border-color: #28a745;
+    border-width: 2px;
+    color: #495057;
+    box-shadow: 0 0 0 1px #28a745;
   }
 
   .tab-button.active:hover {
-    background: #0056b3;
-    border-color: #0056b3;
+    background: #f8fff9;
+    border-color: #20c997;
+    color: #212529;
+  }
+
+  .tab-button.active:active {
+    background: #e8f5e8;
+    border-color: #1e7e34;
+    color: #212529;
+    transform: translateY(1px);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 0 0 1px #1e7e34;
+  }
+
+  .active-filters {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #e8f5e8;
+    border-radius: 6px;
+    border: 1px solid #d4edda;
+  }
+
+  .active-filters-title {
+    font-weight: 600;
+    color: #2d5a2d;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .active-filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .active-filter-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: #28a745;
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
   }
 
   .htmx-indicator {
@@ -170,6 +340,15 @@ function formatDate(dateString: string): string {
     .tab-button {
       padding: 0.5rem 1rem;
       font-size: 0.85rem;
+    }
+
+    .active-filters-list {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .active-filter-tag {
+      font-size: 0.75rem;
     }
   }
 

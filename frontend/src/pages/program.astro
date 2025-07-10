@@ -6,13 +6,17 @@ import Image from '../components/Image.astro';
 import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
-// Hent filter-opsjoner (bare eventDates)
+// Hent filter-opsjoner (eventDates, genres og venues)
 const eventDates = await sanityClient.fetch(`*[_type == "eventDate" && isActive == true] | order(date asc)`);
+const genres = await sanityClient.fetch(`*[_type == "genre"] | order(title asc)`);
+const venues = await sanityClient.fetch(`*[_type == "venue"] | order(title asc)`);
 
 // Hent URL-parametere for initial state
 const url = new URL(Astro.request.url);
 const initialFilters = {
   eventDate: url.searchParams.get('eventDate') || '',
+  genre: url.searchParams.get('genre') || '',
+  venue: url.searchParams.get('venue') || '',
 };
 
 // Hent arrangementer basert på filtre
@@ -22,6 +26,16 @@ const queryParams: any = {};
 if (initialFilters.eventDate) {
   eventsQuery += ` && eventDate->date == $eventDate`;
   queryParams.eventDate = initialFilters.eventDate;
+}
+
+if (initialFilters.genre) {
+  eventsQuery += ` && genre->slug.current == $genre`;
+  queryParams.genre = initialFilters.genre;
+}
+
+if (initialFilters.venue) {
+  eventsQuery += ` && venue->slug.current == $venue`;
+  queryParams.venue = initialFilters.venue;
 }
 
 eventsQuery += `] | order(eventDate->date asc) {
@@ -80,7 +94,9 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
     <EventFilter 
       initialFilters={initialFilters}
       filterOptions={{
-        eventDates
+        eventDates,
+        genres,
+        venues
       }}
     />
     
@@ -197,11 +213,11 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
     ===============================
     
     Denne JavaScript-koden oppdaterer URL-en med query-parametere etter HTMX-filtrering,
-    slik at URL-en blir bookmarkbar og delbar. Eksempel: /program?eventDate=2026-06-23
+    slik at URL-en blir bookmarkbar og delbar. Eksempel: /program?eventDate=2026-06-23&genre=jazz&venue=the-house
     
     Hvordan det fungerer:
     1. Lytter på 'htmx:afterRequest' event (når filtrering er ferdig)
-    2. Henter valgte filtre fra skjemaet
+    2. Henter valgte filtre fra HTMX-parametere
     3. Bygger ny URL med query-parametere
     4. Oppdaterer browser-historikk uten å laste siden på nytt
     
@@ -217,9 +233,22 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       // Sjekk at dette er filtrerings-forespørselen (ikke andre HTMX-kall)
       if (event.detail.xhr.responseURL.includes('/api/filter-events')) {
         
-        // Hent valgte filtre fra skjemaet
-        const eventDateSelect = document.getElementById('eventDate');
-        const selectedEventDate = eventDateSelect ? eventDateSelect.value : '';
+        // Hent valgte filtre fra HTMX-parametere
+        const hxVals = event.detail.elt.getAttribute('hx-vals');
+        let selectedEventDate = '';
+        let selectedGenre = '';
+        let selectedVenue = '';
+        
+        if (hxVals) {
+          try {
+            const vals = JSON.parse(hxVals);
+            selectedEventDate = vals.eventDate || '';
+            selectedGenre = vals.genre || '';
+            selectedVenue = vals.venue || '';
+          } catch (e) {
+            console.log('Kunne ikke parse hx-vals:', hxVals);
+          }
+        }
         
         // Bygg ny URL med query-parametere
         const currentUrl = new URL(window.location);
@@ -229,6 +258,20 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
           currentUrl.searchParams.set('eventDate', selectedEventDate);
         } else {
           currentUrl.searchParams.delete('eventDate');
+        }
+        
+        // Legg til eller fjern genre-parameter basert på valg
+        if (selectedGenre) {
+          currentUrl.searchParams.set('genre', selectedGenre);
+        } else {
+          currentUrl.searchParams.delete('genre');
+        }
+        
+        // Legg til eller fjern venue-parameter basert på valg
+        if (selectedVenue) {
+          currentUrl.searchParams.set('venue', selectedVenue);
+        } else {
+          currentUrl.searchParams.delete('venue');
         }
         
         // Oppdater browser-historikk uten å laste siden på nytt
