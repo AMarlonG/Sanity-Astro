@@ -55,10 +55,14 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
   <title>Program - Sanity + Astro</title>
   <!-- HTMX -->
   <script is:inline src="/htmx.min.js"></script>
+  <script>
+    // Aktiver HTMX logging for debugging
+    htmx.logAll();
+  </script>
 </head>
 <body>
   <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-    <h1>Program fra Sanity</h1>
+    <h1>Program</h1>
     
     <!-- Filter-komponent -->
     <EventFilter 
@@ -166,6 +170,43 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
         // Oppdater browser-historikk uten å laste siden på nytt
         // Dette gjør URL-en bookmarkbar og delbar
         window.history.pushState({}, '', currentUrl.toString());
+      }
+    });
+
+    // AUTOMATISK FILTRERING VED LASTING
+    // ==================================
+    //
+    // Denne koden trigger automatisk filtrering når siden lastes med URL-parametere,
+    // slik at bookmarkbare URL-er fungerer. Eksempel: /program?eventDate=2026-06-23
+    //
+    // Hvordan det fungerer:
+    // 1. Sjekker om URL har eventDate-parameter ved lasting
+    // 2. Hvis ja, trigger filtrering for å oppdatere resultatene
+    // 3. Dette gjør at direkte tilgang til URL med parametere fungerer
+    //
+    // Dette sikrer at:
+    // - Bookmarkbare URL-er fungerer (refresh viser riktige resultater)
+    // - Delbare lenker fungerer (andre kan klikke på lenke og se filtrerte resultater)
+    // - Browser-historikk fungerer (tilbake/frem-knapper viser riktige resultater)
+    // Bruk htmx.onLoad for å sikre at HTMX er klar
+    htmx.onLoad(function(content) {
+      const url = new URL(window.location);
+      const eventDate = url.searchParams.get('eventDate');
+      
+      console.log('htmx.onLoad - URL eventDate:', eventDate);
+      
+      // Hvis URL har eventDate-parameter, trigger filtrering
+      if (eventDate) {
+        const eventDateSelect = document.getElementById('eventDate');
+        console.log('Found eventDateSelect:', eventDateSelect);
+        console.log('Current value:', eventDateSelect?.value);
+        console.log('Expected value:', eventDate);
+        
+                  if (eventDateSelect) {
+            console.log('Triggering HTMX change event...');
+            // Trigger filtrering for å oppdatere resultatene
+            htmx.find('#eventDate').dispatchEvent(new Event('change', { bubbles: true }));
+          }
       }
     });
   </script>

@@ -58,7 +58,7 @@ const currentFilters = {
     <!-- Nullstill-knapp -->
     <button 
       type="button" 
-      onclick="htmx.trigger('#eventDate', 'change')"
+      onclick="htmx.find('#eventDate').dispatchEvent(new Event('change', { bubbles: true }))"
       class="reset-button"
     >
       Nullstill filter
