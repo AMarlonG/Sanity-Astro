@@ -2,6 +2,9 @@
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
 import EventFilter from '../components/EventFilter.astro';
+import Image from '../components/Image.astro';
+import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
 // Hent filter-opsjoner (bare eventDates)
 const eventDates = await sanityClient.fetch(`*[_type == "eventDate" && isActive == true] | order(date asc)`);
@@ -56,13 +59,22 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
   <!-- HTMX -->
   <script is:inline src="/htmx.min.js"></script>
   <script>
-    // Aktiver HTMX logging for debugging
-    htmx.logAll();
+    // Aktiver HTMX logging for debugging når HTMX er lastet
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof htmx !== 'undefined' && htmx.logAll) {
+        htmx.logAll();
+      }
+    });
   </script>
 </head>
 <body>
   <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
-    <h1>Program</h1>
+    <header style="margin-bottom: 2rem;">
+      <h1 style="margin: 0 0 0.5rem 0; color: #333;">🎭 Program</h1>
+      <p style="margin: 0; color: #666; font-size: 1.1rem;">
+        Utforsk våre kommende arrangementer og finn noe som passer deg
+      </p>
+    </header>
     
     <!-- Filter-komponent -->
     <EventFilter 
@@ -76,57 +88,109 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
     <div id="results-container">
       <div id="event-results">
         {events.length > 0 ? (
-          <ul style="list-style: none; padding: 0;">
-            {events.map((event) => (
-              <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-                <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit;">
-                  <h2 style="margin: 0 0 0.5rem 0; color: #333;">{event.title}</h2>
-                  
-                  <div style="margin-bottom: 0.5rem; color: #666;">
-                    {event.eventDate && (
-                      <p style="margin: 0 0 0.25rem 0;">
-                        📅 {event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})
-                      </p>
+          <div>
+            <div style="margin-bottom: 1rem; padding: 0.5rem; background: #e8f5e8; border-radius: 4px; color: #2d5a2d;">
+              📊 Viser {events.length} arrangement{events.length === 1 ? '' : 'er'}
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+              {events.map((event) => (
+                <div style="border: 1px solid #e9ecef; border-radius: 12px; background: white; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1); hover: { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }" data-event-date={event.eventDate?.date}>
+                  <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit; display: block;">
+                    {event.image && (
+                      <div style="position: relative; height: 200px; overflow: hidden;">
+                        <Image 
+                          image={event.image.image}
+                          alt={event.image.alt || event.title}
+                          caption=""
+                          credit=""
+                          size="full"
+                          aspectRatio="16:9"
+                          alignment="center"
+                          className="event-card-image"
+                        />
+                      </div>
                     )}
-                    
-                    {event.eventTime && (
-                      <p style="margin: 0 0 0.25rem 0;">
-                        🕐 {event.eventTime.startTime} - {event.eventTime.endTime}
-                      </p>
-                    )}
-                    
-                    {event.venue && (
-                      <p style="margin: 0 0 0.25rem 0;">
-                        🏢 {event.venue.title}
-                      </p>
-                    )}
-                    
-                    {event.artists && event.artists.length > 0 && (
-                      <p style="margin: 0 0 0.25rem 0;">
-                        🎵 {event.artists.map((artist: any) => artist.name).join(', ')}
-                      </p>
-                    )}
-                    
-                    {event.genre && (
-                      <p style="margin: 0; color: #999; font-size: 0.9rem;">
-                        🎼 {event.genre.title}
-                      </p>
-                    )}
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
+                    <div style="padding: 1.25rem;">
+                      <h3 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;">{event.title}</h3>
+                      
+                      <div style="color: #666; font-size: 0.9rem; line-height: 1.4;">
+                        {event.eventDate && (
+                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">📅</span>
+                            <span>{event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})</span>
+                          </div>
+                        )}
+                        
+                        {event.eventTime && (
+                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">🕐</span>
+                            <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
+                          </div>
+                        )}
+                        
+                        {event.venue && (
+                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">🏢</span>
+                            <span>{event.venue.title}</span>
+                          </div>
+                        )}
+                        
+                        {event.artists && event.artists.length > 0 && (
+                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">🎵</span>
+                            <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
+                          </div>
+                        )}
+                        
+                        {event.genre && (
+                          <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1rem;">🎼</span>
+                            <span style="color: #999; font-size: 0.85rem;">{event.genre.title}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : (
-          <p>Ingen arrangementer funnet med de valgte filtrene.</p>
+          <div style="text-align: center; padding: 3rem; color: #666;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+            <h3 style="margin: 0 0 1rem 0; color: #333;">Ingen arrangementer funnet</h3>
+            <p style="margin: 0; font-size: 1.1rem;">
+              Prøv å endre filtrene eller <a href="/program" style="color: #007acc;">vis alle arrangementer</a>
+            </p>
+          </div>
         )}
       </div>
     </div>
     
-    <p style="margin-top: 2rem;">
-      <a href="/" style="color: #007acc;">← Tilbake til forsiden</a>
-    </p>
+    <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e9ecef;">
+      <a href="/" style="color: #007acc; text-decoration: none; font-weight: 500;">
+        ← Tilbake til forsiden
+      </a>
+    </footer>
   </main>
+
+  <style>
+    .event-card-image .image-container {
+      margin: 0;
+      height: 100%;
+    }
+    
+    .event-card-image .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+    }
+    
+    .event-card-image .image-caption {
+      display: none;
+    }
+  </style>
 
   <!-- 
     URL-OPPDATERING FOR FILTRERING
@@ -170,43 +234,6 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
         // Oppdater browser-historikk uten å laste siden på nytt
         // Dette gjør URL-en bookmarkbar og delbar
         window.history.pushState({}, '', currentUrl.toString());
-      }
-    });
-
-    // AUTOMATISK FILTRERING VED LASTING
-    // ==================================
-    //
-    // Denne koden trigger automatisk filtrering når siden lastes med URL-parametere,
-    // slik at bookmarkbare URL-er fungerer. Eksempel: /program?eventDate=2026-06-23
-    //
-    // Hvordan det fungerer:
-    // 1. Sjekker om URL har eventDate-parameter ved lasting
-    // 2. Hvis ja, trigger filtrering for å oppdatere resultatene
-    // 3. Dette gjør at direkte tilgang til URL med parametere fungerer
-    //
-    // Dette sikrer at:
-    // - Bookmarkbare URL-er fungerer (refresh viser riktige resultater)
-    // - Delbare lenker fungerer (andre kan klikke på lenke og se filtrerte resultater)
-    // - Browser-historikk fungerer (tilbake/frem-knapper viser riktige resultater)
-    // Bruk htmx.onLoad for å sikre at HTMX er klar
-    htmx.onLoad(function(content) {
-      const url = new URL(window.location);
-      const eventDate = url.searchParams.get('eventDate');
-      
-      console.log('htmx.onLoad - URL eventDate:', eventDate);
-      
-      // Hvis URL har eventDate-parameter, trigger filtrering
-      if (eventDate) {
-        const eventDateSelect = document.getElementById('eventDate');
-        console.log('Found eventDateSelect:', eventDateSelect);
-        console.log('Current value:', eventDateSelect?.value);
-        console.log('Expected value:', eventDate);
-        
-                  if (eventDateSelect) {
-            console.log('Triggering HTMX change event...');
-            // Trigger filtrering for å oppdatere resultatene
-            htmx.find('#eventDate').dispatchEvent(new Event('change', { bubbles: true }));
-          }
       }
     });
   </script>

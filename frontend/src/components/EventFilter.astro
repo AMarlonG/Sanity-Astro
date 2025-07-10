@@ -18,103 +18,165 @@ const url = new URL(Astro.request.url);
 const currentFilters = {
   eventDate: url.searchParams.get('eventDate') || initialFilters.eventDate || '',
 };
+
+// Hjelpefunksjon for å formatere dato
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const dayNames = ['Søndag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag'];
+  const monthNames = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+  
+  const dayName = dayNames[date.getDay()];
+  const day = date.getDate();
+  const month = monthNames[date.getMonth()];
+  
+  return `${dayName}, ${day}. ${month}`;
+}
 ---
 
 <div class="event-filter" data-filter-container>
-  <form 
-    hx-post="/api/filter-events" 
-    hx-target="#results-container"
-    hx-indicator="#loading-indicator"
-    hx-trigger="change"
-    hx-push-url="/program"
-    hx-swap="innerHTML"
-    class="filter-form"
-  >
-    <!-- Dato-filter -->
-    <div class="filter-group">
-      <label for="eventDate">Velg dato:</label>
-      <select 
-        name="eventDate" 
-        id="eventDate"
-        class="filter-select"
+  <!-- Scrollbare faner -->
+  <div class="tabs-container">
+    <div class="tabs-scroll">
+      <!-- "Alle dager" fane -->
+      <button 
+        id="tab-all-days"
+        class="tab-button ${!currentFilters.eventDate ? 'active' : ''}"
+        hx-post="/api/filter-events"
+        hx-target="#results-container"
+        hx-indicator="#loading-indicator"
+        hx-swap="innerHTML"
+        hx-vals='{"eventDate": ""}'
+        title="Vis alle arrangementer"
       >
-        <option value="">Alle datoer</option>
-        {filterOptions.eventDates?.map((date) => (
-          <option 
-            value={date.date} 
-            selected={currentFilters.eventDate === date.date}
-          >
-            {date.title}
-          </option>
-        ))}
-      </select>
+        📅 Alle dager
+      </button>
+      
+      <!-- Dato-faner -->
+      {filterOptions.eventDates?.map((date) => (
+        <button 
+          id={`tab-${date.date}`}
+          class="tab-button ${currentFilters.eventDate === date.date ? 'active' : ''}"
+          hx-post="/api/filter-events"
+          hx-target="#results-container"
+          hx-indicator="#loading-indicator"
+          hx-swap="innerHTML"
+          hx-vals={`{"eventDate": "${date.date}"}`}
+          title={`Vis arrangementer ${formatDate(date.date)}`}
+        >
+          📅 {formatDate(date.date)}
+        </button>
+      ))}
     </div>
+  </div>
 
-    <!-- Loading indikator -->
-    <div id="loading-indicator" class="htmx-indicator">
-      <span>Laster...</span>
-    </div>
-
-    <!-- Nullstill-knapp -->
-    <button 
-      type="button" 
-      onclick="htmx.find('#eventDate').dispatchEvent(new Event('change', { bubbles: true }))"
-      class="reset-button"
-    >
-      Nullstill filter
-    </button>
-  </form>
+  <!-- Loading indikator -->
+  <div id="loading-indicator" class="htmx-indicator">
+    <span>🔍 Laster arrangementer...</span>
+  </div>
 </div>
 
 <style>
   .event-filter {
     margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
   }
 
-  .filter-form {
-    display: flex;
-    gap: 1rem;
-    align-items: end;
-    flex-wrap: wrap;
+  .tabs-container {
+    margin-bottom: 1rem;
   }
 
-  .filter-group {
+  .tabs-scroll {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #ced4da #f8f9fa;
   }
 
-  .filter-group label {
-    font-weight: 500;
+  .tabs-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .tabs-scroll::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 3px;
+  }
+
+  .tabs-scroll::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 3px;
+  }
+
+  .tabs-scroll::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+  }
+
+  .tab-button {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background: white;
+    color: #495057;
     font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: fit-content;
   }
 
-  .filter-select {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    min-width: 200px;
+  .tab-button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+    color: #212529;
+  }
+
+  .tab-button.active {
+    background: #007acc;
+    border-color: #007acc;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 122, 204, 0.2);
+  }
+
+  .tab-button.active:hover {
+    background: #0056b3;
+    border-color: #0056b3;
   }
 
   .htmx-indicator {
     display: none;
-    color: #666;
+    color: #6c757d;
     font-style: italic;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 0.5rem;
   }
 
   .htmx-request .htmx-indicator {
-    display: inline;
+    display: block;
   }
 
-  .reset-button {
-    padding: 0.5rem 1rem;
-    background: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .tabs-scroll {
+      gap: 0.25rem;
+    }
+    
+    .tab-button {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
   }
 
-  .reset-button:hover {
-    background: #e0e0e0;
+  @media (max-width: 480px) {
+    .tab-button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+    }
   }
 </style> 
