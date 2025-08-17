@@ -1,10 +1,18 @@
 ---
+import { ViewTransitions } from "astro:transitions";
+import { VisualEditing } from "@sanity/astro/visual-editing";
+
 export interface Props {
   title: string;
   description?: string;
 }
 
 const { title, description = "Moderne web-applikasjon med Sanity CMS og Astro frontend" } = Astro.props;
+
+// Check if Visual Editing should be enabled
+const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
+const hasPreviewMode = Astro.cookies.get('sanity-preview-mode')?.value === 'true';
+const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 ---
 
 <!DOCTYPE html>
@@ -16,9 +24,15 @@ const { title, description = "Moderne web-applikasjon med Sanity CMS og Astro fr
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    
+    <!-- Enable View Transitions -->
+    <ViewTransitions />
   </head>
   <body>
     <slot />
+    
+    <!-- Visual Editing Component -->
+    {enableVisualEditing && <VisualEditing enabled={true} zIndex={1000} />}
   </body>
 </html>
 
@@ -133,6 +147,69 @@ const { title, description = "Moderne web-applikasjon med Sanity CMS og Astro fr
     margin-top: 3rem;
     border-top: 1px solid #e9ecef;
     text-align: center;
+  }
+
+  /* View Transitions Enhancements */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.3s;
+    animation-timing-function: ease-in-out;
+  }
+  
+  /* Smooth fade for main content */
+  ::view-transition-old(main-content) {
+    animation: fade-out 0.2s ease-out;
+  }
+  
+  ::view-transition-new(main-content) {
+    animation: fade-in 0.2s ease-in 0.1s;
+  }
+  
+  /* Enhanced event card transitions */
+  ::view-transition-old(event-card),
+  ::view-transition-new(event-card) {
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Page title transitions */
+  ::view-transition-old(page-title),
+  ::view-transition-new(page-title) {
+    animation-duration: 0.3s;
+    animation-timing-function: ease-out;
+  }
+  
+  /* Event image shared element transitions */
+  ::view-transition-old(event-image),
+  ::view-transition-new(event-image) {
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+  }
+  
+  @keyframes fade-out {
+    to { opacity: 0; }
+  }
+  
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Respect user motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(root),
+    ::view-transition-new(root),
+    ::view-transition-old(main-content),
+    ::view-transition-new(main-content),
+    ::view-transition-old(event-card),
+    ::view-transition-new(event-card),
+    ::view-transition-old(page-title),
+    ::view-transition-new(page-title),
+    ::view-transition-old(event-image),
+    ::view-transition-new(event-image) {
+      animation: none;
+    }
   }
 
   /* Responsive */
