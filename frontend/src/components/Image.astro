@@ -1,7 +1,13 @@
 ---
-import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
-import { sanityClient } from "sanity:client";
+import { 
+  createOptimizedImageUrl,
+  createResponsiveImageSet,
+  createLQIP,
+  extractImageMetadata,
+  generateSizesAttribute,
+  type ImageMetadata
+} from '../lib/imageUtils';
 
 interface Props {
   image: SanityImageSource;
@@ -10,8 +16,14 @@ interface Props {
   credit?: string;
   alignment?: 'left' | 'center' | 'right';
   size?: 'small' | 'medium' | 'large' | 'full';
-  aspectRatio?: '4:5' | '1:1' | '16:9' | '9:16';
+  aspectRatio?: '4:5' | '1:1' | '16:9' | '9:16' | number;
   className?: string;
+  loading?: 'lazy' | 'eager';
+  quality?: number;
+  formats?: string[];
+  sizes?: string;
+  placeholder?: 'blur' | 'color' | 'empty';
+  priority?: boolean;
 }
 
 const { 
@@ -22,46 +34,92 @@ const {
   alignment = 'center', 
   size = 'medium',
   aspectRatio = '16:9',
-  className = '' 
+  className = '',
+  loading = 'lazy',
+  quality = 80,
+  formats = ['avif', 'webp', 'jpg'],
+  sizes,
+  placeholder = 'blur',
+  priority = false
 } = Astro.props;
 
-// Opprett Sanity Image URL Builder
-const { projectId, dataset } = sanityClient.config();
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null;
-
-// Beregn aspect ratio for høyde-beregning
-const getAspectRatioValue = (ratio: string) => {
+// Convert aspect ratio to numeric value
+const getAspectRatioValue = (ratio: string | number): number => {
+  if (typeof ratio === 'number') return ratio;
   const [width, height] = ratio.split(':').map(Number);
   return height / width;
 };
 
-// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
-const getImageUrl = (width: number) => {
-  if (!image || !urlFor) return '';
-  const aspectValue = getAspectRatioValue(aspectRatio);
-  const height = Math.round(width * aspectValue);
-  return urlFor(image).width(width).height(height).url() || '';
+const aspectValue = getAspectRatioValue(aspectRatio);
+
+// Define responsive breakpoints based on size
+const getImageWidths = (size: string): number[] => {
+  switch (size) {
+    case 'small': return [300, 400, 600];
+    case 'medium': return [400, 600, 800, 1200];
+    case 'large': return [600, 800, 1200, 1600];
+    case 'full': return [800, 1200, 1600, 2000];
+    default: return [400, 600, 800, 1200];
+  }
 };
+
+// Generate automatic sizes attribute if not provided
+const getAutoSizes = (size: string): string => {
+  switch (size) {
+    case 'small': return '(max-width: 768px) 100vw, 300px';
+    case 'medium': return '(max-width: 768px) 100vw, 600px';
+    case 'large': return '(max-width: 768px) 100vw, 800px';
+    case 'full': return '100vw';
+    default: return '(max-width: 768px) 100vw, 600px';
+  }
+};
+
+const imageWidths = getImageWidths(size);
+const imageSizes = sizes || getAutoSizes(size);
+
+// Extract metadata for enhanced features (with fallback)
+const metadata: ImageMetadata = image ? extractImageMetadata(image) : {};
+
+// Generate responsive image sets (only if image exists)
+const responsiveImageSets = image ? createResponsiveImageSet(
+  image, 
+  imageWidths, 
+  formats, 
+  aspectValue, 
+  quality
+) : [];
+
+// Generate LQIP for placeholder (only if image exists and placeholder is enabled)
+const lqipUrl = (image && placeholder === 'blur') ? createLQIP(image) : null;
+
+// Generate fallback URL (only if image exists)
+const fallbackUrl = image ? createOptimizedImageUrl(image, {
+  width: imageWidths[0],
+  height: Math.round(imageWidths[0] * aspectValue),
+  format: 'jpg',
+  quality,
+  auto: 'format',
+  fit: 'crop'
+}) : null;
+
+// Determine loading strategy
+const imageLoading = priority ? 'eager' : loading;
+const fetchPriority = priority ? 'high' : 'auto';
 ---
 
 <div class={`image-container image-${alignment} image-${size} ${className}`}>
-  {image && urlFor ? (
+  {image ? (
     <picture>
-      <source srcset={getImageUrl(800)} media="(min-width: 768px)" />
-      <source srcset={getImageUrl(600)} media="(min-width: 480px)" />
       <img 
-        src={getImageUrl(400)} 
+        src={fallbackUrl || ''}
         alt={alt} 
-        loading="lazy"
+        loading={imageLoading}
         class="image"
       />
     </picture>
   ) : (
     <div class="image-placeholder">
-      <span>Bilde ikke funnet</span>
+      <span>Bilde ikke tilgjengelig</span>
     </div>
   )}
   

@@ -2,6 +2,8 @@
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
 import { PortableText } from "astro-portabletext";
+import Layout from '../../layouts/Layout.astro';
+import Image from '../../components/Image.astro';
 
 const EVENT_QUERY = `*[_type == "event" && slug.current == $slug][0]{
   _id,
@@ -45,21 +47,44 @@ export async function getStaticPaths() {
 }
 ---
 
-<html lang="no">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{event.title} - Sanity + Astro</title>
-</head>
-<body>
-  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
-    <a href="/arrangementer" style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;">
-      ← Tilbake til arrangementer
+<Layout title={`${event.title} - Sanity + Astro`}>
+  <main 
+    style="max-width: 800px; margin: 0 auto; padding: 2rem;"
+    transition:name="main-content"
+  >
+    <a 
+      href="/program" 
+      style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;"
+    >
+      ← Tilbake til program
     </a>
     
     <article>
       <header style="margin-bottom: 2rem;">
-        <h1 style="margin: 0 0 1rem 0; color: #333;">{event.title}</h1>
+        <h1 
+          style="margin: 0 0 1rem 0; color: #333;"
+          transition:name={`event-title-${Astro.params.slug}`}
+        >
+          {event.title}
+        </h1>
+        
+        <!-- Event image with shared transition -->
+        {event.image && (
+          <div 
+            style="margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"
+            transition:name={`event-image-${Astro.params.slug}`}
+          >
+            <Image 
+              image={event.image.image}
+              alt={event.image.alt || event.title}
+              caption=""
+              credit=""
+              size="full"
+              aspectRatio="16:9"
+              alignment="center"
+            />
+          </div>
+        )}
         
         <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
           {event.eventDate && (
@@ -129,5 +154,20 @@ export async function getStaticPaths() {
       )}
     </article>
   </main>
-</body>
-</html> 
+</Layout>
+
+<!-- Add View Transitions event listeners -->
+<script>
+  // Enhanced navigation with View Transitions
+  document.addEventListener('astro:page-load', () => {
+    console.log('Event detail page loaded with View Transitions');
+  });
+
+  document.addEventListener('astro:before-preparation', () => {
+    console.log('Preparing to navigate...');
+  });
+
+  document.addEventListener('astro:after-swap', () => {
+    console.log('Page content swapped successfully');
+  });
+</script> 

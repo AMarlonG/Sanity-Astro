@@ -12,6 +12,8 @@ import article from './documents/article'
 import * as components from './components'
 // Importer seksjoner
 import * as sections from './sections'
+// Importer objekter
+import {socialMediaType} from './objects/socialMediaFields'
 
 export const schemaTypes = [
   homepage,
@@ -23,6 +25,8 @@ export const schemaTypes = [
   eventDate,
   page,
   article,
+  // Objekter
+  socialMediaType,
   // Komponenter - sørg for at alle er registrert
   components.title,
   components.quoteComponent,

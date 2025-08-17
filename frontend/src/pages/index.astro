@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { getActiveHomepage } from '../lib/homepage.js';
+import { loadHomepage } from '../lib/sanityQueries';
 import PortableText from '../components/PortableText.astro';
 import Heading from '../components/Heading.astro';
 import Image from '../components/Image.astro';
@@ -13,8 +13,8 @@ import ContentScrollContainer from '../components/ContentScrollContainer.astro';
 import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
 import EventScrollContainer from '../components/EventScrollContainer.astro';
 
-// Hent aktiv forside basert på gjeldende tid
-const homepage = await getActiveHomepage();
+// Load homepage with Visual Editing support
+const { data: homepage } = await loadHomepage(Astro.request);
 
 // Smart caching basert på innholdstype
 if (homepage?.scheduledPeriod) {
@@ -30,10 +30,10 @@ console.log('Aktiv forside:', homepage);
 ---
 
 <Layout title={homepage?.title || "Forside"}>
-  <main>
+  <main transition:name="main-content">
     {homepage ? (
       <div>
-        <h1>{homepage.title}</h1>
+        <h1 transition:name="page-title">{homepage.title}</h1>
         
         <!-- Navigasjonslenker -->
         <nav style="margin: 2rem 0; padding: 1rem 0; border-bottom: 1px solid #eee;">

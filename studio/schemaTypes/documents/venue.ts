@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {HomeIcon} from '@sanity/icons'
+import {venueSlugValidation} from '../../lib/slugValidation'
 
 export const venue = defineType({
   name: 'venue',
@@ -29,7 +30,7 @@ export const venue = defineType({
         source: 'title',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().custom(venueSlugValidation),
     }),
     defineField({
       name: 'linkText',

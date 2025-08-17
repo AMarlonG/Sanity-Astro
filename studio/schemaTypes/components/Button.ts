@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {BoltIcon} from '@sanity/icons'
+import {buttonURLValidation} from '../../lib/urlValidation'
 
 export const buttonComponent = defineType({
   name: 'buttonComponent',
@@ -61,14 +62,7 @@ export const buttonComponent = defineType({
       title: 'URL',
       type: 'url',
       description: 'Lenken knappen skal gå til (f.eks. https://example.com)',
-      validation: (Rule) =>
-        Rule.required()
-          .uri({
-            scheme: ['http', 'https', 'mailto', 'tel'],
-          })
-          .error(
-            'Vennligst oppgi en gyldig URL som starter med http://, https://, mailto: eller tel:',
-          ),
+      validation: (Rule) => Rule.required().custom(buttonURLValidation),
     }),
     defineField({
       name: 'disabled',

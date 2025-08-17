@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {UserIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
+import {workflowFields, workflowGroup} from '../objects/workflowFields'
+import {seoFields, seoGroup} from '../objects/seoFields'
 
 export const artist = defineType({
   name: 'artist',
@@ -29,6 +31,8 @@ export const artist = defineType({
       name: 'scheduling',
       title: 'Tidsstyring',
     },
+    workflowGroup,
+    seoGroup,
   ],
   fields: [
     defineField({
@@ -196,12 +200,65 @@ export const artist = defineType({
         },
       ],
     }),
+    // Add workflow fields
+    ...workflowFields,
+    // Add SEO fields
+    ...seoFields,
   ],
   preview: {
     select: {
-      title: 'name',
-      subtitle: 'instrument',
+      name: 'name',
+      instrument: 'instrument',
+      country: 'country',
+      isPublished: 'isPublished',
+      startDate: 'scheduledPeriod.startDate',
+      endDate: 'scheduledPeriod.endDate',
+      editorialStatus: 'editorialStatus',
+      assignedTo: 'assignedTo',
       media: 'image.image',
+    },
+    prepare({name, instrument, country, isPublished, startDate, endDate, editorialStatus, assignedTo, media}) {
+      // Editorial status icons
+      const workflowIcons = {
+        draft: '📝',
+        review: '👁️', 
+        approved: '✅',
+        published: '🚀',
+        archived: '📦'
+      };
+      
+      // Publication status logic
+      let pubStatusIcon = '⚫'; // Default: draft
+      let pubStatusText = 'Utkast';
+      
+      if (isPublished) {
+        pubStatusIcon = '🟢';
+        pubStatusText = 'Publisert';
+      } else if (startDate && endDate) {
+        const now = new Date();
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        if (now >= start && now <= end) {
+          pubStatusIcon = '🟢';
+          pubStatusText = 'Live';
+        } else if (now < start) {
+          pubStatusIcon = '🟡';
+          pubStatusText = 'Venter';
+        } else {
+          pubStatusIcon = '🔴';
+          pubStatusText = 'Utløpt';
+        }
+      }
+      
+      const workflowIcon = workflowIcons[editorialStatus] || '📝';
+      const assignedText = assignedTo ? ` • ${assignedTo}` : '';
+      
+      return {
+        title: `${workflowIcon}${pubStatusIcon} ${name}`,
+        subtitle: `${instrument} • ${country} • ${pubStatusText}${assignedText}`,
+        media: media || '🎤',
+      };
     },
   },
 })

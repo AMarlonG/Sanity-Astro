@@ -3,6 +3,13 @@ import type { APIRoute } from 'astro';
 import { sanityClient } from 'sanity:client';
 import imageUrlBuilder from '@sanity/image-url';
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types';
+import { 
+  rateLimit, 
+  validateContentType, 
+  InputValidator, 
+  getCORSHeaders, 
+  getSecurityHeaders 
+} from '../../lib/security';
 
 interface FilterOptions {
   eventDate?: string;
@@ -53,33 +60,33 @@ const urlFor = (source: SanityImageSource) =>
     ? imageUrlBuilder({ projectId, dataset }).image(source)
     : null;
 
-// Validering av filter-parametere
+// Enhanced filter validation using security utilities
 function validateFilters(filters: FilterOptions): FilterOptions {
   const validated: FilterOptions = {};
-  // Valider eventDate (må være ISO-dato)
-  if (filters.eventDate && /^\d{4}-\d{2}-\d{2}$/.test(filters.eventDate)) {
-    validated.eventDate = filters.eventDate;
+  
+  // Validate and sanitize eventDate
+  const validDate = InputValidator.validateDate(filters.eventDate || null);
+  if (validDate) {
+    validated.eventDate = validDate;
   }
-  // Valider genre (må være en slug)
-  if (filters.genre && /^[a-z0-9-]+$/.test(filters.genre)) {
-    validated.genre = filters.genre;
+  
+  // Validate and sanitize genre slug
+  const validGenre = InputValidator.validateSlug(filters.genre || null);
+  if (validGenre) {
+    validated.genre = validGenre;
   }
-  // Valider venue (må være en slug)
-  if (filters.venue && /^[a-z0-9-]+$/.test(filters.venue)) {
-    validated.venue = filters.venue;
+  
+  // Validate and sanitize venue slug
+  const validVenue = InputValidator.validateSlug(filters.venue || null);
+  if (validVenue) {
+    validated.venue = validVenue;
   }
+  
   return validated;
 }
 
-// Escape HTML for sikkerhet
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
-}
+// Use enhanced HTML escaping from security utilities
+const escapeHtml = InputValidator.sanitizeString;
 
 // Hjelpefunksjon for å formatere dato
 function formatDate(dateString: string): string {
@@ -185,13 +192,76 @@ function generateEventHtml(event: Event): string {
   `;
 }
 
+// Rate limiter configuration
+const rateLimiter = rateLimit({
+  maxRequests: 30, // 30 requests per window
+  windowMs: 60 * 1000, // 1 minute window
+});
+
+// OPTIONS handler for CORS preflight
+export const OPTIONS: APIRoute = async ({ request }) => {
+  const origin = request.headers.get('origin');
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...getCORSHeaders(origin),
+      ...getSecurityHeaders(),
+    },
+  });
+};
+
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // Hent rå data fra request
+    // Apply rate limiting
+    const rateLimitResult = rateLimiter(request);
+    if (!rateLimitResult.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many requests', 
+          resetTime: rateLimitResult.resetTime 
+        }), {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': '60',
+            ...getSecurityHeaders(),
+          },
+        }
+      );
+    }
+
+    // Validate Content-Type
+    if (!validateContentType(request, 'application/x-www-form-urlencoded')) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid Content-Type' }), {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...getSecurityHeaders(),
+          },
+        }
+      );
+    }
+
+    // Limit request body size (prevent DoS)
+    const contentLength = request.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 1024) { // 1KB limit
+      return new Response(
+        JSON.stringify({ error: 'Request body too large' }), {
+          status: 413,
+          headers: {
+            'Content-Type': 'application/json',
+            ...getSecurityHeaders(),
+          },
+        }
+      );
+    }
+
+    // Parse and validate input data
     const rawData = await request.text();
-    // Parse form-data manuelt
     const formData = new URLSearchParams(rawData);
-    // Hent og valider filtre
+    
+    // Enhanced filter validation
     const filters = validateFilters({
       eventDate: formData.get('eventDate') || undefined,
       genre: formData.get('genre') || undefined,
@@ -282,15 +352,23 @@ export const POST: APIRoute = async ({ request }) => {
       pushUrl = '/program#tab-all-days';
     }
 
+    const origin = request.headers.get('origin');
+    
     return new Response(resultsHtml, {
       headers: {
-        'Content-Type': 'text/html',
-        'Cache-Control': 'public, max-age=300', // Cache i 5 minutter
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'public, max-age=300, stale-while-revalidate=60', // Enhanced caching
         'HX-Push-Url': pushUrl, // HTMX vil oppdatere URL-en med denne
+        ...getCORSHeaders(origin),
+        ...getSecurityHeaders(),
       },
     });
   } catch (error) {
-    // Feilhåndtering: vis en tydelig feilmelding til bruker
+    // Enhanced error handling with logging (don't expose internal errors)
+    console.error('Filter events API error:', error);
+    
+    const origin = request.headers.get('origin');
+    
     return new Response(
       `<div style="text-align: center; padding: 2rem; color: #dc3545;">
         <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
@@ -300,7 +378,9 @@ export const POST: APIRoute = async ({ request }) => {
       {
         status: 500,
         headers: {
-          'Content-Type': 'text/html',
+          'Content-Type': 'text/html; charset=utf-8',
+          ...getCORSHeaders(origin),
+          ...getSecurityHeaders(),
         },
       }
     );

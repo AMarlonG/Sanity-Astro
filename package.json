@@ -1,19 +1,30 @@
 {
   "name": "sanity-project",
   "private": true,
+  "packageManager": "npm@10.8.2",
   "workspaces": [
     "studio",
     "frontend",
     "shared"
   ],
   "scripts": {
-    "dev:studio": "cd studio && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev",
-    "dev": "concurrently \"npm run dev:studio\" \"npm run dev:frontend\"",
-    "build": "npm run build --workspaces",
-    "clean": "rm -rf studio/dist frontend/dist"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean",
+    "dev:studio": "turbo run dev --filter=studio",
+    "dev:frontend": "turbo run dev --filter=frontend",
+    "build:studio": "turbo run build --filter=studio",
+    "build:frontend": "turbo run build --filter=frontend",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "@changesets/cli": "^2.29.6",
+    "turbo": "^2.5.6"
   }
 }

@@ -1,6 +1,7 @@
 ---
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
+import Layout from '../layouts/Layout.astro';
 import EventFilter from '../components/EventFilter.astro';
 import Image from '../components/Image.astro';
 import imageUrlBuilder from "@sanity/image-url";
@@ -65,26 +66,18 @@ eventsQuery += `] | order(eventDate->date asc) {
 const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryParams);
 ---
 
-<html lang="no">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Program - Sanity + Astro</title>
-  <!-- HTMX -->
-  <script is:inline src="/htmx.min.js"></script>
-  <script>
-    // Aktiver HTMX logging for debugging når HTMX er lastet
-    document.addEventListener('DOMContentLoaded', function() {
-      if (typeof htmx !== 'undefined' && htmx.logAll) {
-        htmx.logAll();
-      }
-    });
-  </script>
-</head>
-<body>
-  <main style="max-width: 1200px; margin: 0 auto; padding: 2rem;">
+<Layout title="Program - Sanity + Astro">
+  <main 
+    style="max-width: 1200px; margin: 0 auto; padding: 2rem;"
+    transition:name="main-content"
+  >
     <header style="margin-bottom: 2rem;">
-      <h1 style="margin: 0 0 0.5rem 0; color: #333;">🎭 Program</h1>
+      <h1 
+        style="margin: 0 0 0.5rem 0; color: #333;"
+        transition:name="page-title"
+      >
+        🎭 Program
+      </h1>
       <p style="margin: 0; color: #666; font-size: 1.1rem;">
         Utforsk våre kommende arrangementer og finn noe som passer deg
       </p>
@@ -110,10 +103,17 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
               {events.map((event) => (
-                <div style="border: 1px solid #e9ecef; border-radius: 12px; background: white; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1); hover: { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }" data-event-date={event.eventDate?.date}>
+                <div 
+                  style="border: 1px solid #e9ecef; border-radius: 12px; background: white; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1); hover: { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }" 
+                  data-event-date={event.eventDate?.date}
+                  transition:name={`event-card-${event.slug.current}`}
+                >
                   <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit; display: block;">
                     {event.image && (
-                      <div style="position: relative; height: 200px; overflow: hidden;">
+                      <div 
+                        style="position: relative; height: 200px; overflow: hidden;"
+                        transition:name={`event-image-${event.slug.current}`}
+                      >
                         <Image 
                           image={event.image.image}
                           alt={event.image.alt || event.title}
@@ -127,7 +127,12 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
                       </div>
                     )}
                     <div style="padding: 1.25rem;">
-                      <h3 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;">{event.title}</h3>
+                      <h3 
+                        style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;"
+                        transition:name={`event-title-${event.slug.current}`}
+                      >
+                        {event.title}
+                      </h3>
                       
                       <div style="color: #666; font-size: 0.9rem; line-height: 1.4;">
                         {event.eventDate && (
@@ -279,6 +284,15 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
         window.history.pushState({}, '', currentUrl.toString());
       }
     });
+    
+    // Enhanced navigation with View Transitions
+    document.addEventListener('astro:page-load', () => {
+      console.log('Page loaded with View Transitions');
+      
+      // Reinitialize HTMX if needed
+      if (typeof htmx !== 'undefined') {
+        htmx.process(document.body);
+      }
+    });
   </script>
-</body>
-</html> 
+</Layout> 

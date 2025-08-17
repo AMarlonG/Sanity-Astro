@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {TagIcon} from '@sanity/icons'
+import {genreSlugValidation} from '../../lib/slugValidation'
 
 export const genre = defineType({
   name: 'genre',
@@ -22,7 +23,7 @@ export const genre = defineType({
         source: 'title',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().custom(genreSlugValidation),
     }),
   ],
 })

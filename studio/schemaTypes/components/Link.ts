@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
+import {externalURLValidation} from '../../lib/urlValidation'
 
 export const linkComponent = defineType({
   name: 'linkComponent',
@@ -42,10 +43,7 @@ export const linkComponent = defineType({
       type: 'url',
       description: 'F.eks. https://example.com',
       hidden: ({parent}) => parent?.linkType !== 'url',
-      validation: (Rule) =>
-        Rule.uri({
-          scheme: ['http', 'https'],
-        }),
+      validation: (Rule) => Rule.custom(externalURLValidation),
     }),
     defineField({
       name: 'email',
