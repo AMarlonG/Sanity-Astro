@@ -28,11 +28,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Clear npm cache and install dependencies
         run: |
-          npm --version
+          npm cache clean --force
           npm install
 
       - name: Build shared package
@@ -74,11 +73,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Clear npm cache and install dependencies
         run: |
-          npm --version
+          npm cache clean --force
           npm install
 
       - name: Create Release Pull Request
