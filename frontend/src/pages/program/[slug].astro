@@ -4,10 +4,16 @@ import { sanityClient } from "sanity:client";
 import { PortableText } from "astro-portabletext";
 import Layout from '../../layouts/Layout.astro';
 import Image from '../../components/Image.astro';
+import { getCurrentLanguage, getLocalizedText, getLocalizedContent } from '../../lib/languageUtils';
+import { formatDateForLanguage } from '../../../shared/utils/dates';
+
+// Get current language from request
+const currentLanguage = getCurrentLanguage(Astro.request);
 
 const EVENT_QUERY = `*[_type == "event" && slug.current == $slug][0]{
   _id,
   title,
+  titleEn,
   eventTime,
   eventDate->{
     title,
@@ -15,10 +21,15 @@ const EVENT_QUERY = `*[_type == "event" && slug.current == $slug][0]{
   },
   venue->{
     title,
+    titleEn,
+    linkText,
+    linkTextEn,
+    linkUrl,
     address
   },
   genre->{
-    title
+    title,
+    titleEn
   },
   artists[]->{
     name,
@@ -27,17 +38,26 @@ const EVENT_QUERY = `*[_type == "event" && slug.current == $slug][0]{
   },
   image,
   buttonText,
+  buttonTextEn,
   buttonUrl,
   buttonOpenInNewTab,
-  content
+  content,
+  contentEn
 }`;
 
 const event = await sanityClient.fetch<SanityDocument>(EVENT_QUERY, Astro.params);
 
-// Hvis arrangementet ikke finnes, returner 404
 if (!event) {
   return Astro.redirect('/404');
 }
+
+// Localize content
+const eventTitle = getLocalizedText(event.title, event.titleEn, currentLanguage);
+const venueTitle = event.venue ? getLocalizedText(event.venue.title, event.venue.titleEn, currentLanguage) : '';
+const venueLinkText = event.venue ? getLocalizedText(event.venue.linkText || event.venue.title, event.venue.linkTextEn, currentLanguage) : '';
+const genreTitle = event.genre ? getLocalizedText(event.genre.title, event.genre.titleEn, currentLanguage) : '';
+const buttonText = getLocalizedText(event.buttonText, event.buttonTextEn, currentLanguage);
+const eventContent = getLocalizedContent(event.content, event.contentEn, currentLanguage);
 
 export async function getStaticPaths() {
   const SLUGS_QUERY = `*[_type == "event" && defined(slug.current)]{
@@ -47,7 +67,7 @@ export async function getStaticPaths() {
 }
 ---
 
-<Layout title={`${event.title} - Sanity + Astro`}>
+<Layout title={`${eventTitle} - Sanity + Astro`} titleEn={event.titleEn ? `${event.titleEn} - Sanity + Astro` : undefined}>
   <main 
     style="max-width: 800px; margin: 0 auto; padding: 2rem;"
     transition:name="main-content"
@@ -56,7 +76,7 @@ export async function getStaticPaths() {
       href="/program" 
       style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;"
     >
-      ← Tilbake til program
+      ← {currentLanguage === 'en' ? 'Back to program' : 'Tilbake til program'}
     </a>
     
     <article>
@@ -65,7 +85,7 @@ export async function getStaticPaths() {
           style="margin: 0 0 1rem 0; color: #333;"
           transition:name={`event-title-${Astro.params.slug}`}
         >
-          {event.title}
+          {eventTitle}
         </h1>
         
         <!-- Event image with shared transition -->
@@ -76,7 +96,7 @@ export async function getStaticPaths() {
           >
             <Image 
               image={event.image.image}
-              alt={event.image.alt || event.title}
+              alt={event.image.alt || eventTitle}
               caption=""
               credit=""
               size="full"
@@ -89,32 +109,32 @@ export async function getStaticPaths() {
         <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
           {event.eventDate && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>📅 Dato:</strong> {event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})
+              <strong>📅 {currentLanguage === 'en' ? 'Date:' : 'Dato:'}</strong> {event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, currentLanguage)})
             </p>
           )}
           
           {event.eventTime && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>🕐 Klokkeslett:</strong> {event.eventTime}
+              <strong>🕐 {currentLanguage === 'en' ? 'Time:' : 'Klokkeslett:'}</strong> {event.eventTime}
             </p>
           )}
           
           {event.venue && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>🏢 Sted:</strong> {event.venue.title}
+              <strong>🏢 {currentLanguage === 'en' ? 'Venue:' : 'Sted:'}</strong> {venueTitle}
               {event.venue.address && ` - ${event.venue.address}`}
             </p>
           )}
           
           {event.genre && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>🎼 Sjanger:</strong> {event.genre.title}
+              <strong>🎼 {currentLanguage === 'en' ? 'Genre:' : 'Sjanger:'}</strong> {genreTitle}
             </p>
           )}
           
           {event.artists && event.artists.length > 0 && (
             <div style="margin: 0 0 0.5rem 0;">
-              <strong>🎵 Artister:</strong>
+              <strong>🎵 {currentLanguage === 'en' ? 'Artists:' : 'Artister:'}</strong>
               <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
                 {event.artists.map((artist: any) => (
                   <li style="margin-bottom: 0.25rem;">
@@ -126,7 +146,7 @@ export async function getStaticPaths() {
           )}
         </div>
         
-        {event.buttonText && event.buttonUrl && (
+        {buttonText && event.buttonUrl && (
           <a 
             href={event.buttonUrl} 
             target={event.buttonOpenInNewTab ? "_blank" : "_self"}
@@ -142,14 +162,14 @@ export async function getStaticPaths() {
               margin-top: 1rem;
             "
           >
-            {event.buttonText}
+            {buttonText}
           </a>
         )}
       </header>
       
-      {event.content && (
+      {eventContent && (
         <div style="line-height: 1.6;">
-          <PortableText value={event.content} />
+          <PortableText value={eventContent} />
         </div>
       )}
     </article>

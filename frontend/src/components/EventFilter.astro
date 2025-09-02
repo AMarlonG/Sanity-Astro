@@ -1,4 +1,6 @@
 ---
+import { getCurrentLanguage, getLocalizedText } from '../lib/languageUtils';
+
 export interface Props {
   initialFilters?: {
     eventDate?: string;
@@ -17,6 +19,9 @@ const {
   filterOptions = {} 
 } = Astro.props;
 
+// Get current language
+const currentLanguage = getCurrentLanguage(Astro.request);
+
 // Hent URL-parametere for å opprettholde state
 const url = new URL(Astro.request.url);
 const currentFilters = {
@@ -28,14 +33,26 @@ const currentFilters = {
 // Hjelpefunksjon for å formatere dato
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  const dayNames = ['Søndag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag'];
-  const monthNames = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
   
-  const dayName = dayNames[date.getDay()];
-  const day = date.getDate();
-  const month = monthNames[date.getMonth()];
-  
-  return `${dayName}, ${day}. ${month}`;
+  if (currentLanguage === 'en') {
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const dayName = dayNames[date.getDay()];
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    
+    return `${dayName}, ${month} ${day}`;
+  } else {
+    const dayNames = ['Søndag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag'];
+    const monthNames = ['januar', 'februar', 'mars', 'april', 'mai', 'juni', 'juli', 'august', 'september', 'oktober', 'november', 'desember'];
+    
+    const dayName = dayNames[date.getDay()];
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    
+    return `${dayName}, ${day}. ${month}`;
+  }
 }
 
 // Hjelpefunksjon for å finne aktivt filter-navn
@@ -48,6 +65,10 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   
   if (filterType === 'date' && activeFilter) {
     return formatDate(activeFilter.date);
+  }
+  
+  if (activeFilter && (filterType === 'genre' || filterType === 'venue')) {
+    return getLocalizedText(activeFilter.title, activeFilter.titleEn, currentLanguage);
   }
   
   return activeFilter?.title || '';
@@ -67,9 +88,9 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
         hx-vals='{"eventDate": "", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}'
-        title="Vis alle arrangementer"
+        title={currentLanguage === 'en' ? 'Show all events' : 'Vis alle arrangementer'}
       >
-        📅 Alle dager
+        📅 {currentLanguage === 'en' ? 'All days' : 'Alle dager'}
       </button>
       
       <!-- Dato-faner -->
@@ -82,7 +103,7 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
           hx-vals={`{"eventDate": "${date.date}", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}`}
-          title={`Vis arrangementer ${formatDate(date.date)}`}
+          title={currentLanguage === 'en' ? `Show events ${formatDate(date.date)}` : `Vis arrangementer ${formatDate(date.date)}`}
         >
           📅 {formatDate(date.date)}
         </button>
@@ -102,9 +123,9 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
         hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "", "venue": "${currentFilters.venue}"}`}
-        title="Vis alle sjangre"
+        title={currentLanguage === 'en' ? 'Show all genres' : 'Vis alle sjangre'}
       >
-        🎼 Alle sjangre
+        🎼 {currentLanguage === 'en' ? 'All genres' : 'Alle sjangre'}
       </button>
       
       <!-- Sjanger-faner -->
@@ -117,9 +138,9 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
           hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${genre.slug.current}", "venue": "${currentFilters.venue}"}`}
-          title={`Vis ${genre.title} arrangementer`}
+          title={currentLanguage === 'en' ? `Show ${getLocalizedText(genre.title, genre.titleEn, currentLanguage)} events` : `Vis ${getLocalizedText(genre.title, genre.titleEn, currentLanguage)} arrangementer`}
         >
-          🎼 {genre.title}
+          🎼 {getLocalizedText(genre.title, genre.titleEn, currentLanguage)}
         </button>
       ))}
     </div>
@@ -137,9 +158,9 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
         hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": ""}`}
-        title="Vis alle spillesteder"
+        title={currentLanguage === 'en' ? 'Show all venues' : 'Vis alle spillesteder'}
       >
-        🏢 Alle spillesteder
+        🏢 {currentLanguage === 'en' ? 'All venues' : 'Alle spillesteder'}
       </button>
       
       <!-- Spillested-faner -->
@@ -152,9 +173,9 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
           hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": "${venue.slug.current}"}`}
-          title={`Vis arrangementer på ${venue.title}`}
+          title={currentLanguage === 'en' ? `Show events at ${getLocalizedText(venue.title, venue.titleEn, currentLanguage)}` : `Vis arrangementer på ${getLocalizedText(venue.title, venue.titleEn, currentLanguage)}`}
         >
-          🏢 {venue.title}
+          🏢 {getLocalizedText(venue.title, venue.titleEn, currentLanguage)}
         </button>
       ))}
     </div>
@@ -163,7 +184,7 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   <!-- Aktive filtre visning -->
   {(currentFilters.eventDate || currentFilters.genre || currentFilters.venue) && (
     <div class="active-filters">
-      <div class="active-filters-title">🔍 Aktive filtre:</div>
+      <div class="active-filters-title">🔍 {currentLanguage === 'en' ? 'Active filters:' : 'Aktive filtre:'}</div>
       <div class="active-filters-list">
         {currentFilters.eventDate && (
           <span class="active-filter-tag">
@@ -186,7 +207,7 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
 
   <!-- Loading indikator -->
   <div id="loading-indicator" class="htmx-indicator">
-    <span>🔍 Laster arrangementer...</span>
+    <span>🔍 {currentLanguage === 'en' ? 'Loading events...' : 'Laster arrangementer...'}</span>
   </div>
 </div>
 

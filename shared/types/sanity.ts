@@ -19,11 +19,14 @@ export interface Artist extends SanityDocument {
   facebook?: string;
   spotify?: string;
   youtube?: string;
+  content?: any[];
+  contentEn?: any[];
 }
 
 export interface Event extends SanityDocument {
   _type: 'event';
   title: string;
+  titleEn?: string;
   slug: { current: string };
   eventDates?: EventDate[];
   artists?: Artist[];
@@ -33,6 +36,12 @@ export interface Event extends SanityDocument {
   genres?: Genre[];
   ticketUrl?: string;
   isFeatured?: boolean;
+  buttonText?: string;
+  buttonTextEn?: string;
+  buttonUrl?: string;
+  buttonOpenInNewTab?: boolean;
+  content?: any[];
+  contentEn?: any[];
 }
 
 export interface EventDate {
@@ -46,6 +55,9 @@ export interface EventDate {
 export interface Venue extends SanityDocument {
   _type: 'venue';
   name: string;
+  nameEn?: string;
+  title: string;
+  titleEn?: string;
   slug: { current: string };
   address?: string;
   city?: string;
@@ -57,11 +69,16 @@ export interface Venue extends SanityDocument {
     lat: number;
     lng: number;
   };
+  linkText?: string;
+  linkTextEn?: string;
+  linkUrl?: string;
 }
 
 export interface Genre extends SanityDocument {
   _type: 'genre';
   name: string;
+  title: string;
+  titleEn?: string;
   slug: { current: string };
   description?: string;
   color?: string;
@@ -70,14 +87,23 @@ export interface Genre extends SanityDocument {
 export interface Article extends SanityDocument {
   _type: 'article';
   title: string;
+  titleEn?: string;
+  subtitle?: string;
+  subtitleEn?: string;
   slug: { current: string };
   excerpt?: string;
   content?: any[];
+  contentEn?: any[];
   mainImage?: SanityImage;
   author?: string;
   publishedAt?: string;
   categories?: string[];
   tags?: string[];
+  isPublished?: boolean;
+  scheduledPeriod?: {
+    startDate: string;
+    endDate: string;
+  };
 }
 
 export interface Homepage extends SanityDocument {

@@ -12,9 +12,17 @@ import Accordion from '../components/Accordion.astro';
 import ContentScrollContainer from '../components/ContentScrollContainer.astro';
 import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
 import EventScrollContainer from '../components/EventScrollContainer.astro';
+import { getCurrentLanguage, getLocalizedText, getLocalizedContent } from '../lib/languageUtils';
+
+// Get current language
+const currentLanguage = getCurrentLanguage(Astro.request);
 
 // Load homepage with Visual Editing support
 const { data: homepage } = await loadHomepage(Astro.request);
+
+// Localize homepage content
+const homepageTitle = homepage ? getLocalizedText(homepage.title, homepage.titleEn, currentLanguage) : (currentLanguage === 'en' ? 'Home' : 'Forside');
+const homepageContent = homepage ? getLocalizedContent(homepage.content, homepage.contentEn, currentLanguage) : null;
 
 // Smart caching basert på innholdstype
 if (homepage?.scheduledPeriod) {
@@ -29,24 +37,24 @@ if (homepage?.scheduledPeriod) {
 console.log('Aktiv forside:', homepage);
 ---
 
-<Layout title={homepage?.title || "Forside"}>
+<Layout title={homepageTitle} titleEn={homepage?.titleEn}>
   <main class="container" transition:name="main-content">
     {homepage ? (
       <div>
-        <h1 transition:name="page-title">{homepage.title}</h1>
+        <h1 transition:name="page-title">{homepageTitle}</h1>
         
         <!-- Navigasjonslenker -->
         <nav style="margin: 2rem 0; padding: 1rem 0; border-bottom: 1px solid #eee;">
           <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 2rem; justify-content: center;">
-            <li><a href="/program" style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">Program</a></li>
-            <li><a href="/artister" style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">Artister</a></li>
-            <li><a href="/artikler" style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">Artikler</a></li>
+            <li><a href={currentLanguage === 'en' ? '/program?lang=en' : '/program'} style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">{currentLanguage === 'en' ? 'Program' : 'Program'}</a></li>
+            <li><a href={currentLanguage === 'en' ? '/artister?lang=en' : '/artister'} style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">{currentLanguage === 'en' ? 'Artists' : 'Artister'}</a></li>
+            <li><a href={currentLanguage === 'en' ? '/artikler?lang=en' : '/artikler'} style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">{currentLanguage === 'en' ? 'Articles' : 'Artikler'}</a></li>
           </ul>
         </nav>
         
-        {homepage.content && Array.isArray(homepage.content) && (
+        {homepageContent && Array.isArray(homepageContent) && (
           <div>
-            {homepage.content.map((block) => (
+            {homepageContent.map((block) => (
               <div key={block._key || block._id}>
                 {block._type === 'portableTextBlock' && <PortableText content={block.content} />}
                 {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} />}
@@ -61,7 +69,7 @@ console.log('Aktiv forside:', homepage);
                 {block._type === 'eventScrollContainer' && <EventScrollContainer title={block.title} events={block.events} cardFormat={block.cardFormat} />}
                 {/* Fallback for ukjent type */}
                 {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer' ].indexOf(block._type) === -1 && (
-                  <div>Ukjent komponent: {block._type}</div>
+                  <div>{currentLanguage === 'en' ? 'Unknown component' : 'Ukjent komponent'}: {block._type}</div>
                 )}
               </div>
             ))}
@@ -70,8 +78,8 @@ console.log('Aktiv forside:', homepage);
       </div>
     ) : (
       <div>
-        <h1>Velkommen til forsiden</h1>
-        <p>Ingen forside er konfigurert ennå. Gå til Sanity Studio for å opprette en forside.</p>
+        <h1>{currentLanguage === 'en' ? 'Welcome to the homepage' : 'Velkommen til forsiden'}</h1>
+        <p>{currentLanguage === 'en' ? 'No homepage has been configured yet. Go to Sanity Studio to create a homepage.' : 'Ingen forside er konfigurert ennå. Gå til Sanity Studio for å opprette en forside.'}</p>
       </div>
     )}
   </main>

@@ -203,25 +203,39 @@ export async function loadEvent(slug: string, request?: Request) {
     *[_type == "event" && slug.current == $slug][0]{
       _id,
       title,
+      titleEn,
       slug,
       image,
       description,
+      buttonText,
+      buttonTextEn,
+      buttonUrl,
+      buttonOpenInNewTab,
+      content,
+      contentEn,
       artist[]->{
         _id,
         name,
         slug,
         image,
-        instrument
+        instrument,
+        content,
+        contentEn
       },
       venue->{
         _id,
         title,
+        titleEn,
+        linkText,
+        linkTextEn,
+        linkUrl,
         address,
         city
       },
       genre->{
         _id,
         title,
+        titleEn,
         color
       },
       eventDate->{
@@ -251,14 +265,20 @@ export async function loadArticle(slug: string, request?: Request) {
     *[_type == "article" && slug.current == $slug][0]{
       _id,
       title,
+      titleEn,
+      subtitle,
+      subtitleEn,
       slug,
       excerpt,
       content,
+      contentEn,
       mainImage,
       author,
       publishedAt,
       categories,
-      tags
+      tags,
+      isPublished,
+      scheduledPeriod
     }
   `;
 
