@@ -79,6 +79,16 @@ If the answer to #4 is "yes", then probably don't change it.
 - **Needs both servers running** on correct ports
 - **Environment variables must be set**: `SANITY_API_READ_TOKEN` and `PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true`
 
+### Git Workflow
+- **Suggest pushing changes proactively** after completing logical milestones:
+  - ✅ After adding new features or functionality
+  - ✅ After completing implementation phases
+  - ✅ After significant bug fixes or updates
+  - ✅ After schema changes or major refactoring
+- **Don't wait for explicit push requests** - suggest it when it makes sense
+- **Make meaningful commit messages** that explain what was accomplished
+- **Push frequently** rather than accumulating large changesets
+
 ## File Organization
 
 ### What's Handled by Claude Agents
