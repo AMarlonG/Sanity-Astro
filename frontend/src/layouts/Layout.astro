@@ -1,6 +1,8 @@
 ---
 import { ViewTransitions } from "astro:transitions";
 import { VisualEditing } from "@sanity/astro/visual-editing";
+import { getCurrentLanguage, getLocalizedText } from '../lib/languageUtils';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 
 // Import CSS files in order
 import '../styles/reset.css';
@@ -10,9 +12,26 @@ import '../styles/global.css';
 export interface Props {
   title: string;
   description?: string;
+  titleEn?: string;
+  descriptionEn?: string;
 }
 
-const { title, description = "Moderne web-applikasjon med Sanity CMS og Astro frontend" } = Astro.props;
+const { 
+  title, 
+  description = "Moderne web-applikasjon med Sanity CMS og Astro frontend",
+  titleEn,
+  descriptionEn = "Modern web application with Sanity CMS and Astro frontend"
+} = Astro.props;
+
+// Get current language
+const currentLanguage = getCurrentLanguage(Astro.request);
+
+// Localize content
+const localizedTitle = getLocalizedText(title, titleEn, currentLanguage);
+const localizedDescription = getLocalizedText(description, descriptionEn, currentLanguage);
+
+// Set HTML lang attribute
+const htmlLang = currentLanguage === 'en' ? 'en' : 'no';
 
 // Check if Visual Editing should be enabled
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
@@ -21,19 +40,39 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 ---
 
 <!DOCTYPE html>
-<html lang="no">
+<html lang={htmlLang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={description} />
+    <meta name="description" content={localizedDescription} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <title>{localizedTitle}</title>
     
     <!-- Enable View Transitions -->
     <ViewTransitions />
   </head>
   <body>
+    <header class="site-header">
+      <div class="header-content">
+        <nav class="main-nav">
+          <a href={currentLanguage === 'en' ? '/?lang=en' : '/'}>
+            {currentLanguage === 'en' ? 'Home' : 'Hjem'}
+          </a>
+          <a href={currentLanguage === 'en' ? '/program?lang=en' : '/program'}>
+            {currentLanguage === 'en' ? 'Program' : 'Program'}
+          </a>
+          <a href={currentLanguage === 'en' ? '/artister?lang=en' : '/artister'}>
+            {currentLanguage === 'en' ? 'Artists' : 'Artister'}
+          </a>
+          <a href={currentLanguage === 'en' ? '/artikler?lang=en' : '/artikler'}>
+            {currentLanguage === 'en' ? 'Articles' : 'Artikler'}
+          </a>
+        </nav>
+        <LanguageSwitcher />
+      </div>
+    </header>
+    
     <slot />
     
     <!-- Visual Editing Component -->
@@ -43,6 +82,61 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 
 <style is:global>
   /* Layout-specific overrides and additions */
+  
+  /* Site Header */
+  .site-header {
+    background: var(--color-surface, #f8f9fa);
+    border-bottom: 1px solid var(--color-border, #dee2e6);
+    padding: var(--space-4) 0;
+  }
+  
+  .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .main-nav {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  
+  .main-nav a {
+    color: var(--color-text-primary, #333);
+    text-decoration: none;
+    font-weight: 500;
+    padding: var(--space-2) var(--space-3);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  
+  .main-nav a:hover {
+    color: var(--color-primary, #007acc);
+    background: var(--color-primary-light, rgba(0, 122, 204, 0.1));
+  }
+  
+  /* Responsive navigation */
+  @media (max-width: 768px) {
+    .header-content {
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    
+    .main-nav {
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .main-nav a {
+      font-size: 0.9rem;
+      padding: var(--space-2);
+    }
+  }
   
   /* Main content wrapper */
   main {
