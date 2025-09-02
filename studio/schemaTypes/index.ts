@@ -6,7 +6,7 @@ import {event} from './documents/event'
 import {venue} from './documents/venue'
 import eventDate from './documents/eventDate'
 import page from './documents/page'
-import article from './documents/article'
+import {article} from './documents/article'
 
 // Importer komponenter
 import * as components from './components'

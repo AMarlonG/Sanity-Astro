@@ -39,6 +39,13 @@ export const venue = defineType({
       validation: (Rule) => Rule.required().custom(venueSlugValidation),
     }),
     defineField({
+      name: 'address',
+      title: 'Adresse',
+      type: 'string',
+      description: 'Fysisk adresse for spillestedet',
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
       name: 'linkText',
       title: 'Lenketekst',
       type: 'string',
@@ -73,4 +80,19 @@ export const venue = defineType({
       initialValue: true,
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      address: 'address',
+      linkText: 'linkText',
+      linkUrl: 'linkUrl',
+    },
+    prepare({title, address, linkText, linkUrl}) {
+      return {
+        title: title,
+        subtitle: `${address || 'Ingen adresse'} • ${linkText || 'Ingen lokasjon'} • ${linkUrl ? new URL(linkUrl).hostname : 'Ingen URL'}`,
+        media: HomeIcon,
+      };
+    },
+  },
 })

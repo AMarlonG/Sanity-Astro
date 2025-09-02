@@ -1,22 +1,27 @@
 import {defineField, defineType} from 'sanity'
+import {DocumentIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 
-export default defineType({
+export const article = defineType({
   name: 'article',
   title: 'Artikler',
   type: 'document',
+  icon: DocumentIcon,
   groups: [
     {
       name: 'basic',
       title: 'Grunnleggende informasjon',
+      icon: DocumentIcon,
       default: true,
     },
     {
       name: 'content',
       title: 'Innhold',
+      icon: ComposeIcon,
     },
     {
       name: 'scheduling',
       title: 'Tidsstyring',
+      icon: CogIcon,
     },
   ],
   fields: [
@@ -114,4 +119,44 @@ export default defineType({
       ],
     }),
   ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'subtitle',
+      isPublished: 'isPublished',
+      startDate: 'scheduledPeriod.startDate',
+      endDate: 'scheduledPeriod.endDate',
+    },
+    prepare({title, subtitle, isPublished, startDate, endDate}) {
+      // Status logic
+      let statusIcon = '⚫';
+      let statusText = 'Utkast';
+      
+      if (isPublished) {
+        statusIcon = '🟢';
+        statusText = 'Publisert';
+      } else if (startDate && endDate) {
+        const now = new Date();
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        if (now >= start && now <= end) {
+          statusIcon = '🟢';
+          statusText = 'Live';
+        } else if (now < start) {
+          statusIcon = '🟡';
+          statusText = 'Venter';
+        } else {
+          statusIcon = '🔴';
+          statusText = 'Utløpt';
+        }
+      }
+      
+      return {
+        title: `${statusIcon} ${title}`,
+        subtitle: `${subtitle || 'Ingen undertittel'} • ${statusText}`,
+        media: DocumentIcon,
+      };
+    },
+  },
 })

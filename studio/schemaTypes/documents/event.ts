@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {CalendarIcon} from '@sanity/icons'
+import {CalendarIcon, ImageIcon, UsersIcon, ClockIcon, LinkIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
 import {eventTimeOptions} from '../../lib/timeUtils'
 
@@ -13,32 +13,38 @@ export const event = defineType({
     {
       name: 'basic',
       title: 'Grunnleggende informasjon',
+      icon: CalendarIcon,
       default: true,
     },
     {
       name: 'image',
       title: 'Bilde',
+      icon: ImageIcon,
     },
     {
       name: 'artists',
       title: 'Artister',
+      icon: UsersIcon,
     },
-
     {
       name: 'timing',
       title: 'Tidspunkt & sted',
+      icon: ClockIcon,
     },
     {
       name: 'button',
       title: 'Knapp',
+      icon: LinkIcon,
     },
     {
       name: 'content',
       title: 'Innhold',
+      icon: ComposeIcon,
     },
     {
       name: 'scheduling',
       title: 'Tidsstyring',
+      icon: CogIcon,
     },
   ],
   fields: [

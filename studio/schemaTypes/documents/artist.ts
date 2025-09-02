@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {UserIcon} from '@sanity/icons'
+import {UserIcon, ImageIcon, LinkIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
 import {workflowFields, workflowGroup} from '../objects/workflowFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
@@ -13,23 +13,28 @@ export const artist = defineType({
     {
       name: 'basic',
       title: 'Grunnleggende informasjon',
+      icon: UserIcon,
       default: true,
     },
     {
       name: 'image',
       title: 'Bilde',
+      icon: ImageIcon,
     },
     {
       name: 'links',
       title: 'Lenker',
+      icon: LinkIcon,
     },
     {
       name: 'content',
       title: 'Innhold',
+      icon: ComposeIcon,
     },
     {
       name: 'scheduling',
       title: 'Tidsstyring',
+      icon: CogIcon,
     },
     workflowGroup,
     seoGroup,
