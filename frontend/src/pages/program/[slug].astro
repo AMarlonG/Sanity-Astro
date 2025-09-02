@@ -5,7 +5,7 @@ import { PortableText } from "astro-portabletext";
 import Layout from '../../layouts/Layout.astro';
 import Image from '../../components/Image.astro';
 import { getCurrentLanguage, getLocalizedText, getLocalizedContent } from '../../lib/languageUtils';
-import { formatDateForLanguage } from '../../../shared/utils/dates';
+import { formatDateForLanguage } from '../../../../shared/utils/dates';
 
 // Get current language from request
 const currentLanguage = getCurrentLanguage(Astro.request);

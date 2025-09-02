@@ -7,7 +7,7 @@ import Image from '../components/Image.astro';
 import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import { getCurrentLanguage, getLocalizedText } from '../lib/languageUtils';
-import { formatDateForLanguage } from '../../shared/utils/dates';
+import { formatDateForLanguage } from '../../../shared/utils/dates';
 
 // Get current language
 const currentLanguage = getCurrentLanguage(Astro.request);
