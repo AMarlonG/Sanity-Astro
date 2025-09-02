@@ -21,20 +21,53 @@ export const pageBuilder = defineType({
   type: 'array',
   icon: DocumentIcon,
   description: 'Bygg siden med komponenter og innhold',
-  groups: [
-    { name: 'layout', title: 'Layout' },
-    { name: 'content', title: 'Innhold' },
-    { name: 'media', title: 'Media' },
-    { name: 'interactive', title: 'Interaktiv' },
-    { name: 'sections', title: 'Seksjoner' },
-  ],
+  options: {
+    insertMenu: {
+      filter: true,
+      groups: [
+        {
+          name: 'layout',
+          title: '📐 Layout & Struktur',
+          of: ['columnLayout', 'gridLayout', 'spacer'],
+        },
+        {
+          name: 'content',
+          title: '📝 Innhold',
+          of: ['title', 'headingComponent', 'portableTextBlock', 'quoteComponent'],
+        },
+        {
+          name: 'media',
+          title: '🖼️ Media',
+          of: ['imageComponent', 'videoComponent'],
+        },
+        {
+          name: 'interactive',
+          title: '🔘 Interaktiv',
+          of: ['buttonComponent', 'linkComponent', 'accordionComponent'],
+        },
+        {
+          name: 'sections',
+          title: '📦 Seksjoner',
+          of: ['contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer'],
+        },
+      ],
+      views: [
+        {
+          name: 'grid',
+          previewImageUrl: (schemaTypeName) => `/static/preview-${schemaTypeName}.png`,
+        },
+        {
+          name: 'list',
+        },
+      ],
+    },
+  },
   of: [
     // === LAYOUT COMPONENTS ===
     {
       type: 'columnLayout',
       title: 'Responsiv Layout',
       icon: EllipsisHorizontalIcon,
-      group: 'layout',
       preview: {
         select: {
           layoutType: 'layoutType',
@@ -60,7 +93,6 @@ export const pageBuilder = defineType({
       type: 'gridLayout',
       title: 'Grid Layout (Avansert)',
       icon: BlockContentIcon,
-      group: 'layout',
       preview: {
         select: {
           gridTemplate: 'gridTemplate',
@@ -85,7 +117,6 @@ export const pageBuilder = defineType({
       type: 'spacer',
       title: 'Spacing/Avstand',
       icon: ExpandIcon,
-      group: 'layout',
       preview: {
         select: {
           type: 'type',
@@ -114,7 +145,6 @@ export const pageBuilder = defineType({
       type: 'title',
       title: 'Tittel (H1/H2)',
       icon: DocumentTextIcon,
-      group: 'content',
       preview: {
         select: {
           title: 'mainTitle',
@@ -133,7 +163,6 @@ export const pageBuilder = defineType({
       type: 'headingComponent',
       title: 'Overskrift (H2-H6)',
       icon: BlockContentIcon,
-      group: 'content',
       preview: {
         select: {
           level: 'level',
@@ -157,7 +186,6 @@ export const pageBuilder = defineType({
       type: 'portableTextBlock',
       title: 'Tekst (Rich Text)',
       icon: TextIcon,
-      group: 'content',
       preview: {
         select: {
           title: 'title',
@@ -180,7 +208,6 @@ export const pageBuilder = defineType({
       type: 'quoteComponent',
       title: 'Sitat',
       icon: AddCommentIcon,
-      group: 'content',
       preview: {
         select: {
           quote: 'quote',
@@ -201,7 +228,6 @@ export const pageBuilder = defineType({
       type: 'imageComponent',
       title: 'Bilde',
       icon: ImageIcon,
-      group: 'media',
       preview: {
         select: {
           title: 'alt',
@@ -221,7 +247,6 @@ export const pageBuilder = defineType({
       type: 'videoComponent',
       title: 'Video',
       icon: PlayIcon,
-      group: 'media',
       preview: {
         select: {
           title: 'title',
@@ -243,7 +268,6 @@ export const pageBuilder = defineType({
       type: 'buttonComponent',
       title: 'Knapp',
       icon: BoltIcon,
-      group: 'interactive',
       preview: {
         select: {
           title: 'text',
@@ -264,7 +288,6 @@ export const pageBuilder = defineType({
       type: 'linkComponent',
       title: 'Lenke',
       icon: LinkIcon,
-      group: 'interactive',
       preview: {
         select: {
           title: 'text',
@@ -283,7 +306,6 @@ export const pageBuilder = defineType({
       type: 'accordionComponent',
       title: 'Sammenleggbar seksjon',
       icon: TiersIcon,
-      group: 'interactive',
       preview: {
         select: {
           title: 'title',
@@ -304,7 +326,6 @@ export const pageBuilder = defineType({
       type: 'contentScrollContainer',
       title: 'Content Scroll Container',
       icon: EllipsisHorizontalIcon,
-      group: 'sections',
       preview: {
         select: {
           title: 'title',
@@ -325,7 +346,6 @@ export const pageBuilder = defineType({
       type: 'artistScrollContainer',
       title: 'Artist Scroll Container',
       icon: DocumentIcon,
-      group: 'sections',
       preview: {
         select: {
           title: 'title',
@@ -346,7 +366,6 @@ export const pageBuilder = defineType({
       type: 'eventScrollContainer',
       title: 'Event Scroll Container',
       icon: CalendarIcon,
-      group: 'sections',
       preview: {
         select: {
           title: 'title',
