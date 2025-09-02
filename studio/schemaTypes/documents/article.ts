@@ -28,11 +28,26 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'titleEn',
+      title: 'Title (English)',
+      type: 'string',
+      group: 'basic',
+      description: 'English translation of the article title (optional)',
+    }),
+    defineField({
       name: 'subtitle',
       title: 'Undertittel',
       type: 'string',
       description: 'Valgfri undertittel som vises som H2',
       group: 'basic',
+      validation: (Rule) => Rule.max(200),
+    }),
+    defineField({
+      name: 'subtitleEn',
+      title: 'Subtitle (English)',
+      type: 'string',
+      group: 'basic',
+      description: 'English translation of the subtitle (optional)',
       validation: (Rule) => Rule.max(200),
     }),
     defineField({
@@ -52,6 +67,13 @@ export default defineType({
       title: 'Artikkelinnhold',
       type: 'pageBuilder',
       description: 'Bygg artikkelen med komponenter og innhold',
+      group: 'content',
+    }),
+    defineField({
+      name: 'contentEn',
+      title: 'Article Content (English)',
+      type: 'pageBuilder',
+      description: 'English version of the article content (optional)',
       group: 'content',
     }),
     defineField({

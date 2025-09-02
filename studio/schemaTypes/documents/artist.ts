@@ -164,6 +164,13 @@ export const artist = defineType({
       group: 'content',
     }),
     defineField({
+      name: 'contentEn',
+      title: 'Artist Content (English)',
+      type: 'pageBuilder',
+      description: 'English version of the artist content (optional)',
+      group: 'content',
+    }),
+    defineField({
       name: 'isPublished',
       title: 'Publisert',
       type: 'boolean',

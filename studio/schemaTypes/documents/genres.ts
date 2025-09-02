@@ -15,6 +15,12 @@ export const genre = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'titleEn',
+      title: 'Title (English)',
+      type: 'string',
+      description: 'English translation of the genre title (optional)',
+    }),
+    defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',

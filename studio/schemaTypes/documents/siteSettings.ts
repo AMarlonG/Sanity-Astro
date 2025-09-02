@@ -269,6 +269,13 @@ export const siteSettings = defineType({
           initialValue: 'Meld deg på nyhetsbrev',
         }),
         defineField({
+          name: 'titleEn',
+          title: 'Newsletter Title (English)',
+          type: 'string',
+          description: 'English version of newsletter signup title (optional)',
+          initialValue: 'Subscribe to newsletter',
+        }),
+        defineField({
           name: 'description',
           title: 'Beskrivelse',
           type: 'text',
@@ -288,6 +295,13 @@ export const siteSettings = defineType({
           type: 'string',
           description: 'Tekst på "meld på" knappen',
           initialValue: 'Meld på',
+        }),
+        defineField({
+          name: 'buttonTextEn',
+          title: 'Button Text (English)',
+          type: 'string',
+          description: 'English version of subscribe button text (optional)',
+          initialValue: 'Subscribe',
         }),
         defineField({
           name: 'successMessage',

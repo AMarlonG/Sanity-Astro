@@ -22,6 +22,12 @@ export const venue = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'titleEn',
+      title: 'Name (English)',
+      type: 'string',
+      description: 'English name for the venue (optional)',
+    }),
+    defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
@@ -39,6 +45,13 @@ export const venue = defineType({
       description: 'Teksten som vises som lenke til lokasjon',
       fieldset: 'link',
       validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'linkTextEn',
+      title: 'Link Text (English)',
+      type: 'string',
+      description: 'English translation of the location link text (optional)',
+      fieldset: 'link',
     }),
     defineField({
       name: 'linkUrl',
