@@ -29,16 +29,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Clear npm cache and install dependencies
+      - name: Install dependencies in each workspace
         run: |
-          npm cache clean --force
-          npm install
+          cd shared && npm install
+          cd ../studio && npm install  
+          cd ../frontend && npm install
 
       - name: Build shared package
-        run: npm run build --workspace=shared
+        run: cd shared && npm run build
 
-      - name: Build all packages
-        run: npm run build
+      - name: Build studio package
+        run: cd studio && npm run build
+
+      - name: Build frontend package  
+        run: cd frontend && npm run build
         env:
           PUBLIC_SANITY_PROJECT_ID: ${{ secrets.PUBLIC_SANITY_PROJECT_ID || 'i952bgb1' }}
           PUBLIC_SANITY_DATASET: ${{ secrets.PUBLIC_SANITY_DATASET || 'production' }}
@@ -74,10 +78,11 @@ jobs:
         with:
           node-version: 20.x
 
-      - name: Clear npm cache and install dependencies
+      - name: Install dependencies in each workspace
         run: |
-          npm cache clean --force
-          npm install
+          cd shared && npm install
+          cd ../studio && npm install  
+          cd ../frontend && npm install
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
