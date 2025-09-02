@@ -10,8 +10,6 @@ import {article} from './documents/article'
 
 // Importer komponenter
 import * as components from './components'
-// Importer seksjoner
-import * as sections from './sections'
 // Importer objekter
 import {socialMediaType} from './objects/socialMediaFields'
 
@@ -43,7 +41,7 @@ export const schemaTypes = [
   components.gridLayout,
   components.spacer,
   // Seksjoner
-  sections.contentScrollContainer,
-  sections.artistScrollContainer,
-  sections.eventScrollContainer,
+  components.contentScrollContainer,
+  components.artistScrollContainer,
+  components.eventScrollContainer,
 ]

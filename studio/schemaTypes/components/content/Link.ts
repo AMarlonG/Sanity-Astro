@@ -1,6 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
-import {externalURLValidation} from '../../lib/urlValidation'
+import {externalURLValidation} from '../../../lib/urlValidation'
 
 export const linkComponent = defineType({
   name: 'linkComponent',

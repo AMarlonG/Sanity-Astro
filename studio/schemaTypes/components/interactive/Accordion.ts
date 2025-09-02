@@ -1,6 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, TiersIcon} from '@sanity/icons'
-import {generateQuoteHtml} from './Quote'
+import {generateQuoteHtml} from '../content/Quote'
 
 export const accordionComponent = defineType({
   name: 'accordionComponent',
