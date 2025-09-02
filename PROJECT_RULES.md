@@ -81,10 +81,39 @@ If the answer to #4 is "yes", then probably don't change it.
 
 ## File Organization
 
-### What's Handled by Subagents
-- **Sanity schema best practices** → See `studio/.cursor/rules/sanity-opinionated.mdc`
-- **TypeScript configurations** → Handled by individual workspace configs
-- **Code style and patterns** → Handled by ESLint and Prettier configs
+### What's Handled by Claude Agents
+
+**When to Use Each Agent:**
+
+- **css-intrinsic-expert** → CSS layout issues, responsive design, styling Astro components
+  - Use when: Creating layouts, fixing responsive issues, implementing visual designs
+  - Remember: Prioritize simple, working CSS over cutting-edge features
+
+- **astro-framework-expert** → Astro-specific features, routing, components, SSG/SSR
+  - Use when: Astro build issues, component problems, routing questions
+  - Remember: Prefer stable Astro features over experimental ones
+
+- **htmx-astro-expert** → Dynamic interactions, form submissions, event filtering
+  - Use when: Adding interactivity without complex JavaScript
+  - Perfect for: Event filtering, form enhancements, partial page updates
+
+- **sanity-studio-expert** → Sanity schemas, GROQ queries, Studio configuration
+  - Use when: Content modeling, query optimization, Studio customization
+  - Remember: Keep schemas simple unless complexity is genuinely needed
+
+- **sanity-astro-integration** → Data flow between Sanity and Astro, Visual Editing
+  - Use when: Connecting Sanity content to Astro pages, preview functionality
+  - Focus: Maintaining Visual Editing compatibility
+
+- **typescript-elegance-expert** → TypeScript improvements, code refactoring
+  - Use when: Code needs to be more readable or maintainable
+  - Remember: Working code > elegant code - only refactor if there's a real problem
+
+**Agent Selection Priority:**
+1. **Is the current solution working?** → If yes, probably don't change it
+2. **Is this solving a user problem?** → If no, reconsider the change
+3. **Will this add complexity?** → If yes, find a simpler solution
+4. **Which agent aligns with keeping things simple?** → Choose that one
 
 ### What Goes in This File
 - **Project-specific decisions** and constraints
