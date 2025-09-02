@@ -1,4 +1,5 @@
 import {defineField} from 'sanity'
+import {SearchIcon} from '@sanity/icons'
 
 /**
  * Reusable SEO fields for documents
@@ -59,5 +60,5 @@ export const seoFields = [
 export const seoGroup = {
   name: 'seo',
   title: '🔍 SEO',
-  icon: '🔍',
+  icon: SearchIcon,
 }

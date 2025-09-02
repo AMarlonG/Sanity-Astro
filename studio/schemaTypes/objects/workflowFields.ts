@@ -1,4 +1,5 @@
 import {defineField} from 'sanity'
+import {ClipboardIcon} from '@sanity/icons'
 
 /**
  * Workflow status tracking for editorial control
@@ -54,5 +55,5 @@ export const workflowFields = [
 export const workflowGroup = {
   name: 'workflow',
   title: '📋 Arbeidsflyt',
-  icon: '📋',
+  icon: ClipboardIcon,
 }
