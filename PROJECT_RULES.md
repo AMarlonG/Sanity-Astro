@@ -1,13 +1,13 @@
 # Project Rules: Keep It Simple
 
-This is a small Norwegian events website. These rules prevent over-engineering.
+This is a small festival website with bilingual support (Norwegian/English). These rules prevent over-engineering.
 
 ## What This Project IS
 - Simple Astro frontend displaying events, artists, venues
 - Sanity CMS for content management
 - Basic event filtering with HTMX
 - Visual Editing for content preview
-- Norwegian localization
+- Bilingual support (Norwegian/English)
 
 ## What This Project IS NOT
 - An enterprise application
@@ -33,7 +33,7 @@ This is a small Norwegian events website. These rules prevent over-engineering.
 ## Decision Framework
 Before making ANY change, ask:
 1. **Is this solving an actual problem users are experiencing?**
-2. **Is this specifically needed for this Norwegian events website?**
+2. **Is this specifically needed for this festival website?**
 3. **Will this add unnecessary complexity?**
 4. **Is the current solution already working fine?**
 
@@ -70,8 +70,8 @@ If the answer to #4 is "yes", then probably don't change it.
 - **Check both endpoints** respond before testing Visual Editing
 
 ### Content Structure
-- **Follow Norwegian naming** for content types and fields where applicable
-- **Use proper Norwegian date formatting** in displays
+- **Support bilingual content** with Norwegian as default and English as optional
+- **Use proper date formatting** for both languages in displays
 - **Keep content schemas simple** - avoid complex relationships unless needed
 
 ### Visual Editing Requirements
@@ -137,7 +137,7 @@ If the answer to #4 is "yes", then probably don't change it.
 2. **Removing Norwegian locale** without replacement → Keep `nbNOLocale()` 
 3. **Breaking Visual Editing** by changing stega config → Test preview after changes
 4. **Over-optimizing dependencies** → Keep what works
-5. **Adding enterprise tooling** → This is a small events website
+5. **Adding enterprise tooling** → This is a small festival website
 
 ---
 *This file exists because we learned the hard way that over-engineering breaks working systems.*
