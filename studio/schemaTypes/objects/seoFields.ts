@@ -7,7 +7,7 @@ import {SearchIcon} from '@sanity/icons'
 export const seoFields = [
   defineField({
     name: 'seo',
-    title: '🔍 SEO',
+    title: 'SEO',
     type: 'object',
     group: 'seo',
     fields: [
@@ -59,6 +59,6 @@ export const seoFields = [
 // Helper to add SEO group to document schemas
 export const seoGroup = {
   name: 'seo',
-  title: '🔍 SEO',
+  title: 'SEO',
   icon: SearchIcon,
 }

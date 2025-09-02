@@ -7,17 +7,17 @@ import {ClipboardIcon} from '@sanity/icons'
 export const workflowFields = [
   defineField({
     name: 'editorialStatus',
-    title: '📝 Redaksjonell status',
+    title: 'Redaksjonell status',
     type: 'string',
     group: 'workflow',
     initialValue: 'draft',
     options: {
       list: [
-        {title: '📝 Utkast', value: 'draft'},
-        {title: '👁️ Til gjennomgang', value: 'review'},
-        {title: '✅ Godkjent', value: 'approved'},
-        {title: '🚀 Publisert', value: 'published'},
-        {title: '📦 Arkivert', value: 'archived'},
+        {title: 'Utkast', value: 'draft'},
+        {title: 'Til gjennomgang', value: 'review'},
+        {title: 'Godkjent', value: 'approved'},
+        {title: 'Publisert', value: 'published'},
+        {title: 'Arkivert', value: 'archived'},
       ],
       layout: 'radio',
     },
@@ -26,7 +26,7 @@ export const workflowFields = [
   
   defineField({
     name: 'assignedTo',
-    title: '👤 Tildelt til',
+    title: 'Tildelt til',
     type: 'string',
     group: 'workflow',
     description: 'Hvem som er ansvarlig for dette innholdet',
@@ -34,7 +34,7 @@ export const workflowFields = [
   
   defineField({
     name: 'workflowNotes',
-    title: '📋 Arbeidsnotater',
+    title: 'Arbeidsnotater',
     type: 'text',
     group: 'workflow',
     rows: 3,
@@ -43,7 +43,7 @@ export const workflowFields = [
   
   defineField({
     name: 'reviewDeadline',
-    title: '⏰ Gjennomgangsfrist',
+    title: 'Gjennomgangsfrist',
     type: 'datetime',
     group: 'workflow',
     description: 'Når må dette være ferdig?',
@@ -54,6 +54,6 @@ export const workflowFields = [
 // Helper to add workflow group to document schemas
 export const workflowGroup = {
   name: 'workflow',
-  title: '📋 Arbeidsflyt',
+  title: 'Arbeidsflyt',
   icon: ClipboardIcon,
 }
