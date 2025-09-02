@@ -15,7 +15,7 @@ export const eventScrollContainer = defineType({
       validation: (Rule) => Rule.max(100),
     }),
         defineField({
-      name: 'events',
+      name: 'items',
       title: 'Arrangementer',
       type: 'array',
       description: 'Legg til mellom 2 og 8 arrangementer som skal vises i horisontal scroll',
@@ -89,11 +89,11 @@ export const eventScrollContainer = defineType({
   preview: {
     select: {
       title: 'title',
-      events: 'events',
+      items: 'items',
       cardFormat: 'cardFormat',
     },
-    prepare({title, events, cardFormat}) {
-      const eventCount = events?.length || 0
+    prepare({title, items, cardFormat}) {
+      const eventCount = items?.length || 0
       return {
         title: title || 'Event Scroll Container',
         subtitle: `${eventCount} arrangementer • ${cardFormat}`,
@@ -106,7 +106,7 @@ export const eventScrollContainer = defineType({
 // Funksjon for å generere HTML fra event scroll container data
 export function generateEventScrollHtml(data: {
   title?: string
-  events?: any[]
+  items?: any[]
   showScrollbar?: boolean
   showDate?: boolean
   showTime?: boolean
@@ -115,7 +115,7 @@ export function generateEventScrollHtml(data: {
   sortBy?: string
   cardFormat?: string
 }): string {
-  if (!data.events || data.events.length === 0) {
+  if (!data.items || data.items.length === 0) {
     return ''
   }
 
@@ -126,7 +126,7 @@ export function generateEventScrollHtml(data: {
     : 'card-format-16-9'
 
   // Sorter arrangementer basert på valgt sortering
-  let sortedEvents = [...data.events]
+  let sortedEvents = [...data.items]
   switch (data.sortBy) {
     case 'date-asc':
       sortedEvents.sort((a, b) => {
@@ -151,7 +151,7 @@ export function generateEventScrollHtml(data: {
       break
   }
 
-  const eventsHtml = sortedEvents
+  const itemsHtml = sortedEvents
     .map((event) => {
       if (!event) return ''
 
@@ -201,7 +201,7 @@ export function generateEventScrollHtml(data: {
     <div class="${containerClass} ${scrollbarClass} ${cardFormatClass}">
       ${titleHtml}
       <div class="event-scroll-wrapper">
-        ${eventsHtml}
+        ${itemsHtml}
       </div>
     </div>
   `

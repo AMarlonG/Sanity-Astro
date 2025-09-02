@@ -12,6 +12,7 @@ import {
   BlockContentIcon,
   BoltIcon,
   CalendarIcon,
+  ExpandIcon,
 } from '@sanity/icons'
 
 export const pageBuilder = defineType({
@@ -20,130 +21,119 @@ export const pageBuilder = defineType({
   type: 'array',
   icon: DocumentIcon,
   description: 'Bygg siden med komponenter og innhold',
+  groups: [
+    { name: 'layout', title: 'Layout' },
+    { name: 'content', title: 'Innhold' },
+    { name: 'media', title: 'Media' },
+    { name: 'interactive', title: 'Interaktiv' },
+    { name: 'sections', title: 'Seksjoner' },
+  ],
   of: [
-    // Kolonnelayout-komponent
+    // === LAYOUT COMPONENTS ===
     {
       type: 'columnLayout',
-      title: 'Kolonnelayout',
+      title: 'Responsiv Layout',
       icon: EllipsisHorizontalIcon,
+      group: 'layout',
       preview: {
         select: {
-          cols: 'columns',
+          layoutType: 'layoutType',
+          desktopColumns: 'desktopColumns',
           count: 'items.length',
+          containerWidth: 'containerWidth',
         },
-        prepare({cols, count}) {
+        prepare({layoutType, desktopColumns, count, containerWidth}) {
+          const layoutName = 
+            layoutType === 'columns' ? `${desktopColumns || '2'} kolonne(r)` :
+            layoutType === 'flexbox' ? 'Flexbox' :
+            'Stack'
+          
           return {
-            title: `Kolonnelayout: ${cols} kolonne${cols === '1' ? '' : 'r'}`,
-            subtitle: `${count || 0} element(er)`,
+            title: `${layoutName} Layout`,
+            subtitle: `${count || 0} komponenter • ${containerWidth || 'full'} bredde`,
             media: EllipsisHorizontalIcon,
           }
         },
       },
     },
-    // Bilde-komponent
     {
-      type: 'imageComponent',
-      title: 'Bilde',
-      icon: ImageIcon,
+      type: 'gridLayout',
+      title: 'Grid Layout (Avansert)',
+      icon: BlockContentIcon,
+      group: 'layout',
       preview: {
         select: {
-          title: 'alt',
-          subtitle: 'caption',
-          media: 'image',
+          gridTemplate: 'gridTemplate',
+          itemCount: 'gridItems.length',
         },
-        prepare({title, subtitle, media}) {
+        prepare({gridTemplate, itemCount}) {
+          const templateName = 
+            gridTemplate === 'hero' ? 'Hero Layout' :
+            gridTemplate === 'magazine' ? 'Magazine Layout' :
+            gridTemplate === 'masonry' ? 'Masonry Layout' :
+            'Custom Grid'
+          
           return {
-            title: title || 'Bilde uten alt-tekst',
-            subtitle: subtitle || 'Ingen bildetekst',
-            media: media || ImageIcon,
+            title: templateName,
+            subtitle: `${itemCount || 0} grid items`,
+            media: BlockContentIcon,
           }
         },
       },
     },
-    // Video-komponent
     {
-      type: 'videoComponent',
-      title: 'Video',
-      icon: PlayIcon,
+      type: 'spacer',
+      title: 'Spacing/Avstand',
+      icon: ExpandIcon,
+      group: 'layout',
       preview: {
         select: {
-          title: 'title',
-          subtitle: 'url',
-          media: 'thumbnail',
+          type: 'type',
+          desktopSize: 'size.desktop',
+          showDivider: 'showDivider',
         },
-        prepare({title, subtitle, media}) {
+        prepare({type, desktopSize, showDivider}) {
+          const typeDisplay = 
+            type === 'vertical' ? 'Vertikal' :
+            type === 'horizontal' ? 'Horisontal' :
+            'Seksjon'
+          
+          const dividerDisplay = showDivider ? ' • med skillelinje' : ''
+          
           return {
-            title: title || 'Video uten tittel',
-            subtitle: subtitle || 'Ingen URL',
-            media: media || PlayIcon,
+            title: `${typeDisplay} Avstand`,
+            subtitle: `${desktopSize || 'medium'} størrelse${dividerDisplay}`,
+            media: ExpandIcon,
           }
         },
       },
     },
-    // Knapp-komponent
+
+    // === CONTENT COMPONENTS ===
     {
-      type: 'buttonComponent',
-      title: 'Knapp',
-      icon: BoltIcon,
+      type: 'title',
+      title: 'Tittel (H1/H2)',
+      icon: DocumentTextIcon,
+      group: 'content',
       preview: {
         select: {
-          title: 'text',
-          style: 'style',
-          size: 'size',
-          action: 'action',
-        },
-        prepare({title, style, size, action}) {
-          return {
-            title: title || 'Knapp uten tekst',
-            subtitle: `${style} • ${size} • ${action || 'ingen handling'}`,
-            media: BoltIcon,
-          }
-        },
-      },
-    },
-    // Lenke-komponent
-    {
-      type: 'linkComponent',
-      title: 'Lenke',
-      icon: LinkIcon,
-      preview: {
-        select: {
-          title: 'text',
-          subtitle: 'url',
+          title: 'mainTitle',
+          subtitle: 'subtitle',
         },
         prepare({title, subtitle}) {
           return {
-            title: title || 'Lenke uten tekst',
-            subtitle: subtitle || 'Ingen URL',
-            media: LinkIcon,
+            title: title || 'Untitled',
+            subtitle: subtitle ? `Subtitle: ${subtitle}` : 'No subtitle',
+            media: DocumentTextIcon,
           }
         },
       },
     },
-    // Accordion-komponent
-    {
-      type: 'accordionComponent',
-      title: 'Sammenleggbar seksjon',
-      icon: TiersIcon,
-      preview: {
-        select: {
-          title: 'title',
-          subtitle: 'content',
-        },
-        prepare({title, subtitle}) {
-          return {
-            title: title || 'Accordion uten tittel',
-            subtitle: subtitle ? `${subtitle.substring(0, 50)}...` : 'Ingen innhold',
-            media: TiersIcon,
-          }
-        },
-      },
-    },
-    // Headings-komponent
     {
       type: 'headingComponent',
-      title: 'Overskrifter',
+      title: 'Overskrift (H2-H6)',
       icon: BlockContentIcon,
+      group: 'content',
       preview: {
         select: {
           level: 'level',
@@ -163,11 +153,34 @@ export const pageBuilder = defineType({
         },
       },
     },
-    // Sitat-komponent
+    {
+      type: 'portableTextBlock',
+      title: 'Tekst (Rich Text)',
+      icon: TextIcon,
+      group: 'content',
+      preview: {
+        select: {
+          title: 'title',
+          content: 'content',
+        },
+        prepare({title, content}) {
+          const firstText = content?.[0]?.children?.[0]?.text || ''
+          const displayTitle = title || 'Tekst'
+          const displaySubtitle = firstText ? `${firstText.substring(0, 50)}...` : 'Ingen innhold'
+
+          return {
+            title: displayTitle,
+            subtitle: displaySubtitle,
+            media: TextIcon,
+          }
+        },
+      },
+    },
     {
       type: 'quoteComponent',
-      title: 'Legg til sitat',
+      title: 'Sitat',
       icon: AddCommentIcon,
+      group: 'content',
       preview: {
         select: {
           quote: 'quote',
@@ -182,35 +195,116 @@ export const pageBuilder = defineType({
         },
       },
     },
-    // PortableText-komponent (wrapper)
+
+    // === MEDIA COMPONENTS ===
     {
-      type: 'portableTextBlock',
-      title: 'Legg til tekst',
-      icon: TextIcon,
+      type: 'imageComponent',
+      title: 'Bilde',
+      icon: ImageIcon,
+      group: 'media',
       preview: {
         select: {
-          title: 'title',
-          content: 'content',
+          title: 'alt',
+          subtitle: 'caption',
+          media: 'image',
         },
-        prepare({title, content}) {
-          // Hent første tekst fra portable text
-          const firstText = content?.[0]?.children?.[0]?.text || ''
-          const displayTitle = title || 'Legg til tekst'
-          const displaySubtitle = firstText ? `${firstText.substring(0, 50)}...` : 'Ingen innhold'
-
+        prepare({title, subtitle, media}) {
           return {
-            title: displayTitle,
-            subtitle: displaySubtitle,
-            media: TextIcon,
+            title: title || 'Bilde uten alt-tekst',
+            subtitle: subtitle || 'Ingen bildetekst',
+            media: media || ImageIcon,
           }
         },
       },
     },
-    // Content Scroll Container
+    {
+      type: 'videoComponent',
+      title: 'Video',
+      icon: PlayIcon,
+      group: 'media',
+      preview: {
+        select: {
+          title: 'title',
+          subtitle: 'url',
+          media: 'thumbnail',
+        },
+        prepare({title, subtitle, media}) {
+          return {
+            title: title || 'Video uten tittel',
+            subtitle: subtitle || 'Ingen URL',
+            media: media || PlayIcon,
+          }
+        },
+      },
+    },
+
+    // === INTERACTIVE COMPONENTS ===
+    {
+      type: 'buttonComponent',
+      title: 'Knapp',
+      icon: BoltIcon,
+      group: 'interactive',
+      preview: {
+        select: {
+          title: 'text',
+          style: 'style',
+          size: 'size',
+          action: 'action',
+        },
+        prepare({title, style, size, action}) {
+          return {
+            title: title || 'Knapp uten tekst',
+            subtitle: `${style} • ${size} • ${action || 'ingen handling'}`,
+            media: BoltIcon,
+          }
+        },
+      },
+    },
+    {
+      type: 'linkComponent',
+      title: 'Lenke',
+      icon: LinkIcon,
+      group: 'interactive',
+      preview: {
+        select: {
+          title: 'text',
+          subtitle: 'url',
+        },
+        prepare({title, subtitle}) {
+          return {
+            title: title || 'Lenke uten tekst',
+            subtitle: subtitle || 'Ingen URL',
+            media: LinkIcon,
+          }
+        },
+      },
+    },
+    {
+      type: 'accordionComponent',
+      title: 'Sammenleggbar seksjon',
+      icon: TiersIcon,
+      group: 'interactive',
+      preview: {
+        select: {
+          title: 'title',
+          subtitle: 'content',
+        },
+        prepare({title, subtitle}) {
+          return {
+            title: title || 'Accordion uten tittel',
+            subtitle: subtitle ? `${subtitle.substring(0, 50)}...` : 'Ingen innhold',
+            media: TiersIcon,
+          }
+        },
+      },
+    },
+
+    // === SECTION COMPONENTS ===
     {
       type: 'contentScrollContainer',
       title: 'Content Scroll Container',
       icon: EllipsisHorizontalIcon,
+      group: 'sections',
       preview: {
         select: {
           title: 'title',
@@ -227,11 +321,11 @@ export const pageBuilder = defineType({
         },
       },
     },
-    // Artist Scroll Container
     {
       type: 'artistScrollContainer',
       title: 'Artist Scroll Container',
       icon: DocumentIcon,
+      group: 'sections',
       preview: {
         select: {
           title: 'title',
@@ -248,19 +342,19 @@ export const pageBuilder = defineType({
         },
       },
     },
-    // Event Scroll Container
     {
       type: 'eventScrollContainer',
       title: 'Event Scroll Container',
       icon: CalendarIcon,
+      group: 'sections',
       preview: {
         select: {
           title: 'title',
-          events: 'events',
+          items: 'items',
           cardFormat: 'cardFormat',
         },
-        prepare({title, events, cardFormat}) {
-          const eventCount = events?.length || 0
+        prepare({title, items, cardFormat}) {
+          const eventCount = items?.length || 0
           return {
             title: title || 'Event Scroll Container',
             subtitle: `${eventCount} arrangementer • ${cardFormat}`,
@@ -270,5 +364,4 @@ export const pageBuilder = defineType({
       },
     },
   ],
-  // Fjernet layout: 'grid' for å få vertikal layout
 })

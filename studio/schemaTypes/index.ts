@@ -4,8 +4,8 @@ import {genre} from './documents/genres'
 import {siteSettings} from './documents/siteSettings'
 import {event} from './documents/event'
 import {venue} from './documents/venue'
-import eventDate from './documents/eventDate'
-import page from './documents/page'
+import {eventDate} from './documents/eventDate'
+import {page} from './documents/page'
 import {article} from './documents/article'
 
 // Importer komponenter
@@ -40,6 +40,8 @@ export const schemaTypes = [
   components.accordionComponent,
   components.pageBuilder,
   components.columnLayout,
+  components.gridLayout,
+  components.spacer,
   // Seksjoner
   sections.contentScrollContainer,
   sections.artistScrollContainer,
