@@ -79,6 +79,27 @@ If the answer to #4 is "yes", then probably don't change it.
 - **Needs both servers running** on correct ports
 - **Environment variables must be set**: `SANITY_API_READ_TOKEN` and `PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true`
 
+### File Editing Workflow
+- **Always read a file before editing it** to understand the current code and how the changes will alter the code
+- **Never attempt to edit based on assumptions** about file content from memory or previous sessions
+- **Understand the context** before making changes to ensure proper integration
+
+### Post-Context Compression Checklist
+**IMPORTANT: After any context compression, automatically review this checklist before continuing work:**
+
+✅ **Project Philosophy**: This is a simple festival website - avoid over-engineering
+✅ **File Editing**: Always read files before editing them (never work from memory)
+✅ **Documentation**: NEVER create .md or README files unless explicitly requested
+✅ **Git Workflow**: Proactively suggest pushing after major changes/milestones
+✅ **Agent Usage**: Use specialized agents when appropriate, follow tool usage patterns
+✅ **Dependencies**: Keep stable, use Node.js 20.19.0, npm --legacy-peer-deps
+✅ **Simplicity First**: Working code > "better" code, simple > complex
+✅ **Visual Editing**: Maintain compatibility, test after changes
+✅ **Bilingual Support**: Norwegian default, English optional
+
+**Context Compression Risk**: Technical details survive compression better than behavioral rules.
+**Solution**: Always re-read this section after compression to restore proper working patterns.
+
 ### Git Workflow
 - **Suggest pushing changes proactively** after completing logical milestones:
   - ✅ After adding new features or functionality
