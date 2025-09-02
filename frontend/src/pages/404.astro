@@ -1,0 +1,63 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="404 - Side ikke funnet">
+  <main class="error-page">
+    <h1 class="error-code">404</h1>
+    <h2 class="error-title">Beklager, vi finner ikke siden du leter etter</h2>
+    <p class="error-message">
+      Siden kan ha blitt flyttet eller slettet. Sjekk at URL-en er riktig, eller gå tilbake til forsiden.
+    </p>
+    <div class="error-actions">
+      <a href="/" class="btn btn-primary">
+        Gå til forsiden
+      </a>
+      <a href="/program" class="btn btn-secondary">
+        Se programmet
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .error-page {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .error-code {
+    font-size: var(--font-size-5xl);
+    margin: 0;
+    color: var(--color-primary-500);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .error-title {
+    margin: var(--space-4) 0;
+  }
+
+  .error-message {
+    color: var(--color-text-secondary);
+    margin: var(--space-5) 0;
+    max-width: 500px;
+  }
+
+  .error-actions {
+    margin-top: var(--space-6);
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 768px) {
+    .error-actions {
+      flex-direction: column;
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+</style>

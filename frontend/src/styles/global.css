@@ -1,0 +1,435 @@
+/* Global Styles - Norwegian Events Site */
+
+/* Base typography */
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-background);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+  color: var(--color-text-primary);
+}
+
+h1 {
+  font-size: var(--font-size-5xl);
+  font-weight: var(--font-weight-bold);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+}
+
+/* Reset heading margins when first child */
+h1:first-child, h2:first-child, h3:first-child,
+h4:first-child, h5:first-child, h6:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+p {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+p:first-child {
+  margin-top: 0;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Links */
+a {
+  color: var(--color-primary-500);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-600);
+  text-decoration: underline;
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Lists */
+ul, ol {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-6);
+}
+
+ul ul, ol ol, ul ol, ol ul {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+li {
+  margin-bottom: var(--space-2);
+}
+
+/* Intrinsic Container - Fluid and responsive */
+.container {
+  width: min(100% - var(--space-4), var(--container-max-width));
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
+}
+
+/* Utility classes */
+
+/* Text alignment - Using logical properties */
+.text-start { text-align: start; }
+.text-center { text-align: center; }
+.text-end { text-align: end; }
+
+/* Legacy text alignment (fallback) */
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Text colors */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-disabled { color: var(--color-text-disabled); }
+.text-error { color: var(--color-error); }
+.text-success { color: var(--color-success); }
+
+/* Font weights */
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+/* Logical spacing utilities - Better for internationalization */
+.mbs-0 { margin-block-start: var(--space-0); }
+.mbs-1 { margin-block-start: var(--space-1); }
+.mbs-2 { margin-block-start: var(--space-2); }
+.mbs-3 { margin-block-start: var(--space-3); }
+.mbs-4 { margin-block-start: var(--space-4); }
+.mbs-5 { margin-block-start: var(--space-5); }
+.mbs-6 { margin-block-start: var(--space-6); }
+
+.mbe-0 { margin-block-end: var(--space-0); }
+.mbe-1 { margin-block-end: var(--space-1); }
+.mbe-2 { margin-block-end: var(--space-2); }
+.mbe-3 { margin-block-end: var(--space-3); }
+.mbe-4 { margin-block-end: var(--space-4); }
+.mbe-5 { margin-block-end: var(--space-5); }
+.mbe-6 { margin-block-end: var(--space-6); }
+
+.mis-0 { margin-inline-start: var(--space-0); }
+.mis-1 { margin-inline-start: var(--space-1); }
+.mis-2 { margin-inline-start: var(--space-2); }
+.mis-3 { margin-inline-start: var(--space-3); }
+.mis-4 { margin-inline-start: var(--space-4); }
+.mis-auto { margin-inline-start: auto; }
+
+.mie-0 { margin-inline-end: var(--space-0); }
+.mie-1 { margin-inline-end: var(--space-1); }
+.mie-2 { margin-inline-end: var(--space-2); }
+.mie-3 { margin-inline-end: var(--space-3); }
+.mie-4 { margin-inline-end: var(--space-4); }
+.mie-auto { margin-inline-end: auto; }
+
+.pbs-0 { padding-block-start: var(--space-0); }
+.pbs-1 { padding-block-start: var(--space-1); }
+.pbs-2 { padding-block-start: var(--space-2); }
+.pbs-3 { padding-block-start: var(--space-3); }
+.pbs-4 { padding-block-start: var(--space-4); }
+
+.pbe-0 { padding-block-end: var(--space-0); }
+.pbe-1 { padding-block-end: var(--space-1); }
+.pbe-2 { padding-block-end: var(--space-2); }
+.pbe-3 { padding-block-end: var(--space-3); }
+.pbe-4 { padding-block-end: var(--space-4); }
+
+.pis-0 { padding-inline-start: var(--space-0); }
+.pis-1 { padding-inline-start: var(--space-1); }
+.pis-2 { padding-inline-start: var(--space-2); }
+.pis-3 { padding-inline-start: var(--space-3); }
+.pis-4 { padding-inline-start: var(--space-4); }
+
+.pie-0 { padding-inline-end: var(--space-0); }
+.pie-1 { padding-inline-end: var(--space-1); }
+.pie-2 { padding-inline-end: var(--space-2); }
+.pie-3 { padding-inline-end: var(--space-3); }
+.pie-4 { padding-inline-end: var(--space-4); }
+
+/* Legacy spacing utilities (kept for compatibility) */
+.mt-0 { margin-top: var(--space-0); }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+
+.mb-0 { margin-bottom: var(--space-0); }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+.p-0 { padding: var(--space-0); }
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+
+/* Display utilities */
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+
+/* Flexbox utilities */
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+
+/* Intrinsic Grid utilities - Content-driven layouts */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-4);
+}
+
+.auto-grid-dense {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  gap: var(--space-4);
+  grid-auto-flow: dense;
+}
+
+.responsive-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 40vw, 400px), 1fr));
+  gap: clamp(var(--space-3), 3vw, var(--space-6));
+}
+
+/* Card grid - Perfect for event/artist cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, max(280px, 25ch)), 1fr));
+  gap: clamp(var(--space-3), 2.5vw, var(--space-6));
+}
+
+/* Legacy grid utilities (for fallback) */
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Intrinsic Card component with container queries */
+.card {
+  container-type: inline-size;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: clamp(var(--radius-base), 1cqw, var(--radius-lg));
+  padding: clamp(var(--space-3), 4cqw, var(--space-6));
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+@container (min-width: 300px) {
+  .card {
+    padding: var(--space-5);
+  }
+}
+
+@container (min-width: 500px) {
+  .card {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+  }
+}
+
+/* Button base styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  border-radius: var(--radius-base);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Button variants */
+.btn-primary {
+  background-color: var(--color-primary-500);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-600);
+}
+
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-neutral-100);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-primary);
+}
+
+.btn-ghost:hover {
+  background-color: var(--color-neutral-100);
+}
+
+/* Badge/Tag styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-full);
+  background-color: var(--color-neutral-100);
+  color: var(--color-text-primary);
+}
+
+.badge-primary {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-700);
+}
+
+.badge-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+/* Form elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background-color: var(--color-background);
+  transition: border-color var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+/* Container Queries - Modern responsive design */
+@container (max-width: 480px) {
+  .container-responsive {
+    padding-inline: var(--space-2);
+  }
+}
+
+/* Legacy responsive utilities (kept for compatibility) */
+@media (max-width: 768px) {
+  .md\:hidden { display: none; }
+  
+  /* Legacy grid fallbacks still work with intrinsic grids */
+  .legacy-grid-2 { grid-template-columns: 1fr; }
+  .legacy-grid-3 { grid-template-columns: 1fr; }
+  .legacy-grid-4 { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 769px) {
+  .md\:flex { display: flex; }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

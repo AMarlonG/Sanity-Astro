@@ -1,0 +1,67 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="500 - Serverfeil">
+  <main class="error-page">
+    <h1 class="error-code error-code--danger">500</h1>
+    <h2 class="error-title">Oisann! Noe gikk galt</h2>
+    <p class="error-message">
+      Det oppstod en teknisk feil på serveren. Vårt team har blitt varslet og jobber med saken. Prøv gjerne igjen om litt.
+    </p>
+    <div class="error-actions">
+      <button onclick="window.location.reload()" class="btn btn-primary">
+        Prøv på nytt
+      </button>
+      <a href="/" class="btn btn-secondary">
+        Gå til forsiden
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .error-page {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .error-code {
+    font-size: var(--font-size-5xl);
+    margin: 0;
+    color: var(--color-primary-500);
+    font-weight: var(--font-weight-bold);
+  }
+
+  .error-code--danger {
+    color: var(--color-secondary-500);
+  }
+
+  .error-title {
+    margin: var(--space-4) 0;
+  }
+
+  .error-message {
+    color: var(--color-text-secondary);
+    margin: var(--space-5) 0;
+    max-width: 500px;
+  }
+
+  .error-actions {
+    margin-top: var(--space-6);
+    display: flex;
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 768px) {
+    .error-actions {
+      flex-direction: column;
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+</style>

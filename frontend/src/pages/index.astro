@@ -30,7 +30,7 @@ console.log('Aktiv forside:', homepage);
 ---
 
 <Layout title={homepage?.title || "Forside"}>
-  <main transition:name="main-content">
+  <main class="container" transition:name="main-content">
     {homepage ? (
       <div>
         <h1 transition:name="page-title">{homepage.title}</h1>

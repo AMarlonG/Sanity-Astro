@@ -67,18 +67,12 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
 ---
 
 <Layout title="Program - Sanity + Astro">
-  <main 
-    style="max-width: 1200px; margin: 0 auto; padding: 2rem;"
-    transition:name="main-content"
-  >
-    <header style="margin-bottom: 2rem;">
-      <h1 
-        style="margin: 0 0 0.5rem 0; color: #333;"
-        transition:name="page-title"
-      >
+  <main class="container" transition:name="main-content">
+    <header class="page-header">
+      <h1 class="page-title" transition:name="page-title">
         🎭 Program
       </h1>
-      <p style="margin: 0; color: #666; font-size: 1.1rem;">
+      <p class="page-description">
         Utforsk våre kommende arrangementer og finn noe som passer deg
       </p>
     </header>
@@ -98,20 +92,20 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       <div id="event-results">
         {events.length > 0 ? (
           <div>
-            <div style="margin-bottom: 1rem; padding: 0.5rem; background: #e8f5e8; border-radius: 4px; color: #2d5a2d;">
+            <div class="results-count">
               📊 Viser {events.length} arrangement{events.length === 1 ? '' : 'er'}
             </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            <div class="events-grid">
               {events.map((event) => (
-                <div 
-                  style="border: 1px solid #e9ecef; border-radius: 12px; background: white; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1); hover: { box-shadow: 0 4px 16px rgba(0,0,0,0.15); }" 
+                <article 
+                  class="event-card card" 
                   data-event-date={event.eventDate?.date}
                   transition:name={`event-card-${event.slug.current}`}
                 >
-                  <a href={`/program/${event.slug.current}`} style="text-decoration: none; color: inherit; display: block;">
+                  <a href={`/program/${event.slug.current}`} class="event-link">
                     {event.image && (
                       <div 
-                        style="position: relative; height: 200px; overflow: hidden;"
+                        class="event-image"
                         transition:name={`event-image-${event.slug.current}`}
                       >
                         <Image 
@@ -126,76 +120,153 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
                         />
                       </div>
                     )}
-                    <div style="padding: 1.25rem;">
+                    <div class="event-content">
                       <h3 
-                        style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;"
+                        class="event-title"
                         transition:name={`event-title-${event.slug.current}`}
                       >
                         {event.title}
                       </h3>
                       
-                      <div style="color: #666; font-size: 0.9rem; line-height: 1.4;">
+                      <div class="event-meta">
                         {event.eventDate && (
-                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1rem;">📅</span>
+                          <div class="event-detail">
+                            <span class="event-icon">📅</span>
                             <span>{event.eventDate.title} ({new Date(event.eventDate.date).toLocaleDateString('nb-NO')})</span>
                           </div>
                         )}
                         
                         {event.eventTime && (
-                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1rem;">🕐</span>
+                          <div class="event-detail">
+                            <span class="event-icon">🕐</span>
                             <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
                           </div>
                         )}
                         
                         {event.venue && (
-                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1rem;">🏢</span>
+                          <div class="event-detail">
+                            <span class="event-icon">🏢</span>
                             <span>{event.venue.title}</span>
                           </div>
                         )}
                         
                         {event.artists && event.artists.length > 0 && (
-                          <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1rem;">🎵</span>
+                          <div class="event-detail">
+                            <span class="event-icon">🎵</span>
                             <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
                           </div>
                         )}
                         
                         {event.genre && (
-                          <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1rem;">🎼</span>
-                            <span style="color: #999; font-size: 0.85rem;">{event.genre.title}</span>
+                          <div class="event-genre">
+                            <span class="event-icon">🎼</span>
+                            <span class="genre-name">{event.genre.title}</span>
                           </div>
                         )}
                       </div>
                     </div>
                   </a>
-                </div>
+                </article>
               ))}
             </div>
           </div>
         ) : (
-          <div style="text-align: center; padding: 3rem; color: #666;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
-            <h3 style="margin: 0 0 1rem 0; color: #333;">Ingen arrangementer funnet</h3>
-            <p style="margin: 0; font-size: 1.1rem;">
-              Prøv å endre filtrene eller <a href="/program" style="color: #007acc;">vis alle arrangementer</a>
+          <div class="no-results">
+            <div class="no-results-icon">🔍</div>
+            <h3 class="no-results-title">Ingen arrangementer funnet</h3>
+            <p class="no-results-text">
+              Prøv å endre filtrene eller <a href="/program" class="text-primary">vis alle arrangementer</a>
             </p>
           </div>
         )}
       </div>
     </div>
     
-    <footer style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #e9ecef;">
-      <a href="/" style="color: #007acc; text-decoration: none; font-weight: 500;">
+    <footer class="page-footer">
+      <a href="/" class="back-link">
         ← Tilbake til forsiden
       </a>
     </footer>
   </main>
 
   <style>
+    /* Page Layout */
+    .page-header {
+      margin-block-end: clamp(var(--space-5), 5vw, var(--space-8));
+    }
+
+    .page-title {
+      margin: 0 0 var(--space-2) 0;
+      color: var(--color-text-primary);
+    }
+
+    .page-description {
+      margin: 0;
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-lg);
+    }
+
+    .page-footer {
+      margin-block-start: clamp(var(--space-6), 6vw, var(--space-9));
+      padding-block-start: var(--space-6);
+      border-block-start: 1px solid var(--color-border);
+    }
+
+    .back-link {
+      color: var(--color-primary-500);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+    }
+
+    /* Results */
+    .results-count {
+      margin-block-end: var(--space-4);
+      padding: var(--space-2) var(--space-4);
+      background: #e8f5e8;
+      border-radius: var(--radius-base);
+      color: #2d5a2d;
+    }
+
+    /* Intrinsic Events Grid */
+    .events-grid {
+      container-type: inline-size;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, max(320px, 28ch)), 1fr));
+      gap: clamp(var(--space-4), 3vw, var(--space-6));
+    }
+
+    @container (min-width: 600px) {
+      .events-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 35ch), 1fr));
+      }
+    }
+
+    @container (min-width: 900px) {
+      .events-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
+      }
+    }
+
+    /* Event Card */
+    .event-card {
+      container-type: inline-size;
+      overflow: hidden;
+      transition: box-shadow var(--transition-base);
+    }
+
+    .event-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .event-image {
+      position: relative;
+      height: clamp(180px, 20cqw, 240px);
+      overflow: hidden;
+      aspect-ratio: 16/9;
+    }
+
     .event-card-image .image-container {
       margin: 0;
       height: 100%;
@@ -210,6 +281,88 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
     
     .event-card-image .image-caption {
       display: none;
+    }
+
+    .event-content {
+      padding: 0; /* Let card handle padding with container queries */
+    }
+
+    .event-title {
+      margin: 0 0 var(--space-3) 0;
+      color: var(--color-text-primary);
+      font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
+      line-height: var(--line-height-tight);
+    }
+
+    .event-meta {
+      color: var(--color-text-secondary);
+      font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
+      line-height: var(--line-height-normal);
+    }
+
+    .event-detail {
+      margin-block-end: var(--space-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .event-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .event-genre {
+      margin-block-start: var(--space-3);
+      padding-block-start: var(--space-3);
+      border-block-start: 1px solid var(--color-border-light);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .genre-name {
+      color: var(--color-text-disabled);
+      font-size: var(--font-size-sm);
+    }
+
+    /* No Results */
+    .no-results {
+      text-align: center;
+      padding: clamp(var(--space-6), 8vw, var(--space-9));
+      color: var(--color-text-secondary);
+    }
+
+    .no-results-icon {
+      font-size: clamp(var(--font-size-4xl), 10vw, var(--font-size-5xl));
+      margin-block-end: var(--space-4);
+    }
+
+    .no-results-title {
+      margin: 0 0 var(--space-4) 0;
+      color: var(--color-text-primary);
+    }
+
+    .no-results-text {
+      margin: 0;
+      font-size: var(--font-size-lg);
+    }
+
+    /* Container Query Enhancements */
+    @container (min-width: 350px) {
+      .event-title {
+        font-size: var(--font-size-xl);
+      }
+      
+      .event-meta {
+        font-size: var(--font-size-base);
+      }
+    }
+
+    @container (min-width: 400px) {
+      .event-image {
+        height: 200px;
+      }
     }
   </style>
 
