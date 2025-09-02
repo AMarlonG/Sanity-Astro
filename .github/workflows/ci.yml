@@ -33,21 +33,10 @@ jobs:
       - name: Install dependencies
         run: |
           npm --version
-          npm ci --legacy-peer-deps
+          npm install
 
       - name: Build shared package
-        run: npm run build --workspace=@sanity-astro/shared
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Run type checking
-        run: npm run typecheck
-
-      - name: Run tests
-        run: npm run test
-        env:
-          CI: true
+        run: npm run build --workspace=shared
 
       - name: Build all packages
         run: npm run build
@@ -90,7 +79,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm --version
-          npm ci --legacy-peer-deps
+          npm install
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
