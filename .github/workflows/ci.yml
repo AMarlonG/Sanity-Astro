@@ -52,10 +52,12 @@ jobs:
       - name: Build all packages
         run: npm run build
         env:
-          PUBLIC_SANITY_PROJECT_ID: ${{ secrets.PUBLIC_SANITY_PROJECT_ID }}
-          PUBLIC_SANITY_DATASET: ${{ secrets.PUBLIC_SANITY_DATASET }}
-          SANITY_STUDIO_PROJECT_ID: ${{ secrets.SANITY_STUDIO_PROJECT_ID }}
-          SANITY_STUDIO_DATASET: ${{ secrets.SANITY_STUDIO_DATASET }}
+          PUBLIC_SANITY_PROJECT_ID: ${{ secrets.PUBLIC_SANITY_PROJECT_ID || 'i952bgb1' }}
+          PUBLIC_SANITY_DATASET: ${{ secrets.PUBLIC_SANITY_DATASET || 'production' }}
+          SANITY_STUDIO_PROJECT_ID: ${{ secrets.SANITY_STUDIO_PROJECT_ID || 'i952bgb1' }}
+          SANITY_STUDIO_DATASET: ${{ secrets.SANITY_STUDIO_DATASET || 'production' }}
+          SITE_URL: ${{ secrets.SITE_URL || 'https://example.com' }}
+          NODE_ENV: production
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
