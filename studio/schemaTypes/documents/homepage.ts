@@ -14,12 +14,6 @@ export const homepage = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'titleEn',
-      title: 'Title (English)',
-      type: 'string',
-      description: 'English translation of the homepage title (optional)',
-    }),
-    defineField({
       name: 'homePageType',
       title: 'Forsidetype',
       type: 'string',
@@ -66,12 +60,6 @@ export const homepage = defineType({
       title: 'Sideinnhold',
       type: 'pageBuilder',
       description: 'Bygg forsiden med komponenter og innhold',
-    }),
-    defineField({
-      name: 'contentEn',
-      title: 'Page Content (English)',
-      type: 'pageBuilder',
-      description: 'English version of the homepage content (optional)',
     }),
   ],
   preview: {

@@ -56,13 +56,6 @@ export const event = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'titleEn',
-      title: 'Title (English)',
-      type: 'string',
-      group: 'basic',
-      description: 'English translation of the event title (optional)',
-    }),
-    defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
@@ -195,13 +188,6 @@ export const event = defineType({
       title: 'Arrangementsinnhold',
       type: 'pageBuilder',
       description: 'Bygg arrangement-siden med komponenter og innhold',
-      group: 'content',
-    }),
-    defineField({
-      name: 'contentEn',
-      title: 'Event Content (English)',
-      type: 'pageBuilder',
-      description: 'English version of the event content (optional)',
       group: 'content',
     }),
     defineField({
