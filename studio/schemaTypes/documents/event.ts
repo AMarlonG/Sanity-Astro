@@ -159,13 +159,6 @@ export const event = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'buttonTextEn',
-      title: 'Button Text (English)',
-      type: 'string',
-      group: 'button',
-      description: 'English translation of the button text (optional)',
-    }),
-    defineField({
       name: 'buttonUrl',
       title: 'Knapp-URL',
       type: 'url',

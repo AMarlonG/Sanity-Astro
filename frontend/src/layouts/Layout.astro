@@ -1,8 +1,6 @@
 ---
 import { ViewTransitions } from "astro:transitions";
 import { VisualEditing } from "@sanity/astro/visual-editing";
-import { getCurrentLanguage, getLocalizedText } from '../lib/languageUtils';
-import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 
 // Import CSS files in order
 import '../styles/reset.css';
@@ -12,26 +10,12 @@ import '../styles/global.css';
 export interface Props {
   title: string;
   description?: string;
-  titleEn?: string;
-  descriptionEn?: string;
 }
 
 const { 
   title, 
-  description = "Moderne web-applikasjon med Sanity CMS og Astro frontend",
-  titleEn,
-  descriptionEn = "Modern web application with Sanity CMS and Astro frontend"
+  description = "Moderne web-applikasjon med Sanity CMS og Astro frontend"
 } = Astro.props;
-
-// Get current language
-const currentLanguage = getCurrentLanguage(Astro.request);
-
-// Localize content
-const localizedTitle = getLocalizedText(title, titleEn, currentLanguage);
-const localizedDescription = getLocalizedText(description, descriptionEn, currentLanguage);
-
-// Set HTML lang attribute
-const htmlLang = currentLanguage === 'en' ? 'en' : 'no';
 
 // Check if Visual Editing should be enabled
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
@@ -40,14 +24,14 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 ---
 
 <!DOCTYPE html>
-<html lang={htmlLang}>
+<html lang="no">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={localizedDescription} />
+    <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>{localizedTitle}</title>
+    <title>{title}</title>
     
     <!-- Enable View Transitions -->
     <ViewTransitions />
@@ -56,20 +40,11 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     <header class="site-header">
       <div class="header-content">
         <nav class="main-nav">
-          <a href={currentLanguage === 'en' ? '/?lang=en' : '/'}>
-            {currentLanguage === 'en' ? 'Home' : 'Hjem'}
-          </a>
-          <a href={currentLanguage === 'en' ? '/program?lang=en' : '/program'}>
-            {currentLanguage === 'en' ? 'Program' : 'Program'}
-          </a>
-          <a href={currentLanguage === 'en' ? '/artister?lang=en' : '/artister'}>
-            {currentLanguage === 'en' ? 'Artists' : 'Artister'}
-          </a>
-          <a href={currentLanguage === 'en' ? '/artikler?lang=en' : '/artikler'}>
-            {currentLanguage === 'en' ? 'Articles' : 'Artikler'}
-          </a>
+          <a href="/">Hjem</a>
+          <a href="/program">Program</a>
+          <a href="/artister">Artister</a>
+          <a href="/artikler">Artikler</a>
         </nav>
-        <LanguageSwitcher />
       </div>
     </header>
     
@@ -205,4 +180,4 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
       animation: none;
     }
   }
-</style> 
+</style>

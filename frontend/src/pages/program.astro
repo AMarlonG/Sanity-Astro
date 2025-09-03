@@ -6,16 +6,12 @@ import EventFilter from '../components/EventFilter.astro';
 import Image from '../components/Image.astro';
 import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
-import { getCurrentLanguage, getLocalizedText } from '../lib/languageUtils';
 import { formatDateForLanguage } from '../../../shared/utils/dates';
-
-// Get current language
-const currentLanguage = getCurrentLanguage(Astro.request);
 
 // Hent filter-opsjoner (eventDates, genres og venues)
 const eventDates = await sanityClient.fetch(`*[_type == "eventDate" && isActive == true] | order(date asc)`);
-const genres = await sanityClient.fetch(`*[_type == "genre"] | order(title asc){ _id, title, titleEn, slug }`);
-const venues = await sanityClient.fetch(`*[_type == "venue"] | order(title asc){ _id, title, titleEn, slug }`);
+const genres = await sanityClient.fetch(`*[_type == "genre"] | order(title asc){ _id, title, slug }`);
+const venues = await sanityClient.fetch(`*[_type == "venue"] | order(title asc){ _id, title, slug }`);
 
 // Hent URL-parametere for initial state
 const url = new URL(Astro.request.url);
@@ -47,7 +43,6 @@ if (initialFilters.venue) {
 eventsQuery += `] | order(eventDate->date asc) {
   _id, 
   title,
-  titleEn,
   slug,
   eventTime{
     startTime,
@@ -58,12 +53,10 @@ eventsQuery += `] | order(eventDate->date asc) {
     date
   },
   venue->{
-    title,
-    titleEn
+    title
   },
   genre->{
-    title,
-    titleEn
+    title
   },
   artists[]->{
     name
@@ -74,14 +67,14 @@ eventsQuery += `] | order(eventDate->date asc) {
 const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryParams);
 ---
 
-<Layout title={currentLanguage === 'en' ? 'Program - Sanity + Astro' : 'Program - Sanity + Astro'} titleEn={currentLanguage === 'no' ? 'Program - Sanity + Astro' : undefined}>
+<Layout title="Program - Sanity + Astro">
   <main class="container" transition:name="main-content">
     <header class="page-header">
       <h1 class="page-title" transition:name="page-title">
-        🎭 {currentLanguage === 'en' ? 'Program' : 'Program'}
+        🎭 Program
       </h1>
       <p class="page-description">
-        {currentLanguage === 'en' ? 'Explore our upcoming events and find something that suits you' : 'Utforsk våre kommende arrangementer og finn noe som passer deg'}
+        Utforsk våre kommende arrangementer og finn noe som passer deg
       </p>
     </header>
     
@@ -101,7 +94,7 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
         {events.length > 0 ? (
           <div>
             <div class="results-count">
-              📊 {currentLanguage === 'en' ? `Showing ${events.length} event${events.length === 1 ? '' : 's'}` : `Viser ${events.length} arrangement${events.length === 1 ? '' : 'er'}`}
+              📊 Viser {events.length} arrangement{events.length === 1 ? '' : 'er'}
             </div>
             <div class="events-grid">
               {events.map((event) => (
@@ -118,7 +111,7 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
                       >
                         <Image 
                           image={event.image.image}
-                          alt={event.image.alt || getLocalizedText(event.title, event.titleEn, currentLanguage)}
+                          alt={event.image.alt || event.title}
                           caption=""
                           credit=""
                           size="full"
@@ -133,14 +126,14 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
                         class="event-title"
                         transition:name={`event-title-${event.slug.current}`}
                       >
-                        {getLocalizedText(event.title, event.titleEn, currentLanguage)}
+                        {event.title}
                       </h3>
                       
                       <div class="event-meta">
                         {event.eventDate && (
                           <div class="event-detail">
                             <span class="event-icon">📅</span>
-                            <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, currentLanguage)})</span>
+                            <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})</span>
                           </div>
                         )}
                         
@@ -154,7 +147,7 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
                         {event.venue && (
                           <div class="event-detail">
                             <span class="event-icon">🏢</span>
-                            <span>{getLocalizedText(event.venue.title, event.venue.titleEn, currentLanguage)}</span>
+                            <span>{event.venue.title}</span>
                           </div>
                         )}
                         
@@ -168,7 +161,7 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
                         {event.genre && (
                           <div class="event-genre">
                             <span class="event-icon">🎼</span>
-                            <span class="genre-name">{getLocalizedText(event.genre.title, event.genre.titleEn, currentLanguage)}</span>
+                            <span class="genre-name">{event.genre.title}</span>
                           </div>
                         )}
                       </div>
@@ -181,12 +174,9 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
         ) : (
           <div class="no-results">
             <div class="no-results-icon">🔍</div>
-            <h3 class="no-results-title">{currentLanguage === 'en' ? 'No events found' : 'Ingen arrangementer funnet'}</h3>
+            <h3 class="no-results-title">Ingen arrangementer funnet</h3>
             <p class="no-results-text">
-              {currentLanguage === 'en' 
-                ? 'Try changing the filters or ' 
-                : 'Prøv å endre filtrene eller '
-              }<a href={currentLanguage === 'en' ? '/program?lang=en' : '/program'} class="text-primary">{currentLanguage === 'en' ? 'show all events' : 'vis alle arrangementer'}</a>
+              Prøv å endre filtrene eller <a href="/program" class="text-primary">vis alle arrangementer</a>
             </p>
           </div>
         )}
@@ -195,7 +185,7 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
     
     <footer class="page-footer">
       <a href="/" class="back-link">
-        ← {currentLanguage === 'en' ? 'Back to home' : 'Tilbake til forsiden'}
+        ← Tilbake til forsiden
       </a>
     </footer>
   </main>
@@ -459,4 +449,4 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       }
     });
   </script>
-</Layout> 
+</Layout>

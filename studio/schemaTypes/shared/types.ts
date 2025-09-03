@@ -168,7 +168,6 @@ export interface EventData {
   title: string
   slug: { current: string }
   content?: GlobalComponentData[]
-  contentEn?: GlobalComponentData[]
   eventDate?: { date: string }
   eventTime?: string
   venue?: { title: string }
@@ -184,7 +183,6 @@ export interface ArtistData {
   name: string
   slug: { current: string }
   content?: GlobalComponentData[]
-  contentEn?: GlobalComponentData[]
   image?: ImageData['image']
   bio?: string
   genres?: Array<{ title: string }>

@@ -10,20 +10,18 @@ import {
   getCORSHeaders, 
   getSecurityHeaders 
 } from '../../lib/security';
-import { getCurrentLanguage, getLocalizedText } from '../../lib/languageUtils';
+import { formatDateForLanguage } from '../../../../shared/utils/dates';
 
 interface FilterOptions {
   eventDate?: string;
   genre?: string;
   venue?: string;
-  lang?: string;
 }
 
 // Type for arrangement hentet fra Sanity
 interface Event {
   _id: string;
   title: string;
-  titleEn?: string;
   slug: { current: string };
   eventTime?: {
     startTime: string;
@@ -35,12 +33,10 @@ interface Event {
   };
   venue?: {
     title: string;
-    titleEn?: string;
     slug: { current: string };
   };
   genre?: {
     title: string;
-    titleEn?: string;
     slug: { current: string };
   };
   artists?: Array<{
@@ -93,18 +89,6 @@ function validateFilters(filters: FilterOptions): FilterOptions {
 // Use enhanced HTML escaping from security utilities
 const escapeHtml = InputValidator.sanitizeString;
 
-// Language detection from request
-function getLanguageFromRequest(request: Request): 'no' | 'en' {
-  try {
-    return getCurrentLanguage(request);
-  } catch {
-    // Fallback for API context - check URL parameters
-    const url = new URL(request.url);
-    const lang = url.searchParams.get('lang');
-    return lang === 'en' ? 'en' : 'no';
-  }
-}
-
 // Generer bilde-URL med Sanity's automatiske hotspot-håndtering
 const getImageUrl = (image: any, width: number, height: number) => {
   if (!image || !urlFor) return '';
@@ -115,17 +99,12 @@ const getImageUrl = (image: any, width: number, height: number) => {
 };
 
 // Generer HTML for et enkelt arrangement
-function generateEventHtml(event: Event, currentLanguage: 'no' | 'en'): string {
-  // Localize event data
-  const eventTitle = getLocalizedText(event.title, event.titleEn, currentLanguage);
-  const venueTitle = event.venue ? getLocalizedText(event.venue.title, event.venue.titleEn, currentLanguage) : '';
-  const genreTitle = event.genre ? getLocalizedText(event.genre.title, event.genre.titleEn, currentLanguage) : '';
-
+function generateEventHtml(event: Event): string {
   // Generer bilde-HTML hvis bilde finnes
   let imageHtml = '';
   if (event.image?.image) {
     const imageUrl = getImageUrl(event.image.image, 400, 300);
-    const alt = event.image.alt || eventTitle;
+    const alt = event.image.alt || event.title;
 
     if (imageUrl) {
       imageHtml = `
@@ -146,11 +125,11 @@ function generateEventHtml(event: Event, currentLanguage: 'no' | 'en'): string {
       <a href="/program/${event.slug.current}" style="text-decoration: none; color: inherit; display: block;">
         ${imageHtml}
         <div style="padding: 1.25rem;">
-          <h3 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;">${escapeHtml(eventTitle)}</h3>
+          <h3 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;">${escapeHtml(event.title)}</h3>
           <div style="color: #666; font-size: 0.9rem; line-height: 1.4;">
             ${
               event.eventDate
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">📅</span><span>${escapeHtml(event.eventDate.title)} (${escapeHtml(formatDateForLanguage(event.eventDate.date, currentLanguage))})</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">📅</span><span>${escapeHtml(event.eventDate.title)} (${escapeHtml(formatDateForLanguage(event.eventDate.date, 'no'))})</span></div>`
                 : ''
             }
             ${
@@ -160,7 +139,7 @@ function generateEventHtml(event: Event, currentLanguage: 'no' | 'en'): string {
             }
             ${
               event.venue
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🏢</span><span>${escapeHtml(venueTitle)}</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🏢</span><span>${escapeHtml(event.venue.title)}</span></div>`
                 : ''
             }
             ${
@@ -170,7 +149,7 @@ function generateEventHtml(event: Event, currentLanguage: 'no' | 'en'): string {
             }
             ${
               event.genre
-                ? `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🎼</span><span style="color: #999; font-size: 0.85rem;">${escapeHtml(genreTitle)}</span></div>`
+                ? `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🎼</span><span style="color: #999; font-size: 0.85rem;">${escapeHtml(event.genre.title)}</span></div>`
                 : ''
             }
           </div>
@@ -255,9 +234,6 @@ export const POST: APIRoute = async ({ request }) => {
       genre: formData.get('genre') || undefined,
       venue: formData.get('venue') || undefined,
     });
-    
-    // Get current language from request or form data
-    const currentLanguage = getLanguageFromRequest(request);
 
     // Hent eventDates for å generere faner
     const eventDates = await sanityClient.fetch(
@@ -286,7 +262,6 @@ export const POST: APIRoute = async ({ request }) => {
     query += `] | order(eventDate->date asc) {
       _id,
       title,
-      titleEn,
       slug,
       eventTime{
         startTime,
@@ -298,12 +273,10 @@ export const POST: APIRoute = async ({ request }) => {
       },
       venue->{
         title,
-        titleEn,
         slug
       },
       genre->{
         title,
-        titleEn,
         slug
       },
       artists[]->{
@@ -315,14 +288,9 @@ export const POST: APIRoute = async ({ request }) => {
     const events: Event[] = await sanityClient.fetch(query, queryParams);
 
     // Generer HTML for arrangementene med antall resultater
-    const resultsCountText = currentLanguage === 'en' 
-      ? `📊 Showing ${events.length} event${events.length === 1 ? '' : 's'}`
-      : `📊 Viser ${events.length} arrangement${events.length === 1 ? '' : 'er'}`;
-    
-    const noResultsTitle = currentLanguage === 'en' ? 'No events found' : 'Ingen arrangementer funnet';
-    const noResultsText = currentLanguage === 'en' 
-      ? 'Try changing the filters or <a href="/program?lang=en" style="color: #007acc;">show all events</a>'
-      : 'Prøv å endre filtrene eller <a href="/program" style="color: #007acc;">vis alle arrangementer</a>';
+    const resultsCountText = `📊 Viser ${events.length} arrangement${events.length === 1 ? '' : 'er'}`;
+    const noResultsTitle = 'Ingen arrangementer funnet';
+    const noResultsText = 'Prøv å endre filtrene eller <a href="/program" style="color: #007acc;">vis alle arrangementer</a>';
 
     const resultsHtml = `
       <div id="event-results">
@@ -333,7 +301,7 @@ export const POST: APIRoute = async ({ request }) => {
                   ${resultsCountText}
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
-                  ${events.map(event => generateEventHtml(event, currentLanguage)).join('')}
+                  ${events.map(event => generateEventHtml(event)).join('')}
                 </div>
               </div>`
             : `<div style="text-align: center; padding: 3rem; color: #666;">
