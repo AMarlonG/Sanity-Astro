@@ -1,70 +1,321 @@
 ---
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
+import Layout from '../layouts/Layout.astro';
+import Image from '../components/Image.astro';
+import PortableText from '../components/PortableText.astro';
+import Heading from '../components/Heading.astro';
+import Video from '../components/Video.astro';
+import Button from '../components/Button.astro';
+import Link from '../components/Link.astro';
+import Quote from '../components/Quote.astro';
+import Accordion from '../components/Accordion.astro';
+import ContentScrollContainer from '../components/ContentScrollContainer.astro';
+import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
+import EventScrollContainer from '../components/EventScrollContainer.astro';
 
-const ARTISTS_QUERY = `*[_type == "artist" && defined(slug.current)]|order(name asc)[0...20]{
-  _id, 
-  name, 
-  slug,
-  instrument,
-  country,
-  image,
-  website,
-  socialMedia
-}`;
+// Hent artister-siden innhold fra "Faste sider"
+const artistsPage = await sanityClient.fetch<SanityDocument>(`
+  *[_type == "page" && slug.current == "artister"][0] {
+    title,
+    content
+  }
+`);
 
-const artists = await sanityClient.fetch<SanityDocument[]>(ARTISTS_QUERY);
+// Hent alle publiserte artister
+const artists = await sanityClient.fetch<SanityDocument[]>(`
+  *[_type == "artist"] | order(name asc) {
+    _id, 
+    name,
+    slug,
+    bio,
+    image,
+    genres[]->{
+      title
+    }
+  }
+`);
+
+// Fallback values
+const pageTitle = artistsPage?.title || 'Artister';
 ---
 
-<html lang="no">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Artister - Sanity + Astro</title>
-</head>
-<body>
-  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
-    <h1>Artister fra Sanity</h1>
+<Layout title={`${pageTitle} - Sanity + Astro`}>
+  <main class="container" transition:name="main-content">
+    <header class="page-header">
+      <h1 class="page-title" transition:name="page-title">
+        🎵 {pageTitle}
+      </h1>
+    </header>
     
-    {artists.length > 0 ? (
-      <ul style="list-style: none; padding: 0;">
-        {artists.map((artist) => (
-          <li style="margin-bottom: 2rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
-            <a href={`/artister/${artist.slug.current}`} style="text-decoration: none; color: inherit;">
-              <h2 style="margin: 0 0 0.5rem 0; color: #333;">{artist.name}</h2>
-              
-              <div style="margin-bottom: 0.5rem; color: #666;">
-                {artist.instrument && (
-                  <p style="margin: 0 0 0.25rem 0;">
-                    🎵 {artist.instrument}
-                  </p>
-                )}
-                
-                {artist.country && (
-                  <p style="margin: 0 0 0.25rem 0;">
-                    🌍 {artist.country}
-                  </p>
-                )}
-                
-                {artist.website && (
-                  <p style="margin: 0; color: #999; font-size: 0.9rem;">
-                    🌐 <a href={artist.website} target="_blank" rel="noopener noreferrer" style="color: #007acc;">
-                      Offisiell nettside
-                    </a>
-                  </p>
-                )}
-              </div>
-            </a>
-          </li>
+    <!-- Page content from schema -->
+    {artistsPage?.content && Array.isArray(artistsPage.content) && (
+      <div class="page-content">
+        {artistsPage.content.map((block) => (
+          <div key={block._key || block._id}>
+            {block._type === 'portableTextBlock' && <PortableText content={block.content} />}
+            {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} />}
+            {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} />}
+            {block._type === 'videoComponent' && <Video url={block.url} title={block.title} thumbnail={block.thumbnail} />}
+            {block._type === 'buttonComponent' && <Button text={block.text} style={block.style} size={block.size} action={block.action} />}
+            {block._type === 'linkComponent' && <Link text={block.text} url={block.url} openInNewTab={block.openInNewTab} />}
+            {block._type === 'quoteComponent' && <Quote quote={block.quote} author={block.author} />}
+            {block._type === 'accordionComponent' && <Accordion title={block.title} content={block.content} />}
+            {block._type === 'contentScrollContainer' && <ContentScrollContainer title={block.title} items={block.items} spacing={block.spacing} />}
+            {block._type === 'artistScrollContainer' && <ArtistScrollContainer title={block.title} items={block.items} cardFormat={block.cardFormat} />}
+            {block._type === 'eventScrollContainer' && <EventScrollContainer title={block.title} events={block.events} cardFormat={block.cardFormat} />}
+            {/* Fallback for ukjent type */}
+            {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer' ].indexOf(block._type) === -1 && (
+              <div>Ukjent komponent: {block._type}</div>
+            )}
+          </div>
         ))}
-      </ul>
-    ) : (
-      <p>Ingen kunstnere funnet. Opprett noen kunstnere i Sanity Studio først.</p>
+      </div>
     )}
     
-    <p style="margin-top: 2rem;">
-      <a href="/" style="color: #007acc;">← Tilbake til forsiden</a>
-    </p>
+    <!-- Artists listing -->
+    <section class="artists-section">
+      <h2 class="artists-title">Alle artister</h2>
+      
+      {artists.length > 0 ? (
+        <div class="artists-grid">
+          {artists.map((artist) => (
+            <article 
+              class="artist-card card"
+              transition:name={`artist-card-${artist.slug.current}`}
+            >
+              <a href={`/artister/${artist.slug.current}`} class="artist-link">
+                {artist.image && (
+                  <div 
+                    class="artist-image"
+                    transition:name={`artist-image-${artist.slug.current}`}
+                  >
+                    <Image 
+                      image={artist.image.image}
+                      alt={artist.image.alt || artist.name}
+                      caption=""
+                      credit=""
+                      size="full"
+                      aspectRatio="1:1"
+                      alignment="center"
+                      className="artist-card-image"
+                    />
+                  </div>
+                )}
+                <div class="artist-content">
+                  <h3 
+                    class="artist-name"
+                    transition:name={`artist-name-${artist.slug.current}`}
+                  >
+                    {artist.name}
+                  </h3>
+                  
+                  {artist.bio && (
+                    <p class="artist-bio">
+                      {artist.bio.length > 150 ? `${artist.bio.substring(0, 150)}...` : artist.bio}
+                    </p>
+                  )}
+                  
+                  {artist.genres && artist.genres.length > 0 && (
+                    <div class="artist-genres">
+                      {artist.genres.map((genre: any) => (
+                        <span class="genre-tag">{genre.title}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="no-results">
+          <div class="no-results-icon">🎵</div>
+          <h3 class="no-results-title">Ingen artister publisert</h3>
+          <p class="no-results-text">
+            Sjekk tilbake senere for oppdateringer
+          </p>
+        </div>
+      )}
+    </section>
+    
+    <footer class="page-footer">
+      <a href="/" class="back-link">
+        ← Tilbake til forsiden
+      </a>
+    </footer>
   </main>
-</body>
-</html> 
+
+  <style>
+    /* Page Layout */
+    .page-header {
+      margin-block-end: clamp(var(--space-5), 5vw, var(--space-8));
+    }
+
+    .page-title {
+      margin: 0 0 var(--space-2) 0;
+      color: var(--color-text-primary);
+    }
+
+    .page-content {
+      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+    }
+
+    .artists-section {
+      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+    }
+
+    .artists-title {
+      margin: 0 0 var(--space-4) 0;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-2xl);
+    }
+
+    .page-footer {
+      margin-block-start: clamp(var(--space-6), 6vw, var(--space-9));
+      padding-block-start: var(--space-6);
+      border-block-start: 1px solid var(--color-border);
+    }
+
+    .back-link {
+      color: var(--color-primary-500);
+      text-decoration: none;
+      font-weight: var(--font-weight-medium);
+    }
+
+    /* Intrinsic Artists Grid */
+    .artists-grid {
+      container-type: inline-size;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, max(280px, 25ch)), 1fr));
+      gap: clamp(var(--space-4), 3vw, var(--space-6));
+    }
+
+    @container (min-width: 600px) {
+      .artists-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 30ch), 1fr));
+      }
+    }
+
+    @container (min-width: 900px) {
+      .artists-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 35ch), 1fr));
+      }
+    }
+
+    /* Artist Card */
+    .artist-card {
+      container-type: inline-size;
+      overflow: hidden;
+      transition: box-shadow var(--transition-base);
+    }
+
+    .artist-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .artist-image {
+      position: relative;
+      height: clamp(200px, 25cqw, 300px);
+      overflow: hidden;
+      aspect-ratio: 1;
+    }
+
+    .artist-card-image .image-container {
+      margin: 0;
+      height: 100%;
+    }
+    
+    .artist-card-image .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+    }
+    
+    .artist-card-image .image-caption {
+      display: none;
+    }
+
+    .artist-content {
+      padding: 0; /* Let card handle padding with container queries */
+    }
+
+    .artist-name {
+      margin: 0 0 var(--space-2) 0;
+      color: var(--color-text-primary);
+      font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
+      line-height: var(--line-height-tight);
+    }
+
+    .artist-bio {
+      margin: 0 0 var(--space-3) 0;
+      color: var(--color-text-secondary);
+      font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
+      line-height: var(--line-height-normal);
+    }
+
+    .artist-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .genre-tag {
+      padding: var(--space-1) var(--space-2);
+      background: var(--color-surface);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    /* No Results */
+    .no-results {
+      text-align: center;
+      padding: clamp(var(--space-6), 8vw, var(--space-9));
+      color: var(--color-text-secondary);
+    }
+
+    .no-results-icon {
+      font-size: clamp(var(--font-size-4xl), 10vw, var(--font-size-5xl));
+      margin-block-end: var(--space-4);
+    }
+
+    .no-results-title {
+      margin: 0 0 var(--space-4) 0;
+      color: var(--color-text-primary);
+    }
+
+    .no-results-text {
+      margin: 0;
+      font-size: var(--font-size-lg);
+    }
+
+    /* Container Query Enhancements */
+    @container (min-width: 300px) {
+      .artist-name {
+        font-size: var(--font-size-xl);
+      }
+      
+      .artist-bio {
+        font-size: var(--font-size-base);
+      }
+    }
+
+    @container (min-width: 350px) {
+      .artist-image {
+        height: 250px;
+      }
+    }
+  </style>
+
+  <script>
+    // Enhanced navigation with View Transitions
+    document.addEventListener('astro:page-load', () => {
+      console.log('Artists page loaded with View Transitions');
+    });
+  </script>
+</Layout>

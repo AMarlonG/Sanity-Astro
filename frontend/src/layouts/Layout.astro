@@ -37,17 +37,6 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     <ViewTransitions />
   </head>
   <body>
-    <header class="site-header">
-      <div class="header-content">
-        <nav class="main-nav">
-          <a href="/">Hjem</a>
-          <a href="/program">Program</a>
-          <a href="/artister">Artister</a>
-          <a href="/artikler">Artikler</a>
-        </nav>
-      </div>
-    </header>
-    
     <slot />
     
     <!-- Visual Editing Component -->
@@ -57,66 +46,6 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 
 <style is:global>
   /* Layout-specific overrides and additions */
-  
-  /* Site Header */
-  .site-header {
-    background: var(--color-surface, #f8f9fa);
-    border-bottom: 1px solid var(--color-border, #dee2e6);
-    padding: var(--space-4) 0;
-  }
-  
-  .header-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 var(--space-4);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .main-nav {
-    display: flex;
-    gap: var(--space-6);
-    align-items: center;
-  }
-  
-  .main-nav a {
-    color: var(--color-text-primary, #333);
-    text-decoration: none;
-    font-weight: 500;
-    padding: var(--space-2) var(--space-3);
-    border-radius: 4px;
-    transition: all 0.2s ease;
-  }
-  
-  .main-nav a:hover {
-    color: var(--color-primary, #007acc);
-    background: var(--color-primary-light, rgba(0, 122, 204, 0.1));
-  }
-  
-  /* Responsive navigation */
-  @media (max-width: 768px) {
-    .header-content {
-      flex-direction: column;
-      gap: var(--space-3);
-    }
-    
-    .main-nav {
-      gap: var(--space-4);
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .main-nav a {
-      font-size: 0.9rem;
-      padding: var(--space-2);
-    }
-  }
-  
-  /* Main content wrapper */
-  main {
-    padding: var(--space-6) 0;
-  }
 
   /* View Transitions Enhancements */
   ::view-transition-old(root),

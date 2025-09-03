@@ -24,17 +24,17 @@ export const structure = (S: StructureBuilder) =>
       // Skillelinje
       S.divider(),
 
-      // Nettsideinnhold
+      // Sideinnhold
       S.listItem().title('Forsider').icon(EarthGlobeIcon).child(S.documentTypeList('homepage')),
       S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('page')),
-      S.listItem().title('Artikler').icon(DocumentTextIcon).child(S.documentTypeList('article')),
 
       // Skillelinje
       S.divider(),
 
-      // Artister & Arrangementer
+      // Innholdstyper
       S.listItem().title('Arrangementer').icon(CalendarIcon).child(S.documentTypeList('event')),
       S.listItem().title('Artister').icon(UserIcon).child(S.documentTypeList('artist')),
+      S.listItem().title('Artikler').icon(DocumentTextIcon).child(S.documentTypeList('article')),
 
       // Skillelinje
       S.divider(),

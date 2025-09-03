@@ -2,186 +2,180 @@
 import type { SanityDocument } from "@sanity/client";
 import { sanityClient } from "sanity:client";
 import Layout from '../layouts/Layout.astro';
-import EventFilter from '../components/EventFilter.astro';
 import Image from '../components/Image.astro';
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import PortableText from '../components/PortableText.astro';
+import Heading from '../components/Heading.astro';
+import Video from '../components/Video.astro';
+import Button from '../components/Button.astro';
+import Link from '../components/Link.astro';
+import Quote from '../components/Quote.astro';
+import Accordion from '../components/Accordion.astro';
+import ContentScrollContainer from '../components/ContentScrollContainer.astro';
+import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
+import EventScrollContainer from '../components/EventScrollContainer.astro';
 import { formatDateForLanguage } from '../../../shared/utils/dates';
 
-// Hent filter-opsjoner (eventDates, genres og venues)
-const eventDates = await sanityClient.fetch(`*[_type == "eventDate" && isActive == true] | order(date asc)`);
-const genres = await sanityClient.fetch(`*[_type == "genre"] | order(title asc){ _id, title, slug }`);
-const venues = await sanityClient.fetch(`*[_type == "venue"] | order(title asc){ _id, title, slug }`);
-
-// Hent URL-parametere for initial state
-const url = new URL(Astro.request.url);
-const initialFilters = {
-  eventDate: url.searchParams.get('eventDate') || '',
-  genre: url.searchParams.get('genre') || '',
-  venue: url.searchParams.get('venue') || '',
-};
-
-// Hent arrangementer basert på filtre
-let eventsQuery = `*[_type == "event" && isPublished == true`;
-const queryParams: any = {};
-
-if (initialFilters.eventDate) {
-  eventsQuery += ` && eventDate->date == $eventDate`;
-  queryParams.eventDate = initialFilters.eventDate;
-}
-
-if (initialFilters.genre) {
-  eventsQuery += ` && genre->slug.current == $genre`;
-  queryParams.genre = initialFilters.genre;
-}
-
-if (initialFilters.venue) {
-  eventsQuery += ` && venue->slug.current == $venue`;
-  queryParams.venue = initialFilters.venue;
-}
-
-eventsQuery += `] | order(eventDate->date asc) {
-  _id, 
-  title,
-  slug,
-  eventTime{
-    startTime,
-    endTime
-  },
-  eventDate->{
+// Hent program-siden innhold fra "Faste sider"
+const programPage = await sanityClient.fetch<SanityDocument>(`
+  *[_type == "page" && slug.current == "program"][0] {
     title,
-    date
-  },
-  venue->{
-    title
-  },
-  genre->{
-    title
-  },
-  artists[]->{
-    name
-  },
-  image
-}`;
+    content
+  }
+`);
 
-const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryParams);
+// Hent alle publiserte arrangementer
+const events = await sanityClient.fetch<SanityDocument[]>(`
+  *[_type == "event" && isPublished == true] | order(eventDate->date asc) {
+    _id, 
+    title,
+    slug,
+    eventTime{
+      startTime,
+      endTime
+    },
+    eventDate->{
+      title,
+      date
+    },
+    venue->{
+      title
+    },
+    genre->{
+      title
+    },
+    artists[]->{
+      name
+    },
+    image
+  }
+`);
+
+// Fallback values
+const pageTitle = programPage?.title || 'Program';
 ---
 
-<Layout title="Program - Sanity + Astro">
+<Layout title={`${pageTitle} - Sanity + Astro`}>
   <main class="container" transition:name="main-content">
     <header class="page-header">
       <h1 class="page-title" transition:name="page-title">
-        🎭 Program
+        🎭 {pageTitle}
       </h1>
-      <p class="page-description">
-        Utforsk våre kommende arrangementer og finn noe som passer deg
-      </p>
     </header>
     
-    <!-- Filter-komponent -->
-    <EventFilter 
-      initialFilters={initialFilters}
-      filterOptions={{
-        eventDates,
-        genres,
-        venues
-      }}
-    />
+    <!-- Page content from schema -->
+    {programPage?.content && Array.isArray(programPage.content) && (
+      <div class="page-content">
+        {programPage.content.map((block) => (
+          <div key={block._key || block._id}>
+            {block._type === 'portableTextBlock' && <PortableText content={block.content} />}
+            {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} />}
+            {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} />}
+            {block._type === 'videoComponent' && <Video url={block.url} title={block.title} thumbnail={block.thumbnail} />}
+            {block._type === 'buttonComponent' && <Button text={block.text} style={block.style} size={block.size} action={block.action} />}
+            {block._type === 'linkComponent' && <Link text={block.text} url={block.url} openInNewTab={block.openInNewTab} />}
+            {block._type === 'quoteComponent' && <Quote quote={block.quote} author={block.author} />}
+            {block._type === 'accordionComponent' && <Accordion title={block.title} content={block.content} />}
+            {block._type === 'contentScrollContainer' && <ContentScrollContainer title={block.title} items={block.items} spacing={block.spacing} />}
+            {block._type === 'artistScrollContainer' && <ArtistScrollContainer title={block.title} items={block.items} cardFormat={block.cardFormat} />}
+            {block._type === 'eventScrollContainer' && <EventScrollContainer title={block.title} events={block.events} cardFormat={block.cardFormat} />}
+            {/* Fallback for ukjent type */}
+            {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer' ].indexOf(block._type) === -1 && (
+              <div>Ukjent komponent: {block._type}</div>
+            )}
+          </div>
+        ))}
+      </div>
+    )}
     
-    <!-- Resultater -->
-    <div id="results-container">
-      <div id="event-results">
-        {events.length > 0 ? (
-          <div>
-            <div class="results-count">
-              📊 Viser {events.length} arrangement{events.length === 1 ? '' : 'er'}
-            </div>
-            <div class="events-grid">
-              {events.map((event) => (
-                <article 
-                  class="event-card card" 
-                  data-event-date={event.eventDate?.date}
-                  transition:name={`event-card-${event.slug.current}`}
-                >
-                  <a href={`/program/${event.slug.current}`} class="event-link">
-                    {event.image && (
-                      <div 
-                        class="event-image"
-                        transition:name={`event-image-${event.slug.current}`}
-                      >
-                        <Image 
-                          image={event.image.image}
-                          alt={event.image.alt || event.title}
-                          caption=""
-                          credit=""
-                          size="full"
-                          aspectRatio="16:9"
-                          alignment="center"
-                          className="event-card-image"
-                        />
+    <!-- Events listing -->
+    <section class="events-section">
+      <h2 class="events-title">Alle arrangementer</h2>
+      
+      {events.length > 0 ? (
+        <div class="events-grid">
+          {events.map((event) => (
+            <article 
+              class="event-card card" 
+              data-event-date={event.eventDate?.date}
+              transition:name={`event-card-${event.slug.current}`}
+            >
+              <a href={`/program/${event.slug.current}`} class="event-link">
+                {event.image && (
+                  <div 
+                    class="event-image"
+                    transition:name={`event-image-${event.slug.current}`}
+                  >
+                    <Image 
+                      image={event.image.image}
+                      alt={event.image.alt || event.title}
+                      caption=""
+                      credit=""
+                      size="full"
+                      aspectRatio="16:9"
+                      alignment="center"
+                      className="event-card-image"
+                    />
+                  </div>
+                )}
+                <div class="event-content">
+                  <h3 
+                    class="event-title"
+                    transition:name={`event-title-${event.slug.current}`}
+                  >
+                    {event.title}
+                  </h3>
+                  
+                  <div class="event-meta">
+                    {event.eventDate && (
+                      <div class="event-detail">
+                        <span class="event-icon">📅</span>
+                        <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})</span>
                       </div>
                     )}
-                    <div class="event-content">
-                      <h3 
-                        class="event-title"
-                        transition:name={`event-title-${event.slug.current}`}
-                      >
-                        {event.title}
-                      </h3>
-                      
-                      <div class="event-meta">
-                        {event.eventDate && (
-                          <div class="event-detail">
-                            <span class="event-icon">📅</span>
-                            <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})</span>
-                          </div>
-                        )}
-                        
-                        {event.eventTime && (
-                          <div class="event-detail">
-                            <span class="event-icon">🕐</span>
-                            <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                          </div>
-                        )}
-                        
-                        {event.venue && (
-                          <div class="event-detail">
-                            <span class="event-icon">🏢</span>
-                            <span>{event.venue.title}</span>
-                          </div>
-                        )}
-                        
-                        {event.artists && event.artists.length > 0 && (
-                          <div class="event-detail">
-                            <span class="event-icon">🎵</span>
-                            <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
-                          </div>
-                        )}
-                        
-                        {event.genre && (
-                          <div class="event-genre">
-                            <span class="event-icon">🎼</span>
-                            <span class="genre-name">{event.genre.title}</span>
-                          </div>
-                        )}
+                    
+                    {event.eventTime && (
+                      <div class="event-detail">
+                        <span class="event-icon">🕐</span>
+                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
                       </div>
-                    </div>
-                  </a>
-                </article>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div class="no-results">
-            <div class="no-results-icon">🔍</div>
-            <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-            <p class="no-results-text">
-              Prøv å endre filtrene eller <a href="/program" class="text-primary">vis alle arrangementer</a>
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+                    )}
+                    
+                    {event.venue && (
+                      <div class="event-detail">
+                        <span class="event-icon">🏢</span>
+                        <span>{event.venue.title}</span>
+                      </div>
+                    )}
+                    
+                    {event.artists && event.artists.length > 0 && (
+                      <div class="event-detail">
+                        <span class="event-icon">🎵</span>
+                        <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
+                      </div>
+                    )}
+                    
+                    {event.genre && (
+                      <div class="event-genre">
+                        <span class="event-icon">🎼</span>
+                        <span class="genre-name">{event.genre.title}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="no-results">
+          <div class="no-results-icon">🔍</div>
+          <h3 class="no-results-title">Ingen arrangementer publisert</h3>
+          <p class="no-results-text">
+            Sjekk tilbake senere for oppdateringer
+          </p>
+        </div>
+      )}
+    </section>
     
     <footer class="page-footer">
       <a href="/" class="back-link">
@@ -201,10 +195,18 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       color: var(--color-text-primary);
     }
 
-    .page-description {
-      margin: 0;
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-lg);
+    .page-content {
+      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+    }
+
+    .events-section {
+      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+    }
+
+    .events-title {
+      margin: 0 0 var(--space-4) 0;
+      color: var(--color-text-primary);
+      font-size: var(--font-size-2xl);
     }
 
     .page-footer {
@@ -217,15 +219,6 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
       color: var(--color-primary-500);
       text-decoration: none;
       font-weight: var(--font-weight-medium);
-    }
-
-    /* Results */
-    .results-count {
-      margin-block-end: var(--space-4);
-      padding: var(--space-2) var(--space-4);
-      background: #e8f5e8;
-      border-radius: var(--radius-base);
-      color: #2d5a2d;
     }
 
     /* Intrinsic Events Grid */
@@ -367,86 +360,10 @@ const events = await sanityClient.fetch<SanityDocument[]>(eventsQuery, queryPara
     }
   </style>
 
-  <!-- 
-    URL-OPPDATERING FOR FILTRERING
-    ===============================
-    
-    Denne JavaScript-koden oppdaterer URL-en med query-parametere etter HTMX-filtrering,
-    slik at URL-en blir bookmarkbar og delbar. Eksempel: /program?eventDate=2026-06-23&genre=jazz&venue=the-house
-    
-    Hvordan det fungerer:
-    1. Lytter på 'htmx:afterRequest' event (når filtrering er ferdig)
-    2. Henter valgte filtre fra HTMX-parametere
-    3. Bygger ny URL med query-parametere
-    4. Oppdaterer browser-historikk uten å laste siden på nytt
-    
-    Dette gjør at:
-    - URL-en viser valgte filtre (bookmarkbar/delbar)
-    - Refresh fungerer (siden leser URL-parametere)
-    - Filtrering fungerer fortsatt (HTMX sender til API)
-    - Browser-historikk fungerer (tilbake/frem-knapper)
-  -->
   <script>
-    // Lytter på HTMX-filtrering og oppdaterer URL-en
-    document.addEventListener('htmx:afterRequest', function(event) {
-      // Sjekk at dette er filtrerings-forespørselen (ikke andre HTMX-kall)
-      if (event.detail.xhr.responseURL.includes('/api/filter-events')) {
-        
-        // Hent valgte filtre fra HTMX-parametere
-        const hxVals = event.detail.elt.getAttribute('hx-vals');
-        let selectedEventDate = '';
-        let selectedGenre = '';
-        let selectedVenue = '';
-        
-        if (hxVals) {
-          try {
-            const vals = JSON.parse(hxVals);
-            selectedEventDate = vals.eventDate || '';
-            selectedGenre = vals.genre || '';
-            selectedVenue = vals.venue || '';
-          } catch (e) {
-            console.log('Kunne ikke parse hx-vals:', hxVals);
-          }
-        }
-        
-        // Bygg ny URL med query-parametere
-        const currentUrl = new URL(window.location);
-        
-        // Legg til eller fjern eventDate-parameter basert på valg
-        if (selectedEventDate) {
-          currentUrl.searchParams.set('eventDate', selectedEventDate);
-        } else {
-          currentUrl.searchParams.delete('eventDate');
-        }
-        
-        // Legg til eller fjern genre-parameter basert på valg
-        if (selectedGenre) {
-          currentUrl.searchParams.set('genre', selectedGenre);
-        } else {
-          currentUrl.searchParams.delete('genre');
-        }
-        
-        // Legg til eller fjern venue-parameter basert på valg
-        if (selectedVenue) {
-          currentUrl.searchParams.set('venue', selectedVenue);
-        } else {
-          currentUrl.searchParams.delete('venue');
-        }
-        
-        // Oppdater browser-historikk uten å laste siden på nytt
-        // Dette gjør URL-en bookmarkbar og delbar
-        window.history.pushState({}, '', currentUrl.toString());
-      }
-    });
-    
     // Enhanced navigation with View Transitions
     document.addEventListener('astro:page-load', () => {
-      console.log('Page loaded with View Transitions');
-      
-      // Reinitialize HTMX if needed
-      if (typeof htmx !== 'undefined') {
-        htmx.process(document.body);
-      }
+      console.log('Program page loaded with View Transitions');
     });
   </script>
 </Layout>

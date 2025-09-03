@@ -58,14 +58,6 @@ console.log('Aktiv forside:', homepage);
       <div>
         <h1 transition:name="page-title">{homepageTitle}</h1>
         
-        <!-- Navigasjonslenker -->
-        <nav style="margin: 2rem 0; padding: 1rem 0; border-bottom: 1px solid #eee;">
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; gap: 2rem; justify-content: center;">
-            <li><a href="/program" style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">Program</a></li>
-            <li><a href="/artister" style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">Artister</a></li>
-            <li><a href="/artikler" style="text-decoration: none; color: #333; font-weight: 500; padding: 0.5rem 1rem; border-radius: 4px; transition: background-color 0.2s;">Artikler</a></li>
-          </ul>
-        </nav>
         
         {homepage?.content && Array.isArray(homepage.content) && (
           <div>
