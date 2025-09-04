@@ -69,22 +69,22 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
         hx-vals='{"eventDate": "", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}'
         title="Vis alle arrangementer"
       >
-        📅 Alle dager
+        Alle dager
       </button>
       
       <!-- Dato-faner -->
       {filterOptions.eventDates?.map((date) => (
         <button 
-          id={`tab-${date.date}`}
+          id={`tab-${date.date}>
           class="tab-button ${currentFilters.eventDate === date.date ? 'active' : ''}"
           hx-post="/api/filter-events"
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${date.date}", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}`}
-          title={`Vis arrangementer ${formatDate(date.date)}`}
+          hx-vals={`{"eventDate": "${date.date}", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}>
+          title={`Vis arrangementer ${formatDate(date.date)}>
         >
-          📅 {formatDate(date.date)}
+          {formatDate(date.date)}
         </button>
       ))}
     </div>
@@ -101,25 +101,25 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
         hx-target="#results-container"
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
-        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "", "venue": "${currentFilters.venue}"}`}
+        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "", "venue": "${currentFilters.venue}"}>
         title="Vis alle sjangre"
       >
-        🎼 Alle sjangre
+        Alle sjangre
       </button>
       
       <!-- Sjanger-faner -->
       {filterOptions.genres?.map((genre) => (
         <button 
-          id={`tab-${genre.slug.current}`}
+          id={`tab-${genre.slug.current}>
           class="tab-button ${currentFilters.genre === genre.slug.current ? 'active' : ''}"
           hx-post="/api/filter-events"
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${genre.slug.current}", "venue": "${currentFilters.venue}"}`}
-          title={`Vis ${genre.title} arrangementer`}
+          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${genre.slug.current}", "venue": "${currentFilters.venue}"}>
+          title={`Vis ${genre.title} arrangementer>
         >
-          🎼 {genre.title}
+          {genre.title}
         </button>
       ))}
     </div>
@@ -136,25 +136,25 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
         hx-target="#results-container"
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
-        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": ""}`}
+        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": ""}>
         title="Vis alle spillesteder"
       >
-        🏢 Alle spillesteder
+        Alle spillesteder
       </button>
       
       <!-- Spillested-faner -->
       {filterOptions.venues?.map((venue) => (
         <button 
-          id={`tab-${venue.slug.current}`}
+          id={`tab-${venue.slug.current}>
           class="tab-button ${currentFilters.venue === venue.slug.current ? 'active' : ''}"
           hx-post="/api/filter-events"
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": "${venue.slug.current}"}`}
-          title={`Vis arrangementer på ${venue.title}`}
+          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": "${venue.slug.current}"}>
+          title={`Vis arrangementer på ${venue.title}>
         >
-          🏢 {venue.title}
+          {venue.title}
         </button>
       ))}
     </div>
@@ -163,21 +163,21 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   <!-- Aktive filtre visning -->
   {(currentFilters.eventDate || currentFilters.genre || currentFilters.venue) && (
     <div class="active-filters">
-      <div class="active-filters-title">🔍 Aktive filtre:</div>
+      <div class="active-filters-title">Aktive filtre:</div>
       <div class="active-filters-list">
         {currentFilters.eventDate && (
           <span class="active-filter-tag">
-            📅 {getActiveFilterName('date', currentFilters.eventDate, filterOptions.eventDates || [])}
+            Dato: {getActiveFilterName('date', currentFilters.eventDate, filterOptions.eventDates || [])}
           </span>
         )}
         {currentFilters.genre && (
           <span class="active-filter-tag">
-            🎼 {getActiveFilterName('genre', currentFilters.genre, filterOptions.genres || [])}
+            Sjanger: {getActiveFilterName('genre', currentFilters.genre, filterOptions.genres || [])}
           </span>
         )}
         {currentFilters.venue && (
           <span class="active-filter-tag">
-            🏢 {getActiveFilterName('venue', currentFilters.venue, filterOptions.venues || [])}
+            Spillested: {getActiveFilterName('venue', currentFilters.venue, filterOptions.venues || [])}
           </span>
         )}
       </div>
@@ -186,7 +186,7 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
 
   <!-- Loading indikator -->
   <div id="loading-indicator" class="htmx-indicator">
-    <span>🔍 Laster arrangementer...</span>
+    <span>Laster arrangementer...</span>
   </div>
 </div>
 

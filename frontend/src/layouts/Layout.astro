@@ -1,5 +1,4 @@
 ---
-import { ViewTransitions } from "astro:transitions";
 import { VisualEditing } from "@sanity/astro/visual-editing";
 
 // Import CSS files in order
@@ -33,80 +32,40 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     
-    <!-- Enable View Transitions -->
-    <ViewTransitions />
+    <!-- Preload critical resources for faster transitions -->
+    <link rel="preload" href="/htmx.min.js" as="script" />
+    
+    <!-- Optimize resource hints -->
+    <link rel="dns-prefetch" href="//cdn.sanity.io" />
+    <link rel="preconnect" href="//cdn.sanity.io" crossorigin />
+    
+    <!-- Minimal critical styles -->
+    <style>
+      /* Prevent layout shift during data loading */
+      .page-content {
+        min-height: 50vh;
+        contain: layout style paint;
+      }
+    </style>
+    
   </head>
   <body>
-    <slot />
+    <div id="app" class="page-content">
+      <slot />
+    </div>
     
     <!-- Visual Editing Component -->
     {enableVisualEditing && <VisualEditing enabled={true} zIndex={1000} />}
+    
+    <!-- HTMX initialization -->
+    <script is:inline>
+      // Initialize HTMX when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        if (window.htmx) {
+          window.htmx.process(document.body);
+        }
+      });
+    </script>
   </body>
 </html>
 
-<style is:global>
-  /* Layout-specific overrides and additions */
-
-  /* View Transitions Enhancements */
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 0.3s;
-    animation-timing-function: ease-in-out;
-  }
-  
-  /* Smooth fade for main content */
-  ::view-transition-old(main-content) {
-    animation: fade-out 0.2s ease-out;
-  }
-  
-  ::view-transition-new(main-content) {
-    animation: fade-in 0.2s ease-in 0.1s;
-  }
-  
-  /* Enhanced event card transitions */
-  ::view-transition-old(event-card),
-  ::view-transition-new(event-card) {
-    animation-duration: 0.4s;
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  /* Page title transitions */
-  ::view-transition-old(page-title),
-  ::view-transition-new(page-title) {
-    animation-duration: 0.3s;
-    animation-timing-function: ease-out;
-  }
-  
-  /* Event image shared element transitions */
-  ::view-transition-old(event-image),
-  ::view-transition-new(event-image) {
-    animation-duration: 0.5s;
-    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transform-origin: center;
-  }
-  
-  @keyframes fade-out {
-    to { opacity: 0; }
-  }
-  
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  /* Respect user motion preferences */
-  @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(root),
-    ::view-transition-new(root),
-    ::view-transition-old(main-content),
-    ::view-transition-new(main-content),
-    ::view-transition-old(event-card),
-    ::view-transition-new(event-card),
-    ::view-transition-old(page-title),
-    ::view-transition-new(page-title),
-    ::view-transition-old(event-image),
-    ::view-transition-new(event-image) {
-      animation: none;
-    }
-  }
-</style>

@@ -98,30 +98,6 @@ const buttonIds = panels.map((_, index) => `button-${index}`)
   </div>
 </div>
 
-<script>
-  // JavaScript for accordion-funksjonalitet
-  document.addEventListener('DOMContentLoaded', () => {
-    const accordionButtons = document.querySelectorAll('.accordion-button')
-    
-    accordionButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        const isExpanded = button.getAttribute('aria-expanded') === 'true'
-        const content = document.getElementById(button.getAttribute('aria-controls')!)
-        
-        // Toggle ekspandert tilstand
-        button.setAttribute('aria-expanded', (!isExpanded).toString())
-        content!.setAttribute('aria-hidden', isExpanded.toString())
-        
-        // Toggle visning av innhold
-        if (isExpanded) {
-          content!.style.display = 'none'
-        } else {
-          content!.style.display = 'block'
-        }
-      })
-    })
-  })
-</script>
 
 <style>
   .accordion {

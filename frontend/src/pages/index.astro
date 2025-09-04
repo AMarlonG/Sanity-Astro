@@ -39,6 +39,13 @@ const homepage = await sanityClient.fetch(
           },
           eventTime
         }
+      },
+      _type == "linkComponent" => {
+        ...,
+        internalLink->{
+          _id,
+          slug
+        }
       }
     }
   }`,
@@ -67,10 +74,10 @@ console.log('Aktiv forside:', homepage);
 ---
 
 <Layout title={homepageTitle}>
-  <main class="container" transition:name="main-content">
+  <main class="container">
     {homepage ? (
       <div>
-        <h1 transition:name="page-title">{homepageTitle}</h1>
+        <h1>{homepageTitle}</h1>
         
         
         {homepage?.content && Array.isArray(homepage.content) && (
@@ -82,7 +89,7 @@ console.log('Aktiv forside:', homepage);
                 {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} credit={block.credit} alignment={block.alignment} size={block.size} aspectRatio={block.aspectRatio} _key={block._key} _type={block._type} />}
                 {block._type === 'videoComponent' && <Video url={block.url} title={block.title} thumbnail={block.thumbnail} />}
                 {block._type === 'buttonComponent' && <Button text={block.text} style={block.style} size={block.size} action={block.action} />}
-                {block._type === 'linkComponent' && <Link text={block.text} url={block.url} openInNewTab={block.openInNewTab} />}
+                {block._type === 'linkComponent' && <Link text={block.text} linkType={block.linkType} internalLink={block.internalLink} url={block.url} email={block.email} phone={block.phone} openInNewTab={block.openInNewTab} accessibility={block.accessibility} />}
                 {block._type === 'quoteComponent' && <Quote quote={block.quote} author={block.author} />}
                 {block._type === 'accordionComponent' && <Accordion title={block.title} content={block.content} />}
                 {block._type === 'contentScrollContainer' && <ContentScrollContainer title={block.title} items={block.items} spacing={block.spacing} />}

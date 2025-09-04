@@ -129,27 +129,27 @@ function generateEventHtml(event: Event): string {
           <div style="color: #666; font-size: 0.9rem; line-height: 1.4;">
             ${
               event.eventDate
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">📅</span><span>${escapeHtml(event.eventDate.title)} (${escapeHtml(formatDateForLanguage(event.eventDate.date, 'no'))})</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Dato:</span><span>${escapeHtml(event.eventDate.title)} (${escapeHtml(formatDateForLanguage(event.eventDate.date, 'no'))})</span></div>`
                 : ''
             }
             ${
               event.eventTime
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🕐</span><span>${escapeHtml(event.eventTime.startTime)} - ${escapeHtml(event.eventTime.endTime)}</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Tid:</span><span>${escapeHtml(event.eventTime.startTime)} - ${escapeHtml(event.eventTime.endTime)}</span></div>`
                 : ''
             }
             ${
               event.venue
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🏢</span><span>${escapeHtml(event.venue.title)}</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Sted:</span><span>${escapeHtml(event.venue.title)}</span></div>`
                 : ''
             }
             ${
               event.artists && event.artists.length > 0
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🎵</span><span>${event.artists.map((artist) => escapeHtml(artist.name)).join(', ')}</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 4rem;">Artister:</span><span>${event.artists.map((artist) => escapeHtml(artist.name)).join(', ')}</span></div>`
                 : ''
             }
             ${
               event.genre
-                ? `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;"><span style="font-size: 1rem;">🎼</span><span style="color: #999; font-size: 0.85rem;">${escapeHtml(event.genre.title)}</span></div>`
+                ? `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 4rem;">Sjanger:</span><span style="color: #999; font-size: 0.85rem;">${escapeHtml(event.genre.title)}</span></div>`
                 : ''
             }
           </div>
@@ -288,7 +288,7 @@ export const POST: APIRoute = async ({ request }) => {
     const events: Event[] = await sanityClient.fetch(query, queryParams);
 
     // Generer HTML for arrangementene med antall resultater
-    const resultsCountText = `📊 Viser ${events.length} arrangement${events.length === 1 ? '' : 'er'}`;
+    const resultsCountText = `Viser ${events.length} arrangement${events.length === 1 ? '' : 'er'}`;
     const noResultsTitle = 'Ingen arrangementer funnet';
     const noResultsText = 'Prøv å endre filtrene eller <a href="/program" style="color: #007acc;">vis alle arrangementer</a>';
 
@@ -305,7 +305,7 @@ export const POST: APIRoute = async ({ request }) => {
                 </div>
               </div>`
             : `<div style="text-align: center; padding: 3rem; color: #666;">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+                <div style="font-size: 2rem; margin-bottom: 1rem; color: #666;">Ingen resultater</div>
                 <h3 style="margin: 0 0 1rem 0; color: #333;">${noResultsTitle}</h3>
                 <p style="margin: 0; font-size: 1.1rem;">
                   ${noResultsText}
@@ -342,7 +342,7 @@ export const POST: APIRoute = async ({ request }) => {
     
     return new Response(
       `<div style="text-align: center; padding: 2rem; color: #dc3545;">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+        <div style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;">Feil</div>
         <h3 style="margin: 0 0 1rem 0;">Beklager, det oppstod en feil</h3>
         <p style="margin: 0; font-size: 1.1rem;">Prøv igjen senere eller kontakt support hvis problemet vedvarer.</p>
       </div>`,

@@ -12,6 +12,12 @@ export default defineConfig({
   base: '/',
   trailingSlash: 'never',
 
+  // Enable built-in prefetch
+  prefetch: {
+    prefetchAll: false,
+    defaultStrategy: 'viewport'
+  },
+
   // Enhanced security configuration for 2025
   experimental: {
     // Disable CSP for Visual Editing development

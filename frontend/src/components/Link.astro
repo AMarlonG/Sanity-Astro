@@ -77,6 +77,7 @@ if (accessibility?.ariaDescribedBy) {
   {target}
   {rel}
   class={`link-component ${className}`}
+  data-astro-prefetch={linkType === 'internal' ? true : undefined}
   {...ariaAttributes}
 >
   {text}

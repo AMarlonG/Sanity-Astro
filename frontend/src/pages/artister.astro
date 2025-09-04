@@ -41,10 +41,10 @@ const pageTitle = artistsPage?.title || 'Artister';
 ---
 
 <Layout title={`${pageTitle} - Sanity + Astro`}>
-  <main class="container" transition:name="main-content">
+  <main class="container">
     <header class="page-header">
-      <h1 class="page-title" transition:name="page-title">
-        🎵 {pageTitle}
+      <h1 class="page-title">
+        {pageTitle}
       </h1>
     </header>
     
@@ -82,13 +82,11 @@ const pageTitle = artistsPage?.title || 'Artister';
           {artists.map((artist) => (
             <article 
               class="artist-card card"
-              transition:name={`artist-card-${artist.slug.current}`}
             >
               <a href={`/artister/${artist.slug.current}`} class="artist-link">
                 {artist.image && (
                   <div 
                     class="artist-image"
-                    transition:name={`artist-image-${artist.slug.current}`}
                   >
                     <Image 
                       image={artist.image.image}
@@ -105,7 +103,6 @@ const pageTitle = artistsPage?.title || 'Artister';
                 <div class="artist-content">
                   <h3 
                     class="artist-name"
-                    transition:name={`artist-name-${artist.slug.current}`}
                   >
                     {artist.name}
                   </h3>
@@ -130,7 +127,6 @@ const pageTitle = artistsPage?.title || 'Artister';
         </div>
       ) : (
         <div class="no-results">
-          <div class="no-results-icon">🎵</div>
           <h3 class="no-results-title">Ingen artister publisert</h3>
           <p class="no-results-text">
             Sjekk tilbake senere for oppdateringer
@@ -312,10 +308,4 @@ const pageTitle = artistsPage?.title || 'Artister';
     }
   </style>
 
-  <script>
-    // Enhanced navigation with View Transitions
-    document.addEventListener('astro:page-load', () => {
-      console.log('Artists page loaded with View Transitions');
-    });
-  </script>
 </Layout>

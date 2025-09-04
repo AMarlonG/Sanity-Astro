@@ -55,10 +55,10 @@ const pageTitle = programPage?.title || 'Program';
 ---
 
 <Layout title={`${pageTitle} - Sanity + Astro`}>
-  <main class="container" transition:name="main-content">
+  <main class="container">
     <header class="page-header">
-      <h1 class="page-title" transition:name="page-title">
-        🎭 {pageTitle}
+      <h1 class="page-title">
+        {pageTitle}
       </h1>
     </header>
     
@@ -97,13 +97,11 @@ const pageTitle = programPage?.title || 'Program';
             <article 
               class="event-card card" 
               data-event-date={event.eventDate?.date}
-              transition:name={`event-card-${event.slug.current}`}
             >
               <a href={`/program/${event.slug.current}`} class="event-link">
                 {event.image && (
                   <div 
                     class="event-image"
-                    transition:name={`event-image-${event.slug.current}`}
                   >
                     <Image 
                       image={event.image.image}
@@ -120,7 +118,6 @@ const pageTitle = programPage?.title || 'Program';
                 <div class="event-content">
                   <h3 
                     class="event-title"
-                    transition:name={`event-title-${event.slug.current}`}
                   >
                     {event.title}
                   </h3>
@@ -128,35 +125,35 @@ const pageTitle = programPage?.title || 'Program';
                   <div class="event-meta">
                     {event.eventDate && (
                       <div class="event-detail">
-                        <span class="event-icon">📅</span>
+                        <span class="event-label">Dato:</span>
                         <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})</span>
                       </div>
                     )}
                     
                     {event.eventTime && (
                       <div class="event-detail">
-                        <span class="event-icon">🕐</span>
+                        <span class="event-label">Tid:</span>
                         <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
                       </div>
                     )}
                     
                     {event.venue && (
                       <div class="event-detail">
-                        <span class="event-icon">🏢</span>
+                        <span class="event-label">Sted:</span>
                         <span>{event.venue.title}</span>
                       </div>
                     )}
                     
                     {event.artists && event.artists.length > 0 && (
                       <div class="event-detail">
-                        <span class="event-icon">🎵</span>
+                        <span class="event-label">Artister:</span>
                         <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
                       </div>
                     )}
                     
                     {event.genre && (
                       <div class="event-genre">
-                        <span class="event-icon">🎼</span>
+                        <span class="event-label">Sjanger:</span>
                         <span class="genre-name">{event.genre.title}</span>
                       </div>
                     )}
@@ -168,7 +165,6 @@ const pageTitle = programPage?.title || 'Program';
         </div>
       ) : (
         <div class="no-results">
-          <div class="no-results-icon">🔍</div>
           <h3 class="no-results-title">Ingen arrangementer publisert</h3>
           <p class="no-results-text">
             Sjekk tilbake senere for oppdateringer
@@ -301,9 +297,10 @@ const pageTitle = programPage?.title || 'Program';
       gap: var(--space-2);
     }
 
-    .event-icon {
-      font-size: 1rem;
+    .event-label {
+      font-weight: var(--font-weight-medium);
       flex-shrink: 0;
+      min-width: 4rem;
     }
 
     .event-genre {
@@ -360,10 +357,4 @@ const pageTitle = programPage?.title || 'Program';
     }
   </style>
 
-  <script>
-    // Enhanced navigation with View Transitions
-    document.addEventListener('astro:page-load', () => {
-      console.log('Program page loaded with View Transitions');
-    });
-  </script>
 </Layout>

@@ -95,15 +95,15 @@ export class ContentLayerPerformance {
   }) {
     const loadTime = Date.now() - this.startTime
     
-    console.log('🚀 Content Layer Performance Stats:')
-    console.log(`  📊 Total entries: ${Object.values(collections).flat().length}`)
-    console.log(`  🎪 Events: ${collections.events.length}`)
-    console.log(`  🎵 Artists: ${collections.artists.length}`)
-    console.log(`  🏢 Venues: ${collections.venues.length}`)
-    console.log(`  🎼 Genres: ${collections.genres.length}`)
-    console.log(`  ⚡ Cache load time: ${loadTime}ms`)
-    console.log(`  💾 Build-time cached: ✅`)
-    console.log(`  🔒 Type safety: ✅`)
+    console.log('Content Layer Performance Stats:')
+    console.log(`  Total entries: ${Object.values(collections).flat().length}`)
+    console.log(`  Events: ${collections.events.length}`)
+    console.log(`  Artists: ${collections.artists.length}`)
+    console.log(`  Venues: ${collections.venues.length}`)
+    console.log(`  Genres: ${collections.genres.length}`)
+    console.log(`  Cache load time: ${loadTime}ms`)
+    console.log(`  Build-time cached: Yes`)
+    console.log(`  Type safety: Yes`)
     
     return {
       totalEntries: Object.values(collections).flat().length,
@@ -116,10 +116,10 @@ export class ContentLayerPerformance {
   static compareWithDirectQueries(directQueryTime: number, cacheTime: number) {
     const improvement = ((directQueryTime - cacheTime) / directQueryTime * 100).toFixed(1)
     
-    console.log('📈 Performance Comparison:')
-    console.log(`  🐌 Direct Sanity queries: ${directQueryTime}ms`)
-    console.log(`  ⚡ Content Layer cache: ${cacheTime}ms`)
-    console.log(`  🎯 Performance improvement: ${improvement}%`)
+    console.log('Performance Comparison:')
+    console.log(`  Direct Sanity queries: ${directQueryTime}ms`)
+    console.log(`  Content Layer cache: ${cacheTime}ms`)
+    console.log(`  Performance improvement: ${improvement}%`)
     
     return {
       directQueryTime,

@@ -52,7 +52,7 @@ export async function getStaticPaths() {
 <Layout title={`${event.title} - Sanity + Astro`}>
   <main 
     style="max-width: 800px; margin: 0 auto; padding: 2rem;"
-    transition:name="main-content"
+   
   >
     <a 
       href="/program" 
@@ -65,7 +65,6 @@ export async function getStaticPaths() {
       <header style="margin-bottom: 2rem;">
         <h1 
           style="margin: 0 0 1rem 0; color: #333;"
-          transition:name={`event-title-${Astro.params.slug}`}
         >
           {event.title}
         </h1>
@@ -74,7 +73,6 @@ export async function getStaticPaths() {
         {event.image && (
           <div 
             style="margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"
-            transition:name={`event-image-${Astro.params.slug}`}
           >
             <Image 
               image={event.image.image}
@@ -91,32 +89,32 @@ export async function getStaticPaths() {
         <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
           {event.eventDate && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>📅 Dato:</strong> {event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})
+              <strong>Dato:</strong> {event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})
             </p>
           )}
           
           {event.eventTime && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>🕐 Klokkeslett:</strong> {event.eventTime}
+              <strong>Klokkeslett:</strong> {event.eventTime}
             </p>
           )}
           
           {event.venue && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>🏢 Sted:</strong> {event.venue.title}
+              <strong>Sted:</strong> {event.venue.title}
               {event.venue.address && ` - ${event.venue.address}`}
             </p>
           )}
           
           {event.genre && (
             <p style="margin: 0 0 0.5rem 0;">
-              <strong>🎼 Sjanger:</strong> {event.genre.title}
+              <strong>Sjanger:</strong> {event.genre.title}
             </p>
           )}
           
           {event.artists && event.artists.length > 0 && (
             <div style="margin: 0 0 0.5rem 0;">
-              <strong>🎵 Artister:</strong>
+              <strong>Artister:</strong>
               <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
                 {event.artists.map((artist: any) => (
                   <li style="margin-bottom: 0.25rem;">
@@ -158,18 +156,3 @@ export async function getStaticPaths() {
   </main>
 </Layout>
 
-<!-- Add View Transitions event listeners -->
-<script>
-  // Enhanced navigation with View Transitions
-  document.addEventListener('astro:page-load', () => {
-    console.log('Event detail page loaded with View Transitions');
-  });
-
-  document.addEventListener('astro:before-preparation', () => {
-    console.log('Preparing to navigate...');
-  });
-
-  document.addEventListener('astro:after-swap', () => {
-    console.log('Page content swapped successfully');
-  });
-</script>

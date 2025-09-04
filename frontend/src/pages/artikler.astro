@@ -41,10 +41,10 @@ const pageTitle = articlesPage?.title || 'Artikler';
 ---
 
 <Layout title={`${pageTitle} - Sanity + Astro`}>
-  <main class="container" transition:name="main-content">
+  <main class="container">
     <header class="page-header">
-      <h1 class="page-title" transition:name="page-title">
-        📰 {pageTitle}
+      <h1 class="page-title">
+        {pageTitle}
       </h1>
     </header>
     
@@ -82,13 +82,11 @@ const pageTitle = articlesPage?.title || 'Artikler';
           {articles.map((article) => (
             <article 
               class="article-card card"
-              transition:name={`article-card-${article.slug.current}`}
             >
               <a href={`/artikler/${article.slug.current}`} class="article-link">
                 {article.image && (
                   <div 
                     class="article-image"
-                    transition:name={`article-image-${article.slug.current}`}
                   >
                     <Image 
                       image={article.image.image}
@@ -105,7 +103,6 @@ const pageTitle = articlesPage?.title || 'Artikler';
                 <div class="article-content">
                   <h3 
                     class="article-title"
-                    transition:name={`article-title-${article.slug.current}`}
                   >
                     {article.title}
                   </h3>
@@ -119,7 +116,7 @@ const pageTitle = articlesPage?.title || 'Artikler';
                   {article.publishedAt && (
                     <div class="article-meta">
                       <span class="article-date">
-                        📅 {formatDateForLanguage(article.publishedAt, 'no')}
+                        {formatDateForLanguage(article.publishedAt, 'no')}
                       </span>
                     </div>
                   )}
@@ -130,7 +127,6 @@ const pageTitle = articlesPage?.title || 'Artikler';
         </div>
       ) : (
         <div class="no-results">
-          <div class="no-results-icon">📰</div>
           <h3 class="no-results-title">Ingen artikler publisert</h3>
           <p class="no-results-text">
             Sjekk tilbake senere for oppdateringer
@@ -308,10 +304,4 @@ const pageTitle = articlesPage?.title || 'Artikler';
     }
   </style>
 
-  <script>
-    // Enhanced navigation with View Transitions
-    document.addEventListener('astro:page-load', () => {
-      console.log('Articles page loaded with View Transitions');
-    });
-  </script>
 </Layout>

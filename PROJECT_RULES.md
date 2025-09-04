@@ -29,6 +29,7 @@ This is a small festival website with bilingual support (Norwegian/English). The
 - Add monitoring/analytics unless specifically required
 - Apply TypeScript strict settings that break existing code
 - Change Node.js versions if current one works
+- Use emojis in code, UI, or content (only use when explicitly requested by user)
 
 ## Decision Framework
 Before making ANY change, ask:
@@ -92,10 +93,12 @@ If the answer to #4 is "yes", then probably don't change it.
 ✅ **Documentation**: NEVER create .md or README files unless explicitly requested
 ✅ **Git Workflow**: Proactively suggest pushing after major changes/milestones
 ✅ **Agent Usage**: Use specialized agents when appropriate, follow tool usage patterns
+✅ **Agent Rules**: Read relevant files in `.claude/agents/` for specific agent guidance
 ✅ **Dependencies**: Keep stable, use Node.js 20.19.0, npm --legacy-peer-deps
 ✅ **Simplicity First**: Working code > "better" code, simple > complex
 ✅ **Visual Editing**: Maintain compatibility, test after changes
 ✅ **Bilingual Support**: Norwegian default, English optional
+✅ **No Emojis**: Never use emojis unless explicitly requested by user
 
 **Context Compression Risk**: Technical details survive compression better than behavioral rules.
 **Solution**: Always re-read this section after compression to restore proper working patterns.
