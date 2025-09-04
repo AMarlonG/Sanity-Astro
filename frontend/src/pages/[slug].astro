@@ -20,20 +20,26 @@ if (!slug) {
   return Astro.redirect('/404');
 }
 
+let page = null;
+let title = '';
+let content = [];
+
 try {
-  const { data: page } = await loadPage(slug, Astro.request);
+  const result = await loadPage(slug, Astro.request);
+  page = result.data;
   
   if (!page) {
     return Astro.redirect('/404');
   }
 
-  const { title, content, publishingStatus, scheduledPeriod } = page;
+  title = page.title;
+  content = page.content;
 
   // Additional check for scheduled content in SSR
-  if (publishingStatus === 'scheduled' && scheduledPeriod) {
+  if (page.publishingStatus === 'scheduled' && page.scheduledPeriod) {
     const now = new Date();
-    const start = new Date(scheduledPeriod.startDate);
-    const end = new Date(scheduledPeriod.endDate);
+    const start = new Date(page.scheduledPeriod.startDate);
+    const end = new Date(page.scheduledPeriod.endDate);
     
     if (now < start || now > end) {
       return Astro.redirect('/404');
@@ -41,7 +47,7 @@ try {
   }
 
   // Draft content should not be visible (unless in preview mode)
-  if (publishingStatus === 'draft') {
+  if (page.publishingStatus === 'draft') {
     const cookieHeader = Astro.request.headers.get('cookie');
     const hasPreviewMode = cookieHeader?.includes('sanity-preview-mode=true');
     
@@ -49,6 +55,10 @@ try {
       return Astro.redirect('/404');
     }
   }
+} catch (error) {
+  console.error('Error loading page:', error);
+  return Astro.redirect('/404');
+}
 ---
 
 <Layout title={title}>
@@ -96,8 +106,3 @@ try {
     }
   }
 </style>
-
-} catch (error) {
-  console.error('Error loading page:', error);
-  return Astro.redirect('/404');
-}
