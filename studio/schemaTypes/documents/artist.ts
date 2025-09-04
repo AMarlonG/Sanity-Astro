@@ -30,19 +30,31 @@ export const artist = defineType({
       name: 'name',
       title: 'Navn på artist',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        // Kun vis advarsel hvis brukeren prøver å publisere uten navn
+        if (!value && context.document?.isPublished) {
+          return 'Navn på artist bør fylles ut før publisering'
+        }
+        return true
+      }),
       group: 'basic',
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'URL-en som brukes for å finne denne artisten på nettsiden',
+      description: 'Trykk generer for å lage URL',
       options: {
         source: 'name',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        // Kun vis advarsel hvis navn finnes men slug mangler
+        if (!value?.current && context.document?.name) {
+          return 'Trykk generer for å lage URL'
+        }
+        return true
+      }),
       group: 'basic',
     }),
     defineField({
@@ -51,21 +63,31 @@ export const artist = defineType({
       type: 'text',
       description: 'Kort beskrivelse av artisten (vises i lister)',
       rows: 2,
-      validation: (Rule) => Rule.required().max(100),
+      validation: (Rule) => Rule.max(100),
       group: 'basic',
     }),
     defineField({
       name: 'instrument',
       title: 'Instrument',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Instrument må fylles ut'
+        }
+        return true
+      }),
       group: 'basic',
     }),
     defineField({
       name: 'country',
       title: 'Land',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Land må fylles ut'
+        }
+        return true
+      }),
       group: 'basic',
     }),
     defineField({
@@ -76,18 +98,26 @@ export const artist = defineType({
       group: 'content',
     }),
     defineField({
-      name: 'isPublished',
-      title: 'Publisering',
-      type: 'boolean',
-      description: 'På: Synlig på nettsiden | Av: Skjult på nettsiden | Slett: Fjern helt (bruk slett-knappen)',
-      initialValue: false,
+      name: 'publishingStatus',
+      title: 'Publiseringsstatus',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Synlig på nett umiddelbart', value: 'published' },
+          { title: 'Lagre uten å bli synlig på nett', value: 'draft' },
+          { title: 'Planlegg periode', value: 'scheduled' }
+        ],
+        layout: 'radio'
+      },
+      initialValue: 'published',
+      validation: (Rule) => Rule.required(),
       group: 'scheduling',
     }),
     defineField({
       name: 'scheduledPeriod',
       title: 'Planlagt periode',
       type: 'object',
-      hidden: ({document}) => document?.isPublished === true,
+      hidden: ({document}) => document?.publishingStatus !== 'scheduled',
       fieldsets: [
         {
           name: 'timing',
@@ -101,6 +131,16 @@ export const artist = defineType({
           type: 'datetime',
           description: 'Når denne artisten blir synlig på nettsiden',
           fieldset: 'timing',
+          validation: (Rule) => Rule.required().custom((value, context) => {
+            const status = context.document?.publishingStatus
+            if (status === 'scheduled' && !value) {
+              return 'Startdato må velges for planlagt periode'
+            }
+            if (status !== 'scheduled') {
+              return true
+            }
+            return true
+          }),
         },
         {
           name: 'endDate',
@@ -108,6 +148,16 @@ export const artist = defineType({
           type: 'datetime',
           description: 'Når denne artisten slutter å være synlig på nettsiden',
           fieldset: 'timing',
+          validation: (Rule) => Rule.required().custom((value, context) => {
+            const status = context.document?.publishingStatus
+            if (status === 'scheduled' && !value) {
+              return 'Sluttdato må velges for planlagt periode'
+            }
+            if (status !== 'scheduled') {
+              return true
+            }
+            return true
+          }),
         },
       ],
       group: 'scheduling',

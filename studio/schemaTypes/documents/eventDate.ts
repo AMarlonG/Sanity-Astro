@@ -8,18 +8,16 @@ export const eventDate = defineType({
   icon: CalendarIcon,
   fields: [
     defineField({
-      name: 'title',
-      title: 'Ukedag',
-      type: 'string',
-      description: 'Dag i uken (f.eks. "Mandag", "Tirsdag", "Onsdag")',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
       name: 'date',
-      title: 'Dato',
+      title: 'Arrangementsdato',
       type: 'date',
-      description: 'Faktisk dato for arrangementet',
-      validation: (Rule) => Rule.required(),
+      description: 'Velg dato for arrangementet (ukedag vises automatisk)',
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Dato må velges'
+        }
+        return true
+      }),
     }),
 
     defineField({
@@ -32,16 +30,27 @@ export const eventDate = defineType({
   ],
   preview: {
     select: {
-      title: 'title',
       date: 'date',
       isActive: 'isActive',
     },
-    prepare({title, date, isActive}) {
-      const dateString = date ? new Date(date).toLocaleDateString('nb-NO') : 'Ingen dato'
+    prepare({date, isActive}) {
+      if (!date) {
+        return {
+          title: 'Ingen dato',
+          subtitle: isActive ? 'Aktiv' : 'Inaktiv',
+          media: CalendarIcon,
+        }
+      }
+      
+      const dateObj = new Date(date)
+      const weekdays = ['Søndag', 'Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag']
+      const weekday = weekdays[dateObj.getDay()]
+      const dateString = dateObj.toLocaleDateString('nb-NO')
       const status = isActive ? 'Aktiv' : 'Inaktiv'
+      
       return {
-        title: title,
-        subtitle: `${dateString} • ${status}`,
+        title: `${weekday} ${dateString}`,
+        subtitle: status,
         media: CalendarIcon,
       }
     },

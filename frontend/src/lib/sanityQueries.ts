@@ -184,7 +184,7 @@ export async function loadArtist(slug: string, request?: Request) {
       website,
       socialMedia,
       content,
-      isPublished,
+      publishingStatus,
       scheduledPeriod
     }
   `;
@@ -239,7 +239,7 @@ export async function loadEvent(slug: string, request?: Request) {
       eventTime,
       ticketUrl,
       isFeatured,
-      isPublished,
+      publishingStatus,
       scheduledPeriod
     }
   `;
@@ -267,7 +267,28 @@ export async function loadArticle(slug: string, request?: Request) {
       publishedAt,
       categories,
       tags,
-      isPublished,
+      publishingStatus,
+      scheduledPeriod
+    }
+  `;
+
+  const data = await executeQuery(query, { slug }, perspective);
+  return { data };
+}
+
+/**
+ * Load page by slug with Visual Editing support
+ */
+export async function loadPage(slug: string, request?: Request) {
+  const perspective = getQueryPerspective(request);
+  
+  const query = `
+    *[_type == "page" && slug.current == $slug][0]{
+      _id,
+      title,
+      slug,
+      content,
+      publishingStatus,
       scheduledPeriod
     }
   `;

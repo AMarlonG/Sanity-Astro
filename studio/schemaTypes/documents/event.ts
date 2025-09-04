@@ -38,19 +38,31 @@ export const event = defineType({
       title: 'Navn på arrangement',
       type: 'string',
       group: 'basic',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        // Kun vis advarsel hvis brukeren prøver å publisere uten tittel
+        if (!value && context.document?.isPublished) {
+          return 'Navn på arrangement bør fylles ut før publisering'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'URL-en som brukes for å finne dette arrangementet på nettsiden',
+      description: 'Trykk generer for å lage URL',
       group: 'basic',
       options: {
         source: 'title',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        // Kun vis advarsel hvis tittel finnes men slug mangler
+        if (!value?.current && context.document?.title) {
+          return 'Trykk generer for å lage URL'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'excerpt',
@@ -59,7 +71,12 @@ export const event = defineType({
       description: 'Kort beskrivelse av arrangementet (vises i lister)',
       group: 'basic',
       rows: 2,
-      validation: (Rule) => Rule.required().max(100),
+      validation: (Rule) => Rule.warning().max(100).custom((value, context) => {
+        if (!value && context.document?.isPublished) {
+          return 'Ingress bør fylles ut før publisering'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'genre',
@@ -76,16 +93,26 @@ export const event = defineType({
       to: [{type: 'venue'}],
       description: 'Velg spillestedet for arrangementet',
       group: 'timing',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Spillested må velges'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'eventDate',
-      title: 'Arrangementsdato',
+      title: 'Dato',
       type: 'reference',
       to: [{type: 'eventDate'}],
       description: 'Velg fra de konfigurerte arrangementsdatoene',
       group: 'timing',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Dato må velges'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'eventTime',
@@ -107,7 +134,12 @@ export const event = defineType({
           options: {
             list: eventTimeOptions,
           },
-          validation: (Rule) => Rule.required(),
+          validation: (Rule) => Rule.warning().custom((value, context) => {
+            if (!value && context.document?.isPublished) {
+              return 'Starttidspunkt bør fylles ut før publisering'
+            }
+            return true
+          }),
         },
         {
           name: 'endTime',
@@ -117,10 +149,20 @@ export const event = defineType({
           options: {
             list: eventTimeOptions,
           },
-          validation: (Rule) => Rule.required(),
+          validation: (Rule) => Rule.warning().custom((value, context) => {
+            if (!value && context.document?.isPublished) {
+              return 'Sluttidspunkt bør fylles ut før publisering'
+            }
+            return true
+          }),
         },
       ],
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if ((!value?.startTime || !value?.endTime) && context.document?.isPublished) {
+          return 'Klokkeslett bør fylles ut før publisering'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'content',
@@ -130,18 +172,26 @@ export const event = defineType({
       group: 'content',
     }),
     defineField({
-      name: 'isPublished',
-      title: 'Publisering',
-      type: 'boolean',
-      description: 'På: Synlig på nettsiden | Av: Skjult på nettsiden | Slett: Fjern helt (bruk slett-knappen)',
+      name: 'publishingStatus',
+      title: 'Publiseringsstatus',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Synlig på nett umiddelbart', value: 'published' },
+          { title: 'Lagre uten å bli synlig på nett', value: 'draft' },
+          { title: 'Planlegg periode', value: 'scheduled' }
+        ],
+        layout: 'radio'
+      },
+      initialValue: 'published',
+      validation: (Rule) => Rule.required(),
       group: 'scheduling',
-      initialValue: false,
     }),
     defineField({
       name: 'scheduledPeriod',
       title: 'Planlagt periode',
       type: 'object',
-      hidden: ({document}) => document?.isPublished === true,
+      hidden: ({document}) => document?.publishingStatus !== 'scheduled',
       group: 'scheduling',
       fieldsets: [
         {
@@ -156,6 +206,16 @@ export const event = defineType({
           type: 'datetime',
           description: 'Når dette arrangementet blir synlig på nettsiden',
           fieldset: 'timing',
+          validation: (Rule) => Rule.required().custom((value, context) => {
+            const status = context.document?.publishingStatus
+            if (status === 'scheduled' && !value) {
+              return 'Startdato må velges for planlagt periode'
+            }
+            if (status !== 'scheduled') {
+              return true
+            }
+            return true
+          }),
         },
         {
           name: 'endDate',
@@ -163,6 +223,16 @@ export const event = defineType({
           type: 'datetime',
           description: 'Når dette arrangementet slutter å være synlig på nettsiden',
           fieldset: 'timing',
+          validation: (Rule) => Rule.required().custom((value, context) => {
+            const status = context.document?.publishingStatus
+            if (status === 'scheduled' && !value) {
+              return 'Sluttdato må velges for planlagt periode'
+            }
+            if (status !== 'scheduled') {
+              return true
+            }
+            return true
+          }),
         },
       ],
     }),

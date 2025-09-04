@@ -6,6 +6,24 @@ import {nbNOLocale} from '@sanity/locale-nb-no'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './deskStructure'
 
+// Custom Norwegian i18n resources to override publish button text
+const customNorwegianResources = {
+  'nb-NO': {
+    'document-pane': {
+      'action-menu': {
+        'publish-label': 'Lagre',
+        'publish-now': 'Lagre nå',
+        'publish-schedule': 'Planlegg lagring',
+        'publish-changes': 'Lagre endringer'
+      },
+      'document-status': {
+        'published': 'Lagret',
+        'not-published': 'Ikke lagret'
+      }
+    }
+  }
+}
+
 export default defineConfig({
   name: 'default',
   title: 'studio',
@@ -94,6 +112,16 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
+  },
+
+  // Override default Norwegian translations
+  i18n: {
+    bundles: [
+      {
+        namespace: 'studio',
+        resources: customNorwegianResources,
+      },
+    ],
   },
 
 })

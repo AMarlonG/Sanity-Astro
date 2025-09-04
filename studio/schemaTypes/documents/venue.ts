@@ -17,46 +17,56 @@ export const venue = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Navn',
+      title: 'Navn på spillested',
       type: 'string',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Navn på spillested må fylles ut'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'URL-en som brukes for å finne dette spillestedet på nettsiden',
+      description: 'Trykk generer for å lage URL',
       options: {
         source: 'title',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required().custom(venueSlugValidation),
+      validation: (Rule) => Rule.warning().custom(async (value, context) => {
+        // Først sjekk custom slug validering
+        const slugValidation = await venueSlugValidation(value, context)
+        if (slugValidation !== true) return slugValidation
+        
+        // Så sjekk om slug mangler, men kun hvis tittel finnes
+        if (!value?.current && context.document?.title) {
+          return 'Trykk generer for å lage URL'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'address',
       title: 'Adresse',
       type: 'string',
       description: 'Fysisk adresse for spillestedet',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'linkText',
-      title: 'Lenketekst',
-      type: 'string',
-      description: 'Teksten som vises som lenke til lokasjon',
       fieldset: 'link',
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'linkUrl',
       title: 'Lenke-URL',
       type: 'url',
-      description: 'URL til Google Maps eller annen lokasjon',
+      description: 'Lenke til kart eller nettside (f.eks. Google Maps)',
       fieldset: 'link',
-      validation: (Rule) =>
-        Rule.required().uri({
-          scheme: ['http', 'https'],
-        }),
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        // Hvis adresse er fylt ut, må URL også fylles ut
+        if (context.document?.address && !value) {
+          return 'Lenke-URL bør fylles ut når adresse er definert'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'openInNewTab',
@@ -71,10 +81,9 @@ export const venue = defineType({
     select: {
       title: 'title',
       address: 'address',
-      linkText: 'linkText',
       linkUrl: 'linkUrl',
     },
-    prepare({title, address, linkText, linkUrl}) {
+    prepare({title, address, linkUrl}) {
       let hostname = 'Ingen URL'
       try {
         if (linkUrl) {
@@ -86,7 +95,7 @@ export const venue = defineType({
       
       return {
         title: title,
-        subtitle: `${address || 'Ingen adresse'} • ${linkText || 'Ingen lokasjon'} • ${hostname}`,
+        subtitle: `${address || 'Ingen adresse'} • ${hostname}`,
         media: HomeIcon,
       };
     },

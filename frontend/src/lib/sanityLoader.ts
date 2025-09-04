@@ -97,7 +97,12 @@ export function createSanityLoader(config: SanityLoaderConfig): Loader {
  */
 export const eventLoader = createSanityLoader({
   type: 'event',
-  query: `*[_type == "event" && isPublished == true] | order(eventDate->date asc) {
+  query: `*[_type == "event" && (
+    publishingStatus == "published" ||
+    (publishingStatus == "scheduled" && 
+     now() >= scheduledPeriod.startDate && 
+     now() <= scheduledPeriod.endDate)
+  )] | order(eventDate->date asc) {
     _id,
     _type,
     title,
@@ -147,7 +152,12 @@ export const eventLoader = createSanityLoader({
 
 export const artistLoader = createSanityLoader({
   type: 'artist',
-  query: `*[_type == "artist" && isPublished == true] | order(name asc) {
+  query: `*[_type == "artist" && (
+    publishingStatus == "published" ||
+    (publishingStatus == "scheduled" && 
+     now() >= scheduledPeriod.startDate && 
+     now() <= scheduledPeriod.endDate)
+  )] | order(name asc) {
     _id,
     _type,
     name,
@@ -175,7 +185,12 @@ export const artistLoader = createSanityLoader({
 
 export const articleLoader = createSanityLoader({
   type: 'article',
-  query: `*[_type == "article" && isPublished == true] | order(_createdAt desc) {
+  query: `*[_type == "article" && (
+    publishingStatus == "published" ||
+    (publishingStatus == "scheduled" && 
+     now() >= scheduledPeriod.startDate && 
+     now() <= scheduledPeriod.endDate)
+  )] | order(_createdAt desc) {
     _id,
     _type,
     title,
@@ -254,6 +269,31 @@ export const genreLoader = createSanityLoader({
     _type,
     title,
     slug,
+    _updatedAt
+  }`,
+  parseContent: (entry) => ({
+    ...entry,
+    slug: entry.slug?.current || '',
+    lastUpdated: new Date(entry._updatedAt)
+  })
+})
+
+export const pageLoader = createSanityLoader({
+  type: 'page',
+  query: `*[_type == "page" && (
+    publishingStatus == "published" ||
+    (publishingStatus == "scheduled" && 
+     now() >= scheduledPeriod.startDate && 
+     now() <= scheduledPeriod.endDate)
+  )] | order(_createdAt desc) {
+    _id,
+    _type,
+    title,
+    slug,
+    content,
+    publishingStatus,
+    scheduledPeriod,
+    _createdAt,
     _updatedAt
   }`,
   parseContent: (entry) => ({
