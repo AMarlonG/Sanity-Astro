@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {UserIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {UserIcon, ImageIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
 
 export const artist = defineType({
@@ -13,6 +13,11 @@ export const artist = defineType({
       title: 'Grunnleggende informasjon',
       icon: UserIcon,
       default: true,
+    },
+    {
+      name: 'image',
+      title: 'Hovedbilde',
+      icon: ImageIcon,
     },
     {
       name: 'content',
@@ -96,6 +101,56 @@ export const artist = defineType({
       type: 'pageBuilder',
       description: 'Bygg artist-siden med komponenter og innhold',
       group: 'content',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Hovedbilde',
+      type: 'image',
+      description: 'Hovedbilde for artisten - brukes på artistsiden og når siden deles på sosiale medier',
+      group: 'image',
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Hovedbilde bør lastes opp'
+        }
+        return true
+      }),
+      options: {
+        hotspot: true,
+        accept: 'image/*',
+      },
+    }),
+    defineField({
+      name: 'imageCredit',
+      title: 'Kreditering',
+      type: 'string',
+      description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
+      group: 'image',
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (context.document?.image && !value) {
+          return 'Kreditering bør fylles ut når bilde er lastet opp'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'imageAlt',
+      title: 'Alt-tekst',
+      type: 'string',
+      description: 'Beskriv bildet for tilgjengelighet og SEO',
+      group: 'image',
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (context.document?.image && !value) {
+          return 'Alt-tekst bør fylles ut når bilde er lastet opp'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'imageCaption',
+      title: 'Bildetekst',
+      type: 'string',
+      description: 'Valgfri tekst som kan vises med bildet',
+      group: 'image',
     }),
     defineField({
       name: 'publishingStatus',

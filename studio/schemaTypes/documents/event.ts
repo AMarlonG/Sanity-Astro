@@ -17,6 +17,11 @@ export const event = defineType({
       default: true,
     },
     {
+      name: 'image',
+      title: 'Hovedbilde',
+      icon: ImageIcon,
+    },
+    {
       name: 'timing',
       title: 'Tidspunkt & sted',
       icon: ClockIcon,
@@ -40,7 +45,7 @@ export const event = defineType({
       group: 'basic',
       validation: (Rule) => Rule.warning().custom((value, context) => {
         // Kun vis advarsel hvis brukeren prøver å publisere uten tittel
-        if (!value && context.document?.isPublished) {
+        if (!value && context.document?.publishingStatus === 'published') {
           return 'Navn på arrangement bør fylles ut før publisering'
         }
         return true
@@ -72,7 +77,7 @@ export const event = defineType({
       group: 'basic',
       rows: 2,
       validation: (Rule) => Rule.warning().max(100).custom((value, context) => {
-        if (!value && context.document?.isPublished) {
+        if (!value && context.document?.publishingStatus === 'published') {
           return 'Ingress bør fylles ut før publisering'
         }
         return true
@@ -105,7 +110,7 @@ export const event = defineType({
       title: 'Dato',
       type: 'reference',
       to: [{type: 'eventDate'}],
-      description: 'Velg fra de konfigurerte arrangementsdatoene',
+      description: 'Velg fra de konfigurerte festivaldatoene',
       group: 'timing',
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
@@ -135,7 +140,7 @@ export const event = defineType({
             list: eventTimeOptions,
           },
           validation: (Rule) => Rule.warning().custom((value, context) => {
-            if (!value && context.document?.isPublished) {
+            if (!value && context.document?.publishingStatus === 'published') {
               return 'Starttidspunkt bør fylles ut før publisering'
             }
             return true
@@ -150,7 +155,7 @@ export const event = defineType({
             list: eventTimeOptions,
           },
           validation: (Rule) => Rule.warning().custom((value, context) => {
-            if (!value && context.document?.isPublished) {
+            if (!value && context.document?.publishingStatus === 'published') {
               return 'Sluttidspunkt bør fylles ut før publisering'
             }
             return true
@@ -158,7 +163,7 @@ export const event = defineType({
         },
       ],
       validation: (Rule) => Rule.warning().custom((value, context) => {
-        if ((!value?.startTime || !value?.endTime) && context.document?.isPublished) {
+        if ((!value?.startTime || !value?.endTime) && context.document?.publishingStatus === 'published') {
           return 'Klokkeslett bør fylles ut før publisering'
         }
         return true
@@ -170,6 +175,56 @@ export const event = defineType({
       type: 'pageBuilder',
       description: 'Bygg arrangement-siden med komponenter og innhold',
       group: 'content',
+    }),
+    defineField({
+      name: 'image',
+      title: 'Hovedbilde',
+      type: 'image',
+      description: 'Hovedbilde for arrangementet - brukes på arrangementssiden og når siden deles på sosiale medier',
+      group: 'image',
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Hovedbilde bør lastes opp'
+        }
+        return true
+      }),
+      options: {
+        hotspot: true,
+        accept: 'image/*',
+      },
+    }),
+    defineField({
+      name: 'imageCredit',
+      title: 'Kreditering',
+      type: 'string',
+      description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
+      group: 'image',
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (context.document?.image && !value) {
+          return 'Kreditering bør fylles ut når bilde er lastet opp'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'imageAlt',
+      title: 'Alt-tekst',
+      type: 'string',
+      description: 'Beskriv bildet for tilgjengelighet og SEO',
+      group: 'image',
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (context.document?.image && !value) {
+          return 'Alt-tekst bør fylles ut når bilde er lastet opp'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'imageCaption',
+      title: 'Bildetekst',
+      type: 'string',
+      description: 'Valgfri tekst som kan vises med bildet',
+      group: 'image',
     }),
     defineField({
       name: 'publishingStatus',
@@ -248,20 +303,20 @@ export const event = defineType({
       startTime: 'eventTime.startTime',
       endTime: 'eventTime.endTime',
       genre: 'genre.title',
-      isPublished: 'isPublished',
+      publishingStatus: 'publishingStatus',
       scheduledStart: 'scheduledPeriod.startDate',
       scheduledEnd: 'scheduledPeriod.endDate',
       isFeatured: 'isFeatured',
     },
     prepare(selection) {
-      const {title, venue, artists, media, eventDate, eventDateDate, startTime, endTime, genre, isPublished, scheduledStart, scheduledEnd, isFeatured} = selection
+      const {title, venue, artists, media, eventDate, eventDateDate, startTime, endTime, genre, publishingStatus, scheduledStart, scheduledEnd, isFeatured} = selection
       
       // Status indicator logic
       let statusText = 'Utkast';
       
-      if (isPublished) {
+      if (publishingStatus === 'published') {
         statusText = 'Publisert';
-      } else if (scheduledStart && scheduledEnd) {
+      } else if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
         const now = new Date();
         const start = new Date(scheduledStart);
         const end = new Date(scheduledEnd);

@@ -10,7 +10,7 @@ export const venue = defineType({
   fieldsets: [
     {
       name: 'link',
-      title: 'Lokasjon',
+      title: 'Adresse',
       description: 'Lenke til Google Maps eller annen lokasjon',
     },
   ],
@@ -49,9 +49,9 @@ export const venue = defineType({
     }),
     defineField({
       name: 'address',
-      title: 'Adresse',
+      title: 'Postadresse',
       type: 'string',
-      description: 'Fysisk adresse for spillestedet',
+      description: 'F.eks. Storgata 3, 0150 Byen',
       fieldset: 'link',
     }),
     defineField({

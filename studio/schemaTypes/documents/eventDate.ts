@@ -3,18 +3,44 @@ import {CalendarIcon} from '@sanity/icons'
 
 export const eventDate = defineType({
   name: 'eventDate',
-  title: 'Arrangementsdatoer',
+  title: 'Festivaldatoer',
   type: 'document',
   icon: CalendarIcon,
   fields: [
     defineField({
       name: 'date',
-      title: 'Arrangementsdato',
+      title: 'Festivaldato',
       type: 'date',
       description: 'Velg dato for arrangementet (ukedag vises automatisk)',
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
           return 'Dato må velges'
+        }
+        return true
+      }),
+    }),
+
+    defineField({
+      name: 'slug',
+      title: 'URL',
+      type: 'slug',
+      description: 'Trykk generer for å lage URL',
+      options: {
+        source: (doc) => {
+          if (doc.date) {
+            const dateObj = new Date(doc.date)
+            const weekdays = ['sondag', 'mandag', 'tirsdag', 'onsdag', 'torsdag', 'fredag', 'lordag']
+            const weekday = weekdays[dateObj.getDay()]
+            const dateString = dateObj.toLocaleDateString('nb-NO')
+            return `${weekday}-${dateString.replace(/\./g, '-').replace(/--/g, '-')}`
+          }
+          return 'festivaldato'
+        },
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.date) {
+          return 'Trykk generer for å lage URL'
         }
         return true
       }),

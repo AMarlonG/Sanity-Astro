@@ -42,7 +42,7 @@ export const structure = (S: StructureBuilder) =>
       // Sjangre & Spillesteder
       S.listItem().title('Spillesteder').icon(HomeIcon).child(S.documentTypeList('venue')),
       S.listItem()
-        .title('Arrangementsdatoer')
+        .title('Festivaldatoer')
         .icon(CalendarIcon)
         .child(S.documentTypeList('eventDate')),
       S.listItem().title('Sjangre').icon(TagIcon).child(S.documentTypeList('genre')),
