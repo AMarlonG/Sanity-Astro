@@ -4,17 +4,19 @@ interface Props {
   text: string;
   id?: string;
   className?: string;
+  _key?: string;
+  _type?: string;
 }
 
-const { level, text, id, className = '' } = Astro.props;
+const { level, text, id, className = '', _key, _type } = Astro.props;
 ---
 
-<div class={`heading-component ${className}`}>
-  {level === 'h2' && <h2 id={id}>{text}</h2>}
-  {level === 'h3' && <h3 id={id}>{text}</h3>}
-  {level === 'h4' && <h4 id={id}>{text}</h4>}
-  {level === 'h5' && <h5 id={id}>{text}</h5>}
-  {level === 'h6' && <h6 id={id}>{text}</h6>}
+<div class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>
+  {level === 'h2' && <h2 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h2>}
+  {level === 'h3' && <h3 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h3>}
+  {level === 'h4' && <h4 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h4>}
+  {level === 'h5' && <h5 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h5>}
+  {level === 'h6' && <h6 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h6>}
 </div>
 
 <style>

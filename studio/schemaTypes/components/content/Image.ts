@@ -6,27 +6,11 @@ export const imageComponent = defineType({
   title: 'Bilde',
   type: 'object',
   icon: DocumentIcon,
-  groups: [
-    {
-      name: 'content',
-      title: 'Innhold',
-      default: true,
-    },
-    {
-      name: 'display',
-      title: 'Visning',
-    },
-    {
-      name: 'accessibility',
-      title: 'Tilgjengelighet',
-    },
-  ],
   fields: [
     defineField({
       name: 'image',
       title: 'Bilde',
       type: 'image',
-      group: 'content',
       description:
         'Last opp eller velg et bilde. Sanity optimaliserer bildet automatisk for nettsiden.',
       validation: (Rule) => Rule.required().error('Bilde er påkrevd'),
@@ -36,73 +20,41 @@ export const imageComponent = defineType({
       },
     }),
     defineField({
-      name: 'alt',
-      title: 'Alt-tekst',
-      type: 'string',
-      group: 'accessibility',
-      description:
-        'Valgfritt: Beskriv bildet for tilgjengelighet og SEO. La stå tomt hvis bildet er dekorativt eller ikke har informasjonsverdi.',
-    }),
-    defineField({
       name: 'aspectRatio',
       title: 'Bildeformat',
       type: 'string',
-      group: 'display',
       description: 'Velg format for bildet (bredde:høyde)',
       options: {
         list: [
           {title: 'Portrett (4:5)', value: '4:5'},
           {title: 'Kvadrat (1:1)', value: '1:1'},
           {title: 'Landskap (16:9)', value: '16:9'},
-          {title: 'Portrett (9:16)', value: '9:16'},
+          {title: 'Stående (9:16)', value: '9:16'},
         ],
       },
       initialValue: '16:9',
     }),
     defineField({
-      name: 'caption',
-      title: 'Bildetekst',
-      type: 'string',
-      group: 'content',
-      description: 'Valgfri tekst som vises under bildet',
-    }),
-    defineField({
       name: 'credit',
       title: 'Kreditering',
       type: 'string',
-      group: 'content',
       description:
         'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
       validation: (Rule) => Rule.required().error('Kreditering er påkrevd'),
     }),
     defineField({
-      name: 'alignment',
-      title: 'Justering',
+      name: 'alt',
+      title: 'Alt-tekst',
       type: 'string',
-      group: 'display',
-      options: {
-        list: [
-          {title: 'Venstre', value: 'left'},
-          {title: 'Senter', value: 'center'},
-          {title: 'Høyre', value: 'right'},
-        ],
-      },
-      initialValue: 'center',
+      description:
+        'Beskriv bildet for tilgjengelighet og SEO.',
+      validation: (Rule) => Rule.required().error('Alt-tekst er påkrevd'),
     }),
     defineField({
-      name: 'size',
-      title: 'Størrelse',
+      name: 'caption',
+      title: 'Bildetekst',
       type: 'string',
-      group: 'display',
-      options: {
-        list: [
-          {title: 'Liten', value: 'small'},
-          {title: 'Medium', value: 'medium'},
-          {title: 'Stor', value: 'large'},
-          {title: 'Full bredde', value: 'full'},
-        ],
-      },
-      initialValue: 'medium',
+      description: 'Valgfri tekst som vises under bildet',
     }),
   ],
   preview: {

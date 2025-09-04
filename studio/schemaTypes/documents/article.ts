@@ -29,28 +29,29 @@ export const article = defineType({
       name: 'title',
       title: 'Hovedtittel',
       type: 'string',
-      group: 'basic',
       validation: (Rule) => Rule.required(),
+      group: 'basic',
     }),
     defineField({
-      name: 'subtitle',
-      title: 'Undertittel',
-      type: 'string',
-      description: 'Valgfri undertittel som vises som H2',
+      name: 'excerpt',
+      title: 'Ingress',
+      type: 'text',
+      description: 'Kort beskrivelse av artikkelen (vises i lister)',
+      rows: 2,
+      validation: (Rule) => Rule.required().max(100),
       group: 'basic',
-      validation: (Rule) => Rule.max(200),
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
       description: 'URL-en som brukes for å finne denne artikkelen på nettsiden',
-      group: 'basic',
       options: {
         source: 'title',
         maxLength: 96,
       },
       validation: (Rule) => Rule.required(),
+      group: 'basic',
     }),
     defineField({
       name: 'content',
@@ -61,18 +62,17 @@ export const article = defineType({
     }),
     defineField({
       name: 'isPublished',
-      title: 'Publisert',
+      title: 'Publisering',
       type: 'boolean',
-      description: 'Denne artikkelen er synlig på nettsiden',
-      group: 'scheduling',
+      description: 'På: Synlig på nettsiden | Av: Skjult på nettsiden | Slett: Fjern helt (bruk slett-knappen)',
       initialValue: false,
+      group: 'scheduling',
     }),
     defineField({
       name: 'scheduledPeriod',
       title: 'Planlagt periode',
       type: 'object',
       hidden: ({document}) => document?.isPublished === true,
-      group: 'scheduling',
       fieldsets: [
         {
           name: 'timing',
@@ -95,23 +95,22 @@ export const article = defineType({
           fieldset: 'timing',
         },
       ],
+      group: 'scheduling',
     }),
   ],
   preview: {
     select: {
       title: 'title',
-      subtitle: 'subtitle',
+      excerpt: 'excerpt',
       isPublished: 'isPublished',
       startDate: 'scheduledPeriod.startDate',
       endDate: 'scheduledPeriod.endDate',
     },
-    prepare({title, subtitle, isPublished, startDate, endDate}) {
+    prepare({title, excerpt, isPublished, startDate, endDate}) {
       // Status logic
-      let statusIcon = '⚫';
       let statusText = 'Utkast';
       
       if (isPublished) {
-        statusIcon = '🟢';
         statusText = 'Publisert';
       } else if (startDate && endDate) {
         const now = new Date();
@@ -119,20 +118,17 @@ export const article = defineType({
         const end = new Date(endDate);
         
         if (now >= start && now <= end) {
-          statusIcon = '🟢';
           statusText = 'Live';
         } else if (now < start) {
-          statusIcon = '🟡';
           statusText = 'Venter';
         } else {
-          statusIcon = '🔴';
           statusText = 'Utløpt';
         }
       }
       
       return {
-        title: `${statusIcon} ${title}`,
-        subtitle: `${subtitle || 'Ingen undertittel'} • ${statusText}`,
+        title: title,
+        subtitle: `${excerpt || 'Ingen ingress'} • ${statusText}`,
         media: DocumentIcon,
       };
     },

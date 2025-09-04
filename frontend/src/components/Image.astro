@@ -24,6 +24,9 @@ interface Props {
   sizes?: string;
   placeholder?: 'blur' | 'color' | 'empty';
   priority?: boolean;
+  // Visual editing props
+  _key?: string;
+  _type?: string;
 }
 
 const { 
@@ -40,7 +43,9 @@ const {
   formats = ['avif', 'webp', 'jpg'],
   sizes,
   placeholder = 'blur',
-  priority = false
+  priority = false,
+  _key,
+  _type
 } = Astro.props;
 
 // Convert aspect ratio to numeric value
@@ -105,9 +110,13 @@ const fallbackUrl = image ? createOptimizedImageUrl(image, {
 // Determine loading strategy
 const imageLoading = priority ? 'eager' : loading;
 const fetchPriority = priority ? 'high' : 'auto';
+
 ---
 
-<div class={`image-container image-${alignment} image-${size} ${className}`}>
+<div 
+  class={`image-container image-${alignment} image-${size} ${className}`}
+  data-sanity={_key ? `${_type}.${_key}` : _type}
+>
   {image ? (
     <picture>
       <img 

@@ -1,0 +1,138 @@
+---
+export interface Props {
+  targetEvent: any;
+  title?: string;
+  style?: 'large' | 'compact' | 'minimal';
+  completedMessage?: string;
+  hideWhenComplete?: boolean;
+}
+
+const { 
+  targetEvent, 
+  title, 
+  style = 'compact', 
+  completedMessage = 'Arrangementet har startet!',
+  hideWhenComplete = false 
+} = Astro.props;
+
+// Calculate time remaining server-side for initial render
+function getTimeRemaining(targetDate: Date) {
+  const now = new Date();
+  const diff = targetDate.getTime() - now.getTime();
+  
+  if (diff <= 0) {
+    return { expired: true };
+  }
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+  return { days, hours, minutes, expired: false };
+}
+
+// Get target date from event
+const eventDate = targetEvent?.eventDate?.date;
+const eventTime = targetEvent?.eventTime?.startTime || '00:00';
+
+// Debug logging
+console.log('Countdown Debug:', {
+  targetEvent,
+  eventDate,
+  eventTime,
+});
+
+// Default time remaining
+let timeRemaining = { expired: true, days: 0, hours: 0, minutes: 0 };
+let targetDate = null;
+let updateInterval = '60s';
+
+// Check if we have valid date
+if (eventDate) {
+  // Clean eventTime of any Unicode characters and whitespace
+  const cleanTime = eventTime.replace(/[^\d:]/g, '').trim();
+  console.log('Cleaning time:', { original: eventTime, cleaned: cleanTime, charCodes: [...eventTime].map(c => c.charCodeAt(0)) });
+  
+  // Parse cleaned time
+  const timeParts = cleanTime.split(':');
+  const hours = parseInt(timeParts[0] || '0', 10);
+  const minutes = parseInt(timeParts[1] || '0', 10);
+  
+  targetDate = new Date(eventDate);
+  targetDate.setHours(hours, minutes, 0, 0);
+  
+  console.log('Target date:', targetDate.toISOString());
+  
+  timeRemaining = getTimeRemaining(targetDate);
+  
+  // Determine update frequency based on time remaining
+  updateInterval = timeRemaining.days && timeRemaining.days > 1 
+    ? '3600s' // Update every hour when > 1 day
+    : '60s';   // Update every minute when < 1 day
+} else {
+  console.error('No event date found for countdown. TargetEvent:', targetEvent);
+}
+
+// Don't render if expired and hideWhenComplete is true
+if (timeRemaining.expired && hideWhenComplete) {
+  return null;
+}
+
+const eventId = targetEvent?._id;
+---
+
+<div 
+  class={`countdown countdown--${style}`}
+  hx-get={`/api/countdown?eventId=${eventId}`}
+  hx-trigger={`every ${updateInterval}`}
+  hx-swap="innerHTML"
+>
+  <div class="countdown__display">
+    {timeRemaining.expired ? (
+      <p class="countdown__expired">{completedMessage}</p>
+    ) : (
+      <p class="countdown__sentence">
+        {title && <span class="countdown__title-inline">{title} </span>}
+        {timeRemaining.days > 0 && <span>{timeRemaining.days} {timeRemaining.days === 1 ? 'dag' : 'dager'}, </span>}
+        {(timeRemaining.hours >= 0 && (timeRemaining.days > 0 || timeRemaining.hours > 0)) && <span>{timeRemaining.hours} {timeRemaining.hours === 1 ? 'time' : 'timer'} og </span>}
+        <span>{timeRemaining.minutes} {timeRemaining.minutes === 1 ? 'minutt' : 'minutter'}</span>
+      </p>
+    )}
+  </div>
+</div>
+
+<style>
+  .countdown {
+    text-align: center;
+    padding: var(--space-m);
+  }
+  
+  .countdown__sentence {
+    margin: 0;
+    font-size: var(--font-size-l);
+    line-height: 1.4;
+  }
+  
+  .countdown__title-inline {
+    font-weight: normal;
+  }
+  
+  /* Style variations */
+  .countdown--large .countdown__sentence {
+    font-size: var(--font-size-xl);
+  }
+  
+  .countdown--minimal {
+    padding: var(--space-xs);
+  }
+  
+  .countdown--minimal .countdown__sentence {
+    font-size: var(--font-size-m);
+  }
+  
+  .countdown__expired {
+    margin: 0;
+    font-size: var(--font-size-l);
+    font-style: italic;
+  }
+</style>

@@ -13,6 +13,7 @@ import {
   BoltIcon,
   CalendarIcon,
   ExpandIcon,
+  ClockIcon,
 } from '@sanity/icons'
 
 export const pageBuilder = defineType({
@@ -43,7 +44,7 @@ export const pageBuilder = defineType({
         {
           name: 'interactive',
           title: '🔘 Interaktiv',
-          of: ['buttonComponent', 'linkComponent', 'accordionComponent'],
+          of: ['buttonComponent', 'linkComponent', 'accordionComponent', 'countdownComponent'],
         },
         {
           name: 'sections',
@@ -316,6 +317,25 @@ export const pageBuilder = defineType({
             title: title || 'Accordion uten tittel',
             subtitle: subtitle ? `${subtitle.substring(0, 50)}...` : 'Ingen innhold',
             media: TiersIcon,
+          }
+        },
+      },
+    },
+    {
+      type: 'countdownComponent',
+      title: 'Nedtelling',
+      icon: ClockIcon,
+      preview: {
+        select: {
+          title: 'title',
+          eventTitle: 'targetEvent.title',
+          style: 'style',
+        },
+        prepare({title, eventTitle, style}) {
+          return {
+            title: title || 'Nedtelling',
+            subtitle: `til ${eventTitle || 'arrangement'} • ${style || 'compact'}`,
+            media: ClockIcon,
           }
         },
       },

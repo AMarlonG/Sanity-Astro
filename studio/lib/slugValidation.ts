@@ -15,12 +15,13 @@ export function createUniqueSlugValidation(documentType: string) {
     // Get the current document ID, handling both published and draft documents
     const currentDocId = document?._id?.replace(/^drafts\./, '')
     
-    // Query for documents with the same slug, excluding the current document
-    const query = `*[_type == $type && slug.current == $slug && _id != $id][0]`
+    // Query for documents with the same slug, excluding the current document (both published and draft versions)
+    const query = `*[_type == $type && slug.current == $slug && _id != $id && _id != $draftId][0]`
     const params = {
       type: documentType,
       slug: slug.current,
-      id: currentDocId
+      id: currentDocId,
+      draftId: `drafts.${currentDocId}`
     }
     
     try {

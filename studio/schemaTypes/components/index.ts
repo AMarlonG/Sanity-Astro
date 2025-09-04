@@ -22,8 +22,6 @@ export {
 export {portableTextBlock} from './content/PortableTextBlock'
 export {imageComponent, generateImageHtml, generateOptimizedImageUrl} from './content/Image'
 export {videoComponent, generateVideoHtml} from './content/Video'
-export {buttonComponent, generateButtonHtml} from './content/Button'
-export {linkComponent, generateLinkHtml} from './content/Link'
 
 // Layout Components
 export {columnLayout} from './layout/ColumnLayout'
@@ -32,6 +30,9 @@ export {spacer} from './layout/Spacer'
 
 // Interactive Components
 export {accordionComponent, generateAccordionHtml} from './interactive/Accordion'
+export {buttonComponent, generateButtonHtml} from './interactive/Button'
+export {countdownComponent} from './interactive/Countdown'
+export {linkComponent, generateLinkHtml} from './interactive/Link'
 
 // Section Components
 export {contentScrollContainer} from './sections/ContentScrollContainer'

@@ -1,8 +1,6 @@
 // Content Components - Elements focused on displaying information
-export {default as Button} from './Button'
 export {default as Heading} from './Heading'
 export {default as Image} from './Image'
-export {default as Link} from './Link'
 export {default as PortableText} from './PortableText'
 export {default as PortableTextBlock} from './PortableTextBlock'
 export {default as Quote} from './Quote'

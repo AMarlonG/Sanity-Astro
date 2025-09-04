@@ -75,9 +75,18 @@ export const venue = defineType({
       linkUrl: 'linkUrl',
     },
     prepare({title, address, linkText, linkUrl}) {
+      let hostname = 'Ingen URL'
+      try {
+        if (linkUrl) {
+          hostname = new URL(linkUrl).hostname
+        }
+      } catch (error) {
+        hostname = 'Ugyldig URL'
+      }
+      
       return {
         title: title,
-        subtitle: `${address || 'Ingen adresse'} • ${linkText || 'Ingen lokasjon'} • ${linkUrl ? new URL(linkUrl).hostname : 'Ingen URL'}`,
+        subtitle: `${address || 'Ingen adresse'} • ${linkText || 'Ingen lokasjon'} • ${hostname}`,
         media: HomeIcon,
       };
     },

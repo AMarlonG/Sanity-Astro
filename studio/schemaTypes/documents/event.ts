@@ -17,24 +17,9 @@ export const event = defineType({
       default: true,
     },
     {
-      name: 'image',
-      title: 'Bilde',
-      icon: ImageIcon,
-    },
-    {
-      name: 'artists',
-      title: 'Artister',
-      icon: UsersIcon,
-    },
-    {
       name: 'timing',
       title: 'Tidspunkt & sted',
       icon: ClockIcon,
-    },
-    {
-      name: 'button',
-      title: 'Knapp',
-      icon: LinkIcon,
     },
     {
       name: 'content',
@@ -50,7 +35,7 @@ export const event = defineType({
   fields: [
     defineField({
       name: 'title',
-      title: 'Tittel',
+      title: 'Navn på arrangement',
       type: 'string',
       group: 'basic',
       validation: (Rule) => Rule.required(),
@@ -68,21 +53,21 @@ export const event = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'excerpt',
+      title: 'Ingress',
+      type: 'text',
+      description: 'Kort beskrivelse av arrangementet (vises i lister)',
+      group: 'basic',
+      rows: 2,
+      validation: (Rule) => Rule.required().max(100),
+    }),
+    defineField({
       name: 'genre',
       title: 'Sjanger',
       type: 'reference',
       to: [{type: 'genre'}],
       description: 'Velg sjanger for arrangementet',
       group: 'basic',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'image',
-      title: 'Bilde',
-      type: 'imageComponent',
-      description: 'Hovedbilde for arrangementet med alt-tekst og kreditering',
-      group: 'image',
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'venue',
@@ -92,20 +77,6 @@ export const event = defineType({
       description: 'Velg spillestedet for arrangementet',
       group: 'timing',
       validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'artists',
-      title: 'Artister',
-      type: 'array',
-      of: [
-        {
-          type: 'reference',
-          to: [{type: 'artist'}],
-        },
-      ],
-      description: 'Velg artister som skal opptre på arrangementet',
-      group: 'artists',
-      validation: (Rule) => Rule.required().min(1),
     }),
     defineField({
       name: 'eventDate',
@@ -152,31 +123,6 @@ export const event = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: 'buttonText',
-      title: 'Knappetekst',
-      type: 'string',
-      group: 'button',
-      validation: (Rule) => Rule.required(),
-    }),
-    defineField({
-      name: 'buttonUrl',
-      title: 'Knapp-URL',
-      type: 'url',
-      description: 'URL-en knappen skal lede til (f.eks. billettkjøp)',
-      group: 'button',
-      validation: (Rule) =>
-        Rule.required().uri({
-          scheme: ['http', 'https'],
-        }),
-    }),
-    defineField({
-      name: 'buttonOpenInNewTab',
-      title: 'Åpne knapp i ny fane',
-      type: 'boolean',
-      group: 'button',
-      initialValue: true,
-    }),
-    defineField({
       name: 'content',
       title: 'Arrangementsinnhold',
       type: 'pageBuilder',
@@ -185,9 +131,9 @@ export const event = defineType({
     }),
     defineField({
       name: 'isPublished',
-      title: 'Publisert',
+      title: 'Publisering',
       type: 'boolean',
-      description: 'Dette arrangementet er synlig på nettsiden',
+      description: 'På: Synlig på nettsiden | Av: Skjult på nettsiden | Slett: Fjern helt (bruk slett-knappen)',
       group: 'scheduling',
       initialValue: false,
     }),
@@ -241,11 +187,9 @@ export const event = defineType({
       const {title, venue, artists, media, eventDate, eventDateDate, startTime, endTime, genre, isPublished, scheduledStart, scheduledEnd, isFeatured} = selection
       
       // Status indicator logic
-      let statusIcon = '⚫'; // Default: draft
       let statusText = 'Utkast';
       
       if (isPublished) {
-        statusIcon = '🟢';
         statusText = 'Publisert';
       } else if (scheduledStart && scheduledEnd) {
         const now = new Date();
@@ -253,19 +197,13 @@ export const event = defineType({
         const end = new Date(scheduledEnd);
         
         if (now >= start && now <= end) {
-          statusIcon = '🟢';
           statusText = 'Live';
         } else if (now < start) {
-          statusIcon = '🟡';
           statusText = 'Venter';
         } else {
-          statusIcon = '🔴';
           statusText = 'Utløpt';
         }
       }
-      
-      // Featured indicator
-      const featuredIcon = isFeatured ? '⭐ ' : '';
       
       const artistNames = artists?.map((artist: any) => artist.name).join(', ') || 'Ingen artister'
       const dateString = eventDateDate
@@ -283,9 +221,9 @@ export const event = defineType({
       const genreLabel = genre ? ` • ${genre}` : ''
       
       return {
-        title: `${statusIcon} ${featuredIcon}${title}`,
+        title: title,
         subtitle: `${dateLabel}${timeString} • ${venue || 'Ingen venue'} • ${artistNames}${genreLabel} • ${statusText}`,
-        media: media || '🎭',
+        media: media,
       }
     },
   },

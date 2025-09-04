@@ -12,11 +12,12 @@ import Accordion from '../components/Accordion.astro';
 import ContentScrollContainer from '../components/ContentScrollContainer.astro';
 import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
 import EventScrollContainer from '../components/EventScrollContainer.astro';
+import Countdown from '../components/Countdown.astro';
 
 // Get Visual Editing perspective
 const perspective = Astro.request.headers.get('cookie')?.includes('sanity-preview-mode=true') ? 'drafts' : 'published';
 
-// Load homepage
+// Load homepage with expanded countdown references
 const homepage = await sanityClient.fetch(
   `*[_type == "homepage" && (homePageType == "default" || 
     (homePageType == "scheduled" && 
@@ -26,7 +27,20 @@ const homepage = await sanityClient.fetch(
     title,
     homePageType,
     scheduledPeriod,
-    content
+    content[]{
+      ...,
+      _type == "countdownComponent" => {
+        ...,
+        targetEvent->{
+          _id,
+          title,
+          eventDate->{
+            date
+          },
+          eventTime
+        }
+      }
+    }
   }`,
   {},
   {
@@ -64,8 +78,8 @@ console.log('Aktiv forside:', homepage);
             {homepage.content.map((block) => (
               <div key={block._key || block._id}>
                 {block._type === 'portableTextBlock' && <PortableText content={block.content} />}
-                {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} />}
-                {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} />}
+                {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} _key={block._key} _type={block._type} />}
+                {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} credit={block.credit} alignment={block.alignment} size={block.size} aspectRatio={block.aspectRatio} _key={block._key} _type={block._type} />}
                 {block._type === 'videoComponent' && <Video url={block.url} title={block.title} thumbnail={block.thumbnail} />}
                 {block._type === 'buttonComponent' && <Button text={block.text} style={block.style} size={block.size} action={block.action} />}
                 {block._type === 'linkComponent' && <Link text={block.text} url={block.url} openInNewTab={block.openInNewTab} />}
@@ -74,8 +88,9 @@ console.log('Aktiv forside:', homepage);
                 {block._type === 'contentScrollContainer' && <ContentScrollContainer title={block.title} items={block.items} spacing={block.spacing} />}
                 {block._type === 'artistScrollContainer' && <ArtistScrollContainer title={block.title} items={block.items} cardFormat={block.cardFormat} />}
                 {block._type === 'eventScrollContainer' && <EventScrollContainer title={block.title} events={block.events} cardFormat={block.cardFormat} />}
+                {block._type === 'countdownComponent' && <Countdown targetEvent={block.targetEvent} title={block.title} style={block.style} completedMessage={block.completedMessage} hideWhenComplete={block.hideWhenComplete} />}
                 {/* Fallback for ukjent type */}
-                {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer' ].indexOf(block._type) === -1 && (
+                {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer', 'countdownComponent' ].indexOf(block._type) === -1 && (
                   <div>Ukjent komponent: {block._type}</div>
                 )}
               </div>
