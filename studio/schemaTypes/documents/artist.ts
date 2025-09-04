@@ -37,7 +37,7 @@ export const artist = defineType({
       type: 'string',
       validation: (Rule) => Rule.warning().custom((value, context) => {
         // Kun vis advarsel hvis brukeren prøver å publisere uten navn
-        if (!value && context.document?.isPublished) {
+        if (!value && context.document?.publishingStatus === 'published') {
           return 'Navn på artist bør fylles ut før publisering'
         }
         return true
@@ -223,16 +223,16 @@ export const artist = defineType({
       name: 'name',
       instrument: 'instrument',
       country: 'country',
-      isPublished: 'isPublished',
+      publishingStatus: 'publishingStatus',
       startDate: 'scheduledPeriod.startDate',
       endDate: 'scheduledPeriod.endDate',
       media: 'image.image',
     },
-    prepare({name, instrument, country, isPublished, startDate, endDate, media}) {
+    prepare({name, instrument, country, publishingStatus, startDate, endDate, media}) {
       // Publication status logic
       let statusText = 'Utkast';
       
-      if (isPublished) {
+      if (publishingStatus === 'published') {
         statusText = 'Publisert';
       } else if (startDate && endDate) {
         const now = new Date();

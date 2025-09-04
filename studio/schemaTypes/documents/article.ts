@@ -36,7 +36,7 @@ export const article = defineType({
       type: 'string',
       validation: (Rule) => Rule.warning().custom((value, context) => {
         // Kun vis advarsel hvis brukeren prøver å publisere uten tittel
-        if (!value && context.document?.isPublished) {
+        if (!value && context.document?.publishingStatus === 'published') {
           return 'Navn på artikkel bør fylles ut før publisering'
         }
         return true
@@ -197,15 +197,15 @@ export const article = defineType({
     select: {
       title: 'title',
       excerpt: 'excerpt',
-      isPublished: 'isPublished',
+      publishingStatus: 'publishingStatus',
       startDate: 'scheduledPeriod.startDate',
       endDate: 'scheduledPeriod.endDate',
     },
-    prepare({title, excerpt, isPublished, startDate, endDate}) {
+    prepare({title, excerpt, publishingStatus, startDate, endDate}) {
       // Status logic
       let statusText = 'Utkast';
       
-      if (isPublished) {
+      if (publishingStatus === 'published') {
         statusText = 'Publisert';
       } else if (startDate && endDate) {
         const now = new Date();
