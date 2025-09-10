@@ -27,6 +27,11 @@ export const event = defineType({
       icon: ClockIcon,
     },
     {
+      name: 'composers',
+      title: 'Komponister',
+      icon: ComposeIcon,
+    },
+    {
       name: 'content',
       title: 'Innhold',
       icon: ComposeIcon,
@@ -90,6 +95,19 @@ export const event = defineType({
       to: [{type: 'genre'}],
       description: 'Velg sjanger for arrangementet',
       group: 'basic',
+    }),
+    defineField({
+      name: 'composers',
+      title: 'Komponister',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'composer'}],
+        }
+      ],
+      description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
+      group: 'composers',
     }),
     defineField({
       name: 'venue',
