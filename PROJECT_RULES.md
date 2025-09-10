@@ -24,7 +24,7 @@ This is a small festival website with bilingual support (Norwegian/English). The
 
 ### ❌ DON'T
 - Add "best practices" from enterprise projects
-- Upgrade dependencies just to have "latest versions"
+- Upgrade to major new versions without clear benefit or security need
 - Add testing infrastructure unless genuinely needed
 - Add monitoring/analytics unless specifically required
 - Apply TypeScript strict settings that break existing code
@@ -55,7 +55,9 @@ If the answer to #4 is "yes", then probably don't change it.
 
 ### Dependency Management  
 - **Use `npm install --legacy-peer-deps`** for dependency conflicts
-- **Keep dependencies stable** - only update for security fixes or specific features needed
+- **Update for security and stability** - prioritize security patches and minor updates from trusted sources
+- **Sanity Studio updates** - keep reasonably current to get security fixes and bug improvements
+- **Avoid major version jumps** - update incrementally (4.4 → 4.5 → 4.6, not 4.4 → 5.0)
 - **Test after any dependency changes** - both studio and frontend must work
 
 ### API Configuration
