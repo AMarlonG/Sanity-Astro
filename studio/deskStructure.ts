@@ -8,6 +8,7 @@ import {
   HomeIcon,
   EarthGlobeIcon,
   DocumentsIcon,
+  ComposeIcon,
 } from '@sanity/icons'
 
 export const structure = (S: StructureBuilder) =>
@@ -46,4 +47,5 @@ export const structure = (S: StructureBuilder) =>
         .icon(CalendarIcon)
         .child(S.documentTypeList('eventDate')),
       S.listItem().title('Sjangre').icon(TagIcon).child(S.documentTypeList('genre')),
+      S.listItem().title('Komponister').icon(ComposeIcon).child(S.documentTypeList('composer')),
     ])

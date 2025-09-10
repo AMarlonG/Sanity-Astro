@@ -1,6 +1,7 @@
 import {homepage} from './documents/homepage'
 import {artist} from './documents/artist'
 import {genre} from './documents/genres'
+import {composer} from './documents/composer'
 import {siteSettings} from './documents/siteSettings'
 import {event} from './documents/event'
 import {venue} from './documents/venue'
@@ -17,6 +18,7 @@ export const schemaTypes = [
   homepage,
   artist,
   genre,
+  composer,
   siteSettings,
   event,
   venue,
