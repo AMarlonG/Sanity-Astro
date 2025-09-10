@@ -24,10 +24,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Build shared package
-        run: npm run build --workspace=@sanity-astro/shared
+        run: npm run build --workspace=shared
 
       - name: Build frontend
         run: npm run build:frontend
@@ -71,7 +71,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Build studio
         run: npm run build:studio

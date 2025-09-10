@@ -31,9 +31,9 @@ jobs:
 
       - name: Install dependencies in each workspace
         run: |
-          cd shared && npm install
-          cd ../studio && npm install  
-          cd ../frontend && npm install
+          cd shared && npm install --legacy-peer-deps
+          cd ../studio && npm install --legacy-peer-deps
+          cd ../frontend && npm install --legacy-peer-deps
 
       - name: Build shared package
         run: cd shared && npm run build
