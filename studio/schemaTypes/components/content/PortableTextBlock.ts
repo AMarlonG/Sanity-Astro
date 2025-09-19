@@ -3,9 +3,10 @@ import {TextIcon} from '@sanity/icons'
 
 export const portableTextBlock = defineType({
   name: 'portableTextBlock',
-  title: 'Legg til tekst',
+  title: 'Tekstinnhold',
   type: 'object',
   icon: TextIcon,
+  description: 'Opprett rik tekst med formatering, lenker, lister og mer. Perfekt for artikler og beskrivelser.',
   fields: [
     defineField({
       name: 'content',
@@ -21,7 +22,7 @@ export const portableTextBlock = defineType({
     prepare({content}) {
       // Hent første tekst fra portable text
       const firstText = content?.[0]?.children?.[0]?.text || ''
-      const displayTitle = 'Legg til tekst'
+      const displayTitle = 'Tekstinnhold'
       const displaySubtitle = firstText ? `${firstText.substring(0, 50)}...` : 'Ingen innhold'
 
       return {

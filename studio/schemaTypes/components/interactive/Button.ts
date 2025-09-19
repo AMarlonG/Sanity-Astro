@@ -9,16 +9,12 @@ export const buttonComponent = defineType({
   title: 'Knapp',
   type: 'object',
   icon: BoltIcon,
-  description: 'Knapp med fleksible design- og handlingsinnstillinger',
+  description: 'Opprett knapp for enten lenke eller handling',
   groups: [
     {
       name: 'content',
-      title: 'Innhold',
+      title: 'Innhold & Innstillinger',
       default: true,
-    },
-    {
-      name: 'settings',
-      title: 'Innstillinger',
     },
     designGroup,
   ],
@@ -43,7 +39,7 @@ export const buttonComponent = defineType({
       name: 'style',
       title: 'Stil',
       type: 'string',
-      group: 'settings',
+      group: 'content',
       description: 'Visuell stil på knappen',
       options: {
         list: [
@@ -59,7 +55,7 @@ export const buttonComponent = defineType({
       name: 'size',
       title: 'Størrelse',
       type: 'string',
-      group: 'settings',
+      group: 'content',
       description: 'Størrelse på knappen',
       options: {
         list: [
@@ -75,7 +71,7 @@ export const buttonComponent = defineType({
       name: 'icon',
       title: 'Ikon',
       type: 'string',
-      group: 'settings',
+      group: 'content',
       description: 'Valgfritt ikon som vises ved siden av teksten',
       options: {
         list: [
@@ -91,7 +87,7 @@ export const buttonComponent = defineType({
       name: 'iconPosition',
       title: 'Ikon posisjon',
       type: 'string',
-      group: 'settings',
+      group: 'content',
       description: 'Hvor ikonet skal plasseres',
       hidden: ({parent}) => !parent?.icon || parent?.icon === 'none',
       options: {
@@ -106,7 +102,7 @@ export const buttonComponent = defineType({
       name: 'fullWidth',
       title: 'Full bredde',
       type: 'boolean',
-      group: 'settings',
+      group: 'content',
       description: 'Strekk knappen over full container-bredde',
       initialValue: false,
     }),
@@ -114,7 +110,7 @@ export const buttonComponent = defineType({
       name: 'openInNewTab',
       title: 'Åpne i ny fane',
       type: 'boolean',
-      group: 'settings',
+      group: 'content',
       description: 'Åpne lenken i en ny fane',
       initialValue: false,
     }),
@@ -131,12 +127,24 @@ export const buttonComponent = defineType({
       theme: 'theme.variant',
     },
     prepare({title, style, size, icon, theme}) {
-      const iconText = icon && icon !== 'none' ? ` • ${icon}` : ''
-      const themeText = theme && theme !== 'default' ? ` • ${theme}` : ''
-      
+      // Lag realistisk beskrivelse av hvordan knappen ser ut
+      const styleDesc = {
+        'primary': 'Blå bakgrunn, hvit tekst',
+        'secondary': 'Grå bakgrunn, hvit tekst',
+        'outline': 'Gjennomsiktig bakgrunn, blå ramme'
+      }[style || 'primary'] || 'Blå bakgrunn, hvit tekst'
+
+      const sizeDesc = {
+        'small': 'liten',
+        'medium': 'medium',
+        'large': 'stor'
+      }[size || 'medium'] || 'medium'
+
+      const iconText = icon && icon !== 'none' ? ` • ${icon}-ikon` : ''
+
       return {
         title: title || 'Knapp uten tekst',
-        subtitle: `${style || 'primary'} • ${size || 'medium'}${iconText}${themeText}`,
+        subtitle: `${styleDesc} • ${sizeDesc} størrelse${iconText}`,
         media: BoltIcon,
       }
     },

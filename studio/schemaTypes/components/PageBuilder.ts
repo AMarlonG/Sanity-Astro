@@ -55,7 +55,6 @@ export const pageBuilder = defineType({
       views: [
         {
           name: 'grid',
-          previewImageUrl: (schemaTypeName) => `/static/preview-${schemaTypeName}.png`,
         },
         {
           name: 'list',

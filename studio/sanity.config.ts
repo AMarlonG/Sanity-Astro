@@ -3,6 +3,7 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {presentationTool} from 'sanity/presentation'
 import {nbNOLocale} from '@sanity/locale-nb-no'
+import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './deskStructure'
 
@@ -32,9 +33,10 @@ export default defineConfig({
   dataset: 'production',
 
   plugins: [
-    structureTool({structure}), 
-    visionTool(), 
+    structureTool({structure}),
+    visionTool(),
     nbNOLocale(),
+    unsplashImageAsset(),
     presentationTool({
       previewUrl: {
         origin: 'http://localhost:4321',

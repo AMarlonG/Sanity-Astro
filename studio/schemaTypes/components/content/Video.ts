@@ -6,6 +6,7 @@ export const videoComponent = defineType({
   title: 'Video',
   type: 'object',
   icon: DocumentIcon,
+  description: 'Legg til video fra YouTube, Vimeo eller last opp egen fil',
   groups: [
     {
       name: 'content',
@@ -14,11 +15,7 @@ export const videoComponent = defineType({
     },
     {
       name: 'display',
-      title: 'Visning',
-    },
-    {
-      name: 'playback',
-      title: 'Avspilling',
+      title: 'Visning & Avspilling',
     },
   ],
   fields: [
@@ -127,7 +124,7 @@ export const videoComponent = defineType({
       name: 'autoplay',
       title: 'Autoplay',
       type: 'boolean',
-      group: 'playback',
+      group: 'display',
       description: 'Start video automatisk når siden lastes',
       initialValue: false,
     }),
@@ -135,7 +132,7 @@ export const videoComponent = defineType({
       name: 'muted',
       title: 'Dempet',
       type: 'boolean',
-      group: 'playback',
+      group: 'display',
       description: 'Start video dempet (kreves for autoplay)',
       initialValue: true,
     }),
@@ -143,7 +140,7 @@ export const videoComponent = defineType({
       name: 'controls',
       title: 'Kontroller',
       type: 'boolean',
-      group: 'playback',
+      group: 'display',
       description: 'Vis video-kontroller',
       initialValue: true,
     }),
@@ -151,7 +148,7 @@ export const videoComponent = defineType({
       name: 'loop',
       title: 'Loop',
       type: 'boolean',
-      group: 'playback',
+      group: 'display',
       description: 'Spill video på nytt når den er ferdig',
       initialValue: false,
     }),

@@ -40,6 +40,7 @@ export const schemaTypes = [
   components.accordionComponent,
   components.countdownComponent,
   components.pageBuilder,
+  components.pageBuilderWithoutTitle,
   components.columnLayout,
   components.gridLayout,
   components.spacer,

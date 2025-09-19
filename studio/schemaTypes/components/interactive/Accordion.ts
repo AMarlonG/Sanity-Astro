@@ -4,7 +4,7 @@ import {generateQuoteHtml} from '../content/Quote'
 
 export const accordionComponent = defineType({
   name: 'accordionComponent',
-  title: 'Sammenleggbar seksjon',
+  title: 'Nedtrekksmeny',
   type: 'object',
   icon: DocumentIcon,
   fields: [
@@ -12,26 +12,26 @@ export const accordionComponent = defineType({
       name: 'title',
       title: 'Tittel',
       type: 'string',
-      description: 'Hovedtittel for accordion-komponenten',
+      description: 'Hovedtittel for nedtrekksmenyen',
       validation: (Rule) => Rule.required().error('Tittel er påkrevd'),
     }),
     defineField({
       name: 'description',
       title: 'Beskrivelse',
       type: 'text',
-      description: 'Valgfri beskrivelse som vises over accordion-panelene',
+      description: 'Valgfri beskrivelse som vises over nedtrekksmenyen',
     }),
     defineField({
       name: 'panels',
       title: 'Paneler',
       type: 'array',
-      description: 'Legg til accordion-paneler',
+      description: 'Lag seksjoner som kan klikkes for å åpne og lukke innhold',
       validation: (Rule) => Rule.required().min(1).error('Minst ett panel er påkrevd'),
       of: [
         {
           type: 'object',
           name: 'accordionPanel',
-          title: 'Accordion Panel',
+          title: 'Panel',
           fields: [
             {
               name: 'title',

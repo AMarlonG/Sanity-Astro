@@ -26,7 +26,7 @@ export const artist = defineType({
     },
     {
       name: 'scheduling',
-      title: 'Tidsstyring',
+      title: 'Publisering',
       icon: CogIcon,
     },
   ],
@@ -98,8 +98,8 @@ export const artist = defineType({
     defineField({
       name: 'content',
       title: 'Artistinnhold',
-      type: 'pageBuilder',
-      description: 'Bygg artist-siden med komponenter og innhold',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Bygg artist-siden med komponenter og innhold (artistnavn er allerede H1)',
       group: 'content',
     }),
     defineField({

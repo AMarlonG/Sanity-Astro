@@ -12,7 +12,7 @@ export const event = defineType({
   groups: [
     {
       name: 'basic',
-      title: 'Grunnleggende informasjon',
+      title: 'Arrangementinfo',
       icon: CalendarIcon,
       default: true,
     },
@@ -22,23 +22,13 @@ export const event = defineType({
       icon: ImageIcon,
     },
     {
-      name: 'timing',
-      title: 'Tidspunkt & sted',
-      icon: ClockIcon,
-    },
-    {
-      name: 'composers',
-      title: 'Komponister',
-      icon: ComposeIcon,
-    },
-    {
       name: 'content',
       title: 'Innhold',
       icon: ComposeIcon,
     },
     {
       name: 'scheduling',
-      title: 'Tidsstyring',
+      title: 'Publisering',
       icon: CogIcon,
     },
   ],
@@ -107,7 +97,7 @@ export const event = defineType({
         }
       ],
       description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
-      group: 'composers',
+      group: 'content',
     }),
     defineField({
       name: 'venue',
@@ -115,7 +105,7 @@ export const event = defineType({
       type: 'reference',
       to: [{type: 'venue'}],
       description: 'Velg spillestedet for arrangementet',
-      group: 'timing',
+      group: 'basic',
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
           return 'Spillested må velges'
@@ -129,7 +119,7 @@ export const event = defineType({
       type: 'reference',
       to: [{type: 'eventDate'}],
       description: 'Velg fra de konfigurerte festivaldatoene',
-      group: 'timing',
+      group: 'basic',
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
           return 'Dato må velges'
@@ -141,7 +131,7 @@ export const event = defineType({
       name: 'eventTime',
       title: 'Klokkeslett',
       type: 'object',
-      group: 'timing',
+      group: 'basic',
       fieldsets: [
         {
           name: 'timing',
@@ -190,8 +180,8 @@ export const event = defineType({
     defineField({
       name: 'content',
       title: 'Arrangementsinnhold',
-      type: 'pageBuilder',
-      description: 'Bygg arrangement-siden med komponenter og innhold',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Bygg arrangement-siden med komponenter og innhold (arrangementsnavn er allerede H1)',
       group: 'content',
     }),
     defineField({

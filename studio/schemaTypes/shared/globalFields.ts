@@ -12,7 +12,7 @@ export const spacingFields = [
     description: 'Kontroller avstand rundt komponenten',
     options: {
       collapsible: true,
-      collapsed: true,
+      collapsed: false,
     },
     fields: [
       defineField({
@@ -95,7 +95,7 @@ export const themeFields = [
     description: 'Kontroller utseende og stil på komponenten',
     options: {
       collapsible: true,
-      collapsed: true,
+      collapsed: false,
     },
     fields: [
       defineField({
@@ -175,7 +175,7 @@ export const animationFields = [
     description: 'Kontroller animasjoner og effekter',
     options: {
       collapsible: true,
-      collapsed: true,
+      collapsed: false,
     },
     fields: [
       defineField({

@@ -10,25 +10,25 @@ export function escapeHtml(text: string): string {
 
 export const title = defineType({
   name: 'title',
-  title: 'Title',
+  title: 'Tittel',
   type: 'object',
   icon: DocumentTextIcon,
   fields: [
     defineField({
       name: 'mainTitle',
-      title: 'Main Title (H1)',
+      title: 'Hovedtittel (H1)',
       type: 'string',
-      description: 'The primary title of the document. This will be rendered as an H1 tag.',
+      description: 'Hovedtittelen til dokumentet. Denne vises som en H1-tag.',
       validation: (Rule) =>
-        Rule.required().error('Main title is required for SEO and accessibility'),
+        Rule.required().error('Hovedtittel er påkrevd for SEO og tilgjengelighet'),
     }),
     defineField({
       name: 'subtitle',
-      title: 'Subtitle (H2)',
+      title: 'Undertittel (H2)',
       type: 'string',
-      description: 'Optional subtitle that will be rendered as an H2 tag below the main title.',
+      description: 'Valgfri undertittel som vises som en H2-tag under hovedtittelen.',
       validation: (Rule) =>
-        Rule.max(200).warning('Subtitles should be concise for better readability'),
+        Rule.max(200).warning('Undertitler bør være korte for bedre lesbarhet'),
     }),
   ],
   preview: {
@@ -38,8 +38,8 @@ export const title = defineType({
     },
     prepare({title, subtitle}) {
       return {
-        title: title || 'Untitled',
-        subtitle: subtitle ? `Subtitle: ${subtitle}` : 'No subtitle',
+        title: title || 'Uten tittel',
+        subtitle: subtitle ? `Undertittel: ${subtitle}` : 'Ingen undertittel',
         media: DocumentTextIcon,
       }
     },

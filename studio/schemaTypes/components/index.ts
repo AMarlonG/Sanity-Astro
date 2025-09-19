@@ -41,3 +41,4 @@ export {eventScrollContainer} from './sections/EventScrollContainer'
 
 // Page Builder
 export {pageBuilder} from './PageBuilder'
+export {pageBuilderWithoutTitle} from './PageBuilderWithoutTitle'

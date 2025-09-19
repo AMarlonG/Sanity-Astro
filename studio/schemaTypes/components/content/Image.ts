@@ -6,6 +6,7 @@ export const imageComponent = defineType({
   title: 'Bilde',
   type: 'object',
   icon: DocumentIcon,
+  description: 'Last opp et bilde med alt-tekst og bildetekst for bedre tilgjengelighet',
   fields: [
     defineField({
       name: 'image',

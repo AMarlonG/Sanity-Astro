@@ -30,10 +30,10 @@ export const columnLayout = defineType({
     // Layout Type
     defineField({
       name: 'layoutType',
-      title: 'Layout Type',
+      title: 'Layout-type',
       type: 'string',
       group: 'layout',
-      description: 'Velg grunnleggende layout-mønster',
+      description: 'Hvordan skal komponentene arrangeres? Kolonner er mest vanlig.',
       options: {
         list: [
           {title: 'Kolonner (CSS Grid)', value: 'columns'},
@@ -48,10 +48,10 @@ export const columnLayout = defineType({
     // Desktop Layout
     defineField({
       name: 'desktopColumns',
-      title: 'Desktop Kolonner',
+      title: 'Kolonner på desktop',
       type: 'string',
       group: 'responsive',
-      description: 'Antall kolonner på desktop (>768px)',
+      description: 'Hvor mange kolonner ønsker du side ved side på store skjermer?',
       hidden: ({parent}) => parent?.layoutType !== 'columns',
       options: {
         list: [

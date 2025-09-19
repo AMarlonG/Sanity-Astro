@@ -10,9 +10,10 @@ export function escapeHtml(text: string): string {
 
 export const heading = defineType({
   name: 'headingComponent',
-  title: 'Overskrifter',
+  title: 'Overskrift',
   type: 'object',
   icon: BlockContentIcon,
+  description: 'Opprett overskrifter (H2-H6) for å strukturere innholdet ditt.',
   fields: [
     defineField({
       name: 'level',
@@ -121,7 +122,7 @@ export function validateHeadingHierarchy(
   if (hasTitleH2) {
     const hasH2InHeadings = headings.some((h) => h.level === 'h2')
     if (hasH2InHeadings) {
-      errors.push('H2 should only be used in the Title component, not in Headings')
+      errors.push('H2 bør bare brukes i Tittel-komponenten, ikke i Overskrifter')
     }
   }
 
@@ -132,7 +133,7 @@ export function validateHeadingHierarchy(
 
     if (currentLevel - previousLevel > 1) {
       errors.push(
-        `Heading hierarchy error at "${heading.text}": Cannot skip from H${previousLevel} to H${currentLevel}`,
+        `Overskriftshierarki-feil ved "${heading.text}": Kan ikke hoppe fra H${previousLevel} til H${currentLevel}`,
       )
     }
 
