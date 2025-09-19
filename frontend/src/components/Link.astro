@@ -34,17 +34,22 @@ const {
 let href = '#'
 let target = ''
 let rel = ''
+let isValidLink = false
 
 switch (linkType) {
   case 'internal':
     if (internalLink?.slug?.current) {
       href = `/${internalLink.slug.current}`
+      isValidLink = true
     }
     break
   case 'url':
     if (url) {
       href = url
-      if (openInNewTab) {
+      isValidLink = true
+      // Automatisk åpne eksterne lenker i ny fane
+      const isExternal = url.startsWith('http') && !url.includes(Astro.site?.hostname || 'localhost')
+      if (openInNewTab || isExternal) {
         target = '_blank'
         rel = 'noopener noreferrer'
       }
@@ -53,13 +58,20 @@ switch (linkType) {
   case 'email':
     if (email) {
       href = `mailto:${email}`
+      isValidLink = true
     }
     break
   case 'phone':
     if (phone) {
       href = `tel:${phone}`
+      isValidLink = true
     }
     break
+}
+
+// Fallback for ugyldige lenker
+if (!isValidLink) {
+  console.warn('Link component: Invalid or missing link data', { linkType, internalLink, url, email, phone })
 }
 
 // Bygg ARIA-attributter
@@ -86,23 +98,72 @@ if (accessibility?.ariaDescribedBy) {
 <style>
   .link-component {
     color: #0066cc;
-    text-decoration: none;
-    transition: color 0.2s ease;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: 1px;
+    transition: all 0.2s ease;
+    min-height: 44px;
+    display: inline-block;
+    padding: 0.25rem 0;
+    word-break: break-word;
   }
 
   .link-component:hover {
     color: #004499;
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   .link-component:focus {
     outline: 2px solid #0066cc;
     outline-offset: 2px;
+    background: rgba(0, 102, 204, 0.1);
+    border-radius: 2px;
   }
 
-  /* Tilgjengelighet for tastaturnavigasjon */
+  /* Moderne focus-visible for bedre tastaturnavigasjon */
   .link-component:focus-visible {
     outline: 2px solid #0066cc;
     outline-offset: 2px;
+    background: rgba(0, 102, 204, 0.1);
+    border-radius: 2px;
+  }
+
+  /* Forbedret kontrast for visited lenker */
+  .link-component:visited {
+    color: #663399;
+  }
+
+  .link-component:visited:hover {
+    color: #442266;
+  }
+
+  /* Eksterne lenker indikator */
+  .link-component[target="_blank"]::after {
+    content: ' ↗';
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin-left: 0.2em;
+  }
+
+  /* Mobiloptimalisering */
+  @media (max-width: 768px) {
+    .link-component {
+      min-height: 48px;
+      padding: 0.5rem 0;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .link-component {
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .link-component {
+      transition: none;
+    }
   }
 </style> 

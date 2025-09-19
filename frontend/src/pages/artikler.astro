@@ -1,205 +1,72 @@
 ---
-import type { SanityDocument } from "@sanity/client";
-import { sanityClient } from "sanity:client";
-import Layout from '../layouts/Layout.astro';
+import ContentPageLayout from '../layouts/ContentPageLayout.astro';
+import CardGrid from '../components/CardGrid.astro';
 import Image from '../components/Image.astro';
-import PortableText from '../components/PortableText.astro';
-import Heading from '../components/Heading.astro';
-import Video from '../components/Video.astro';
-import Button from '../components/Button.astro';
-import Link from '../components/Link.astro';
-import Quote from '../components/Quote.astro';
-import Accordion from '../components/Accordion.astro';
-import ContentScrollContainer from '../components/ContentScrollContainer.astro';
-import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
-import EventScrollContainer from '../components/EventScrollContainer.astro';
+import { createDataService } from '../lib/sanity/dataService.js';
 import { formatDateForLanguage } from '../../../shared/utils/dates';
 
+// Create data service with Visual Editing support
+const dataService = createDataService(Astro.request);
+
 // Hent artikler-siden innhold fra "Faste sider"
-const articlesPage = await sanityClient.fetch<SanityDocument>(`
-  *[_type == "page" && slug.current == "artikler"][0] {
-    title,
-    content
-  }
-`);
+const articlesPage = await dataService.getPageBySlug('artikler');
 
 // Hent alle publiserte artikler
-const articles = await sanityClient.fetch<SanityDocument[]>(`
-  *[_type == "article"] | order(_createdAt desc) {
-    _id, 
-    title,
-    slug,
-    subtitle,
-    publishedAt,
-    image,
-    content
-  }
-`);
+const articles = await dataService.getPublishedArticles();
 
 // Fallback values
 const pageTitle = articlesPage?.title || 'Artikler';
 ---
 
-<Layout title={`${pageTitle} - Sanity + Astro`}>
-  <main class="container">
-    <header class="page-header">
-      <h1 class="page-title">
-        {pageTitle}
-      </h1>
-    </header>
-    
-    <!-- Page content from schema -->
-    {articlesPage?.content && Array.isArray(articlesPage.content) && (
-      <div class="page-content">
-        {articlesPage.content.map((block) => (
-          <div key={block._key || block._id}>
-            {block._type === 'portableTextBlock' && <PortableText content={block.content} />}
-            {block._type === 'headingComponent' && <Heading level={block.level} text={block.text} id={block.id} />}
-            {block._type === 'imageComponent' && <Image image={block.image} alt={block.alt} caption={block.caption} />}
-            {block._type === 'videoComponent' && <Video url={block.url} title={block.title} thumbnail={block.thumbnail} />}
-            {block._type === 'buttonComponent' && <Button text={block.text} style={block.style} size={block.size} action={block.action} />}
-            {block._type === 'linkComponent' && <Link text={block.text} url={block.url} openInNewTab={block.openInNewTab} />}
-            {block._type === 'quoteComponent' && <Quote quote={block.quote} author={block.author} />}
-            {block._type === 'accordionComponent' && <Accordion title={block.title} content={block.content} />}
-            {block._type === 'contentScrollContainer' && <ContentScrollContainer title={block.title} items={block.items} spacing={block.spacing} />}
-            {block._type === 'artistScrollContainer' && <ArtistScrollContainer title={block.title} items={block.items} cardFormat={block.cardFormat} />}
-            {block._type === 'eventScrollContainer' && <EventScrollContainer title={block.title} events={block.events} cardFormat={block.cardFormat} />}
-            {/* Fallback for ukjent type */}
-            {[ 'portableTextBlock', 'headingComponent', 'imageComponent', 'videoComponent', 'buttonComponent', 'linkComponent', 'quoteComponent', 'accordionComponent', 'contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer' ].indexOf(block._type) === -1 && (
-              <div>Ukjent komponent: {block._type}</div>
+<ContentPageLayout
+  title={pageTitle}
+  pageContent={articlesPage?.content}
+>
+  <CardGrid
+    title="Alle artikler"
+    items={articles}
+    gridType="articles"
+    noResultsTitle="Ingen artikler publisert"
+  >
+    {articles.map((article) => (
+      <article class="article-card card">
+        <a href={`/artikler/${article.slug.current}`} class="article-link">
+          {article.image && (
+            <div class="article-image">
+              <Image
+                image={article.image.image}
+                alt={article.image.alt || article.title}
+                caption=""
+                credit=""
+                size="full"
+                aspectRatio="16:9"
+                alignment="center"
+                className="article-card-image"
+              />
+            </div>
+          )}
+          <div class="article-content">
+            <h3 class="article-title">{article.title}</h3>
+
+            {article.subtitle && (
+              <p class="article-subtitle">{article.subtitle}</p>
+            )}
+
+            {article.publishedAt && (
+              <div class="article-meta">
+                <span class="article-date">
+                  {formatDateForLanguage(article.publishedAt, 'no')}
+                </span>
+              </div>
             )}
           </div>
-        ))}
-      </div>
-    )}
-    
-    <!-- Articles listing -->
-    <section class="articles-section">
-      <h2 class="articles-title">Alle artikler</h2>
-      
-      {articles.length > 0 ? (
-        <div class="articles-grid">
-          {articles.map((article) => (
-            <article 
-              class="article-card card"
-            >
-              <a href={`/artikler/${article.slug.current}`} class="article-link">
-                {article.image && (
-                  <div 
-                    class="article-image"
-                  >
-                    <Image 
-                      image={article.image.image}
-                      alt={article.image.alt || article.title}
-                      caption=""
-                      credit=""
-                      size="full"
-                      aspectRatio="16:9"
-                      alignment="center"
-                      className="article-card-image"
-                    />
-                  </div>
-                )}
-                <div class="article-content">
-                  <h3 
-                    class="article-title"
-                  >
-                    {article.title}
-                  </h3>
-                  
-                  {article.subtitle && (
-                    <p class="article-subtitle">
-                      {article.subtitle}
-                    </p>
-                  )}
-                  
-                  {article.publishedAt && (
-                    <div class="article-meta">
-                      <span class="article-date">
-                        {formatDateForLanguage(article.publishedAt, 'no')}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </a>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <div class="no-results">
-          <h3 class="no-results-title">Ingen artikler publisert</h3>
-          <p class="no-results-text">
-            Sjekk tilbake senere for oppdateringer
-          </p>
-        </div>
-      )}
-    </section>
-    
-    <footer class="page-footer">
-      <a href="/" class="back-link">
-        ← Tilbake til forsiden
-      </a>
-    </footer>
-  </main>
+        </a>
+      </article>
+    ))}
+  </CardGrid>
 
   <style>
-    /* Page Layout */
-    .page-header {
-      margin-block-end: clamp(var(--space-5), 5vw, var(--space-8));
-    }
-
-    .page-title {
-      margin: 0 0 var(--space-2) 0;
-      color: var(--color-text-primary);
-    }
-
-    .page-content {
-      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
-    }
-
-    .articles-section {
-      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
-    }
-
-    .articles-title {
-      margin: 0 0 var(--space-4) 0;
-      color: var(--color-text-primary);
-      font-size: var(--font-size-2xl);
-    }
-
-    .page-footer {
-      margin-block-start: clamp(var(--space-6), 6vw, var(--space-9));
-      padding-block-start: var(--space-6);
-      border-block-start: 1px solid var(--color-border);
-    }
-
-    .back-link {
-      color: var(--color-primary-500);
-      text-decoration: none;
-      font-weight: var(--font-weight-medium);
-    }
-
-    /* Intrinsic Articles Grid */
-    .articles-grid {
-      container-type: inline-size;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, max(350px, 30ch)), 1fr));
-      gap: clamp(var(--space-4), 3vw, var(--space-6));
-    }
-
-    @container (min-width: 700px) {
-      .articles-grid {
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
-      }
-    }
-
-    @container (min-width: 1000px) {
-      .articles-grid {
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 45ch), 1fr));
-      }
-    }
-
-    /* Article Card */
+    /* Article Card Specific Styles */
     .article-card {
       container-type: inline-size;
       overflow: hidden;
@@ -223,20 +90,20 @@ const pageTitle = articlesPage?.title || 'Artikler';
       margin: 0;
       height: 100%;
     }
-    
+
     .article-card-image .image {
       width: 100%;
       height: 100%;
       object-fit: cover;
       border-radius: 0;
     }
-    
+
     .article-card-image .image-caption {
       display: none;
     }
 
     .article-content {
-      padding: 0; /* Let card handle padding with container queries */
+      padding: 0;
     }
 
     .article-title {
@@ -264,34 +131,12 @@ const pageTitle = articlesPage?.title || 'Artikler';
       gap: var(--space-2);
     }
 
-    /* No Results */
-    .no-results {
-      text-align: center;
-      padding: clamp(var(--space-6), 8vw, var(--space-9));
-      color: var(--color-text-secondary);
-    }
-
-    .no-results-icon {
-      font-size: clamp(var(--font-size-4xl), 10vw, var(--font-size-5xl));
-      margin-block-end: var(--space-4);
-    }
-
-    .no-results-title {
-      margin: 0 0 var(--space-4) 0;
-      color: var(--color-text-primary);
-    }
-
-    .no-results-text {
-      margin: 0;
-      font-size: var(--font-size-lg);
-    }
-
     /* Container Query Enhancements */
     @container (min-width: 350px) {
       .article-title {
         font-size: var(--font-size-xl);
       }
-      
+
       .article-subtitle {
         font-size: var(--font-size-base);
       }
@@ -304,4 +149,4 @@ const pageTitle = articlesPage?.title || 'Artikler';
     }
   </style>
 
-</Layout>
+</ContentPageLayout>

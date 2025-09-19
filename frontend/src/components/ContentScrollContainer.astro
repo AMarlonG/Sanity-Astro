@@ -35,7 +35,7 @@ const formatClass = `format-${format.replace(':', '-')}`
           {item._type === 'imageComponent' && <Image {...item} />}
           {item._type === 'videoComponent' && <Video {...item} />}
           {item._type === 'quoteComponent' && <Quote {...item} />}
-          {item._type === 'portableTextBlock' && <PortableText content={item.content} />}
+          {item._type === 'portableTextBlock' && <PortableText content={item.content} semantic="div" />}
         </div>
       )
     })}

@@ -1,158 +1,309 @@
 ---
-import type { SanityDocument } from "@sanity/client";
-import { sanityClient } from "sanity:client";
-import { PortableText } from "astro-portabletext";
 import Layout from '../../layouts/Layout.astro';
-import Image from '../../components/Image.astro';
+import DynamicComponent from '../../components/DynamicComponent.astro';
+import { createDataService } from '../../lib/sanity/dataService.js';
 import { formatDateForLanguage } from '../../../../shared/utils/dates';
 
-const EVENT_QUERY = `*[_type == "event" && slug.current == $slug][0]{
-  _id,
-  title,
-  eventTime,
-  eventDate->{
-    title,
-    date
-  },
-  venue->{
-    title,
-    linkText,
-    linkUrl,
-    address
-  },
-  genre->{
-    title
-  },
-  artists[]->{
-    name,
-    instrument,
-    country
-  },
-  image,
-  buttonText,
-  buttonUrl,
-  buttonOpenInNewTab,
-  content
-}`;
+const { slug } = Astro.params;
 
-const event = await sanityClient.fetch<SanityDocument>(EVENT_QUERY, Astro.params);
+if (!slug) {
+  return Astro.redirect('/404');
+}
 
-if (!event) {
+// Create data service with Visual Editing support
+const dataService = createDataService(Astro.request);
+
+let event = null;
+
+try {
+  event = await dataService.getEventBySlug(slug);
+
+  if (!event) {
+    return Astro.redirect('/404');
+  }
+} catch (error) {
+  console.error('Error loading event:', error);
   return Astro.redirect('/404');
 }
 
 export async function getStaticPaths() {
-  const SLUGS_QUERY = `*[_type == "event" && defined(slug.current)]{
-    "params": {"slug": slug.current}
-  }`;
-  return await sanityClient.fetch(SLUGS_QUERY);
+  // In development, return empty array for on-demand rendering
+  if (import.meta.env.DEV) {
+    return [];
+  }
+
+  const dataService = new (await import("../../lib/sanity/dataService.js")).SanityDataService();
+  return await dataService.getSlugsForType('event');
 }
 ---
 
-<Layout title={`${event.title} - Sanity + Astro`}>
-  <main 
-    style="max-width: 800px; margin: 0 auto; padding: 2rem;"
-   
-  >
-    <a 
-      href="/program" 
-      style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;"
-    >
-      ← Tilbake til program
-    </a>
-    
+<Layout title={`${event.title} - Event`}>
+  <main>
+    <nav class="breadcrumb">
+      <a href="/program">← Tilbake til program</a>
+    </nav>
+
     <article>
-      <header style="margin-bottom: 2rem;">
-        <h1 
-          style="margin: 0 0 1rem 0; color: #333;"
-        >
-          {event.title}
-        </h1>
-        
-        <!-- Event image with shared transition -->
+      <header>
+        <h1>{event.title}</h1>
+
         {event.image && (
-          <div 
-            style="margin-bottom: 2rem; border-radius: 8px; overflow: hidden;"
-          >
-            <Image 
-              image={event.image.image}
-              alt={event.image.alt || event.title}
-              caption=""
-              credit=""
-              size="full"
-              aspectRatio="16:9"
-              alignment="center"
-            />
-          </div>
+          <figure class="event-image">
+            <picture>
+              <img
+                src={event.image.asset.url}
+                alt={event.image.alt || event.title}
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          </figure>
         )}
-        
-        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+
+        <div class="event-info">
           {event.eventDate && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>Dato:</strong> {event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})
-            </p>
+            <div class="event-detail">
+              <strong>📅 Dato:</strong>
+              <span>{formatDateForLanguage(event.eventDate.date, 'no')}</span>
+            </div>
           )}
-          
+
           {event.eventTime && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>Klokkeslett:</strong> {event.eventTime}
-            </p>
+            <div class="event-detail">
+              <strong>🕰️ Klokkeslett:</strong>
+              <span>{event.eventTime}</span>
+            </div>
           )}
-          
+
           {event.venue && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>Sted:</strong> {event.venue.title}
-              {event.venue.address && ` - ${event.venue.address}`}
-            </p>
+            <div class="event-detail">
+              <strong>🎭 Sted:</strong>
+              <span>
+                {event.venue.name}
+                {event.venue.address && (
+                  <span class="address">, {event.venue.address}</span>
+                )}
+                {event.venue.city && (
+                  <span class="city">, {event.venue.city}</span>
+                )}
+              </span>
+            </div>
           )}
-          
-          {event.genre && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>Sjanger:</strong> {event.genre.title}
-            </p>
-          )}
-          
+
           {event.artists && event.artists.length > 0 && (
-            <div style="margin: 0 0 0.5rem 0;">
-              <strong>Artister:</strong>
-              <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
-                {event.artists.map((artist: any) => (
-                  <li style="margin-bottom: 0.25rem;">
-                    {artist.name} ({artist.instrument}, {artist.country})
+            <div class="event-detail artists">
+              <strong>🎤 Artister:</strong>
+              <ul>
+                {event.artists.map((artist) => (
+                  <li>
+                    <span class="artist-name">{artist.name}</span>
+                    {artist.image && (
+                      <picture>
+                        <img
+                          src={artist.image.asset.url}
+                          alt={artist.image.alt || artist.name}
+                          class="artist-avatar"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </picture>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           )}
+
+          {event.price && (
+            <div class="event-detail price">
+              <strong>🎫 Pris:</strong>
+              <span>{event.price}</span>
+            </div>
+          )}
         </div>
-        
-        {event.buttonText && event.buttonUrl && (
-          <a 
-            href={event.buttonUrl} 
-            target={event.buttonOpenInNewTab ? "_blank" : "_self"}
-            rel={event.buttonOpenInNewTab ? "noopener noreferrer" : ""}
-            style="
-              display: inline-block;
-              background: #0066cc;
-              color: white;
-              padding: 0.75rem 1.5rem;
-              text-decoration: none;
-              border-radius: 4px;
-              font-weight: bold;
-              margin-top: 1rem;
-            "
-          >
-            {event.buttonText}
-          </a>
+
+        {event.ticketUrl && (
+          <div class="ticket-section">
+            <a
+              href={event.ticketUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="ticket-button"
+            >
+              Kjøp billetter
+            </a>
+          </div>
         )}
       </header>
-      
-      {event.content && (
-        <div style="line-height: 1.6;">
-          <PortableText value={event.content} />
+
+      {event.description && (
+        <div class="event-description">
+          <p>{event.description}</p>
         </div>
       )}
     </article>
   </main>
 </Layout>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumb a {
+    color: var(--link-color, #007acc);
+    text-decoration: none;
+  }
+
+  article header {
+    margin-bottom: 3rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 2rem;
+  }
+
+  .event-image {
+    margin-bottom: 2rem;
+  }
+
+  .event-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .event-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+  }
+
+  .event-detail {
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+  }
+
+  .event-detail:last-child {
+    margin-bottom: 0;
+  }
+
+  .event-detail strong {
+    min-width: 140px;
+    margin-right: 1rem;
+    color: #495057;
+  }
+
+  .address,
+  .city {
+    color: #6c757d;
+  }
+
+  .artists ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .artists li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+  }
+
+  .artist-name {
+    font-weight: 500;
+  }
+
+  .artist-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-left: auto;
+    object-fit: cover;
+  }
+
+  .price {
+    font-size: 1.1rem;
+  }
+
+  .price span {
+    font-weight: 600;
+    color: #28a745;
+  }
+
+  .ticket-section {
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  .ticket-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  }
+
+  .ticket-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  }
+
+  .event-description {
+    line-height: 1.6;
+    font-size: 1.1rem;
+    color: #495057;
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .event-info {
+      padding: 1.5rem;
+    }
+
+    .event-detail {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .event-detail strong {
+      margin-bottom: 0.25rem;
+      margin-right: 0;
+    }
+
+    .ticket-button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+  }
+</style>
 

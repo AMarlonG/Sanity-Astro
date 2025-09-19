@@ -128,10 +128,14 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
           <div class="event-card">
             {eventImage && (
               <div class="event-image">
-                <img 
-                  src={getImageUrl(eventImage, cardWidth, cardHeight)} 
-                  alt={imageAlt}
-                />
+                <picture>
+                  <img
+                    src={getImageUrl(eventImage, cardWidth, cardHeight)}
+                    alt={imageAlt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
               </div>
             )}
             <div class="event-content">

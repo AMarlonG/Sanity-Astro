@@ -59,14 +59,14 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   <div class="tabs-container">
     <div class="tabs-scroll">
       <!-- "Alle dager" fane -->
-      <button 
+      <button
         id="tab-all-days"
-        class="tab-button ${!currentFilters.eventDate ? 'active' : ''}"
+        class={`tab-button ${!currentFilters.eventDate ? 'active' : ''}`}
         hx-post="/api/filter-events"
         hx-target="#results-container"
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
-        hx-vals='{"eventDate": "", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}'
+        hx-vals={`{"eventDate": "", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}`}
         title="Vis alle arrangementer"
       >
         Alle dager
@@ -74,15 +74,15 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
       
       <!-- Dato-faner -->
       {filterOptions.eventDates?.map((date) => (
-        <button 
-          id={`tab-${date.date}>
-          class="tab-button ${currentFilters.eventDate === date.date ? 'active' : ''}"
+        <button
+          id={`tab-${date.date}`}
+          class={`tab-button ${currentFilters.eventDate === date.date ? 'active' : ''}`}
           hx-post="/api/filter-events"
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${date.date}", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}>
-          title={`Vis arrangementer ${formatDate(date.date)}>
+          hx-vals={`{"eventDate": "${date.date}", "genre": "${currentFilters.genre}", "venue": "${currentFilters.venue}"}`}
+          title={`Vis arrangementer ${formatDate(date.date)}`}
         >
           {formatDate(date.date)}
         </button>
@@ -94,30 +94,30 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   <div class="tabs-container">
     <div class="tabs-scroll">
       <!-- "Alle sjangre" fane -->
-      <button 
+      <button
         id="tab-all-genres"
-        class="tab-button ${!currentFilters.genre ? 'active' : ''}"
+        class={`tab-button ${!currentFilters.genre ? 'active' : ''}`}
         hx-post="/api/filter-events"
         hx-target="#results-container"
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
-        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "", "venue": "${currentFilters.venue}"}>
+        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "", "venue": "${currentFilters.venue}"}`}
         title="Vis alle sjangre"
       >
         Alle sjangre
       </button>
-      
+
       <!-- Sjanger-faner -->
       {filterOptions.genres?.map((genre) => (
-        <button 
-          id={`tab-${genre.slug.current}>
-          class="tab-button ${currentFilters.genre === genre.slug.current ? 'active' : ''}"
+        <button
+          id={`tab-${genre.slug.current}`}
+          class={`tab-button ${currentFilters.genre === genre.slug.current ? 'active' : ''}`}
           hx-post="/api/filter-events"
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${genre.slug.current}", "venue": "${currentFilters.venue}"}>
-          title={`Vis ${genre.title} arrangementer>
+          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${genre.slug.current}", "venue": "${currentFilters.venue}"}`}
+          title={`Vis ${genre.title} arrangementer`}
         >
           {genre.title}
         </button>
@@ -129,30 +129,30 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   <div class="tabs-container">
     <div class="tabs-scroll">
       <!-- "Alle spillesteder" fane -->
-      <button 
+      <button
         id="tab-all-venues"
-        class="tab-button ${!currentFilters.venue ? 'active' : ''}"
+        class={`tab-button ${!currentFilters.venue ? 'active' : ''}`}
         hx-post="/api/filter-events"
         hx-target="#results-container"
         hx-indicator="#loading-indicator"
         hx-swap="innerHTML"
-        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": ""}>
+        hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": ""}`}
         title="Vis alle spillesteder"
       >
         Alle spillesteder
       </button>
-      
+
       <!-- Spillested-faner -->
       {filterOptions.venues?.map((venue) => (
-        <button 
-          id={`tab-${venue.slug.current}>
-          class="tab-button ${currentFilters.venue === venue.slug.current ? 'active' : ''}"
+        <button
+          id={`tab-${venue.slug.current}`}
+          class={`tab-button ${currentFilters.venue === venue.slug.current ? 'active' : ''}`}
           hx-post="/api/filter-events"
           hx-target="#results-container"
           hx-indicator="#loading-indicator"
           hx-swap="innerHTML"
-          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": "${venue.slug.current}"}>
-          title={`Vis arrangementer på ${venue.title}>
+          hx-vals={`{"eventDate": "${currentFilters.eventDate}", "genre": "${currentFilters.genre}", "venue": "${venue.slug.current}"}`}
+          title={`Vis arrangementer på ${venue.title}`}
         >
           {venue.title}
         </button>

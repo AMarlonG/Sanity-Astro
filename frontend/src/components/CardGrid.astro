@@ -1,0 +1,120 @@
+---
+interface Props {
+  title: string;
+  items: any[];
+  noResultsTitle?: string;
+  noResultsText?: string;
+  gridType?: 'articles' | 'events' | 'artists';
+}
+
+const {
+  title,
+  items,
+  noResultsTitle = "Ingen resultater",
+  noResultsText = "Sjekk tilbake senere for oppdateringer",
+  gridType = 'articles'
+} = Astro.props;
+---
+
+<section class={`content-section ${gridType}-section`}>
+  <h2 class="section-title">{title}</h2>
+
+  {items.length > 0 ? (
+    <div class={`grid ${gridType}-grid`}>
+      <slot />
+    </div>
+  ) : (
+    <div class="no-results">
+      <h3 class="no-results-title">{noResultsTitle}</h3>
+      <p class="no-results-text">{noResultsText}</p>
+    </div>
+  )}
+</section>
+
+<style>
+  /* Section Layout */
+  .content-section {
+    margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+  }
+
+  .section-title {
+    margin: 0 0 var(--space-4) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-2xl);
+  }
+
+  /* Intrinsic Grid System */
+  .grid {
+    container-type: inline-size;
+    display: grid;
+    gap: clamp(var(--space-4), 3vw, var(--space-6));
+  }
+
+  /* Articles Grid */
+  .articles-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(350px, 30ch)), 1fr));
+  }
+
+  @container (min-width: 700px) {
+    .articles-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
+    }
+  }
+
+  @container (min-width: 1000px) {
+    .articles-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 45ch), 1fr));
+    }
+  }
+
+  /* Events Grid */
+  .events-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(320px, 28ch)), 1fr));
+  }
+
+  @container (min-width: 600px) {
+    .events-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 35ch), 1fr));
+    }
+  }
+
+  @container (min-width: 900px) {
+    .events-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
+    }
+  }
+
+  /* Artists Grid */
+  .artists-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(280px, 25ch)), 1fr));
+  }
+
+  @container (min-width: 600px) {
+    .artists-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 30ch), 1fr));
+    }
+  }
+
+  @container (min-width: 900px) {
+    .artists-grid {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 35ch), 1fr));
+    }
+  }
+
+  /* No Results */
+  .no-results {
+    text-align: center;
+    padding: clamp(var(--space-6), 8vw, var(--space-9));
+    color: var(--color-text-secondary);
+  }
+
+  .no-results-title {
+    margin: 0 0 var(--space-4) 0;
+    color: var(--color-text-primary);
+  }
+
+  .no-results-text {
+    margin: 0;
+    font-size: var(--font-size-lg);
+  }
+</style>

@@ -1,155 +1,71 @@
 ---
-import type { SanityDocument } from "@sanity/client";
-import { sanityClient } from "sanity:client";
-import Title from "../../components/Title.astro";
-import Image from "../../components/Image.astro";
-import PortableText from "../../components/PortableText.astro";
-import Button from "../../components/Button.astro";
-import Heading from "../../components/Heading.astro";
-import Link from "../../components/Link.astro";
-import Accordion from "../../components/Accordion.astro";
-import Quote from "../../components/Quote.astro";
-import Video from "../../components/Video.astro";
-import ArtistScrollContainer from "../../components/ArtistScrollContainer.astro";
-import EventScrollContainer from "../../components/EventScrollContainer.astro";
-import ContentScrollContainer from "../../components/ContentScrollContainer.astro";
+import Layout from "../../layouts/Layout.astro";
+import DynamicComponent from "../../components/DynamicComponent.astro";
+import { createDataService } from "../../lib/sanity/dataService.js";
 
-const ARTICLE_QUERY = `*[_type == "article" && slug.current == $slug][0]{
-  _id,
-  title,
-  subtitle,
-  content,
-  _createdAt
-}`;
+const { slug } = Astro.params;
 
-const article = await sanityClient.fetch<SanityDocument>(ARTICLE_QUERY, Astro.params);
+if (!slug) {
+  return Astro.redirect('/404');
+}
 
-// Hvis artikkelen ikke finnes, returner 404
-if (!article) {
+// Create data service with Visual Editing support
+const dataService = createDataService(Astro.request);
+
+let article = null;
+
+try {
+  article = await dataService.getArticleBySlug(slug);
+
+  if (!article) {
+    return Astro.redirect('/404');
+  }
+} catch (error) {
+  console.error('Error loading article:', error);
   return Astro.redirect('/404');
 }
 
 export async function getStaticPaths() {
-  const SLUGS_QUERY = `*[_type == "article" && defined(slug.current)]{
-    "params": {"slug": slug.current}
-  }`;
-  
-  const articles = await sanityClient.fetch(SLUGS_QUERY);
-  return articles;
+  // In development, return empty array for on-demand rendering
+  if (import.meta.env.DEV) {
+    return [];
+  }
+
+  const dataService = new (await import("../../lib/sanity/dataService.js")).SanityDataService();
+  return await dataService.getSlugsForType('article');
 }
 ---
 
-<html lang="no">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <title>{article.title}</title>
-  </head>
-  <body>
-    <main>
-      <article>
-        <Title mainTitle={article.title} subtitle={article.subtitle} />
-        
-        {article.content && (
-          <div class="content">
-            {article.content.map((component: any) => {
-              switch (component._type) {
-                case 'title':
-                  return <Title mainTitle={component.mainTitle} subtitle={component.subtitle} />;
-                case 'imageComponent':
-                  return <Image 
-                    image={component.image} 
-                    alt={component.alt || ''} 
-                    caption={component.caption} 
-                    credit={component.credit}
-                    aspectRatio={component.aspectRatio || '16:9'}
-                    alignment={component.alignment || 'center'}
-                    size={component.size || 'medium'}
-                  />;
-                case 'portableTextBlock':
-                  return <PortableText value={component.content} />;
-                case 'buttonComponent':
-                  return <Button text={component.text} url={component.url} style={component.style} size={component.size} />;
-                case 'heading':
-                  return <Heading level={component.level} text={component.text} id={component.id?.current} />;
-                case 'linkComponent':
-                  return <Link 
-                    text={component.text} 
-                    linkType={component.linkType} 
-                    internalLink={component.internalLink}
-                    url={component.url}
-                    email={component.email}
-                    phone={component.phone}
-                    openInNewTab={component.openInNewTab}
-                    accessibility={component.accessibility}
-                  />;
-                case 'accordionComponent':
-                  return <Accordion 
-                    title={component.title} 
-                    description={component.description} 
-                    panels={component.panels} 
-                    accessibility={component.accessibility}
-                  />;
-                case 'quoteComponent':
-                  return <Quote 
-                    quote={component.quote} 
-                    author={component.author} 
-                    source={component.source} 
-                    cite={component.cite}
-                  />;
-                case 'videoComponent':
-                  return <Video 
-                    videoType={component.videoType} 
-                    video={component.video}
-                    youtubeUrl={component.youtubeUrl}
-                    vimeoUrl={component.vimeoUrl}
-                    externalUrl={component.externalUrl}
-                    aspectRatio={component.aspectRatio}
-                    title={component.title}
-                    description={component.description}
-                    autoplay={component.autoplay}
-                    muted={component.muted}
-                    controls={component.controls}
-                    loop={component.loop}
-                  />;
-                case 'artistScrollContainer':
-                  return <ArtistScrollContainer 
-                    title={component.title}
-                    items={component.items}
-                    showScrollbar={component.showScrollbar}
-                    cardFormat={component.cardFormat}
-                  />;
-                case 'eventScrollContainer':
-                  return <EventScrollContainer 
-                    title={component.title}
-                    events={component.events}
-                    showScrollbar={component.showScrollbar}
-                    showDate={component.showDate}
-                    showTime={component.showTime}
-                    showVenue={component.showVenue}
-                    showArtists={component.showArtists}
-                    sortBy={component.sortBy}
-                    cardFormat={component.cardFormat}
-                  />;
-                case 'contentScrollContainer':
-                  return <ContentScrollContainer 
-                    title={component.title}
-                    items={component.items}
-                    showScrollbar={component.showScrollbar}
-                    format={component.format}
-                  />;
-                default:
-                  return <div>Ukjent komponent: {component._type}</div>;
-              }
-            })}
-          </div>
+<Layout title={article.title}>
+  <main>
+    <article>
+      <header>
+        <h1>{article.title}</h1>
+        {article.excerpt && <p class="excerpt">{article.excerpt}</p>}
+        {article.publishedAt && (
+          <time datetime={new Date(article.publishedAt).toISOString()}>
+            {new Intl.DateTimeFormat('no-NO', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            }).format(new Date(article.publishedAt))}
+          </time>
         )}
-      </article>
-    </main>
-  </body>
-</html>
+        {article.author && (
+          <p class="author">Av {article.author.name}</p>
+        )}
+      </header>
+
+      {article.content && Array.isArray(article.content) && (
+        <div class="article-content">
+          {article.content.map((block) => (
+            <DynamicComponent key={block._key || block._id} block={block} />
+          ))}
+        </div>
+      )}
+    </article>
+  </main>
+</Layout>
 
 <style>
   main {
@@ -157,8 +73,53 @@ export async function getStaticPaths() {
     margin: 0 auto;
     padding: 2rem;
   }
-  
-  .content {
-    margin-top: 2rem;
+
+  article header {
+    margin-bottom: 3rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .excerpt {
+    font-size: 1.25rem;
+    color: #666;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  time {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  .author {
+    color: #666;
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+
+  .article-content {
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .excerpt {
+      font-size: 1.1rem;
+    }
   }
 </style> 

@@ -113,17 +113,28 @@ const fetchPriority = priority ? 'high' : 'auto';
 
 ---
 
-<div 
+<figure
   class={`image-container image-${alignment} image-${size} ${className}`}
   data-sanity={_key ? `${_type}.${_key}` : _type}
 >
   {image ? (
     <picture>
-      <img 
+      {responsiveImageSets.map((format) => (
+        <source
+          srcset={format.srcset}
+          sizes={imageSizes}
+          type={`image/${format.format}`}
+        />
+      ))}
+      <img
         src={fallbackUrl || ''}
-        alt={alt} 
+        alt={alt}
         loading={imageLoading}
+        decoding="async"
+        fetchpriority={fetchPriority}
+        sizes={imageSizes}
         class="image"
+        style={lqipUrl ? `background-image: url(${lqipUrl}); background-size: cover;` : undefined}
       />
     </picture>
   ) : (
@@ -131,14 +142,14 @@ const fetchPriority = priority ? 'high' : 'auto';
       <span>Bilde ikke tilgjengelig</span>
     </div>
   )}
-  
+
   {(caption || credit) && (
     <figcaption class="image-caption">
       {caption && <span class="caption-text">{caption}</span>}
       {credit && <span class="credit-text">{credit}</span>}
     </figcaption>
   )}
-</div>
+</figure>
 
 <style>
   .image-container {

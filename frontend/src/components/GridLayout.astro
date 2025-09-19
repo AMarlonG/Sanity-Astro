@@ -1,0 +1,249 @@
+---
+import DynamicComponent from './DynamicComponent.astro';
+
+interface Props {
+  gridTemplate?: 'hero' | 'magazine' | 'masonry' | 'custom';
+  gridAreas?: string;
+  gridItems?: Array<{
+    component: any[];
+    gridArea?: string;
+    span?: {
+      columns: number;
+      rows: number;
+    };
+  }>;
+  responsiveGrid?: {
+    tabletBehavior: 'keep' | 'two-columns' | 'stack';
+    mobileBehavior: 'stack' | 'two-columns';
+  };
+  gap?: {
+    desktop: string;
+    mobile: string;
+  };
+  _key?: string;
+  _type?: string;
+}
+
+const {
+  gridTemplate = 'hero',
+  gridAreas,
+  gridItems = [],
+  responsiveGrid = {
+    tabletBehavior: 'two-columns',
+    mobileBehavior: 'stack'
+  },
+  gap = { desktop: 'medium', mobile: 'medium' },
+} = Astro.props;
+
+// Build CSS classes
+const containerClasses = [
+  'grid-layout',
+  `grid-template-${gridTemplate}`,
+  `gap-desktop-${gap.desktop}`,
+  `gap-mobile-${gap.mobile}`,
+  `tablet-${responsiveGrid.tabletBehavior}`,
+  `mobile-${responsiveGrid.mobileBehavior}`,
+];
+
+// Generate inline styles for custom grid
+const customGridStyles = gridTemplate === 'custom' && gridAreas
+  ? { gridTemplateAreas: gridAreas.replace(/"/g, '') }
+  : {};
+---
+
+{gridItems && gridItems.length > 0 && (
+  <div class={containerClasses.join(' ')} style={customGridStyles}>
+    {gridItems.map((gridItem, index) => {
+      // Get the first (and only) component from the array
+      const component = gridItem.component?.[0];
+      if (!component) return null;
+
+      // Build item classes
+      const itemClasses = ['grid-item'];
+
+      // Add span classes for predefined templates
+      if (gridTemplate !== 'custom' && gridItem.span) {
+        itemClasses.push(`span-col-${gridItem.span.columns}`);
+        itemClasses.push(`span-row-${gridItem.span.rows}`);
+      }
+
+      // Inline styles for custom grid areas
+      const itemStyles = gridTemplate === 'custom' && gridItem.gridArea
+        ? { gridArea: gridItem.gridArea }
+        : {};
+
+      return (
+        <div
+          class={itemClasses.join(' ')}
+          style={itemStyles}
+          data-grid-index={index}
+        >
+          <DynamicComponent block={component} />
+        </div>
+      );
+    })}
+  </div>
+)}
+
+<style>
+  .grid-layout {
+    display: grid;
+    width: 100%;
+    container-type: inline-size;
+  }
+
+  /* Hero Layout Template */
+  .grid-template-hero {
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      "main sidebar1"
+      "main sidebar2";
+  }
+
+  .grid-template-hero .grid-item:nth-child(1) { grid-area: main; }
+  .grid-template-hero .grid-item:nth-child(2) { grid-area: sidebar1; }
+  .grid-template-hero .grid-item:nth-child(3) { grid-area: sidebar2; }
+
+  /* Magazine Layout Template */
+  .grid-template-magazine {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "header header aside"
+      "content content aside";
+  }
+
+  .grid-template-magazine .grid-item:nth-child(1) { grid-area: header; }
+  .grid-template-magazine .grid-item:nth-child(2) { grid-area: content; }
+  .grid-template-magazine .grid-item:nth-child(3) { grid-area: aside; }
+
+  /* Masonry Layout Template */
+  .grid-template-masonry {
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+    grid-auto-rows: minmax(200px, auto);
+  }
+
+  /* Custom Grid Template */
+  .grid-template-custom {
+    /* Grid template areas set via inline styles */
+  }
+
+  /* Span Classes for Predefined Templates */
+  .span-col-1 { grid-column: span 1; }
+  .span-col-2 { grid-column: span 2; }
+  .span-col-3 { grid-column: span 3; }
+  .span-col-4 { grid-column: span 4; }
+  .span-col-5 { grid-column: span 5; }
+  .span-col-6 { grid-column: span 6; }
+
+  .span-row-1 { grid-row: span 1; }
+  .span-row-2 { grid-row: span 2; }
+  .span-row-3 { grid-row: span 3; }
+  .span-row-4 { grid-row: span 4; }
+
+  /* Gap Settings */
+  .gap-desktop-small { gap: clamp(0.5rem, 2vw, 1rem); }
+  .gap-desktop-medium { gap: clamp(1rem, 3vw, 2rem); }
+  .gap-desktop-large { gap: clamp(1.5rem, 4vw, 3rem); }
+  .gap-desktop-xl { gap: clamp(2rem, 5vw, 4rem); }
+
+  /* Tablet Responsive Behavior */
+  @container (max-width: 768px) {
+    .gap-mobile-small { gap: 0.5rem !important; }
+    .gap-mobile-medium { gap: 1rem !important; }
+    .gap-mobile-large { gap: 1.5rem !important; }
+
+    /* Tablet: Keep Grid */
+    .tablet-keep.grid-template-hero {
+      grid-template-columns: 1.5fr 1fr;
+    }
+
+    .tablet-keep.grid-template-magazine {
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "header aside"
+        "content aside";
+    }
+
+    /* Tablet: Two Columns */
+    .tablet-two-columns.grid-template-hero,
+    .tablet-two-columns.grid-template-magazine {
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-areas: none !important;
+    }
+
+    .tablet-two-columns .grid-item {
+      grid-area: auto !important;
+    }
+
+    /* Tablet: Stack */
+    .tablet-stack.grid-template-hero,
+    .tablet-stack.grid-template-magazine {
+      grid-template-columns: 1fr !important;
+      grid-template-areas: none !important;
+    }
+
+    .tablet-stack .grid-item {
+      grid-area: auto !important;
+    }
+  }
+
+  /* Mobile Responsive Behavior */
+  @container (max-width: 480px) {
+    /* Mobile: Stack (default) */
+    .mobile-stack.grid-template-hero,
+    .mobile-stack.grid-template-magazine {
+      grid-template-columns: 1fr !important;
+      grid-template-areas: none !important;
+    }
+
+    .mobile-stack .grid-item {
+      grid-area: auto !important;
+      grid-column: auto !important;
+      grid-row: auto !important;
+    }
+
+    /* Mobile: Two Columns */
+    .mobile-two-columns.grid-template-hero,
+    .mobile-two-columns.grid-template-magazine {
+      grid-template-columns: 1fr 1fr !important;
+      grid-template-areas: none !important;
+    }
+
+    .mobile-two-columns .grid-item {
+      grid-area: auto !important;
+    }
+
+    /* Masonry adjustments for mobile */
+    .mobile-stack.grid-template-masonry {
+      grid-template-columns: 1fr !important;
+    }
+
+    .mobile-two-columns.grid-template-masonry {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
+  /* Grid Item */
+  .grid-item {
+    min-width: 0; /* Prevents grid overflow */
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Special handling for masonry */
+  .grid-template-masonry .grid-item {
+    break-inside: avoid;
+  }
+
+  /* Visual debugging (remove in production) */
+  .grid-layout {
+    /* border: 1px dashed rgba(0, 0, 255, 0.2); */
+  }
+
+  .grid-item {
+    /* border: 1px dashed rgba(255, 0, 0, 0.2); */
+  }
+</style>

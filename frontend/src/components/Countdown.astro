@@ -81,58 +81,191 @@ if (timeRemaining.expired && hideWhenComplete) {
 const eventId = targetEvent?._id;
 ---
 
-<div 
-  class={`countdown countdown--${style}`}
-  hx-get={`/api/countdown?eventId=${eventId}`}
-  hx-trigger={`every ${updateInterval}`}
-  hx-swap="innerHTML"
->
-  <div class="countdown__display">
+<section class={`countdown countdown--${style}`} aria-labelledby={title ? "countdown-title" : undefined}>
+  {title && <h3 id="countdown-title" class="countdown__title">{title}</h3>}
+
+  <div
+    class="countdown__display"
+    role={timeRemaining.expired ? "status" : "timer"}
+    aria-live="polite"
+    aria-atomic="true"
+    aria-label={timeRemaining.expired ? completedMessage : `Nedtelling: ${timeRemaining.days ? `${timeRemaining.days} dager, ` : ''}${timeRemaining.hours ? `${timeRemaining.hours} timer og ` : ''}${timeRemaining.minutes} minutter igjen`}
+    hx-get={`/api/countdown?eventId=${eventId}`}
+    hx-trigger={`every ${updateInterval}`}
+    hx-swap="innerHTML"
+  >
     {timeRemaining.expired ? (
-      <p class="countdown__expired">{completedMessage}</p>
-    ) : (
-      <p class="countdown__sentence">
-        {title && <span class="countdown__title-inline">{title} </span>}
-        {timeRemaining.days > 0 && <span>{timeRemaining.days} {timeRemaining.days === 1 ? 'dag' : 'dager'}, </span>}
-        {(timeRemaining.hours >= 0 && (timeRemaining.days > 0 || timeRemaining.hours > 0)) && <span>{timeRemaining.hours} {timeRemaining.hours === 1 ? 'time' : 'timer'} og </span>}
-        <span>{timeRemaining.minutes} {timeRemaining.minutes === 1 ? 'minutt' : 'minutter'}</span>
+      <p class="countdown__expired">
+        <span aria-hidden="true">✓</span>
+        {completedMessage}
       </p>
+    ) : (
+      <div class="countdown__time">
+        <p class="countdown__sentence">
+          {timeRemaining.days > 0 && (
+            <span class="countdown__unit">
+              <span class="countdown__number">{timeRemaining.days}</span>
+              <span class="countdown__label">{timeRemaining.days === 1 ? 'dag' : 'dager'}</span>
+            </span>
+          )}
+          {(timeRemaining.hours >= 0 && (timeRemaining.days > 0 || timeRemaining.hours > 0)) && (
+            <span class="countdown__unit">
+              <span class="countdown__number">{timeRemaining.hours}</span>
+              <span class="countdown__label">{timeRemaining.hours === 1 ? 'time' : 'timer'}</span>
+            </span>
+          )}
+          <span class="countdown__unit">
+            <span class="countdown__number">{timeRemaining.minutes}</span>
+            <span class="countdown__label">{timeRemaining.minutes === 1 ? 'minutt' : 'minutter'}</span>
+          </span>
+        </p>
+        <p class="countdown__readable" aria-hidden="true">
+          {timeRemaining.days > 0 && `${timeRemaining.days} ${timeRemaining.days === 1 ? 'dag' : 'dager'}, `}
+          {(timeRemaining.hours >= 0 && (timeRemaining.days > 0 || timeRemaining.hours > 0)) && `${timeRemaining.hours} ${timeRemaining.hours === 1 ? 'time' : 'timer'} og `}
+          {timeRemaining.minutes} {timeRemaining.minutes === 1 ? 'minutt' : 'minutter'} igjen
+        </p>
+      </div>
     )}
   </div>
-</div>
+</section>
 
 <style>
   .countdown {
     text-align: center;
-    padding: var(--space-m);
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
   }
-  
+
+  .countdown__title {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .countdown__display {
+    position: relative;
+  }
+
   .countdown__sentence {
     margin: 0;
-    font-size: var(--font-size-l);
+    font-size: 1.5rem;
     line-height: 1.4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
-  
-  .countdown__title-inline {
-    font-weight: normal;
+
+  .countdown__unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
   }
-  
+
+  .countdown__number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #0066cc;
+    display: block;
+  }
+
+  .countdown__label {
+    font-size: 0.875rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.25rem;
+  }
+
+  .countdown__readable {
+    font-size: 1rem;
+    color: #666;
+    margin: 0.5rem 0 0 0;
+    font-style: italic;
+  }
+
   /* Style variations */
   .countdown--large .countdown__sentence {
-    font-size: var(--font-size-xl);
+    font-size: 2rem;
   }
-  
+
+  .countdown--large .countdown__number {
+    font-size: 3rem;
+  }
+
   .countdown--minimal {
-    padding: var(--space-xs);
+    padding: 1rem;
+    background: none;
+    border: none;
   }
-  
+
   .countdown--minimal .countdown__sentence {
-    font-size: var(--font-size-m);
+    font-size: 1.25rem;
   }
-  
+
+  .countdown--minimal .countdown__number {
+    font-size: 1.5rem;
+  }
+
   .countdown__expired {
     margin: 0;
-    font-size: var(--font-size-l);
-    font-style: italic;
+    font-size: 1.5rem;
+    color: #28a745;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  /* Responsivt design */
+  @media (max-width: 768px) {
+    .countdown {
+      padding: 1rem;
+    }
+
+    .countdown__sentence {
+      font-size: 1.25rem;
+      gap: 0.25rem;
+    }
+
+    .countdown__number {
+      font-size: 1.5rem;
+    }
+
+    .countdown__unit {
+      min-width: 50px;
+    }
+
+    .countdown--large .countdown__sentence {
+      font-size: 1.5rem;
+    }
+
+    .countdown--large .countdown__number {
+      font-size: 2rem;
+    }
+  }
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .countdown {
+      border: 2px solid #000;
+    }
+
+    .countdown__number {
+      color: #000;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .countdown {
+      background: #f8f9fa;
+    }
   }
 </style>

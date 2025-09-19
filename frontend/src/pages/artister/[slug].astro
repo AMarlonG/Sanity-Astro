@@ -1,100 +1,177 @@
 ---
-import type { SanityDocument } from "@sanity/client";
-import { sanityClient } from "sanity:client";
-import { PortableText } from "astro-portabletext";
+import Layout from "../../layouts/Layout.astro";
+import DynamicComponent from "../../components/DynamicComponent.astro";
+import { createDataService } from "../../lib/sanity/dataService.js";
 
-const ARTIST_QUERY = `*[_type == "artist" && slug.current == $slug][0]{
-  _id,
-  name,
-  instrument,
-  country,
-  image,
-  website,
-  socialMedia,
-  content
-}`;
+const { slug } = Astro.params;
 
-const artist = await sanityClient.fetch<SanityDocument>(ARTIST_QUERY, Astro.params);
+if (!slug) {
+  return Astro.redirect('/404');
+}
 
-// Hvis kunstneren ikke finnes, returner 404
-if (!artist) {
+// Create data service with Visual Editing support
+const dataService = createDataService(Astro.request);
+
+let artist = null;
+
+try {
+  artist = await dataService.getArtistBySlug(slug);
+
+  if (!artist) {
+    return Astro.redirect('/404');
+  }
+} catch (error) {
+  console.error('Error loading artist:', error);
   return Astro.redirect('/404');
 }
 
 export async function getStaticPaths() {
-  const SLUGS_QUERY = `*[_type == "artist" && defined(slug.current)]{
-    "params": {"slug": slug.current}
-  }`;
-  return await sanityClient.fetch(SLUGS_QUERY);
+  // In development, return empty array for on-demand rendering
+  if (import.meta.env.DEV) {
+    return [];
+  }
+
+  const dataService = new (await import("../../lib/sanity/dataService.js")).SanityDataService();
+  return await dataService.getSlugsForType('artist');
 }
 ---
 
-<html lang="no">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{artist.name} - Sanity + Astro</title>
-</head>
-<body>
-  <main style="max-width: 800px; margin: 0 auto; padding: 2rem;">
-    <a href="/kunstnere" style="color: #007acc; text-decoration: none; margin-bottom: 2rem; display: inline-block;">
-      ← Tilbake til kunstnere
-    </a>
-    
+<Layout title={`${artist.name} - Artist`}>
+  <main>
+    <nav class="breadcrumb">
+      <a href="/artister">← Tilbake til artister</a>
+    </nav>
+
     <article>
-      <header style="margin-bottom: 2rem;">
-        <h1 style="margin: 0 0 1rem 0; color: #333;">{artist.name}</h1>
-        
-        <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-          {artist.instrument && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>Instrument:</strong> {artist.instrument}
-            </p>
-          )}
-          
-          {artist.country && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>🌍 Land:</strong> {artist.country}
-            </p>
-          )}
-          
-          {artist.website && (
-            <p style="margin: 0 0 0.5rem 0;">
-              <strong>🌐 Nettside:</strong> 
-              <a href={artist.website} target="_blank" rel="noopener noreferrer" style="color: #007acc;">
-                {artist.website}
-              </a>
-            </p>
-          )}
-          
-          {artist.socialMedia && artist.socialMedia.length > 0 && (
-            <div style="margin: 0 0 0.5rem 0;">
-              <strong>📱 Sosiale medier:</strong>
-              <ul style="margin: 0.25rem 0 0 1rem; padding: 0;">
-                {artist.socialMedia.map((social: any) => (
-                  <li style="margin-bottom: 0.25rem;">
-                    <a 
-                      href={social.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style="color: #007acc;"
-                    >
-                      {social.customLabel || social.platform} - {social.url}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+      <header class="artist-header">
+        <h1>{artist.name}</h1>
+
+        {artist.excerpt && (
+          <p class="artist-excerpt">{artist.excerpt}</p>
+        )}
+
+        {artist.instrument && (
+          <p class="artist-instrument">{artist.instrument}</p>
+        )}
+
+        {artist.country && (
+          <p class="artist-country">{artist.country}</p>
+        )}
+
+        {artist.image && (
+          <figure class="artist-main-image">
+            <picture>
+              <img
+                src={artist.image.asset.url}
+                alt={artist.imageAlt || artist.name}
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+            {(artist.imageCaption || artist.imageCredit) && (
+              <figcaption class="image-caption">
+                {artist.imageCaption && <span class="caption-text">{artist.imageCaption}</span>}
+                {artist.imageCredit && <span class="image-credit">{artist.imageCredit}</span>}
+              </figcaption>
+            )}
+          </figure>
+        )}
       </header>
-      
-      {artist.content && (
-        <div style="line-height: 1.6;">
-          <PortableText value={artist.content} />
+
+      <!-- PageBuilder content from CMS -->
+      {artist.content && Array.isArray(artist.content) && artist.content.length > 0 && (
+        <div class="artist-content">
+          {artist.content.map((block) => (
+            <DynamicComponent key={block._key || block._id} block={block} />
+          ))}
         </div>
       )}
     </article>
   </main>
-</body>
-</html> 
+</Layout>
+
+<style>
+  main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .breadcrumb {
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumb a {
+    color: var(--link-color, #007acc);
+    text-decoration: none;
+  }
+
+  .artist-header {
+    margin-bottom: 3rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .artist-excerpt {
+    font-size: 1.2rem;
+    line-height: 1.4;
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .artist-instrument,
+  .artist-country {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+  }
+
+  .artist-main-image {
+    margin-top: 2rem;
+  }
+
+  .artist-main-image img {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .image-caption {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  .caption-text {
+    display: block;
+    font-style: italic;
+  }
+
+  .image-credit {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: #777;
+  }
+
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    .artist-info {
+      padding: 1rem;
+    }
+  }
+</style> 

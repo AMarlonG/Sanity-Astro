@@ -11,72 +11,57 @@ interface Props {
 const { level, text, id, className = '', _key, _type } = Astro.props;
 ---
 
-<div class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>
-  {level === 'h2' && <h2 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h2>}
-  {level === 'h3' && <h3 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h3>}
-  {level === 'h4' && <h4 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h4>}
-  {level === 'h5' && <h5 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h5>}
-  {level === 'h6' && <h6 id={id} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h6>}
-</div>
+{level === 'h2' && <h2 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h2>}
+{level === 'h3' && <h3 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h3>}
+{level === 'h4' && <h4 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h4>}
+{level === 'h5' && <h5 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h5>}
+{level === 'h6' && <h6 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h6>}
 
 <style>
   .heading-component {
     margin: 2rem 0 1rem 0;
+    font-weight: 600;
+    color: #1a1a1a;
   }
-  
-  .heading-component h2 {
+
+  h2.heading-component {
     font-size: 2rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
   }
-  
-  .heading-component h3 {
+
+  h3.heading-component {
     font-size: 1.75rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
   }
-  
-  .heading-component h4 {
+
+  h4.heading-component {
     font-size: 1.5rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
   }
-  
-  .heading-component h5 {
+
+  h5.heading-component {
     font-size: 1.25rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
   }
-  
-  .heading-component h6 {
+
+  h6.heading-component {
     font-size: 1.125rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin: 0;
   }
   
   @media (max-width: 768px) {
-    .heading-component h2 {
+    h2.heading-component {
       font-size: 1.75rem;
     }
-    
-    .heading-component h3 {
+
+    h3.heading-component {
       font-size: 1.5rem;
     }
-    
-    .heading-component h4 {
+
+    h4.heading-component {
       font-size: 1.25rem;
     }
-    
-    .heading-component h5 {
+
+    h5.heading-component {
       font-size: 1.125rem;
     }
-    
-    .heading-component h6 {
+
+    h6.heading-component {
       font-size: 1rem;
     }
   }

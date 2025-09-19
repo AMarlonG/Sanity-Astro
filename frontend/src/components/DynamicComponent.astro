@@ -1,0 +1,54 @@
+---
+import { componentRegistry, isRegisteredComponent, type ContentBlock } from '../lib/componentRegistry';
+
+interface Props {
+  block: ContentBlock;
+}
+
+const { block } = Astro.props;
+
+// Get the component for this block type
+const Component = componentRegistry[block._type];
+const isKnownComponent = isRegisteredComponent(block._type);
+---
+
+{isKnownComponent && Component ? (
+  <Component {...block} />
+) : (
+  <div class="unknown-component">
+    <p>⚠️ Ukjent komponent: <code>{block._type}</code></p>
+    <details>
+      <summary>Debug info</summary>
+      <pre>{JSON.stringify(block, null, 2)}</pre>
+    </details>
+  </div>
+)}
+
+<style>
+  .unknown-component {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+  }
+
+  .unknown-component code {
+    background: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+  }
+
+  .unknown-component details {
+    margin-top: 0.5rem;
+  }
+
+  .unknown-component pre {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 3px;
+    overflow-x: auto;
+    font-size: 0.8rem;
+  }
+</style>

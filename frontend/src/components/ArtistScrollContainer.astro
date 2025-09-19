@@ -89,10 +89,14 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
               <div class="artist-card">
                 {artistImage && (
                   <div class="artist-image">
-                    <img 
-                      src={getImageUrl(artistImage, cardWidth, cardHeight)} 
-                      alt={artistImageAlt}
-                    />
+                    <picture>
+                      <img
+                        src={getImageUrl(artistImage, cardWidth, cardHeight)}
+                        alt={artistImageAlt}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </picture>
                   </div>
                 )}
                 <div class="artist-content">
@@ -106,10 +110,14 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
             <div class="artist-card">
               {artistImage && (
                 <div class="artist-image">
-                  <img 
-                    src={getImageUrl(artistImage, cardWidth, cardHeight)} 
-                    alt={artistImageAlt}
-                  />
+                  <picture>
+                    <img
+                      src={getImageUrl(artistImage, cardWidth, cardHeight)}
+                      alt={artistImageAlt}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
                 </div>
               )}
               <div class="artist-content">
