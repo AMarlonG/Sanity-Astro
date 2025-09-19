@@ -102,70 +102,81 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 ---
 
-<div class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
+<section class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
   {title && <h3 class="event-scroll-title">{title}</h3>}
   <div class="event-scroll-wrapper">
-    {sortedEvents.map((event) => {
-      if (!event) return null
-      
-      const eventDate = event.eventDate?.date ? new Date(event.eventDate.date) : null
-      const dateString = eventDate ? eventDate.toLocaleDateString('nb-NO') : ''
-      const timeString = event.eventTime || ''
-      const venueName = event.venue?.title || ''
-      const artistNames = event.artists?.map((artist: any) => artist.name).join(', ') || ''
-      const eventSlug = event.slug?.current || ''
-      
-      const eventImage = event.image || null
-      const imageAlt = event.imageAlt || event.title || ''
-      
-      // Beregn høyde basert på cardFormat
-      const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
-      const cardWidth = cardFormat === '16:9' ? 350 : 300
-      const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
-      
-      return (
-        <div class="event-item">
-          <div class="event-card">
-            {eventImage && (
-              <div class="event-image">
-                <picture>
-                  <img
-                    src={getImageUrl(eventImage, cardWidth, cardHeight)}
-                    alt={imageAlt}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
+    <ul class="event-list">
+      {sortedEvents.map((event) => {
+        if (!event) return null
+
+        const eventDate = event.eventDate?.date ? new Date(event.eventDate.date) : null
+        const dateString = eventDate ? eventDate.toLocaleDateString('nb-NO') : ''
+        const timeString = event.eventTime || ''
+        const venueName = event.venue?.title || ''
+        const artistNames = event.artists?.map((artist: any) => artist.name).join(', ') || ''
+        const eventSlug = event.slug?.current || ''
+
+        const eventImage = event.image || null
+        const imageAlt = event.imageAlt || event.title || ''
+
+        // Beregn høyde basert på cardFormat
+        const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
+        const cardWidth = cardFormat === '16:9' ? 350 : 300
+        const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
+
+        // Kombinert dato og tid for <time> element
+        const dateTimeValue = eventDate && timeString
+          ? `${eventDate.toISOString().split('T')[0]}T${timeString}:00`
+          : eventDate?.toISOString().split('T')[0]
+
+        return (
+          <li class="event-item">
+            <article class="event-card">
+              {eventImage && (
+                <div class="event-image">
+                  <picture>
+                    <img
+                      src={getImageUrl(eventImage, cardWidth, cardHeight)}
+                      alt={imageAlt}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </picture>
+                </div>
+              )}
+              <div class="event-content">
+                <h4 class="event-title">{event.title || ''}</h4>
+                {(showDate || showTime) && (dateString || timeString) && (
+                  <time class="event-datetime" dateTime={dateTimeValue}>
+                    {showDate && dateString && <span class="event-date">{dateString}</span>}
+                    {showTime && timeString && <span class="event-time">{timeString}</span>}
+                  </time>
+                )}
+                {showVenue && venueName && <address class="event-venue">{venueName}</address>}
+                {showArtists && artistNames && <p class="event-artists">{artistNames}</p>}
+                {eventSlug && (
+                  <a href={`/arrangementer/${eventSlug}`} class="event-link">
+                    Les mer
+                  </a>
+                )}
+                {event.buttonText && (
+                  <a
+                    href={event.buttonUrl || '#'}
+                    class="event-button"
+                    target={event.buttonOpenInNewTab ? '_blank' : undefined}
+                    rel={event.buttonOpenInNewTab ? 'noopener noreferrer' : undefined}
+                  >
+                    {event.buttonText}
+                  </a>
+                )}
               </div>
-            )}
-            <div class="event-content">
-              <h4 class="event-title">{event.title || ''}</h4>
-              {showDate && dateString && <div class="event-date">{dateString}</div>}
-              {showTime && timeString && <div class="event-time">{timeString}</div>}
-              {showVenue && venueName && <div class="event-venue">{venueName}</div>}
-              {showArtists && artistNames && <div class="event-artists">{artistNames}</div>}
-              {event.buttonText && (
-                <a 
-                  href={event.buttonUrl || '#'} 
-                  class="event-button"
-                  target={event.buttonOpenInNewTab ? '_blank' : undefined}
-                  rel={event.buttonOpenInNewTab ? 'noopener noreferrer' : undefined}
-                >
-                  {event.buttonText}
-                </a>
-              )}
-              {eventSlug && (
-                <a href={`/arrangementer/${eventSlug}`} class="event-link">
-                  Les mer
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      )
-    })}
+            </article>
+          </li>
+        )
+      })}
+    </ul>
   </div>
-</div>
+</section>
 
 <style>
   /* Intrinsic Scroll Container */
@@ -184,11 +195,17 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 
   /* Fluid scroll wrapper */
   .event-scroll-wrapper {
-    display: flex;
     overflow-x: auto;
-    gap: clamp(var(--space-3), 2.5vw, var(--space-5));
     padding-block: var(--space-2);
     scroll-snap-type: x mandatory;
+  }
+
+  .event-list {
+    display: flex;
+    gap: clamp(var(--space-3), 2.5vw, var(--space-5));
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .event-item {
