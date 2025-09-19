@@ -24,23 +24,25 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 const formatClass = `format-${format.replace(':', '-')}`
 ---
 
-<div class={`${containerClass} ${scrollbarClass} ${formatClass}`}>
+<section class={`${containerClass} ${scrollbarClass} ${formatClass}`}>
   {title && <h3 class="scroll-container-title">{title}</h3>}
   <div class="scroll-wrapper">
-    {items.map((item) => {
-      if (!item) return null
-      
-      return (
-        <div class="scroll-item">
-          {item._type === 'imageComponent' && <Image {...item} />}
-          {item._type === 'videoComponent' && <Video {...item} />}
-          {item._type === 'quoteComponent' && <Quote {...item} />}
-          {item._type === 'portableTextBlock' && <PortableText content={item.content} semantic="div" />}
-        </div>
-      )
-    })}
+    <ul class="scroll-list">
+      {items.map((item) => {
+        if (!item) return null
+
+        return (
+          <li class="scroll-item">
+            {item._type === 'imageComponent' && <Image {...item} />}
+            {item._type === 'videoComponent' && <Video {...item} />}
+            {item._type === 'quoteComponent' && <Quote {...item} />}
+            {item._type === 'portableTextBlock' && <PortableText content={item.content} semantic="div" />}
+          </li>
+        )
+      })}
+    </ul>
   </div>
-</div>
+</section>
 
 <style>
   .content-scroll-container {
@@ -56,10 +58,16 @@ const formatClass = `format-${format.replace(':', '-')}`
   }
 
   .scroll-wrapper {
-    display: flex;
     overflow-x: auto;
-    gap: 1rem;
     padding: 0.5rem 0;
+  }
+
+  .scroll-list {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .scroll-item {

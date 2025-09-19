@@ -64,29 +64,29 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 ---
 
-<div class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
+<section class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
   {title && <h3 class="artist-scroll-title">{title}</h3>}
   <div class="artist-scroll-wrapper">
-    {artistData.map((artist) => {
-      if (!artist) return null
-      
-      const artistName = artist.name || ''
-      const artistImage = artist.image || null
-      const artistImageAlt = artist.imageAlt || artistName || ''
-      const artistInstrument = artist.instrument || ''
-      const artistCountry = artist.country || ''
-      const artistSlug = artist.slug?.current || ''
-      
-      // Beregn høyde basert på cardFormat
-      const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
-      const cardWidth = cardFormat === '16:9' ? 320 : 280
-      const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
-      
-      return (
-        <div class="artist-item">
-          {artistSlug ? (
+    <ul class="artist-list">
+      {artistData.map((artist) => {
+        if (!artist) return null
+
+        const artistName = artist.name || ''
+        const artistImage = artist.image || null
+        const artistImageAlt = artist.imageAlt || artistName || ''
+        const artistInstrument = artist.instrument || ''
+        const artistCountry = artist.country || ''
+        const artistSlug = artist.slug?.current || ''
+
+        // Beregn høyde basert på cardFormat
+        const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
+        const cardWidth = cardFormat === '16:9' ? 320 : 280
+        const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
+
+        return (
+          <li class="artist-item">
             <a href={`/kunstnere/${artistSlug}`} class="artist-card-link">
-              <div class="artist-card">
+              <article class="artist-card">
                 {artistImage && (
                   <div class="artist-image">
                     <picture>
@@ -101,37 +101,17 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
                 )}
                 <div class="artist-content">
                   <h4 class="artist-name">{artistName}</h4>
-                  {artistInstrument && <div class="artist-instrument">{artistInstrument}</div>}
-                  {artistCountry && <div class="artist-country">{artistCountry}</div>}
+                  {artistInstrument && <p class="artist-instrument">{artistInstrument}</p>}
+                  {artistCountry && <p class="artist-country">{artistCountry}</p>}
                 </div>
-              </div>
+              </article>
             </a>
-          ) : (
-            <div class="artist-card">
-              {artistImage && (
-                <div class="artist-image">
-                  <picture>
-                    <img
-                      src={getImageUrl(artistImage, cardWidth, cardHeight)}
-                      alt={artistImageAlt}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </picture>
-                </div>
-              )}
-              <div class="artist-content">
-                <h4 class="artist-name">{artistName}</h4>
-                {artistInstrument && <div class="artist-instrument">{artistInstrument}</div>}
-                {artistCountry && <div class="artist-country">{artistCountry}</div>}
-              </div>
-            </div>
-          )}
-        </div>
-      )
-    })}
+          </li>
+        )
+      })}
+    </ul>
   </div>
-</div>
+</section>
 
 <style>
   .artist-scroll-container {
@@ -147,10 +127,16 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
   }
 
   .artist-scroll-wrapper {
-    display: flex;
     overflow-x: auto;
-    gap: 1rem;
     padding: 0.5rem 0;
+  }
+
+  .artist-list {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .artist-item {

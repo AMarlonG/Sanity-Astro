@@ -19,7 +19,7 @@ export const contentScrollContainer = defineType({
       title: 'Elementer',
       type: 'array',
       description: 'Legg til mellom 3 og 6 elementer som skal vises i horisontal scroll',
-              of: [{type: 'imageComponent'}, {type: 'videoComponent'}, {type: 'quoteComponent'}],
+              of: [{type: 'imageComponent'}, {type: 'videoComponent'}, {type: 'quoteComponent'}, {type: 'portableTextBlock'}],
       validation: (Rule) => Rule.max(6).min(3),
     }),
     defineField({
