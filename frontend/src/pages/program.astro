@@ -8,8 +8,8 @@ import { formatDateForLanguage } from '../../../shared/utils/dates';
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Hent program-siden innhold fra "Faste sider"
-const programPage = await dataService.getPageBySlug('program');
+// Hent program-siden innhold fra programPage schema
+const programPage = await dataService.getProgramPage();
 
 // Hent alle publiserte arrangementer
 const events = await dataService.getPublishedEvents();

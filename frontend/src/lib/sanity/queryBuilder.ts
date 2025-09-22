@@ -176,6 +176,28 @@ export const QueryBuilder = {
     }
   `,
 
+  // Program page query
+  programPage: () => `
+    *[_type == "programPage"][0] {
+      _id,
+      title,
+      slug,
+      excerpt,
+      ${CONTENT_QUERY}
+    }
+  `,
+
+  // Artist page query
+  artistPage: () => `
+    *[_type == "artistPage"][0] {
+      _id,
+      title,
+      slug,
+      excerpt,
+      ${CONTENT_QUERY}
+    }
+  `,
+
   // Dynamic content queries
   contentByType: (contentType: string, orderBy: string = '_createdAt desc') => `
     *[_type == "${contentType}"] | order(${orderBy}) {

@@ -114,6 +114,26 @@ export class SanityDataService {
     );
   }
 
+  async getProgramPage(options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.programPage(),
+      {},
+      options,
+      'programPage',
+      CACHE_DURATION.page
+    );
+  }
+
+  async getArtistPage(options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.artistPage(),
+      {},
+      options,
+      'artistPage',
+      CACHE_DURATION.page
+    );
+  }
+
   // Content type methods
   async getContentByType(contentType: string, orderBy?: string, options: QueryOptions = {}) {
     return this.fetch(

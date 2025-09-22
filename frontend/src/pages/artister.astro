@@ -7,8 +7,8 @@ import { createDataService } from '../lib/sanity/dataService.js';
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Hent artister-siden innhold fra "Faste sider"
-const artistsPage = await dataService.getPageBySlug('artister');
+// Hent artister-siden innhold fra artistPage schema
+const artistsPage = await dataService.getArtistPage();
 
 // Hent alle publiserte artister
 const artists = await dataService.getPublishedArtists();

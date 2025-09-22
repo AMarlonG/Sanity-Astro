@@ -9,6 +9,7 @@ import {
   EarthGlobeIcon,
   DocumentsIcon,
   ComposeIcon,
+  UsersIcon,
 } from '@sanity/icons'
 
 export const structure = (S: StructureBuilder) =>
@@ -26,6 +27,8 @@ export const structure = (S: StructureBuilder) =>
       S.divider().title('FAST INNHOLD'),
 
       S.listItem().title('Forsider').icon(EarthGlobeIcon).child(S.documentTypeList('homepage')),
+      S.listItem().title('Programside').icon(CalendarIcon).child(S.documentTypeList('programPage')),
+      S.listItem().title('Artistside').icon(UsersIcon).child(S.documentTypeList('artistPage')),
       S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('page')),
 
       // Festivalinnhold
