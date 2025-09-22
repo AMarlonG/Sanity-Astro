@@ -17,6 +17,16 @@ export const event = defineType({
       default: true,
     },
     {
+      name: 'artists',
+      title: 'Artister',
+      icon: UsersIcon,
+    },
+    {
+      name: 'composers',
+      title: 'Komponister',
+      icon: ComposeIcon,
+    },
+    {
       name: 'image',
       title: 'Hovedbilde',
       icon: ImageIcon,
@@ -87,6 +97,25 @@ export const event = defineType({
       group: 'basic',
     }),
     defineField({
+      name: 'artist',
+      title: 'Artister',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'artist'}],
+        }
+      ],
+      description: 'Velg artister som opptrer på arrangementet',
+      group: 'artists',
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.length && context.document?.publishingStatus === 'published') {
+          return 'Minst en artist bør velges før publisering'
+        }
+        return true
+      }),
+    }),
+    defineField({
       name: 'composers',
       title: 'Komponister',
       type: 'array',
@@ -97,7 +126,7 @@ export const event = defineType({
         }
       ],
       description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
-      group: 'content',
+      group: 'composers',
     }),
     defineField({
       name: 'venue',
@@ -134,7 +163,7 @@ export const event = defineType({
       group: 'basic',
       fieldsets: [
         {
-          name: 'timing',
+          name: 'times',
           options: {columns: 2},
         },
       ],
@@ -143,7 +172,7 @@ export const event = defineType({
           name: 'startTime',
           title: 'Starttidspunkt',
           type: 'string',
-          fieldset: 'timing',
+          fieldset: 'times',
           options: {
             list: eventTimeOptions,
           },
@@ -158,7 +187,7 @@ export const event = defineType({
           name: 'endTime',
           title: 'Sluttidspunkt',
           type: 'string',
-          fieldset: 'timing',
+          fieldset: 'times',
           options: {
             list: eventTimeOptions,
           },
@@ -304,7 +333,7 @@ export const event = defineType({
     select: {
       title: 'title',
       venue: 'venue.title',
-      artists: 'artist',
+      artists: 'artist[].name',
       media: 'image.image',
       eventDate: 'eventDate.title',
       eventDateDate: 'eventDate.date',
@@ -338,7 +367,7 @@ export const event = defineType({
         }
       }
       
-      const artistNames = artists?.map((artist: any) => artist.name).join(', ') || 'Ingen artister'
+      const artistNames = artists?.length ? artists.join(', ') : 'Ingen artister'
       const dateString = eventDateDate
         ? new Date(eventDateDate).toLocaleDateString('nb-NO')
         : 'Ingen dato'

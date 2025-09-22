@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {UserIcon, ImageIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {UserIcon, ImageIcon, ComposeIcon, CogIcon, CalendarIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
 
 export const artist = defineType({
@@ -13,6 +13,11 @@ export const artist = defineType({
       title: 'Grunnleggende informasjon',
       icon: UserIcon,
       default: true,
+    },
+    {
+      name: 'events',
+      title: 'Arrangementer',
+      icon: CalendarIcon,
     },
     {
       name: 'image',
@@ -216,6 +221,25 @@ export const artist = defineType({
         },
       ],
       group: 'scheduling',
+    }),
+    defineField({
+      name: 'events',
+      title: 'Arrangementer',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'event'}],
+        }
+      ],
+      description: 'Velg arrangementer som denne artisten opptrer på',
+      group: 'events',
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.length && context.document?.publishingStatus === 'published') {
+          return 'Det kan være lurt å koble artisten til minst ett arrangement'
+        }
+        return true
+      }),
     }),
   ],
   preview: {

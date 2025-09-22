@@ -87,6 +87,11 @@ If the answer to #4 is "yes", then probably don't change it.
 - **Never attempt to edit based on assumptions** about file content from memory or previous sessions
 - **Understand the context** before making changes to ensure proper integration
 
+### Web Research Methodology
+- **Always search chronologically starting with the current year first, then work backwards through previous years** (last year, the year before, etc.)
+- **Rationale**: Technology evolves rapidly - recent solutions often supersede older approaches with better performance, support, or maintainability
+- **Note**: This same methodology is defined in all specialized agent files (`.claude/agents/`)
+
 ### Post-Context Compression Checklist
 **IMPORTANT: After any context compression, automatically review this checklist before continuing work:**
 
