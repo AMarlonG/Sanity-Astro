@@ -40,8 +40,23 @@ export const structure = (S: StructureBuilder) =>
       // Festivalinnhold
       S.divider().title('FESTIVALINNHOLD'),
 
-      S.listItem().title('Arrangementer').icon(CalendarIcon).child(S.documentTypeList('event')),
-      S.listItem().title('Artister').icon(UserIcon).child(S.documentTypeList('artist')),
+      S.listItem()
+        .title('Arrangementer')
+        .icon(CalendarIcon)
+        .child(
+          S.documentTypeList('event')
+            .defaultOrdering([
+              {field: 'eventDate.date', direction: 'asc'},
+              {field: 'eventTime.startTime', direction: 'asc'}
+            ])
+        ),
+      S.listItem()
+        .title('Artister')
+        .icon(UserIcon)
+        .child(
+          S.documentTypeList('artist')
+            .defaultOrdering([{field: 'name', direction: 'asc'}])
+        ),
       S.listItem().title('Artikler').icon(DocumentTextIcon).child(S.documentTypeList('article')),
 
       // Referansedata
@@ -49,8 +64,29 @@ export const structure = (S: StructureBuilder) =>
       S.listItem()
         .title('Festivaldatoer')
         .icon(CalendarIcon)
-        .child(S.documentTypeList('eventDate')),
-      S.listItem().title('Spillesteder').icon(HomeIcon).child(S.documentTypeList('venue')),
-      S.listItem().title('Sjangre').icon(TagIcon).child(S.documentTypeList('genre')),
-      S.listItem().title('Komponister').icon(ComposeIcon).child(S.documentTypeList('composer')),
+        .child(
+          S.documentTypeList('eventDate')
+            .defaultOrdering([{field: 'date', direction: 'asc'}])
+        ),
+      S.listItem()
+        .title('Spillesteder')
+        .icon(HomeIcon)
+        .child(
+          S.documentTypeList('venue')
+            .defaultOrdering([{field: 'name', direction: 'asc'}])
+        ),
+      S.listItem()
+        .title('Sjangre')
+        .icon(TagIcon)
+        .child(
+          S.documentTypeList('genre')
+            .defaultOrdering([{field: 'title', direction: 'asc'}])
+        ),
+      S.listItem()
+        .title('Komponister')
+        .icon(ComposeIcon)
+        .child(
+          S.documentTypeList('composer')
+            .defaultOrdering([{field: 'name', direction: 'asc'}])
+        ),
     ])

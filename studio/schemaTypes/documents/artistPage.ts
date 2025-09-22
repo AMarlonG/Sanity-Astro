@@ -6,6 +6,7 @@ export const artistPage = defineType({
   title: 'Artistside',
   type: 'document',
   icon: UsersIcon,
+  __experimental_formPreviewTitle: false,
   groups: [
     {
       name: 'content',
@@ -78,8 +79,8 @@ export const artistPage = defineType({
     },
     prepare({title, slug}) {
       return {
-        title: title || 'Uten tittel',
-        subtitle: `/${slug || 'ingen-url'}`,
+        title: 'Artistside',
+        subtitle: `/${slug || 'artister'}`,
       }
     },
   },

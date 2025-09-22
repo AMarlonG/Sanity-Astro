@@ -6,6 +6,7 @@ export const programPage = defineType({
   title: 'Programside',
   type: 'document',
   icon: CalendarIcon,
+  __experimental_formPreviewTitle: false,
   groups: [
     {
       name: 'content',
@@ -78,8 +79,8 @@ export const programPage = defineType({
     },
     prepare({title, slug}) {
       return {
-        title: title || 'Uten tittel',
-        subtitle: `/${slug || 'ingen-url'}`,
+        title: 'Programside',
+        subtitle: `/${slug || 'program'}`,
       }
     },
   },
