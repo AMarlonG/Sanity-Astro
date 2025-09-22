@@ -27,8 +27,14 @@ export const structure = (S: StructureBuilder) =>
       S.divider().title('FAST INNHOLD'),
 
       S.listItem().title('Forsider').icon(EarthGlobeIcon).child(S.documentTypeList('homepage')),
-      S.listItem().title('Programside').icon(CalendarIcon).child(S.documentTypeList('programPage')),
-      S.listItem().title('Artistside').icon(UsersIcon).child(S.documentTypeList('artistPage')),
+      S.listItem()
+        .title('Programside')
+        .icon(CalendarIcon)
+        .child(S.document().schemaType('programPage').documentId('programPage')),
+      S.listItem()
+        .title('Artistside')
+        .icon(UsersIcon)
+        .child(S.document().schemaType('artistPage').documentId('artistPage')),
       S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('page')),
 
       // Festivalinnhold

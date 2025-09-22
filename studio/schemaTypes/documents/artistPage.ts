@@ -1,11 +1,24 @@
 import {defineField, defineType} from 'sanity'
-import {UsersIcon} from '@sanity/icons'
+import {UsersIcon, ComposeIcon, UserIcon} from '@sanity/icons'
 
 export const artistPage = defineType({
   name: 'artistPage',
   title: 'Artistside',
   type: 'document',
   icon: UsersIcon,
+  groups: [
+    {
+      name: 'content',
+      title: 'Innhold',
+      icon: ComposeIcon,
+      default: true,
+    },
+    {
+      name: 'artists',
+      title: 'Artister',
+      icon: UserIcon,
+    },
+  ],
   fields: [
     defineField({
       name: 'title',
@@ -13,6 +26,7 @@ export const artistPage = defineType({
       type: 'string',
       initialValue: 'Artister',
       validation: (Rule) => Rule.required(),
+      group: 'content',
     }),
     defineField({
       name: 'slug',
@@ -25,6 +39,7 @@ export const artistPage = defineType({
       },
       initialValue: {current: 'artister'},
       validation: (Rule) => Rule.required(),
+      group: 'content',
     }),
     defineField({
       name: 'excerpt',
@@ -33,12 +48,27 @@ export const artistPage = defineType({
       description: 'Kort beskrivelse av artistsiden',
       rows: 2,
       validation: (Rule) => Rule.max(200),
+      group: 'content',
     }),
     defineField({
       name: 'content',
       title: 'Sideinnhold',
       type: 'pageBuilder',
       description: 'Bygg artistsiden med komponenter og innhold',
+      group: 'content',
+    }),
+    defineField({
+      name: 'selectedArtists',
+      title: 'Valgte artister',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'artist'}],
+        }
+      ],
+      description: 'Velg artister som skal vises på artistsiden',
+      group: 'artists',
     }),
   ],
   preview: {

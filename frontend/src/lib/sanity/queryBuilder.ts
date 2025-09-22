@@ -183,7 +183,22 @@ export const QueryBuilder = {
       title,
       slug,
       excerpt,
-      ${CONTENT_QUERY}
+      ${CONTENT_QUERY},
+      selectedEvents[]->{
+        _id,
+        title,
+        slug,
+        eventDate->{date, title},
+        eventTime,
+        venue->{name},
+        artists[]->{name},
+        image{
+          asset->{url},
+          alt
+        },
+        genre->{title},
+        price
+      }
     }
   `,
 
@@ -194,7 +209,20 @@ export const QueryBuilder = {
       title,
       slug,
       excerpt,
-      ${CONTENT_QUERY}
+      ${CONTENT_QUERY},
+      selectedArtists[]->{
+        _id,
+        name,
+        slug,
+        excerpt,
+        instrument,
+        country,
+        image{
+          asset->{url},
+          alt
+        },
+        genres[]->{title}
+      }
     }
   `,
 

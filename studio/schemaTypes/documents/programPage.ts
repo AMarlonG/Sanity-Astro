@@ -1,11 +1,24 @@
 import {defineField, defineType} from 'sanity'
-import {CalendarIcon} from '@sanity/icons'
+import {CalendarIcon, ComposeIcon} from '@sanity/icons'
 
 export const programPage = defineType({
   name: 'programPage',
   title: 'Programside',
   type: 'document',
   icon: CalendarIcon,
+  groups: [
+    {
+      name: 'content',
+      title: 'Innhold',
+      icon: ComposeIcon,
+      default: true,
+    },
+    {
+      name: 'events',
+      title: 'Arrangementer',
+      icon: CalendarIcon,
+    },
+  ],
   fields: [
     defineField({
       name: 'title',
@@ -13,6 +26,7 @@ export const programPage = defineType({
       type: 'string',
       initialValue: 'Program',
       validation: (Rule) => Rule.required(),
+      group: 'content',
     }),
     defineField({
       name: 'slug',
@@ -25,6 +39,7 @@ export const programPage = defineType({
       },
       initialValue: {current: 'program'},
       validation: (Rule) => Rule.required(),
+      group: 'content',
     }),
     defineField({
       name: 'excerpt',
@@ -33,12 +48,27 @@ export const programPage = defineType({
       description: 'Kort beskrivelse av programsiden',
       rows: 2,
       validation: (Rule) => Rule.max(200),
+      group: 'content',
     }),
     defineField({
       name: 'content',
       title: 'Sideinnhold',
       type: 'pageBuilder',
       description: 'Bygg programsiden med komponenter og innhold',
+      group: 'content',
+    }),
+    defineField({
+      name: 'selectedEvents',
+      title: 'Valgte arrangementer',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'event'}],
+        }
+      ],
+      description: 'Velg arrangementer som skal vises på programsiden',
+      group: 'events',
     }),
   ],
   preview: {

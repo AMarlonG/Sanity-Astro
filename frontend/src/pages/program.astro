@@ -11,8 +11,8 @@ const dataService = createDataService(Astro.request);
 // Hent program-siden innhold fra programPage schema
 const programPage = await dataService.getProgramPage();
 
-// Hent alle publiserte arrangementer
-const events = await dataService.getPublishedEvents();
+// Bruk kun valgte arrangementer fra programPage
+const events = programPage?.selectedEvents || [];
 
 // Fallback values
 const pageTitle = programPage?.title || 'Program';

@@ -10,8 +10,8 @@ const dataService = createDataService(Astro.request);
 // Hent artister-siden innhold fra artistPage schema
 const artistsPage = await dataService.getArtistPage();
 
-// Hent alle publiserte artister
-const artists = await dataService.getPublishedArtists();
+// Bruk kun valgte artister fra artistPage
+const artists = artistsPage?.selectedArtists || [];
 
 // Fallback values
 const pageTitle = artistsPage?.title || 'Artister';
