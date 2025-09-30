@@ -57,9 +57,9 @@ export const eventDate = defineType({
       description: 'Trykk generer for å lage norsk URL',
       group: 'no',
       options: {
-        source: (doc) => {
-          if (!doc.date) return 'festivaldato'
-          const d = new Date(doc.date)
+        source: (doc: any) => {
+          if (!doc.date || typeof doc.date !== 'string') return 'festivaldato'
+          const d = new Date(doc.date as string)
           const weekday = new Intl.DateTimeFormat('nb-NO', {weekday: 'long'})
             .format(d)
             .toLowerCase()
@@ -96,9 +96,9 @@ export const eventDate = defineType({
       description: 'Click generate to create English URL',
       group: 'en',
       options: {
-        source: (doc) => {
-          if (!doc.date) return 'festival-date'
-          const d = new Date(doc.date)
+        source: (doc: any) => {
+          if (!doc.date || typeof doc.date !== 'string') return 'festival-date'
+          const d = new Date(doc.date as string)
           const weekday = new Intl.DateTimeFormat('en-GB', {weekday: 'long'})
             .format(d)
             .toLowerCase()
@@ -141,7 +141,7 @@ export const eventDate = defineType({
         }
       }
 
-      const d = new Date(date)
+      const d = new Date(date as string)
       const formatted = new Intl.DateTimeFormat('nb-NO', {
         weekday: 'long',
         day: 'numeric',
@@ -164,7 +164,6 @@ export const eventDate = defineType({
       title: 'Dato, eldste først',
       name: 'dateAsc',
       by: [{field: 'date', direction: 'asc'}],
-      default: true,
     },
     {
       title: 'Dato, nyeste først',
