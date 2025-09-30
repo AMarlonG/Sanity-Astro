@@ -1,8 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {UserIcon, ImageIcon, ComposeIcon, CogIcon, CalendarIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
-import {createMirrorStringInput} from '../../components/inputs/MirrorStringInput'
-import {createMirrorTextInput} from '../../components/inputs/MirrorTextInput'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 
 export const artist = defineType({
@@ -112,9 +110,6 @@ export const artist = defineType({
       rows: 2,
       validation: (Rule) => Rule.max(100),
       group: 'en',
-      components: {
-        input: createMirrorTextInput('excerpt_no')
-      },
     }),
     defineField({
       name: 'instrument_en',
@@ -122,9 +117,6 @@ export const artist = defineType({
       type: 'string',
       description: 'Instrument description in English',
       group: 'en',
-      components: {
-        input: createMirrorStringInput('instrument_no')
-      },
     }),
     defineField({
       name: 'content_en',

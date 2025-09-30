@@ -6,7 +6,6 @@ import {nbNOLocale} from '@sanity/locale-nb-no'
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './deskStructure'
-import CopyNoToEnAction from './actions/CopyNoToEnAction'
 
 // Custom Norwegian i18n resources to override publish button text
 const customNorwegianResources = {
@@ -117,14 +116,6 @@ export default defineConfig({
     types: schemaTypes,
   },
 
-  document: {
-    actions: (prev, context) => {
-      if (context.schemaType === 'artist') {
-        return [...prev, CopyNoToEnAction]
-      }
-      return prev
-    },
-  },
 
   // Override default Norwegian translations
   i18n: {

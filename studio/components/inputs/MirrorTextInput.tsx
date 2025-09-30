@@ -8,8 +8,8 @@ export function createMirrorTextInput(sourceField: string) {
     const sourceValue = useFormValue([sourceField]) as string
 
     // If field is empty and we have a source value, mirror it
-    const displayValue = value !== undefined ? value : (sourceValue || '')
-    const isUsingMirror = value === undefined && sourceValue
+    const displayValue = value || ''
+    const isUsingMirror = !value && sourceValue
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = event.target.value
@@ -27,10 +27,6 @@ export function createMirrorTextInput(sourceField: string) {
           value={displayValue}
           onChange={handleChange}
           placeholder={sourceValue ? `Følger norsk: "${sourceValue.substring(0, 50)}${sourceValue.length > 50 ? '...' : ''}"` : props.placeholder}
-          style={{
-            fontStyle: isUsingMirror ? 'italic' : 'normal',
-            color: isUsingMirror ? '#6b7280' : 'inherit'
-          }}
         />
         {isUsingMirror && (
           <Text size={1} muted>
