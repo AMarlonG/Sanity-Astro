@@ -64,11 +64,11 @@ export const heading = defineType({
     prepare({level, text, id}) {
       const displayLevel = level ? level.toUpperCase() : 'H?'
       const displayText = text || 'Ingen overskriftstekst'
-      const displayId = id?.current ? `Anker: #${id.current}` : ''
+      const displayId = id?.current ? ` • Anker: #${id.current}` : ''
 
       return {
-        title: `${displayLevel}: ${displayText}`,
-        subtitle: displayId,
+        title: 'Overskrift',
+        subtitle: `${displayLevel}: ${displayText}${displayId}`,
         media: BlockContentIcon,
       }
     },

@@ -268,8 +268,8 @@ export const columnLayout = defineType({
         'Stack'
       
       return {
-        title: `${layoutName} Layout`,
-        subtitle: `${count || 0} komponenter • ${containerWidth || 'full'} bredde`,
+        title: 'Layout',
+        subtitle: `${layoutName} • ${count || 0} komponenter • ${containerWidth || 'full'} bredde`,
         media: EllipsisHorizontalIcon,
       }
     },

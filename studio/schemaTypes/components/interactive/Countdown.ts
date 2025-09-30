@@ -65,8 +65,8 @@ export const countdownComponent = defineType({
         : 'Ingen arrangement valgt'
       
       return {
-        title: displayTitle,
-        subtitle: `${eventInfo} • ${style} stil`,
+        title: 'Nedtelling',
+        subtitle: `${displayTitle} • ${eventInfo} • ${style} stil`,
         media: ClockIcon,
       }
     },

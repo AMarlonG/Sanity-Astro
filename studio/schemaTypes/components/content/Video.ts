@@ -180,9 +180,8 @@ export const videoComponent = defineType({
       }
 
       return {
-        title: title || 'Video',
-        subtitle:
-          (subtitle ? `${subtitle} (${videoType})` : videoType || 'Ukjent type') + formatText,
+        title: 'Video',
+        subtitle: `${title || 'Uten tittel'} • ${(subtitle ? `${subtitle} (${videoType})` : videoType || 'Ukjent type')}${formatText}`,
         media: media || PlayIcon,
       }
     },

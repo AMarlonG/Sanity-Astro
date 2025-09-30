@@ -53,14 +53,14 @@ export const quoteComponent = defineType({
       source: 'source',
     },
     prepare({title, subtitle, source}) {
-      const displayTitle = title ? `${title.substring(0, 50)}...` : 'Ingen sitat'
-      const displaySubtitle = subtitle
+      const displaySubtitle = title ? `${title.substring(0, 40)}...` : 'Ingen innhold'
+      const authorInfo = subtitle
         ? `${subtitle}${source ? ` - ${source}` : ''}`
         : source || 'Ingen forfatter'
 
       return {
-        title: displayTitle,
-        subtitle: displaySubtitle,
+        title: 'Sitat',
+        subtitle: `${displaySubtitle} • ${authorInfo}`,
         media: AddCommentIcon,
       }
     },

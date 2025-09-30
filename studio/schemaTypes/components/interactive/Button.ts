@@ -143,8 +143,8 @@ export const buttonComponent = defineType({
       const iconText = icon && icon !== 'none' ? ` • ${icon}-ikon` : ''
 
       return {
-        title: title || 'Knapp uten tekst',
-        subtitle: `${styleDesc} • ${sizeDesc} størrelse${iconText}`,
+        title: 'Knapp',
+        subtitle: `${title || 'Uten tekst'} • ${styleDesc} • ${sizeDesc} størrelse${iconText}`,
         media: BoltIcon,
       }
     },

@@ -99,8 +99,8 @@ export const accordionComponent = defineType({
     prepare({title, panelCount}) {
       const count = panelCount?.length || 0
       return {
-        title: title || 'Accordion uten tittel',
-        subtitle: `${count} panel${count !== 1 ? 'er' : ''}`,
+        title: 'Nedtrekksmeny',
+        subtitle: `${title || 'Uten tittel'} • ${count} panel${count !== 1 ? 'er' : ''}`,
         media: TiersIcon,
       }
     },

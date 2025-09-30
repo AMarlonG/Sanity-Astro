@@ -38,8 +38,8 @@ export const title = defineType({
     },
     prepare({title, subtitle}) {
       return {
-        title: title || 'Uten tittel',
-        subtitle: subtitle ? `Undertittel: ${subtitle}` : 'Ingen undertittel',
+        title: 'Tittel',
+        subtitle: `${title || 'Uten tittel'}${subtitle ? ` • Undertittel: ${subtitle}` : ''}`,
         media: DocumentTextIcon,
       }
     },

@@ -108,8 +108,8 @@ export const spacer = defineType({
       const dividerDisplay = showDivider ? ' • med skillelinje' : ''
       
       return {
-        title: `${typeDisplay} Avstand`,
-        subtitle: `${sizeDisplay}${dividerDisplay}`,
+        title: 'Mellomrom',
+        subtitle: `${typeDisplay} • ${sizeDisplay}${dividerDisplay}`,
         media: ExpandIcon,
       }
     },

@@ -52,8 +52,8 @@ export const artistScrollContainer = defineType({
     prepare({title, items, cardFormat}) {
       const itemCount = items?.length || 0
       return {
-        title: title || 'Artist Scroll Container',
-        subtitle: `${itemCount} artister • ${cardFormat}`,
+        title: 'Artister',
+        subtitle: `${title || 'Scroll Container'} • ${itemCount} artister • ${cardFormat}`,
         media: DocumentIcon,
       }
     },

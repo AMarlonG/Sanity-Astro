@@ -95,8 +95,8 @@ export const eventScrollContainer = defineType({
     prepare({title, items, cardFormat}) {
       const eventCount = items?.length || 0
       return {
-        title: title || 'Event Scroll Container',
-        subtitle: `${eventCount} arrangementer • ${cardFormat}`,
+        title: 'Arrangementer',
+        subtitle: `${title || 'Scroll Container'} • ${eventCount} arrangementer • ${cardFormat}`,
         media: CalendarIcon,
       }
     },

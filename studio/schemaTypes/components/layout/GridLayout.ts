@@ -227,8 +227,8 @@ export const gridLayout = defineType({
         'Custom Grid'
       
       return {
-        title: templateName,
-        subtitle: `${itemCount || 0} grid items`,
+        title: 'Grid',
+        subtitle: `${templateName} • ${itemCount || 0} grid items`,
         media: BlockElementIcon,
       }
     },

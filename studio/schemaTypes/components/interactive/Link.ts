@@ -93,11 +93,28 @@ export const linkComponent = defineType({
       title: 'text',
       linkType: 'linkType',
       openInNewTab: 'openInNewTab',
+      url: 'url',
+      email: 'email',
+      phone: 'phone',
+      internalLink: 'internalLink.slug.current',
     },
-    prepare({title, linkType, openInNewTab}) {
+    prepare({title, linkType, openInNewTab, url, email, phone, internalLink}) {
+      // Bestem hvilken URL/lenke som skal vises
+      let linkDisplay = linkType || 'ingen lenke'
+
+      if (linkType === 'url' && url) {
+        linkDisplay = url.length > 30 ? `${url.substring(0, 30)}...` : url
+      } else if (linkType === 'email' && email) {
+        linkDisplay = email
+      } else if (linkType === 'phone' && phone) {
+        linkDisplay = phone
+      } else if (linkType === 'internal' && internalLink) {
+        linkDisplay = `/${internalLink}`
+      }
+
       return {
-        title: title || 'Lenke uten tekst',
-        subtitle: `${linkType || 'ingen lenke'}${openInNewTab ? ' (ny fane)' : ''}`,
+        title: 'Lenke',
+        subtitle: `${title || 'Uten tekst'} • ${linkDisplay}${openInNewTab ? ' (ny fane)' : ''}`,
         media: DocumentIcon,
       }
     },

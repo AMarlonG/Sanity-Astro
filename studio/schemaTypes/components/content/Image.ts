@@ -69,8 +69,8 @@ export const imageComponent = defineType({
       const formatText = aspectRatio ? ` • Format: ${aspectRatio}` : ''
 
       return {
-        title: title || 'Bilde uten alt-tekst',
-        subtitle: (subtitle || 'Ingen bildetekst') + formatText,
+        title: 'Bilde',
+        subtitle: `${title || 'Uten alt-tekst'} • ${(subtitle || 'Ingen bildetekst')}${formatText}`,
         media: media || DocumentIcon,
       }
     },
