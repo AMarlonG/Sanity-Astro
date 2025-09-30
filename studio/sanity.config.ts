@@ -62,18 +62,24 @@ export default defineConfig({
               ],
             }),
           },
-          // Event pages  
+          // Event pages
           event: {
             select: {
-              title: 'title',
-              slug: 'slug.current',
+              title_no: 'title_no',
+              title_en: 'title_en',
+              slug_no: 'slug_no.current',
+              slug_en: 'slug_en.current',
             },
             resolve: (doc) => ({
               locations: [
                 {
-                  title: doc?.title || 'Untitled event',
-                  href: `/program/${doc?.slug}`,
+                  title: doc?.title_no || 'Untitled event',
+                  href: `/program/${doc?.slug_no}`,
                 },
+                ...(doc?.slug_en ? [{
+                  title: doc?.title_en || 'Untitled event (EN)',
+                  href: `/en/program/${doc?.slug_en}`,
+                }] : []),
               ],
             }),
           },

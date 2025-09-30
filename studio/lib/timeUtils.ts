@@ -26,6 +26,6 @@ export function generateTimeOptions(
 }
 
 /**
- * Standard time options for events (00:00 - 23:45 in 15-minute intervals)
+ * Standard time options for events (06:00 - 23:45 in 15-minute intervals)
  */
-export const eventTimeOptions = generateTimeOptions(15, 0, 23)
+export const eventTimeOptions = generateTimeOptions(15, 6, 23)

@@ -68,12 +68,6 @@ export const event = defineType({
       ],
       description: 'Velg artister som opptrer på arrangementet',
       group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.length && context.document?.publishingStatus === 'published') {
-          return 'Minst en artist bør velges før publisering'
-        }
-        return true
-      }),
     }),
     defineField({
       name: 'composers',
@@ -172,12 +166,6 @@ export const event = defineType({
       type: 'image',
       description: 'Hovedbilde for arrangementet - brukes på arrangementssiden og når siden deles på sosiale medier',
       group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Hovedbilde bør lastes opp'
-        }
-        return true
-      }),
       options: {
         hotspot: true,
         accept: 'image/*',
@@ -389,65 +377,25 @@ export const event = defineType({
     select: {
       title_no: 'title_no',
       title_en: 'title_en',
-      venue: 'venue.title',
-      artists: 'artist[].name',
       media: 'image',
-      eventDate: 'eventDate.title',
-      eventDateDate: 'eventDate.date',
-      startTime: 'eventTime.startTime',
-      endTime: 'eventTime.endTime',
-      publishingStatus: 'publishingStatus',
-      scheduledStart: 'scheduledPeriod.startDate',
-      scheduledEnd: 'scheduledPeriod.endDate',
-      hasNorwegian: 'excerpt_no',
-      hasEnglish: 'excerpt_en',
       _id: '_id',
     },
     prepare(selection) {
-      const {title_no, title_en, venue, artists, media, eventDate, eventDateDate, startTime, endTime, publishingStatus, scheduledStart, scheduledEnd, hasNorwegian, hasEnglish, _id} = selection
+      const {title_no, title_en, media, _id} = selection
 
-      // Publication status logic
       const isPublished = _id && !_id.startsWith('drafts.')
-      let statusText = isPublished ? 'Publisert' : 'Utkast';
-
-      if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
-        const now = new Date();
-        const start = new Date(scheduledStart);
-        const end = new Date(scheduledEnd);
-
-        if (now >= start && now <= end) {
-          statusText = 'Live';
-        } else if (now < start) {
-          statusText = 'Venter';
-        } else {
-          statusText = 'Utløpt';
-        }
-      }
-
-      // Language status
-      const languages: string[] = [];
-      if (hasNorwegian) languages.push('🇳🇴');
-      if (hasEnglish) languages.push('🇬🇧');
-      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
-
+      const statusText = isPublished ? 'Publisert' : 'Utkast'
       const title = title_no || title_en || 'Uten navn'
-      const artistNames = artists?.length ? artists.join(', ') : 'Ingen artister'
-      const dateString = eventDateDate
-        ? new Date(eventDateDate).toLocaleDateString('nb-NO')
-        : 'Ingen dato'
 
-      let timeString = ''
-      if (startTime && endTime) {
-        timeString = ` • ${startTime}-${endTime}`
-      } else if (startTime) {
-        timeString = ` • ${startTime}`
-      }
-
-      const dateLabel = eventDate ? `${eventDate} (${dateString})` : dateString
+      // Language flags based on which languages have content
+      const languageFlags = []
+      if (title_no) languageFlags.push('🇳🇴')
+      if (title_en) languageFlags.push('🇬🇧')
+      const flagsText = languageFlags.length > 0 ? languageFlags.join(' ') + ' • ' : ''
 
       return {
         title: title,
-        subtitle: `${dateLabel}${timeString} • ${venue || 'Ingen venue'} • ${artistNames} • ${statusText} • ${langStatus}`,
+        subtitle: `${flagsText}${statusText}`,
         media: media,
       }
     },
