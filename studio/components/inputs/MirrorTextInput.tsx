@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react'
-import { TextInputProps, useFormValue } from 'sanity'
+import { TextInputProps, useFormValue, PatchEvent, set, unset } from 'sanity'
 import { TextArea, Stack, Text } from '@sanity/ui'
 
 export function createMirrorTextInput(sourceField: string) {
@@ -13,7 +13,11 @@ export function createMirrorTextInput(sourceField: string) {
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = event.target.value
-      onChange(newValue)
+      onChange(
+        PatchEvent.from([
+          newValue ? set(newValue) : unset()
+        ])
+      )
     }, [onChange])
 
     return (

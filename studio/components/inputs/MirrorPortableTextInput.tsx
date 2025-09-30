@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react'
-import { ArrayInputProps, useFormValue } from 'sanity'
+import { ArrayInputProps, useFormValue, PatchEvent, set } from 'sanity'
 import { Stack, Text, Button } from '@sanity/ui'
 
 export function createMirrorPortableTextInput(sourceField: string) {
@@ -15,8 +15,12 @@ export function createMirrorPortableTextInput(sourceField: string) {
       if (hasSource) {
         // Deep clone the source content to avoid reference issues
         const clonedContent = JSON.parse(JSON.stringify(sourceValue))
-        // Pass the cloned array directly - no set() wrapper needed
-        onChange(clonedContent)
+        // Use PatchEvent with proper set operation
+        onChange(
+          PatchEvent.from([
+            set(clonedContent)
+          ])
+        )
       }
     }, [sourceValue, onChange, hasSource])
 
