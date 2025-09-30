@@ -172,18 +172,27 @@ export const artist = defineType({
       fieldset: 'altText',
     }),
     defineField({
-      name: 'hideFromPublic',
-      title: 'Skjul fra offentlighet',
-      type: 'boolean',
-      description: 'Aktivér for å skjule artisten fra nettsiden selv om den er publisert',
-      initialValue: false,
+      name: 'publishingStatus',
+      title: 'Publiseringsstatus',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Synlig på nett umiddelbart', value: 'published' },
+          { title: 'Lagre uten å bli synlig på nett', value: 'draft' },
+          { title: 'Planlegg periode', value: 'scheduled' }
+        ],
+        layout: 'radio'
+      },
+      initialValue: 'published',
+      validation: (Rule) => Rule.required(),
       group: 'scheduling',
     }),
     defineField({
       name: 'scheduledPeriod',
-      title: 'Synlighetsperiode (valgfri)',
+      title: 'Planlagt periode',
       type: 'object',
-      description: 'Sett datoer kun hvis du vil begrense når artisten vises på nettsiden',
+      hidden: ({document}) => document?.publishingStatus !== 'scheduled',
+      group: 'scheduling',
       fieldsets: [
         {
           name: 'timing',
@@ -193,31 +202,39 @@ export const artist = defineType({
       fields: [
         {
           name: 'startDate',
-          title: 'Synlig fra (valgfri)',
+          title: 'Startdato',
           type: 'datetime',
-          description: 'La stå tom for å vise umiddelbart ved publisering',
+          description: 'Når denne artisten blir synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.custom((value, context) => {
+          validation: (Rule) => Rule.required().custom((value, context) => {
+            const status = context.document?.publishingStatus
+            if (status === 'scheduled' && !value) {
+              return 'Startdato må velges for planlagt periode'
+            }
+            if (status !== 'scheduled') {
+              return true
+            }
             return true
           }),
         },
         {
           name: 'endDate',
-          title: 'Synlig til (valgfri)',
+          title: 'Sluttdato',
           type: 'datetime',
-          description: 'La stå tom for å vise permanent',
+          description: 'Når denne artisten slutter å være synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.custom((value, context) => {
-            const startDate = context.document?.scheduledPeriod?.startDate
-
-            if (startDate && value && new Date(value) <= new Date(startDate)) {
-              return 'Sluttdato må være etter startdato'
+          validation: (Rule) => Rule.required().custom((value, context) => {
+            const status = context.document?.publishingStatus
+            if (status === 'scheduled' && !value) {
+              return 'Sluttdato må velges for planlagt periode'
+            }
+            if (status !== 'scheduled') {
+              return true
             }
             return true
           }),
         },
       ],
-      group: 'scheduling',
     }),
     defineField({
       name: 'events',
@@ -239,58 +256,29 @@ export const artist = defineType({
       name: 'name',
       instrument_no: 'instrument_no',
       instrument_en: 'instrument_en',
-      hideFromPublic: 'hideFromPublic',
-      startDate: 'scheduledPeriod.startDate',
-      endDate: 'scheduledPeriod.endDate',
+      publishingStatus: 'publishingStatus',
+      scheduledStart: 'scheduledPeriod.startDate',
+      scheduledEnd: 'scheduledPeriod.endDate',
       media: 'image',
       hasNorwegian: 'excerpt_no',
       hasEnglish: 'excerpt_en',
       _id: '_id',
     },
-    prepare({name, instrument_no, instrument_en, hideFromPublic, startDate, endDate, media, hasNorwegian, hasEnglish, _id}) {
+    prepare({name, instrument_no, instrument_en, publishingStatus, scheduledStart, scheduledEnd, media, hasNorwegian, hasEnglish, _id}) {
       // Publication status logic
       const isPublished = _id && !_id.startsWith('drafts.')
       let statusText = isPublished ? 'Publisert' : 'Utkast';
 
-      if (hideFromPublic) {
-        statusText = 'Skjult';
-      } else if (startDate || endDate) {
+      if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
         const now = new Date();
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
+        const start = new Date(scheduledStart);
+        const end = new Date(scheduledEnd);
 
-        if (start && end) {
-          if (now >= start && now <= end) {
-            const endTime = end.toLocaleString('nb-NO', {
-              timeZone: 'Europe/Oslo',
-              day: '2-digit',
-              month: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            statusText = `Live (til ${endTime})`;
-          } else if (now < start) {
-            const startTime = start.toLocaleString('nb-NO', {
-              timeZone: 'Europe/Oslo',
-              day: '2-digit',
-              month: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-            statusText = `Venter (fra ${startTime})`;
-          } else {
-            statusText = 'Utløpt';
-          }
-        } else if (start && now < start) {
-          const startTime = start.toLocaleString('nb-NO', {
-            timeZone: 'Europe/Oslo',
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-          statusText = `Venter (fra ${startTime})`;
-        } else if (end && now > end) {
+        if (now >= start && now <= end) {
+          statusText = 'Live';
+        } else if (now < start) {
+          statusText = 'Venter';
+        } else {
           statusText = 'Utløpt';
         }
       }

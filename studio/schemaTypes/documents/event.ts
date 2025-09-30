@@ -16,20 +16,20 @@ export const event = defineType({
   ],
   groups: [
     {
-      name: 'basic',
-      title: 'Felles innhold',
-      icon: CogIcon,
-      default: true,
-    },
-    {
       name: 'no',
       title: '🇳🇴 Norsk',
       icon: ComposeIcon,
+      default: true,
     },
     {
       name: 'en',
       title: '🇬🇧 English',
       icon: ComposeIcon,
+    },
+    {
+      name: 'basic',
+      title: 'Felles innhold',
+      icon: CogIcon,
     },
     {
       name: 'scheduling',
@@ -56,31 +56,6 @@ export const event = defineType({
   ],
   fields: [
     // BASE (shared content)
-    defineField({
-      name: 'slug',
-      title: 'URL',
-      type: 'slug',
-      description: 'URL-vennlig versjon av arrangementsnavn (brukes på alle språk)',
-      group: 'basic',
-      options: {
-        source: 'title_no',
-        maxLength: 96,
-      },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_no) {
-          return 'Trykk generer for å lage URL'
-        }
-        return true
-      }),
-    }),
-    defineField({
-      name: 'genre',
-      title: 'Sjanger',
-      type: 'reference',
-      to: [{type: 'genre'}],
-      description: 'Velg sjanger for arrangementet',
-      group: 'basic',
-    }),
     defineField({
       name: 'artist',
       title: 'Artister',
@@ -267,6 +242,23 @@ export const event = defineType({
       group: 'no',
     }),
     defineField({
+      name: 'slug_no',
+      title: 'URL (norsk)',
+      type: 'slug',
+      description: 'URL-vennlig versjon av norsk arrangementsnavn',
+      group: 'no',
+      options: {
+        source: 'title_no',
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.title_no) {
+          return 'Trykk generer for å lage norsk URL'
+        }
+        return true
+      }),
+    }),
+    defineField({
       name: 'excerpt_no',
       title: 'Ingress (norsk)',
       type: 'text',
@@ -290,6 +282,23 @@ export const event = defineType({
       type: 'string',
       description: 'Event name in English',
       group: 'en',
+    }),
+    defineField({
+      name: 'slug_en',
+      title: 'URL (English)',
+      type: 'slug',
+      description: 'URL-friendly version of English event name',
+      group: 'en',
+      options: {
+        source: 'title_en',
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.title_en) {
+          return 'Click generate to create English URL'
+        }
+        return true
+      }),
     }),
     defineField({
       name: 'excerpt_en',
@@ -387,7 +396,6 @@ export const event = defineType({
       eventDateDate: 'eventDate.date',
       startTime: 'eventTime.startTime',
       endTime: 'eventTime.endTime',
-      genre: 'genre.title',
       publishingStatus: 'publishingStatus',
       scheduledStart: 'scheduledPeriod.startDate',
       scheduledEnd: 'scheduledPeriod.endDate',
@@ -396,7 +404,7 @@ export const event = defineType({
       _id: '_id',
     },
     prepare(selection) {
-      const {title_no, title_en, venue, artists, media, eventDate, eventDateDate, startTime, endTime, genre, publishingStatus, scheduledStart, scheduledEnd, hasNorwegian, hasEnglish, _id} = selection
+      const {title_no, title_en, venue, artists, media, eventDate, eventDateDate, startTime, endTime, publishingStatus, scheduledStart, scheduledEnd, hasNorwegian, hasEnglish, _id} = selection
 
       // Publication status logic
       const isPublished = _id && !_id.startsWith('drafts.')
@@ -436,11 +444,10 @@ export const event = defineType({
       }
 
       const dateLabel = eventDate ? `${eventDate} (${dateString})` : dateString
-      const genreLabel = genre ? ` • ${genre}` : ''
 
       return {
         title: title,
-        subtitle: `${dateLabel}${timeString} • ${venue || 'Ingen venue'} • ${artistNames}${genreLabel} • ${statusText} • ${langStatus}`,
+        subtitle: `${dateLabel}${timeString} • ${venue || 'Ingen venue'} • ${artistNames} • ${statusText} • ${langStatus}`,
         media: media,
       }
     },

@@ -2,7 +2,6 @@ import {homepage} from './documents/homepage'
 import {programPage} from './documents/programPage'
 import {artistPage} from './documents/artistPage'
 import {artist} from './documents/artist'
-import {genre} from './documents/genres'
 import {composer} from './documents/composer'
 import {siteSettings} from './documents/siteSettings'
 import {event} from './documents/event'
@@ -21,7 +20,6 @@ export const schemaTypes = [
   programPage,
   artistPage,
   artist,
-  genre,
   composer,
   siteSettings,
   event,

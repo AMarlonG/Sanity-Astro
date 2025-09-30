@@ -4,7 +4,6 @@ import {
   DocumentTextIcon,
   UserIcon,
   CalendarIcon,
-  TagIcon,
   HomeIcon,
   EarthGlobeIcon,
   DocumentsIcon,
@@ -74,13 +73,6 @@ export const structure = (S: StructureBuilder) =>
         .child(
           S.documentTypeList('venue')
             .defaultOrdering([{field: 'name', direction: 'asc'}])
-        ),
-      S.listItem()
-        .title('Sjangre')
-        .icon(TagIcon)
-        .child(
-          S.documentTypeList('genre')
-            .defaultOrdering([{field: 'title', direction: 'asc'}])
         ),
       S.listItem()
         .title('Komponister')

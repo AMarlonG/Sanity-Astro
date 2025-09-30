@@ -38,7 +38,6 @@ export function createUniqueSlugValidation(documentType: string) {
 /**
  * Pre-configured validation functions for common document types
  */
-export const genreSlugValidation = createUniqueSlugValidation('genre')
 export const venueSlugValidation = createUniqueSlugValidation('venue')
 export const artistSlugValidation = createUniqueSlugValidation('artist')
 export const eventSlugValidation = createUniqueSlugValidation('event')

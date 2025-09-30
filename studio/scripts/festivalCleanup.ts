@@ -9,8 +9,7 @@ const client = getCliClient()
 
 // Document types to clean up after festival
 const FESTIVAL_DOCUMENT_TYPES = [
-  'genre',
-  'event', 
+  'event',
   'artist',
   'venue',
   'eventDate',
