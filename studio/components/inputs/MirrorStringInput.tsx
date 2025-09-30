@@ -1,10 +1,6 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback } from 'react'
 import { StringInputProps, useFormValue } from 'sanity'
 import { TextInput, Stack, Text } from '@sanity/ui'
-
-interface MirrorStringInputProps extends StringInputProps {
-  sourceField: string
-}
 
 export function createMirrorStringInput(sourceField: string) {
   return function MirrorStringInput(props: StringInputProps) {
@@ -12,12 +8,12 @@ export function createMirrorStringInput(sourceField: string) {
     const sourceValue = useFormValue([sourceField]) as string
 
     // If field is empty and we have a source value, mirror it
-    const displayValue = value || sourceValue || ''
-    const isUsingMirror = !value && sourceValue
+    const displayValue = value !== undefined ? value : (sourceValue || '')
+    const isUsingMirror = value === undefined && sourceValue
 
     const handleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = event.target.value
-      onChange(newValue || undefined)
+      onChange(newValue)
     }, [onChange])
 
     return (

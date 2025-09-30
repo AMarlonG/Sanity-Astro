@@ -10,6 +10,10 @@ export const artist = defineType({
   title: 'Artister',
   type: 'document',
   icon: UserIcon,
+  orderings: [
+    { title: 'Navn A–Å', name: 'nameAsc', by: [{ field: 'name', direction: 'asc' }] },
+    { title: 'Nylig opprettet', name: 'createdDesc', by: [{ field: '_createdAt', direction: 'desc' }] },
+  ],
   groups: [
     {
       name: 'basic',
@@ -88,12 +92,7 @@ export const artist = defineType({
       title: 'Instrument (norsk)',
       type: 'string',
       description: 'Instrumentbeskrivelse på norsk',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Instrument må fylles ut på norsk'
-        }
-        return true
-      }),
+      validation: (Rule) => Rule.required(),
       group: 'no',
     }),
     defineField({
@@ -143,12 +142,6 @@ export const artist = defineType({
       type: 'image',
       description: 'Hovedbilde for artisten - brukes på artistsiden og når siden deles på sosiale medier',
       group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Hovedbilde bør lastes opp'
-        }
-        return true
-      }),
       options: {
         hotspot: true,
         accept: 'image/*',
@@ -160,12 +153,6 @@ export const artist = defineType({
       type: 'string',
       description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
       group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (context.document?.image && !value) {
-          return 'Kreditering bør fylles ut når bilde er lastet opp'
-        }
-        return true
-      }),
     }),
     defineField({
       name: 'imageAlt_no',
@@ -174,12 +161,6 @@ export const artist = defineType({
       description: 'Beskriv bildet for tilgjengelighet på norsk',
       group: 'basic',
       fieldset: 'altText',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (context.document?.image && !value) {
-          return 'Alt-tekst på norsk bør fylles ut når bilde er lastet opp'
-        }
-        return true
-      }),
     }),
     defineField({
       name: 'imageAlt_en',
@@ -206,26 +187,18 @@ export const artist = defineType({
       fieldset: 'imageCaption',
     }),
     defineField({
-      name: 'publishingStatus',
-      title: 'Publiseringsstatus',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Synlig på nett umiddelbart', value: 'published' },
-          { title: 'Lagre uten å bli synlig på nett', value: 'draft' },
-          { title: 'Planlegg periode', value: 'scheduled' }
-        ],
-        layout: 'radio'
-      },
-      initialValue: 'published',
-      validation: (Rule) => Rule.required(),
+      name: 'hideFromPublic',
+      title: 'Skjul fra offentlighet',
+      type: 'boolean',
+      description: 'Aktivér for å skjule artisten fra nettsiden selv om den er publisert',
+      initialValue: false,
       group: 'scheduling',
     }),
     defineField({
       name: 'scheduledPeriod',
-      title: 'Planlagt periode',
+      title: 'Synlighetsperiode (valgfri)',
       type: 'object',
-      hidden: ({document}) => document?.publishingStatus !== 'scheduled',
+      description: 'Sett datoer kun hvis du vil begrense når artisten vises på nettsiden',
       fieldsets: [
         {
           name: 'timing',
@@ -235,34 +208,25 @@ export const artist = defineType({
       fields: [
         {
           name: 'startDate',
-          title: 'Startdato',
+          title: 'Synlig fra (valgfri)',
           type: 'datetime',
-          description: 'Når denne artisten blir synlig på nettsiden',
+          description: 'La stå tom for å vise umiddelbart ved publisering',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Startdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
+          validation: (Rule) => Rule.custom((value, context) => {
             return true
           }),
         },
         {
           name: 'endDate',
-          title: 'Sluttdato',
+          title: 'Synlig til (valgfri)',
           type: 'datetime',
-          description: 'Når denne artisten slutter å være synlig på nettsiden',
+          description: 'La stå tom for å vise permanent',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Sluttdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
+          validation: (Rule) => Rule.custom((value, context) => {
+            const startDate = context.document?.scheduledPeriod?.startDate
+
+            if (startDate && value && new Date(value) <= new Date(startDate)) {
+              return 'Sluttdato må være etter startdato'
             }
             return true
           }),
@@ -282,12 +246,7 @@ export const artist = defineType({
       ],
       description: 'Velg arrangementer som denne artisten opptrer på',
       group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.length && context.document?.publishingStatus === 'published') {
-          return 'Det kan være lurt å koble artisten til minst ett arrangement'
-        }
-        return true
-      }),
+      validation: (Rule) => Rule.unique(),
     }),
   ],
   preview: {
@@ -295,29 +254,58 @@ export const artist = defineType({
       name: 'name',
       instrument_no: 'instrument_no',
       instrument_en: 'instrument_en',
-      publishingStatus: 'publishingStatus',
+      hideFromPublic: 'hideFromPublic',
       startDate: 'scheduledPeriod.startDate',
       endDate: 'scheduledPeriod.endDate',
       media: 'image',
       hasNorwegian: 'excerpt_no',
       hasEnglish: 'excerpt_en',
+      _id: '_id',
     },
-    prepare({name, instrument_no, instrument_en, publishingStatus, startDate, endDate, media, hasNorwegian, hasEnglish}) {
+    prepare({name, instrument_no, instrument_en, hideFromPublic, startDate, endDate, media, hasNorwegian, hasEnglish, _id}) {
       // Publication status logic
-      let statusText = 'Utkast';
+      const isPublished = _id && !_id.startsWith('drafts.')
+      let statusText = isPublished ? 'Publisert' : 'Utkast';
 
-      if (publishingStatus === 'published') {
-        statusText = 'Publisert';
-      } else if (startDate && endDate) {
+      if (hideFromPublic) {
+        statusText = 'Skjult';
+      } else if (startDate || endDate) {
         const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
 
-        if (now >= start && now <= end) {
-          statusText = 'Live';
-        } else if (now < start) {
-          statusText = 'Venter';
-        } else {
+        if (start && end) {
+          if (now >= start && now <= end) {
+            const endTime = end.toLocaleString('nb-NO', {
+              timeZone: 'Europe/Oslo',
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            statusText = `Live (til ${endTime})`;
+          } else if (now < start) {
+            const startTime = start.toLocaleString('nb-NO', {
+              timeZone: 'Europe/Oslo',
+              day: '2-digit',
+              month: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            });
+            statusText = `Venter (fra ${startTime})`;
+          } else {
+            statusText = 'Utløpt';
+          }
+        } else if (start && now < start) {
+          const startTime = start.toLocaleString('nb-NO', {
+            timeZone: 'Europe/Oslo',
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          statusText = `Venter (fra ${startTime})`;
+        } else if (end && now > end) {
           statusText = 'Utløpt';
         }
       }
@@ -333,7 +321,7 @@ export const artist = defineType({
       return {
         title: name,
         subtitle: `${instrument} • ${statusText} • ${langStatus}`,
-        media: media,
+        media: media || UserIcon,
       };
     },
   },
