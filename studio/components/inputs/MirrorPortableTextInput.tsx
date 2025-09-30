@@ -10,6 +10,7 @@ export function createMirrorPortableTextInput(sourceField: string) {
     const isEmpty = !value || value.length === 0
     const hasSource = sourceValue && sourceValue.length > 0
     const isUsingMirror = isEmpty && hasSource
+    const canCopy = hasSource // Always show copy button if source has content
 
     const handleCopyFromSource = useCallback(() => {
       if (hasSource) {
@@ -24,9 +25,9 @@ export function createMirrorPortableTextInput(sourceField: string) {
       }
     }, [sourceValue, onChange, hasSource])
 
-    // Show hint if field is empty but source has content
-    const hintContent = useMemo(() => {
-      if (!isUsingMirror) return null
+    // Show copy button if source has content
+    const copyButton = useMemo(() => {
+      if (!canCopy) return null
 
       const previewText = sourceValue
         ?.map(block => {
@@ -39,9 +40,13 @@ export function createMirrorPortableTextInput(sourceField: string) {
         .substring(0, 100)
 
       return (
-        <Stack space={3} padding={3} style={{ border: '1px dashed #e5e7eb', borderRadius: '4px', backgroundColor: '#f9fafb' }}>
+        <Stack space={2} padding={2} style={{ border: '1px solid #e5e7eb', borderRadius: '4px', backgroundColor: isEmpty ? '#f9fafb' : '#fff' }}>
           <Text size={1} muted>
-            💡 <strong>Norsk innhold tilgjengelig:</strong> "{previewText}..."
+            {isEmpty ? (
+              <>💡 <strong>Norsk innhold tilgjengelig:</strong> "{previewText}..."</>
+            ) : (
+              <>🔄 <strong>Oppdater fra norsk:</strong> "{previewText}..."</>
+            )}
           </Text>
           <Button
             mode="ghost"
@@ -49,15 +54,15 @@ export function createMirrorPortableTextInput(sourceField: string) {
             fontSize={1}
             padding={2}
             onClick={handleCopyFromSource}
-            text="📋 Kopier fra norsk"
+            text={isEmpty ? "📋 Kopier fra norsk" : "🔄 Oppdater fra norsk"}
           />
         </Stack>
       )
-    }, [isUsingMirror, sourceValue, handleCopyFromSource])
+    }, [canCopy, isEmpty, sourceValue, handleCopyFromSource])
 
     return (
       <Stack space={3}>
-        {hintContent}
+        {copyButton}
         {renderDefault(props)}
       </Stack>
     )
