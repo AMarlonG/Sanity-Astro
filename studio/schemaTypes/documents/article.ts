@@ -1,17 +1,27 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, ImageIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 
 export const article = defineType({
   name: 'article',
   title: 'Artikler',
   type: 'document',
   icon: DocumentIcon,
+  orderings: [
+    { title: 'Tittel A–Å', name: 'titleAsc', by: [{ field: 'title_no', direction: 'asc' }] },
+    { title: 'Nylig opprettet', name: 'createdDesc', by: [{ field: '_createdAt', direction: 'desc' }] },
+  ],
   groups: [
     {
-      name: 'basic',
-      title: 'Grunnleggende informasjon',
-      icon: DocumentIcon,
+      name: 'no',
+      title: '🇳🇴 Norsk',
+      icon: ComposeIcon,
       default: true,
+    },
+    {
+      name: 'en',
+      title: '🇬🇧 English',
+      icon: ComposeIcon,
     },
     {
       name: 'image',
@@ -19,113 +29,155 @@ export const article = defineType({
       icon: ImageIcon,
     },
     {
-      name: 'content',
-      title: 'Innhold',
-      icon: ComposeIcon,
-    },
-    {
-      name: 'scheduling',
-      title: 'Tidsstyring',
+      name: 'publishing',
+      title: 'Publisering',
       icon: CogIcon,
     },
   ],
+  fieldsets: [
+    {
+      name: 'altText',
+      title: 'Alt-tekst',
+      options: {columns: 2},
+    },
+    {
+      name: 'imageCredit',
+      title: 'Kreditering',
+      options: {columns: 2},
+    },
+  ],
   fields: [
+    // NORSK INNHOLD
     defineField({
-      name: 'title',
-      title: 'Navn på artikkel',
+      name: 'title_no',
+      title: 'Artikkeltittel (norsk)',
       type: 'string',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Kun vis advarsel hvis brukeren prøver å publisere uten tittel
-        if (!value && context.document?.publishingStatus === 'published') {
-          return 'Navn på artikkel bør fylles ut før publisering'
-        }
-        return true
-      }),
-      group: 'basic',
+      description: 'Artikkeltittel på norsk',
+      validation: (Rule) => Rule.required(),
+      group: 'no',
     }),
     defineField({
-      name: 'slug',
-      title: 'URL',
+      name: 'slug_no',
+      title: 'URL (norsk)',
       type: 'slug',
-      description: 'Trykk generer for å lage URL',
+      description: 'URL-vennlig versjon av norsk artikkeltittel',
+      group: 'no',
       options: {
-        source: 'title',
+        source: 'title_no',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required().custom((value, context) => {
-        // Kun vis advarsel hvis tittel finnes men slug mangler
-        if (!value?.current && context.document?.title) {
-          return 'Trykk generer for å lage URL'
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.title_no) {
+          return 'Trykk generer for å lage norsk URL'
         }
         return true
       }),
-      group: 'basic',
     }),
     defineField({
-      name: 'excerpt',
-      title: 'Ingress',
+      name: 'excerpt_no',
+      title: 'Ingress (norsk)',
       type: 'text',
-      description: 'Kort beskrivelse av artikkelen (vises i lister)',
+      description: 'Kort beskrivelse av artikkelen på norsk (vises i lister)',
+      group: 'no',
       rows: 2,
       validation: (Rule) => Rule.max(100),
-      group: 'basic',
     }),
     defineField({
-      name: 'content',
-      title: 'Artikkelinnhold',
-      type: 'pageBuilder',
-      description: 'Bygg artikkelen med komponenter og innhold',
-      group: 'content',
+      name: 'content_no',
+      title: 'Artikkelinnhold (norsk)',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Bygg norsk artikkel med komponenter og innhold (artikkeltittel er allerede H1)',
+      group: 'no',
+    }),
+
+    // ENGELSK INNHOLD
+    defineField({
+      name: 'title_en',
+      title: 'Article title (English)',
+      type: 'string',
+      description: 'Article title in English',
+      group: 'en',
     }),
     defineField({
-      name: 'image',
-      title: 'Hovedbilde',
-      type: 'image',
-      description: 'Hovedbilde for artikkelen - brukes på artikkelsiden og når siden deles på sosiale medier',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Hovedbilde bør lastes opp'
+      name: 'slug_en',
+      title: 'URL (English)',
+      type: 'slug',
+      description: 'URL-friendly version of English article title',
+      group: 'en',
+      options: {
+        source: 'title_en',
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.title_en) {
+          return 'Click generate to create English URL'
         }
         return true
       }),
+    }),
+    defineField({
+      name: 'excerpt_en',
+      title: 'Excerpt (English)',
+      type: 'text',
+      description: 'Short description of the article in English (shown in lists)',
+      group: 'en',
+      rows: 2,
+      validation: (Rule) => Rule.max(100),
+    }),
+    defineField({
+      name: 'content_en',
+      title: 'Article content (English)',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Build English article with components and content (article title is already H1)',
+      group: 'en',
+      components: {
+        input: createMirrorPortableTextInput('content_no')
+      },
+    }),
+
+    // HOVEDBILDE
+    defineField({
+      name: 'image',
+      title: 'Hovedbilde (valgfritt)',
+      type: 'image',
+      description: 'Valgfritt hovedbilde for sosiale medier og hero-seksjon. Kan også legge inn bilder direkte i innholdet.',
+      group: 'image',
       options: {
         hotspot: true,
         accept: 'image/*',
       },
     }),
     defineField({
-      name: 'imageCredit',
-      title: 'Kreditering',
+      name: 'imageCredit_no',
+      title: 'Kreditering (norsk)',
       type: 'string',
-      description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
+      description: 'Hvem som har tatt eller eier bildet på norsk (f.eks. "Foto: John Doe")',
       group: 'image',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (context.document?.image && !value) {
-          return 'Kreditering bør fylles ut når bilde er lastet opp'
-        }
-        return true
-      }),
+      fieldset: 'imageCredit',
     }),
     defineField({
-      name: 'imageAlt',
-      title: 'Alt-tekst',
+      name: 'imageCredit_en',
+      title: 'Kreditering (English)',
       type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet og SEO',
+      description: 'Who took or owns the image in English (e.g. "Photo: John Doe")',
       group: 'image',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (context.document?.image && !value) {
-          return 'Alt-tekst bør fylles ut når bilde er lastet opp'
-        }
-        return true
-      }),
+      fieldset: 'imageCredit',
     }),
     defineField({
-      name: 'imageCaption',
-      title: 'Bildetekst',
+      name: 'imageAlt_no',
+      title: 'Alt-tekst (norsk)',
       type: 'string',
-      description: 'Valgfri tekst som kan vises med bildet',
+      description: 'Beskriv bildet for tilgjengelighet på norsk',
       group: 'image',
+      fieldset: 'altText',
+    }),
+    defineField({
+      name: 'imageAlt_en',
+      title: 'Alt-tekst (English)',
+      type: 'string',
+      description: 'Describe the image for accessibility in English',
+      group: 'image',
+      fieldset: 'altText',
     }),
     defineField({
       name: 'publishingStatus',
@@ -141,13 +193,14 @@ export const article = defineType({
       },
       initialValue: 'published',
       validation: (Rule) => Rule.required(),
-      group: 'scheduling',
+      group: 'publishing',
     }),
     defineField({
       name: 'scheduledPeriod',
       title: 'Planlagt periode',
       type: 'object',
       hidden: ({document}) => document?.publishingStatus !== 'scheduled',
+      group: 'publishing',
       fieldsets: [
         {
           name: 'timing',
@@ -190,28 +243,30 @@ export const article = defineType({
           }),
         },
       ],
-      group: 'scheduling',
     }),
   ],
   preview: {
     select: {
-      title: 'title',
-      excerpt: 'excerpt',
+      title_no: 'title_no',
+      title_en: 'title_en',
+      excerpt_no: 'excerpt_no',
+      excerpt_en: 'excerpt_en',
       publishingStatus: 'publishingStatus',
-      startDate: 'scheduledPeriod.startDate',
-      endDate: 'scheduledPeriod.endDate',
+      scheduledStart: 'scheduledPeriod.startDate',
+      scheduledEnd: 'scheduledPeriod.endDate',
+      media: 'image',
+      _id: '_id',
     },
-    prepare({title, excerpt, publishingStatus, startDate, endDate}) {
-      // Status logic
-      let statusText = 'Utkast';
-      
-      if (publishingStatus === 'published') {
-        statusText = 'Publisert';
-      } else if (startDate && endDate) {
+    prepare({title_no, title_en, excerpt_no, excerpt_en, publishingStatus, scheduledStart, scheduledEnd, media, _id}) {
+      // Publication status logic
+      const isPublished = _id && !_id.startsWith('drafts.')
+      let statusText = isPublished ? 'Publisert' : 'Utkast';
+
+      if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
         const now = new Date();
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        
+        const start = new Date(scheduledStart);
+        const end = new Date(scheduledEnd);
+
         if (now >= start && now <= end) {
           statusText = 'Live';
         } else if (now < start) {
@@ -220,11 +275,20 @@ export const article = defineType({
           statusText = 'Utløpt';
         }
       }
-      
+
+      // Language status
+      const languages: string[] = [];
+      if (title_no || excerpt_no) languages.push('🇳🇴');
+      if (title_en || excerpt_en) languages.push('🇬🇧');
+      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+
+      const title = title_no || title_en || 'Uten tittel';
+      const excerpt = excerpt_no || excerpt_en || 'Ingen ingress';
+
       return {
         title: title,
-        subtitle: `${excerpt || 'Ingen ingress'} • ${statusText}`,
-        media: DocumentIcon,
+        subtitle: `${excerpt} • ${statusText} • ${langStatus}`,
+        media: media || DocumentIcon,
       };
     },
   },

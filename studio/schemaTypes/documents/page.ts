@@ -1,65 +1,103 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 
 export const page = defineType({
   name: 'page',
   title: 'Faste sider',
   type: 'document',
   icon: DocumentIcon,
+  orderings: [
+    { title: 'Tittel A–Å', name: 'titleAsc', by: [{ field: 'title_no', direction: 'asc' }] },
+    { title: 'Nylig opprettet', name: 'createdDesc', by: [{ field: '_createdAt', direction: 'desc' }] },
+  ],
   groups: [
     {
-      name: 'basic',
-      title: 'Grunnleggende informasjon',
-      icon: DocumentIcon,
+      name: 'no',
+      title: '🇳🇴 Norsk',
+      icon: ComposeIcon,
       default: true,
     },
     {
-      name: 'content',
-      title: 'Innhold',
+      name: 'en',
+      title: '🇬🇧 English',
       icon: ComposeIcon,
     },
     {
-      name: 'scheduling',
-      title: 'Tidsstyring',
+      name: 'publishing',
+      title: 'Publisering',
       icon: CogIcon,
     },
   ],
   fields: [
+    // NORSK INNHOLD
     defineField({
-      name: 'title',
-      title: 'Navn på side',
+      name: 'title_no',
+      title: 'Sidetittel (norsk)',
       type: 'string',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value && context.document?.publishingStatus === 'published') {
-          return 'Navn på side bør fylles ut før publisering'
-        }
-        return true
-      }),
-      group: 'basic',
+      description: 'Tittel på siden på norsk',
+      validation: (Rule) => Rule.required(),
+      group: 'no',
     }),
     defineField({
-      name: 'slug',
-      title: 'URL',
+      name: 'slug_no',
+      title: 'URL (norsk)',
       type: 'slug',
-      description: 'Trykk generer for å lage URL',
+      description: 'URL-vennlig versjon av norsk sidetittel',
+      group: 'no',
       options: {
-        source: 'title',
+        source: 'title_no',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.required().custom((value, context) => {
-        if (!value?.current && context.document?.title) {
-          return 'Trykk generer for å lage URL'
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.title_no) {
+          return 'Trykk generer for å lage norsk URL'
         }
         return true
       }),
-      group: 'basic',
     }),
     defineField({
-      name: 'content',
-      title: 'Sideinnhold',
+      name: 'content_no',
+      title: 'Sideinnhold (norsk)',
       type: 'pageBuilder',
-      description: 'Bygg siden med komponenter og innhold',
-      group: 'content',
+      description: 'Bygg norsk side med komponenter og innhold',
+      group: 'no',
+    }),
+
+    // ENGELSK INNHOLD
+    defineField({
+      name: 'title_en',
+      title: 'Page title (English)',
+      type: 'string',
+      description: 'Page title in English',
+      group: 'en',
+    }),
+    defineField({
+      name: 'slug_en',
+      title: 'URL (English)',
+      type: 'slug',
+      description: 'URL-friendly version of English page title',
+      group: 'en',
+      options: {
+        source: 'title_en',
+        maxLength: 96,
+      },
+      validation: (Rule) => Rule.warning().custom((value, context) => {
+        if (!value?.current && context.document?.title_en) {
+          return 'Click generate to create English URL'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'content_en',
+      title: 'Page content (English)',
+      type: 'pageBuilder',
+      description: 'Build English page with components and content',
+      group: 'en',
+      components: {
+        input: createMirrorPortableTextInput('content_no')
+      },
     }),
     defineField({
       name: 'publishingStatus',
@@ -75,7 +113,7 @@ export const page = defineType({
       },
       initialValue: 'published',
       validation: (Rule) => Rule.required(),
-      group: 'scheduling',
+      group: 'publishing',
     }),
     defineField({
       name: 'scheduledPeriod',
@@ -124,7 +162,52 @@ export const page = defineType({
           }),
         },
       ],
-      group: 'scheduling',
+      group: 'publishing',
     }),
   ],
+  preview: {
+    select: {
+      title_no: 'title_no',
+      title_en: 'title_en',
+      publishingStatus: 'publishingStatus',
+      scheduledStart: 'scheduledPeriod.startDate',
+      scheduledEnd: 'scheduledPeriod.endDate',
+      hasNorwegian: 'content_no',
+      hasEnglish: 'content_en',
+      _id: '_id',
+    },
+    prepare({title_no, title_en, publishingStatus, scheduledStart, scheduledEnd, hasNorwegian, hasEnglish, _id}) {
+      // Publication status logic
+      const isPublished = _id && !_id.startsWith('drafts.')
+      let statusText = isPublished ? 'Publisert' : 'Utkast';
+
+      if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
+        const now = new Date();
+        const start = new Date(scheduledStart);
+        const end = new Date(scheduledEnd);
+
+        if (now >= start && now <= end) {
+          statusText = 'Live';
+        } else if (now < start) {
+          statusText = 'Venter';
+        } else {
+          statusText = 'Utløpt';
+        }
+      }
+
+      // Language status
+      const languages: string[] = [];
+      if (hasNorwegian || title_no) languages.push('🇳🇴');
+      if (hasEnglish || title_en) languages.push('🇬🇧');
+      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+
+      const title = title_no || title_en || 'Uten tittel';
+
+      return {
+        title: title,
+        subtitle: `${statusText} • ${langStatus}`,
+        media: DocumentIcon,
+      };
+    },
+  },
 })
