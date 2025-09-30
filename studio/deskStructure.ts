@@ -45,7 +45,8 @@ export const structure = (S: StructureBuilder) =>
         .child(
           S.documentTypeList('event')
             .defaultOrdering([
-              {field: '_createdAt', direction: 'desc'}
+              {field: 'eventDate.date', direction: 'asc'},
+              {field: 'eventTime.startTime', direction: 'asc'}
             ])
         ),
       S.listItem()
@@ -71,7 +72,7 @@ export const structure = (S: StructureBuilder) =>
         .icon(HomeIcon)
         .child(
           S.documentTypeList('venue')
-            .defaultOrdering([{field: 'name', direction: 'asc'}])
+            .defaultOrdering([{field: 'title', direction: 'asc'}])
         ),
       S.listItem()
         .title('Komponister')

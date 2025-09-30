@@ -1,6 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {UserIcon, ImageIcon, ComposeIcon, CogIcon, CalendarIcon} from '@sanity/icons'
-import {imageComponent} from '../components/Image'
+import {UserIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 
 export const artist = defineType({

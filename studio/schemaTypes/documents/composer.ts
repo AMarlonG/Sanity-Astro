@@ -6,13 +6,6 @@ export const composer = defineType({
   title: 'Komponister',
   type: 'document',
   icon: ComposeIcon,
-  fieldsets: [
-    {
-      name: 'years',
-      title: 'Leveår',
-      options: {columns: 2},
-    },
-  ],
   fields: [
     defineField({
       name: 'name',
@@ -26,39 +19,14 @@ export const composer = defineType({
         return true
       }),
     }),
-    defineField({
-      name: 'birthYear',
-      title: 'Fødselsår',
-      type: 'number',
-      description: 'F.eks. 1756 for Mozart',
-      validation: (Rule) => Rule.positive().integer(),
-      fieldset: 'years',
-    }),
-    defineField({
-      name: 'deathYear',
-      title: 'Dødsår',
-      type: 'number',
-      description: 'La stå tom hvis komponisten fortsatt lever',
-      validation: (Rule) => Rule.positive().integer(),
-      fieldset: 'years',
-    }),
   ],
   preview: {
     select: {
       name: 'name',
-      birthYear: 'birthYear',
-      deathYear: 'deathYear',
     },
-    prepare({name, birthYear, deathYear}) {
-      const years = birthYear && deathYear 
-        ? `${birthYear}-${deathYear}` 
-        : birthYear 
-          ? `f. ${birthYear}` 
-          : '';
-      
+    prepare({name}) {
       return {
-        title: name,
-        subtitle: years,
+        title: name || 'Uten navn',
       };
     },
   },

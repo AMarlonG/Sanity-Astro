@@ -48,11 +48,6 @@ export const event = defineType({
       title: 'Kreditering',
       options: {columns: 2},
     },
-    {
-      name: 'imageCaption',
-      title: 'Bildetekst',
-      options: {columns: 2},
-    },
   ],
   fields: [
     // BASE (shared content)
@@ -103,6 +98,9 @@ export const event = defineType({
       to: [{type: 'eventDate'}],
       description: 'Velg fra de konfigurerte festivaldatoene',
       group: 'basic',
+      options: {
+        sort: [{field: 'date', direction: 'asc'}],
+      },
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
           return 'Dato må velges'
@@ -202,22 +200,6 @@ export const event = defineType({
       description: 'Describe the image for accessibility in English',
       group: 'basic',
       fieldset: 'altText',
-    }),
-    defineField({
-      name: 'imageCaption_no',
-      title: 'Bildetekst (norsk)',
-      type: 'string',
-      description: 'Valgfri tekst som kan vises med bildet på norsk',
-      group: 'basic',
-      fieldset: 'imageCaption',
-    }),
-    defineField({
-      name: 'imageCaption_en',
-      title: 'Bildetekst (English)',
-      type: 'string',
-      description: 'Optional text that can be shown with the image in English',
-      group: 'basic',
-      fieldset: 'imageCaption',
     }),
 
     // NORSK INNHOLD
@@ -378,14 +360,25 @@ export const event = defineType({
       title_no: 'title_no',
       title_en: 'title_en',
       media: 'image',
+      eventDate: 'eventDate.title',
+      eventDateDate: 'eventDate.date',
+      startTime: 'eventTime.startTime',
       _id: '_id',
     },
     prepare(selection) {
-      const {title_no, title_en, media, _id} = selection
+      const {title_no, title_en, media, eventDate, eventDateDate, startTime, _id} = selection
 
       const isPublished = _id && !_id.startsWith('drafts.')
       const statusText = isPublished ? 'Publisert' : 'Utkast'
       const title = title_no || title_en || 'Uten navn'
+
+      // Date and time info
+      const dateString = eventDateDate
+        ? new Date(eventDateDate).toLocaleDateString('nb-NO')
+        : null
+      const dateLabel = eventDate && dateString ? `${eventDate} (${dateString})` : (dateString || 'Ingen dato')
+      const timeText = startTime ? ` kl. ${startTime}` : ''
+      const dateTimeText = `${dateLabel}${timeText}`
 
       // Language flags based on which languages have content
       const languageFlags = []
@@ -395,7 +388,7 @@ export const event = defineType({
 
       return {
         title: title,
-        subtitle: `${flagsText}${statusText}`,
+        subtitle: `${dateTimeText}\n${flagsText}${statusText}`,
         media: media,
       }
     },
