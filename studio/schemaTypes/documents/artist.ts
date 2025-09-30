@@ -259,11 +259,13 @@ export const artist = defineType({
       scheduledStart: 'scheduledPeriod.startDate',
       scheduledEnd: 'scheduledPeriod.endDate',
       media: 'image',
-      hasNorwegian: 'excerpt_no',
-      hasEnglish: 'excerpt_en',
+      hasNorwegian: 'content_no',
+      hasEnglish: 'content_en',
+      excerpt_no: 'excerpt_no',
+      excerpt_en: 'excerpt_en',
       _id: '_id',
     },
-    prepare({name, instrument_no, instrument_en, publishingStatus, scheduledStart, scheduledEnd, media, hasNorwegian, hasEnglish, _id}) {
+    prepare({name, instrument_no, instrument_en, publishingStatus, scheduledStart, scheduledEnd, media, hasNorwegian, hasEnglish, excerpt_no, excerpt_en, _id}) {
       // Publication status logic
       const isPublished = _id && !_id.startsWith('drafts.')
       let statusText = isPublished ? 'Publisert' : 'Utkast';
@@ -284,8 +286,8 @@ export const artist = defineType({
 
       // Language status
       const languages: string[] = [];
-      if (hasNorwegian) languages.push('🇳🇴');
-      if (hasEnglish) languages.push('🇬🇧');
+      if (hasNorwegian || excerpt_no || instrument_no) languages.push('🇳🇴');
+      if (hasEnglish || excerpt_en || instrument_en) languages.push('🇬🇧');
       const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
 
       const instrument = instrument_no || instrument_en || 'Ukjent instrument';

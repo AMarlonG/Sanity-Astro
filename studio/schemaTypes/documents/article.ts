@@ -251,13 +251,15 @@ export const article = defineType({
       title_en: 'title_en',
       excerpt_no: 'excerpt_no',
       excerpt_en: 'excerpt_en',
+      content_no: 'content_no',
+      content_en: 'content_en',
       publishingStatus: 'publishingStatus',
       scheduledStart: 'scheduledPeriod.startDate',
       scheduledEnd: 'scheduledPeriod.endDate',
       media: 'image',
       _id: '_id',
     },
-    prepare({title_no, title_en, excerpt_no, excerpt_en, publishingStatus, scheduledStart, scheduledEnd, media, _id}) {
+    prepare({title_no, title_en, excerpt_no, excerpt_en, content_no, content_en, publishingStatus, scheduledStart, scheduledEnd, media, _id}) {
       // Publication status logic
       const isPublished = _id && !_id.startsWith('drafts.')
       let statusText = isPublished ? 'Publisert' : 'Utkast';
@@ -278,16 +280,15 @@ export const article = defineType({
 
       // Language status
       const languages: string[] = [];
-      if (title_no || excerpt_no) languages.push('🇳🇴');
-      if (title_en || excerpt_en) languages.push('🇬🇧');
+      if (title_no || excerpt_no || content_no) languages.push('🇳🇴');
+      if (title_en || excerpt_en || content_en) languages.push('🇬🇧');
       const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
 
       const title = title_no || title_en || 'Uten tittel';
-      const excerpt = excerpt_no || excerpt_en || 'Ingen ingress';
 
       return {
         title: title,
-        subtitle: `${excerpt} • ${statusText} • ${langStatus}`,
+        subtitle: `${statusText} • ${langStatus}`,
         media: media || DocumentIcon,
       };
     },
