@@ -1,6 +1,9 @@
 import {defineField, defineType} from 'sanity'
 import {UserIcon, ImageIcon, ComposeIcon, CogIcon, CalendarIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
+import {createMirrorStringInput} from '../../components/inputs/MirrorStringInput'
+import {createMirrorTextInput} from '../../components/inputs/MirrorTextInput'
+import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 
 export const artist = defineType({
   name: 'artist',
@@ -10,23 +13,18 @@ export const artist = defineType({
   groups: [
     {
       name: 'basic',
-      title: 'Grunnleggende informasjon',
-      icon: UserIcon,
+      title: 'Felles innhold',
+      icon: CogIcon,
       default: true,
     },
     {
-      name: 'events',
-      title: 'Arrangementer',
-      icon: CalendarIcon,
+      name: 'no',
+      title: '🇳🇴 Norsk',
+      icon: ComposeIcon,
     },
     {
-      name: 'image',
-      title: 'Hovedbilde',
-      icon: ImageIcon,
-    },
-    {
-      name: 'content',
-      title: 'Innhold',
+      name: 'en',
+      title: '🇬🇧 English',
       icon: ComposeIcon,
     },
     {
@@ -35,31 +33,38 @@ export const artist = defineType({
       icon: CogIcon,
     },
   ],
+  fieldsets: [
+    {
+      name: 'altText',
+      title: 'Alt-tekst',
+      options: {columns: 2},
+    },
+    {
+      name: 'imageCaption',
+      title: 'Bildetekst',
+      options: {columns: 2},
+    },
+  ],
   fields: [
+    // BASE (shared content)
     defineField({
       name: 'name',
       title: 'Navn på artist',
       type: 'string',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Kun vis advarsel hvis brukeren prøver å publisere uten navn
-        if (!value && context.document?.publishingStatus === 'published') {
-          return 'Navn på artist bør fylles ut før publisering'
-        }
-        return true
-      }),
+      description: 'Artistnavn (samme på alle språk)',
+      validation: (Rule) => Rule.required(),
       group: 'basic',
     }),
     defineField({
       name: 'slug',
       title: 'URL',
       type: 'slug',
-      description: 'Trykk generer for å lage URL',
+      description: 'URL-vennlig versjon av artistnavn (brukes på alle språk)',
       options: {
         source: 'name',
         maxLength: 96,
       },
       validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Kun vis advarsel hvis navn finnes men slug mangler
         if (!value?.current && context.document?.name) {
           return 'Trykk generer for å lage URL'
         }
@@ -67,52 +72,77 @@ export const artist = defineType({
       }),
       group: 'basic',
     }),
+
+    // NORSK INNHOLD
     defineField({
-      name: 'excerpt',
-      title: 'Ingress',
+      name: 'excerpt_no',
+      title: 'Ingress (norsk)',
       type: 'text',
-      description: 'Kort beskrivelse av artisten (vises i lister)',
+      description: 'Kort beskrivelse på norsk (vises i lister)',
       rows: 2,
       validation: (Rule) => Rule.max(100),
-      group: 'basic',
+      group: 'no',
     }),
     defineField({
-      name: 'instrument',
-      title: 'Instrument',
+      name: 'instrument_no',
+      title: 'Instrument (norsk)',
       type: 'string',
+      description: 'Instrumentbeskrivelse på norsk',
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
-          return 'Instrument må fylles ut'
+          return 'Instrument må fylles ut på norsk'
         }
         return true
       }),
-      group: 'basic',
+      group: 'no',
     }),
     defineField({
-      name: 'country',
-      title: 'Land',
-      type: 'string',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Land må fylles ut'
-        }
-        return true
-      }),
-      group: 'basic',
-    }),
-    defineField({
-      name: 'content',
-      title: 'Artistinnhold',
+      name: 'content_no',
+      title: 'Artistinnhold (norsk)',
       type: 'pageBuilderWithoutTitle',
-      description: 'Bygg artist-siden med komponenter og innhold (artistnavn er allerede H1)',
-      group: 'content',
+      description: 'Bygg norsk artist-side med komponenter og innhold',
+      group: 'no',
+    }),
+
+    // ENGELSK INNHOLD
+    defineField({
+      name: 'excerpt_en',
+      title: 'Excerpt (English)',
+      type: 'text',
+      description: 'Short description in English (shown in lists)',
+      rows: 2,
+      validation: (Rule) => Rule.max(100),
+      group: 'en',
+      components: {
+        input: createMirrorTextInput('excerpt_no')
+      },
+    }),
+    defineField({
+      name: 'instrument_en',
+      title: 'Instrument (English)',
+      type: 'string',
+      description: 'Instrument description in English',
+      group: 'en',
+      components: {
+        input: createMirrorStringInput('instrument_no')
+      },
+    }),
+    defineField({
+      name: 'content_en',
+      title: 'Artist content (English)',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Build English artist page with components and content',
+      group: 'en',
+      components: {
+        input: createMirrorPortableTextInput('content_no')
+      },
     }),
     defineField({
       name: 'image',
       title: 'Hovedbilde',
       type: 'image',
       description: 'Hovedbilde for artisten - brukes på artistsiden og når siden deles på sosiale medier',
-      group: 'image',
+      group: 'basic',
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
           return 'Hovedbilde bør lastes opp'
@@ -129,7 +159,7 @@ export const artist = defineType({
       title: 'Kreditering',
       type: 'string',
       description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
-      group: 'image',
+      group: 'basic',
       validation: (Rule) => Rule.warning().custom((value, context) => {
         if (context.document?.image && !value) {
           return 'Kreditering bør fylles ut når bilde er lastet opp'
@@ -138,24 +168,42 @@ export const artist = defineType({
       }),
     }),
     defineField({
-      name: 'imageAlt',
-      title: 'Alt-tekst',
+      name: 'imageAlt_no',
+      title: 'Alt-tekst (norsk)',
       type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet og SEO',
-      group: 'image',
+      description: 'Beskriv bildet for tilgjengelighet på norsk',
+      group: 'basic',
+      fieldset: 'altText',
       validation: (Rule) => Rule.warning().custom((value, context) => {
         if (context.document?.image && !value) {
-          return 'Alt-tekst bør fylles ut når bilde er lastet opp'
+          return 'Alt-tekst på norsk bør fylles ut når bilde er lastet opp'
         }
         return true
       }),
     }),
     defineField({
-      name: 'imageCaption',
-      title: 'Bildetekst',
+      name: 'imageAlt_en',
+      title: 'Alt-tekst (English)',
       type: 'string',
-      description: 'Valgfri tekst som kan vises med bildet',
-      group: 'image',
+      description: 'Describe the image for accessibility in English',
+      group: 'basic',
+      fieldset: 'altText',
+    }),
+    defineField({
+      name: 'imageCaption_no',
+      title: 'Bildetekst (norsk)',
+      type: 'string',
+      description: 'Valgfri tekst som kan vises med bildet på norsk',
+      group: 'basic',
+      fieldset: 'imageCaption',
+    }),
+    defineField({
+      name: 'imageCaption_en',
+      title: 'Bildetekst (English)',
+      type: 'string',
+      description: 'Optional text that can be shown with the image in English',
+      group: 'basic',
+      fieldset: 'imageCaption',
     }),
     defineField({
       name: 'publishingStatus',
@@ -233,7 +281,7 @@ export const artist = defineType({
         }
       ],
       description: 'Velg arrangementer som denne artisten opptrer på',
-      group: 'events',
+      group: 'basic',
       validation: (Rule) => Rule.warning().custom((value, context) => {
         if (!value?.length && context.document?.publishingStatus === 'published') {
           return 'Det kan være lurt å koble artisten til minst ett arrangement'
@@ -245,24 +293,26 @@ export const artist = defineType({
   preview: {
     select: {
       name: 'name',
-      instrument: 'instrument',
-      country: 'country',
+      instrument_no: 'instrument_no',
+      instrument_en: 'instrument_en',
       publishingStatus: 'publishingStatus',
       startDate: 'scheduledPeriod.startDate',
       endDate: 'scheduledPeriod.endDate',
-      media: 'image.image',
+      media: 'image',
+      hasNorwegian: 'excerpt_no',
+      hasEnglish: 'excerpt_en',
     },
-    prepare({name, instrument, country, publishingStatus, startDate, endDate, media}) {
+    prepare({name, instrument_no, instrument_en, publishingStatus, startDate, endDate, media, hasNorwegian, hasEnglish}) {
       // Publication status logic
       let statusText = 'Utkast';
-      
+
       if (publishingStatus === 'published') {
         statusText = 'Publisert';
       } else if (startDate && endDate) {
         const now = new Date();
         const start = new Date(startDate);
         const end = new Date(endDate);
-        
+
         if (now >= start && now <= end) {
           statusText = 'Live';
         } else if (now < start) {
@@ -271,10 +321,18 @@ export const artist = defineType({
           statusText = 'Utløpt';
         }
       }
-      
+
+      // Language status
+      const languages: string[] = [];
+      if (hasNorwegian) languages.push('🇳🇴');
+      if (hasEnglish) languages.push('🇬🇧');
+      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+
+      const instrument = instrument_no || instrument_en || 'Ukjent instrument';
+
       return {
         title: name,
-        subtitle: `${instrument} • ${country} • ${statusText}`,
+        subtitle: `${instrument} • ${statusText} • ${langStatus}`,
         media: media,
       };
     },
