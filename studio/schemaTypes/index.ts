@@ -9,8 +9,6 @@ import {venue} from './documents/venue'
 import {eventDate} from './documents/eventDate'
 import {page} from './documents/page'
 import {article} from './documents/article'
-import {error404} from './documents/error404'
-import {error500} from './documents/error500'
 
 // Importer komponenter
 import * as components from './components'
@@ -29,8 +27,6 @@ export const schemaTypes = [
   eventDate,
   page,
   article,
-  error404,
-  error500,
   // Objekter
   seoType,
   // Komponenter - sørg for at alle er registrert

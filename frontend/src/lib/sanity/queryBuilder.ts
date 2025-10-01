@@ -1,6 +1,8 @@
 /**
- * Type-safe GROQ query builder for consistent data fetching
+ * Type-safe GROQ query builder for consistent data fetching with multilingual support
  */
+
+import { createMultilingualField, createMultilingualSlug, type Language } from '../utils/language.js';
 
 // PageBuilder content query
 const CONTENT_QUERY = `
@@ -159,20 +161,24 @@ export const QueryBuilder = {
        scheduledPeriod.startDate <= now() &&
        scheduledPeriod.endDate >= now()))] | order(homePageType desc)[0]{
       _id,
-      title,
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
       homePageType,
       scheduledPeriod,
-      ${CONTENT_QUERY}
+      ${MULTILINGUAL_CONTENT_QUERY}
     }
   `,
 
   // Page queries
   pageBySlug: (slug: string) => `
-    *[_type == "page" && slug.current == "${slug}"][0] {
+    *[_type == "page" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0] {
       _id,
-      title,
-      slug,
-      ${CONTENT_QUERY}
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      ${MULTILINGUAL_CONTENT_QUERY}
     }
   `,
 
@@ -240,12 +246,16 @@ export const QueryBuilder = {
 
   // Detailed content queries
   articleBySlug: (slug: string) => `
-    *[_type == "article" && slug.current == "${slug}"][0]{
+    *[_type == "article" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0]{
       _id,
-      title,
-      slug,
-      excerpt,
-      ${CONTENT_QUERY},
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
+      ${MULTILINGUAL_CONTENT_QUERY},
       publishedAt,
       author->{
         name,
@@ -259,11 +269,13 @@ export const QueryBuilder = {
   `,
 
   artistBySlug: (slug: string) => `
-    *[_type == "artist" && slug.current == "${slug}"][0]{
+    *[_type == "artist" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0]{
       _id,
       name,
-      slug,
-      excerpt,
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
       instrument,
       country,
       image{
@@ -275,16 +287,20 @@ export const QueryBuilder = {
       imageCredit,
       imageAlt,
       imageCaption,
-      ${CONTENT_QUERY}
+      ${MULTILINGUAL_CONTENT_QUERY}
     }
   `,
 
   eventBySlug: (slug: string) => `
-    *[_type == "event" && slug.current == "${slug}"][0]{
+    *[_type == "event" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0]{
       _id,
-      title,
-      slug,
-      description,
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      description_no,
+      description_en,
+      ${createMultilingualField('description')},
       eventDate->{
         date
       },
@@ -426,6 +442,294 @@ export function buildQueryParams(options: QueryOptions = {}): any {
   };
 }
 
+// Multilingual field helpers
+function createMultilingualFields(): string {
+  return `
+    ${createMultilingualField('title')},
+    ${createMultilingualField('content')},
+    ${createMultilingualField('excerpt')},
+    ${createMultilingualField('description')},
+    ${createMultilingualSlug()}
+  `;
+}
+
+// Content query with multilingual support
+const MULTILINGUAL_CONTENT_QUERY = `
+  content_no[]{
+    _key,
+    _type,
+    _type == "title" => {
+      mainTitle,
+      subtitle
+    },
+    _type == "headingComponent" => {
+      text,
+      level,
+      alignment,
+      id
+    },
+    _type == "portableTextBlock" => {
+      title,
+      content
+    },
+    _type == "imageComponent" => {
+      image{
+        asset->{
+          _id,
+          url
+        }
+      },
+      alt,
+      caption,
+      credit,
+      size,
+      aspectRatio,
+      alignment
+    },
+    _type == "videoComponent" => {
+      url,
+      title,
+      autoplay,
+      controls,
+      thumbnail
+    },
+    _type == "quoteComponent" => {
+      quote,
+      author
+    },
+    _type == "buttonComponent" => {
+      text,
+      url,
+      variant,
+      style,
+      size,
+      action
+    },
+    _type == "linkComponent" => {
+      text,
+      url,
+      linkType,
+      internalLink,
+      openInNewTab
+    },
+    _type == "accordionComponent" => {
+      title,
+      description,
+      panels[]
+    },
+    _type == "countdownComponent" => {
+      title,
+      targetEvent,
+      style
+    },
+    _type == "columnLayout" => {
+      layoutType,
+      desktopColumns,
+      containerWidth,
+      items
+    },
+    _type == "gridLayout" => {
+      gridTemplate,
+      gridItems
+    },
+    _type == "spacer" => {
+      type,
+      size,
+      showDivider
+    },
+    _type == "contentScrollContainer" => {
+      title,
+      items[]{
+        _key,
+        _type,
+        _type == "imageComponent" => {
+          image{
+            asset->{
+              _id,
+              url
+            }
+          },
+          alt,
+          caption,
+          credit
+        },
+        _type == "videoComponent" => {
+          url,
+          title
+        },
+        _type == "quoteComponent" => {
+          quote,
+          author
+        }
+      },
+      format,
+      showScrollbar
+    },
+    _type == "artistScrollContainer" => {
+      title,
+      items[]->{
+        name,
+        slug,
+        image,
+        bio,
+        genres[]->{title}
+      },
+      showScrollbar,
+      cardFormat
+    },
+    _type == "eventScrollContainer" => {
+      title,
+      items[]->{
+        title,
+        slug,
+        eventDate->{date},
+        eventTime,
+        venue->{title},
+        image
+      },
+      showScrollbar,
+      cardFormat
+    }
+  },
+  content_en[]{
+    _key,
+    _type,
+    _type == "title" => {
+      mainTitle,
+      subtitle
+    },
+    _type == "headingComponent" => {
+      text,
+      level,
+      alignment,
+      id
+    },
+    _type == "portableTextBlock" => {
+      title,
+      content
+    },
+    _type == "imageComponent" => {
+      image{
+        asset->{
+          _id,
+          url
+        }
+      },
+      alt,
+      caption,
+      credit,
+      size,
+      aspectRatio,
+      alignment
+    },
+    _type == "videoComponent" => {
+      url,
+      title,
+      autoplay,
+      controls,
+      thumbnail
+    },
+    _type == "quoteComponent" => {
+      quote,
+      author
+    },
+    _type == "buttonComponent" => {
+      text,
+      url,
+      variant,
+      style,
+      size,
+      action
+    },
+    _type == "linkComponent" => {
+      text,
+      url,
+      linkType,
+      internalLink,
+      openInNewTab
+    },
+    _type == "accordionComponent" => {
+      title,
+      description,
+      panels[]
+    },
+    _type == "countdownComponent" => {
+      title,
+      targetEvent,
+      style
+    },
+    _type == "columnLayout" => {
+      layoutType,
+      desktopColumns,
+      containerWidth,
+      items
+    },
+    _type == "gridLayout" => {
+      gridTemplate,
+      gridItems
+    },
+    _type == "spacer" => {
+      type,
+      size,
+      showDivider
+    },
+    _type == "contentScrollContainer" => {
+      title,
+      items[]{
+        _key,
+        _type,
+        _type == "imageComponent" => {
+          image{
+            asset->{
+              _id,
+              url
+            }
+          },
+          alt,
+          caption,
+          credit
+        },
+        _type == "videoComponent" => {
+          url,
+          title
+        },
+        _type == "quoteComponent" => {
+          quote,
+          author
+        }
+      },
+      format,
+      showScrollbar
+    },
+    _type == "artistScrollContainer" => {
+      title,
+      items[]->{
+        name,
+        slug,
+        image,
+        bio,
+        genres[]->{title}
+      },
+      showScrollbar,
+      cardFormat
+    },
+    _type == "eventScrollContainer" => {
+      title,
+      items[]->{
+        title,
+        slug,
+        eventDate->{date},
+        eventTime,
+        venue->{title},
+        image
+      },
+      showScrollbar,
+      cardFormat
+    }
+  },
+  ${createMultilingualField('content')}
+`;
+
 // Common query fragments for reuse
 export const COMMON_FRAGMENTS = {
   imageFields: `
@@ -442,10 +746,31 @@ export const COMMON_FRAGMENTS = {
     }
   `,
 
+  multilingualSlugFields: `
+    slug_no{
+      current
+    },
+    slug_en{
+      current
+    },
+    ${createMultilingualSlug()}
+  `,
+
   referenceFields: `
     _id,
     _type,
     title,
     slug
+  `,
+
+  multilingualReferenceFields: `
+    _id,
+    _type,
+    title_no,
+    title_en,
+    ${createMultilingualField('title')},
+    slug_no,
+    slug_en,
+    ${createMultilingualSlug()}
   `
 };

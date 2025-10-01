@@ -1,10 +1,12 @@
 ---
 import Layout from './Layout.astro';
 import DynamicComponent from '../components/DynamicComponent.astro';
+import { getMultilingualContent } from '../lib/utils/language.js';
 
 interface Props {
   title: string;
   pageContent?: any[];
+  pageDocument?: any; // Full document with multilingual content
   backLinkText?: string;
   backLinkUrl?: string;
 }
@@ -12,9 +14,15 @@ interface Props {
 const {
   title,
   pageContent = [],
+  pageDocument,
   backLinkText = "← Tilbake til forsiden",
   backLinkUrl = "/"
 } = Astro.props;
+
+// Get multilingual content if pageDocument is provided, otherwise use pageContent
+const content = pageDocument
+  ? (getMultilingualContent(pageDocument) || pageDocument?.content || pageContent)
+  : pageContent;
 ---
 
 <Layout title={`${title} - Sanity + Astro`}>
@@ -26,9 +34,9 @@ const {
     </header>
 
     <!-- Page content from schema -->
-    {pageContent && Array.isArray(pageContent) && pageContent.length > 0 && (
+    {content && Array.isArray(content) && content.length > 0 && (
       <div class="page-content">
-        {pageContent.map((block) => (
+        {content.map((block) => (
           <DynamicComponent key={block._key || block._id} block={block} />
         ))}
       </div>

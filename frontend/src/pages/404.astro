@@ -1,63 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { sanityClient } from '../lib/sanity';
-import { PageBuilder } from '../components/PageBuilder.astro';
-
-// Fetch 404 error page content from Sanity
-const errorPageData = await sanityClient.fetch(`
-  *[_type == "error404"][0] {
-    title_no,
-    title_en,
-    content_no,
-    content_en,
-    image,
-    imageAlt_no,
-    imageAlt_en,
-    imageCredit_no,
-    imageCredit_en
-  }
-`);
-
-// Fallback content if no Sanity content exists
-const fallbackContent = {
-  title_no: "404 - Side ikke funnet",
-  title_en: "404 - Page not found",
-  message_no: "Beklager, vi finner ikke siden du leter etter. Siden kan ha blitt flyttet eller slettet.",
-  message_en: "Sorry, we can't find the page you're looking for. The page may have been moved or deleted."
-};
-
-// Use Sanity content or fallback
-const pageTitle = errorPageData?.title_no || fallbackContent.title_no;
 ---
 
 <Layout
-  title={pageTitle}
+  title="404 - Side ikke funnet"
   noIndex={true}
 >
-  {errorPageData?.content_no ? (
-    <!-- Use Sanity content if available -->
-    <main class="error-page-custom">
-      <h1>{pageTitle}</h1>
-      <PageBuilder content={errorPageData.content_no} />
-    </main>
-  ) : (
-    <!-- Fallback to hardcoded content -->
-    <main class="error-page">
-      <h1 class="error-code">404</h1>
-      <h2 class="error-title">{fallbackContent.title_no}</h2>
-      <p class="error-message">
-        {fallbackContent.message_no} Sjekk at URL-en er riktig, eller gå tilbake til forsiden.
-      </p>
-      <div class="error-actions">
-        <a href="/" class="btn btn-primary">
-          Gå til forsiden
-        </a>
-        <a href="/program" class="btn btn-secondary">
-          Se programmet
-        </a>
-      </div>
-    </main>
-  )}
+  <main class="error-page">
+    <h1 class="error-code">404</h1>
+    <h2 class="error-title">Side ikke funnet</h2>
+    <p class="error-message">
+      Beklager, vi finner ikke siden du leter etter. Siden kan ha blitt flyttet eller slettet.
+      Sjekk at URL-en er riktig, eller gå tilbake til forsiden.
+    </p>
+    <div class="error-actions">
+      <a href="/" class="btn btn-primary">
+        Gå til forsiden
+      </a>
+      <a href="/program" class="btn btn-secondary">
+        Se programmet
+      </a>
+    </div>
+  </main>
 </Layout>
 
 <style>

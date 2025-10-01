@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import DynamicComponent from '../components/DynamicComponent.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
+import { getMultilingualContent } from "../lib/utils/language.js";
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
@@ -10,6 +11,9 @@ const dataService = createDataService(Astro.request);
 const homepage = await dataService.getHomepage();
 
 const homepageTitle = homepage?.title || 'Forside';
+
+// Get appropriate content array
+const content = getMultilingualContent(homepage) || homepage?.content;
 
 // Smart caching basert på innholdstype
 if (homepage?.scheduledPeriod) {
@@ -31,9 +35,9 @@ console.log('Aktiv forside:', homepage);
         <h1>{homepageTitle}</h1>
         
         
-        {homepage?.content && Array.isArray(homepage.content) && (
+        {content && Array.isArray(content) && (
           <div>
-            {homepage.content.map((block) => (
+            {content.map((block) => (
               <DynamicComponent key={block._key || block._id} block={block} />
             ))}
           </div>

@@ -1,5 +1,6 @@
 import { sanityClient } from 'sanity:client';
 import { QueryBuilder, buildQueryParams, type QueryOptions } from './queryBuilder.js';
+import { transformMultilingualDocument, detectLanguage, type Language } from '../utils/language.js';
 
 // Cache configuration - shorter cache in development
 const isDevelopment = import.meta.env.DEV;
@@ -52,9 +53,11 @@ function setCache(key: string, data: any, duration: number): void {
 export class SanityDataService {
   private client: typeof sanityClient;
   private defaultOptions: QueryOptions;
+  private language: Language;
 
-  constructor(options: QueryOptions = {}) {
+  constructor(options: QueryOptions = {}, language: Language = 'no') {
     this.client = sanityClient;
+    this.language = language;
     this.defaultOptions = {
       perspective: 'published',
       useCdn: true,
@@ -62,19 +65,20 @@ export class SanityDataService {
     };
   }
 
-  // Execute query with caching
+  // Execute query with caching and multilingual transformation
   async fetch<T = any>(
     query: string,
     params: any = {},
     options: QueryOptions = {},
     cacheKey?: string,
-    cacheDuration?: number
+    cacheDuration?: number,
+    transformMultilingual: boolean = true
   ): Promise<T> {
     const mergedOptions = { ...this.defaultOptions, ...options };
     const queryParams = buildQueryParams(mergedOptions);
 
-    // Generate cache key
-    const finalCacheKey = cacheKey || getCacheKey(query, { ...params, ...queryParams });
+    // Generate cache key including language
+    const finalCacheKey = cacheKey || getCacheKey(query, { ...params, ...queryParams, lang: this.language });
 
     // Check cache first
     const cached = getFromCache(finalCacheKey);
@@ -85,11 +89,24 @@ export class SanityDataService {
     // Fetch from Sanity
     const data = await this.client.fetch(query, params, queryParams);
 
+    // Transform multilingual data if requested
+    const transformedData = transformMultilingual
+      ? this.transformData(data)
+      : data;
+
     // Cache the result
     const duration = cacheDuration || CACHE_DURATION.default;
-    setCache(finalCacheKey, data, duration);
+    setCache(finalCacheKey, transformedData, duration);
 
-    return data;
+    return transformedData;
+  }
+
+  // Transform data to include language-aware fields
+  private transformData(data: any): any {
+    if (Array.isArray(data)) {
+      return data.map(item => transformMultilingualDocument(item, this.language));
+    }
+    return transformMultilingualDocument(data, this.language);
   }
 
   // Homepage methods
@@ -273,12 +290,15 @@ export function createDataService(request?: Request): SanityDataService {
     ? 'drafts'
     : 'published';
 
+  // Detect language from request
+  const language = detectLanguage(request);
+
   return new SanityDataService({
     perspective,
     useCdn: perspective === 'published',
     token: import.meta.env.SANITY_API_READ_TOKEN,
     stega: import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true'
-  });
+  }, language);
 }
 
 // Default export for convenience

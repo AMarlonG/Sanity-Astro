@@ -99,20 +99,27 @@ export const eventLoader = createSanityLoader({
   type: 'event',
   query: `*[_type == "event" && (
     publishingStatus == "published" ||
-    (publishingStatus == "scheduled" && 
-     now() >= scheduledPeriod.startDate && 
+    (publishingStatus == "scheduled" &&
+     now() >= scheduledPeriod.startDate &&
      now() <= scheduledPeriod.endDate)
   )] | order(eventDate->date asc) {
     _id,
     _type,
-    title,
-    slug,
+    title_no,
+    title_en,
+    slug_no,
+    slug_en,
+    excerpt_no,
+    excerpt_en,
+    content_no,
+    content_en,
     eventTime{
       startTime,
       endTime
     },
     eventDate->{
-      title,
+      title_display_no,
+      title_display_en,
       date
     },
     venue->{
@@ -123,9 +130,10 @@ export const eventLoader = createSanityLoader({
       title,
       slug
     },
-    artists[]->{
+    artist[]->{
       name,
-      slug
+      slug_no,
+      slug_en
     },
     image{
       _type,
@@ -139,14 +147,26 @@ export const eventLoader = createSanityLoader({
   }`,
   parseContent: (entry) => ({
     ...entry,
-    // Ensure slug is properly formatted
-    slug: entry.slug?.current || '',
+    // Ensure slugs are properly formatted for both languages
+    slug_no: entry.slug_no?.current || '',
+    slug_en: entry.slug_en?.current || '',
     // Parse dates for better handling
     eventDate: entry.eventDate ? {
       ...entry.eventDate,
-      date: new Date(entry.eventDate.date)
+      date: new Date(entry.eventDate.date),
+      title: entry.eventDate.title_display_no || entry.eventDate.title_display_en || ''
     } : null,
-    lastUpdated: new Date(entry._updatedAt)
+    lastUpdated: new Date(entry._updatedAt),
+    // For compatibility, use Norwegian as default
+    title: entry.title_no || entry.title_en || '',
+    slug: entry.slug_no?.current || entry.slug_en?.current || '',
+    excerpt: entry.excerpt_no || entry.excerpt_en || '',
+    content: entry.content_no || entry.content_en || null,
+    // Fix artists field name and add compatibility slug
+    artists: entry.artist ? entry.artist.map(artist => ({
+      ...artist,
+      slug: artist.slug_no?.current || artist.slug_en?.current || ''
+    })) : []
   })
 })
 
@@ -154,15 +174,21 @@ export const artistLoader = createSanityLoader({
   type: 'artist',
   query: `*[_type == "artist" && (
     publishingStatus == "published" ||
-    (publishingStatus == "scheduled" && 
-     now() >= scheduledPeriod.startDate && 
+    (publishingStatus == "scheduled" &&
+     now() >= scheduledPeriod.startDate &&
      now() <= scheduledPeriod.endDate)
   )] | order(name asc) {
     _id,
     _type,
     name,
-    slug,
-    bio,
+    slug_no,
+    slug_en,
+    excerpt_no,
+    excerpt_en,
+    instrument_no,
+    instrument_en,
+    content_no,
+    content_en,
     image{
       _type,
       asset,
@@ -178,8 +204,16 @@ export const artistLoader = createSanityLoader({
   }`,
   parseContent: (entry) => ({
     ...entry,
-    slug: entry.slug?.current || '',
-    lastUpdated: new Date(entry._updatedAt)
+    // Ensure slugs are properly formatted for both languages
+    slug_no: entry.slug_no?.current || '',
+    slug_en: entry.slug_en?.current || '',
+    lastUpdated: new Date(entry._updatedAt),
+    // For compatibility, use Norwegian as default
+    slug: entry.slug_no?.current || entry.slug_en?.current || '',
+    bio: entry.excerpt_no || entry.excerpt_en || '',
+    excerpt: entry.excerpt_no || entry.excerpt_en || '',
+    instrument: entry.instrument_no || entry.instrument_en || '',
+    content: entry.content_no || entry.content_en || null
   })
 })
 
@@ -187,16 +221,20 @@ export const articleLoader = createSanityLoader({
   type: 'article',
   query: `*[_type == "article" && (
     publishingStatus == "published" ||
-    (publishingStatus == "scheduled" && 
-     now() >= scheduledPeriod.startDate && 
+    (publishingStatus == "scheduled" &&
+     now() >= scheduledPeriod.startDate &&
      now() <= scheduledPeriod.endDate)
   )] | order(_createdAt desc) {
     _id,
     _type,
-    title,
-    slug,
-    excerpt,
-    content,
+    title_no,
+    title_en,
+    slug_no,
+    slug_en,
+    excerpt_no,
+    excerpt_en,
+    content_no,
+    content_en,
     image{
       _type,
       asset,
@@ -237,9 +275,16 @@ export const articleLoader = createSanityLoader({
   }`,
   parseContent: (entry) => ({
     ...entry,
-    slug: entry.slug?.current || '',
+    // Ensure slugs are properly formatted for both languages
+    slug_no: entry.slug_no?.current || '',
+    slug_en: entry.slug_en?.current || '',
     publishedAt: new Date(entry._createdAt),
-    lastUpdated: new Date(entry._updatedAt)
+    lastUpdated: new Date(entry._updatedAt),
+    // For compatibility, use Norwegian as default
+    title: entry.title_no || entry.title_en || '',
+    slug: entry.slug_no?.current || entry.slug_en?.current || '',
+    excerpt: entry.excerpt_no || entry.excerpt_en || '',
+    content: entry.content_no || entry.content_en || null
   })
 })
 
@@ -282,15 +327,18 @@ export const pageLoader = createSanityLoader({
   type: 'page',
   query: `*[_type == "page" && (
     publishingStatus == "published" ||
-    (publishingStatus == "scheduled" && 
-     now() >= scheduledPeriod.startDate && 
+    (publishingStatus == "scheduled" &&
+     now() >= scheduledPeriod.startDate &&
      now() <= scheduledPeriod.endDate)
   )] | order(_createdAt desc) {
     _id,
     _type,
-    title,
-    slug,
-    content,
+    title_no,
+    title_en,
+    slug_no,
+    slug_en,
+    content_no,
+    content_en,
     publishingStatus,
     scheduledPeriod,
     _createdAt,
@@ -298,7 +346,13 @@ export const pageLoader = createSanityLoader({
   }`,
   parseContent: (entry) => ({
     ...entry,
-    slug: entry.slug?.current || '',
-    lastUpdated: new Date(entry._updatedAt)
+    // Ensure slugs are properly formatted for both languages
+    slug_no: entry.slug_no?.current || '',
+    slug_en: entry.slug_en?.current || '',
+    lastUpdated: new Date(entry._updatedAt),
+    // For compatibility, use Norwegian as default
+    title: entry.title_no || entry.title_en || '',
+    slug: entry.slug_no?.current || entry.slug_en?.current || '',
+    content: entry.content_no || entry.content_en || null
   })
 })
