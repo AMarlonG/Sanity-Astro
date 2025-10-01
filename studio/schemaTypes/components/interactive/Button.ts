@@ -1,8 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {BoltIcon} from '@sanity/icons'
 import {buttonURLValidation} from '../../../lib/urlValidation'
-import {addGlobalFields, designGroup} from '../../shared/globalFields'
 import {componentSpecificValidation} from '../../shared/validation'
+import type {ButtonData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const buttonComponent = defineType({
   name: 'buttonComponent',
@@ -16,9 +16,8 @@ export const buttonComponent = defineType({
       title: 'Innhold & Innstillinger',
       default: true,
     },
-    designGroup,
   ],
-  fields: addGlobalFields([
+  fields: [
     defineField({
       name: 'text',
       title: 'Knappetekst',
@@ -114,10 +113,7 @@ export const buttonComponent = defineType({
       description: 'Åpne lenken i en ny fane',
       initialValue: false,
     }),
-  ], {
-    includeSpacing: true,
-    includeTheme: true,
-  }),
+  ],
   preview: {
     select: {
       title: 'text',
@@ -143,8 +139,8 @@ export const buttonComponent = defineType({
       const iconText = icon && icon !== 'none' ? ` • ${icon}-ikon` : ''
 
       return {
-        title: title || 'Knapp uten tekst',
-        subtitle: `${styleDesc} • ${sizeDesc} størrelse${iconText}`,
+        title: 'Knapp',
+        subtitle: `${title || 'Uten tekst'} • ${styleDesc} • ${sizeDesc} størrelse${iconText}`,
         media: BoltIcon,
       }
     },
@@ -152,16 +148,7 @@ export const buttonComponent = defineType({
 })
 
 // Funksjon for å generere HTML fra knapp-data
-export function generateButtonHtml(data: {
-  text: string
-  url?: string
-  style?: string
-  size?: string
-  icon?: string
-  iconPosition?: string
-  fullWidth?: boolean
-  openInNewTab?: boolean
-}): string {
+export const generateButtonHtml: ComponentHTMLGenerator<ButtonData> = (data: ButtonData): string => {
   if (!data.text) {
     return ''
   }
@@ -215,3 +202,9 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
 }
+
+// Type-safe validation functions
+export const buttonValidationRules = {
+  text: componentSpecificValidation.buttonText as ValidationRule,
+  url: (Rule: any) => Rule.required().custom(buttonURLValidation) as ValidationRule,
+} as const

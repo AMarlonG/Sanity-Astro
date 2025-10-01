@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {HomeIcon} from '@sanity/icons'
 import {venueSlugValidation} from '../../lib/slugValidation'
+import {componentValidation, componentSpecificValidation, crossFieldValidation} from '../shared/validation'
 
 export const venue = defineType({
   name: 'venue',
@@ -19,12 +20,7 @@ export const venue = defineType({
       name: 'title',
       title: 'Navn på spillested',
       type: 'string',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Navn på spillested må fylles ut'
-        }
-        return true
-      }),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'slug',
@@ -60,7 +56,9 @@ export const venue = defineType({
       type: 'url',
       description: 'Lenke til kart eller nettside (f.eks. Google Maps)',
       fieldset: 'link',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
+      validation: (Rule) => Rule.uri({
+        scheme: ['http', 'https'],
+      }).warning('Må være en gyldig URL (http/https)').custom((value, context) => {
         // Hvis adresse er fylt ut, må URL også fylles ut
         if (context.document?.address && !value) {
           return 'Lenke-URL bør fylles ut når adresse er definert'

@@ -87,7 +87,7 @@ export const pageBuilderWithoutTitle = defineType({
     },
     {
       type: 'portableTextBlock',
-      title: 'Tekst (Rich Text)',
+      title: 'Tekst',
       icon: TextIcon,
     },
     {

@@ -53,8 +53,8 @@ export const contentScrollContainer = defineType({
       const itemCount = items?.length || 0
       const scrollbarStatus = showScrollbar ? 'med scrollbar' : 'uten scrollbar'
       return {
-        title: title || 'Content Scroll Container',
-        subtitle: `${itemCount} elementer • ${scrollbarStatus}`,
+        title: 'Innhold',
+        subtitle: `${title || 'Scroll Container'} • ${itemCount} elementer • ${scrollbarStatus}`,
         media: EllipsisHorizontalIcon,
       }
     },

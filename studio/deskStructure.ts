@@ -4,12 +4,12 @@ import {
   DocumentTextIcon,
   UserIcon,
   CalendarIcon,
-  TagIcon,
   HomeIcon,
   EarthGlobeIcon,
   DocumentsIcon,
   ComposeIcon,
   UsersIcon,
+  WarningOutlineIcon,
 } from '@sanity/icons'
 
 export const structure = (S: StructureBuilder) =>
@@ -73,13 +73,6 @@ export const structure = (S: StructureBuilder) =>
         .icon(HomeIcon)
         .child(
           S.documentTypeList('venue')
-            .defaultOrdering([{field: 'name', direction: 'asc'}])
-        ),
-      S.listItem()
-        .title('Sjangre')
-        .icon(TagIcon)
-        .child(
-          S.documentTypeList('genre')
             .defaultOrdering([{field: 'title', direction: 'asc'}])
         ),
       S.listItem()
@@ -89,4 +82,15 @@ export const structure = (S: StructureBuilder) =>
           S.documentTypeList('composer')
             .defaultOrdering([{field: 'name', direction: 'asc'}])
         ),
+
+      // Feilsider
+      S.divider().title('FEILSIDER'),
+      S.listItem()
+        .title('404 - Side ikke funnet')
+        .icon(WarningOutlineIcon)
+        .child(S.document().schemaType('error404').documentId('error404')),
+      S.listItem()
+        .title('500 - Serverfeil')
+        .icon(WarningOutlineIcon)
+        .child(S.document().schemaType('error500').documentId('error500')),
     ])

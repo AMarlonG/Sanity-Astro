@@ -1,5 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, PlayIcon} from '@sanity/icons'
+import {componentValidation} from '../../shared/validation'
+import type {VideoData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const videoComponent = defineType({
   name: 'videoComponent',
@@ -33,7 +35,7 @@ export const videoComponent = defineType({
         ],
       },
       initialValue: 'sanity',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'video',
@@ -180,9 +182,8 @@ export const videoComponent = defineType({
       }
 
       return {
-        title: title || 'Video',
-        subtitle:
-          (subtitle ? `${subtitle} (${videoType})` : videoType || 'Ukjent type') + formatText,
+        title: 'Video',
+        subtitle: `${title || 'Uten tittel'} • ${(subtitle ? `${subtitle} (${videoType})` : videoType || 'Ukjent type')}${formatText}`,
         media: media || PlayIcon,
       }
     },
@@ -190,20 +191,7 @@ export const videoComponent = defineType({
 })
 
 // Funksjon for å generere HTML fra video-data
-export function generateVideoHtml(data: {
-  videoType: string
-  video?: any
-  youtubeUrl?: string
-  vimeoUrl?: string
-  externalUrl?: string
-  title?: string
-  description?: string
-  autoplay?: boolean
-  muted?: boolean
-  controls?: boolean
-  loop?: boolean
-  aspectRatio?: string
-}): string {
+export const generateVideoHtml: ComponentHTMLGenerator<VideoData> = (data: VideoData): string => {
   // Sjekk at vi har en video-URL først
   const hasVideo =
     (data.videoType === 'sanity' && data.video?.asset?.url) ||
@@ -258,7 +246,9 @@ export function generateVideoHtml(data: {
   return html
 }
 
-function generateSanityVideoHtml(data: any): string {
+function generateSanityVideoHtml(data: VideoData): string {
+  if (!data.video?.asset?.url) return ''
+
   const videoUrl = data.video.asset.url
   const autoplay = data.autoplay ? 'autoplay' : ''
   const muted = data.muted ? 'muted' : ''
@@ -271,7 +261,8 @@ function generateSanityVideoHtml(data: any): string {
   </video>`
 }
 
-function generateYouTubeHtml(data: any): string {
+function generateYouTubeHtml(data: VideoData): string {
+  if (!data.youtubeUrl) return ''
   const videoId = extractYouTubeId(data.youtubeUrl)
   if (!videoId) return ''
 
@@ -290,7 +281,8 @@ function generateYouTubeHtml(data: any): string {
   </iframe>`
 }
 
-function generateVimeoHtml(data: any): string {
+function generateVimeoHtml(data: VideoData): string {
+  if (!data.vimeoUrl) return ''
   const videoId = extractVimeoId(data.vimeoUrl)
   if (!videoId) return ''
 
@@ -309,7 +301,8 @@ function generateVimeoHtml(data: any): string {
   </iframe>`
 }
 
-function generateExternalVideoHtml(data: any): string {
+function generateExternalVideoHtml(data: VideoData): string {
+  if (!data.externalUrl) return ''
   const autoplay = data.autoplay ? 'autoplay' : ''
   const muted = data.muted ? 'muted' : ''
   const controls = data.controls ? 'controls' : ''
@@ -335,7 +328,32 @@ function extractVimeoId(url: string): string | null {
 
 // HTML escape utility function
 function escapeHtml(text: string): string {
-  const div = document.createElement('div')
-  div.textContent = text
-  return div.innerHTML
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+// Type-safe validation functions
+export const videoValidationRules = {
+  title: componentValidation.title as ValidationRule,
+  videoType: componentValidation.title as ValidationRule,
+} as const
+
+// Utility function to validate video data has required fields
+export function hasValidVideoData(data: VideoData): boolean {
+  switch (data.videoType) {
+    case 'sanity':
+      return !!(data.video?.asset?.url)
+    case 'youtube':
+      return !!(data.youtubeUrl && extractYouTubeId(data.youtubeUrl))
+    case 'vimeo':
+      return !!(data.vimeoUrl && extractVimeoId(data.vimeoUrl))
+    case 'external':
+      return !!data.externalUrl
+    default:
+      return false
+  }
 }

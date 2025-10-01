@@ -184,7 +184,7 @@ export const pageBuilder = defineType({
     },
     {
       type: 'portableTextBlock',
-      title: 'Tekst (Rich Text)',
+      title: 'Tekst',
       icon: TextIcon,
       preview: {
         select: {

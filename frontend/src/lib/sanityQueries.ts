@@ -1,12 +1,34 @@
-import { sanityClient } from 'sanity:client';
+import { sanityClient } from 'sanity:client'
+import {
+  // Query definitions
+  eventBySlugQuery,
+  artistBySlugQuery,
+  pageBySlugQuery,
+  articleBySlugQuery,
+  activeHomepageQuery,
+  allEventsQuery,
+  featuredEventsQuery,
+  allArtistsQuery,
+  siteSettingsQuery,
+  // Result types
+  type EventQueryResult,
+  type ArtistQueryResult,
+  type PageQueryResult,
+  type ArticleQueryResult,
+  type HomepageQueryResult,
+  type SiteSettingsQueryResult,
+  type QueryParams,
+  type QueryOptions as BaseQueryOptions,
+  type QueryResult
+} from './sanity-queries'
 
 /**
- * Modern query utility that supports Visual Editing and draft mode
+ * Modern query utility that supports Visual Editing and draft mode with full type safety
  */
 
-export interface QueryOptions {
-  perspective?: 'published' | 'drafts';
-  useCdn?: boolean;
+export interface QueryOptions extends BaseQueryOptions {
+  perspective?: 'published' | 'drafts'
+  useCdn?: boolean
 }
 
 /**
@@ -23,276 +45,167 @@ export function getQueryPerspective(request?: Request): 'published' | 'drafts' {
 }
 
 /**
- * Execute a Sanity query with Visual Editing support
+ * Execute a Sanity query with Visual Editing support and full type safety
  */
 function executeQuery<T>(
-  query: string, 
-  params: Record<string, any> = {}, 
-  perspective: 'published' | 'drafts' = 'published'
+  query: string,
+  params: QueryParams = {},
+  options: QueryOptions = {}
 ): Promise<T> {
-  const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
-  const token = import.meta.env.SANITY_API_READ_TOKEN;
+  const {
+    perspective = 'published',
+    useCdn,
+    stega,
+    token: optionsToken,
+    cache = 60
+  } = options
+
+  const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true'
+  const token = optionsToken || import.meta.env.SANITY_API_READ_TOKEN
 
   // Require read token for visual editing
   if (visualEditingEnabled && !token) {
-    throw new Error('SANITY_API_READ_TOKEN is required for Visual Editing');
+    throw new Error('SANITY_API_READ_TOKEN is required for Visual Editing')
   }
 
   return sanityClient.fetch(
-    query, 
-    params, 
+    query,
+    params,
     {
       perspective,
-      useCdn: perspective === 'published' && !visualEditingEnabled,
+      useCdn: useCdn ?? (perspective === 'published' && !visualEditingEnabled),
       token: visualEditingEnabled ? token : undefined,
-      stega: visualEditingEnabled,
-      next: { revalidate: perspective === 'published' ? 60 : 0 }
+      stega: stega ?? visualEditingEnabled,
+      next: { revalidate: perspective === 'published' ? cache : 0 }
     }
-  );
+  )
 }
 
 /**
- * Load homepage with Visual Editing support
+ * Safe query execution with error handling
  */
-export async function loadHomepage(request?: Request) {
-  const perspective = getQueryPerspective(request);
-  const now = new Date().toISOString();
-  
-  const scheduledQuery = `
-    *[_type == "homepage" && 
-      scheduledPeriod.startDate <= $now && 
-      scheduledPeriod.endDate >= $now
-    ] | order(scheduledPeriod.startDate desc)[0]{
-      _id,
-      title,
-      content[]{
-        _key,
-        _type,
-        // PortableText
-        content,
-        // HeadingComponent
-        level,
-        text,
-        id,
-        // Image
-        image,
-        alt,
-        caption,
-        // Video
-        url,
-        title,
-        thumbnail,
-        // Button
-        text,
-        style,
-        size,
-        action,
-        // Link
-        openInNewTab,
-        // Quote
-        quote,
-        author,
-        // Accordion
-        // Content Scroll Container
-        items,
-        spacing,
-        // Artist Scroll Container
-        cardFormat,
-        // Event Scroll Container
-        events
-      },
-      isDefault,
-      scheduledPeriod
-    }
-  `;
-
+async function safeExecuteQuery<T>(
+  query: string,
+  params: QueryParams = {},
+  options: QueryOptions = {}
+): Promise<QueryResult<T>> {
   try {
-    // Try to get a scheduled homepage first
-    const scheduledHomepage = await executeQuery(scheduledQuery, { now }, perspective);
-
-    if (scheduledHomepage) {
-      return { data: scheduledHomepage };
-    }
+    const data = await executeQuery<T>(query, params, options)
+    return { data, loading: false }
   } catch (error) {
-    console.error('Error fetching scheduled homepage:', error);
+    console.error('Query execution failed:', error)
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+      loading: false
+    }
   }
-
-  // Fall back to default homepage
-  const defaultQuery = `
-    *[_type == "homepage" && isDefault == true][0]{
-      _id,
-      title,
-      content[]{
-        _key,
-        _type,
-        // PortableText
-        content,
-        // HeadingComponent
-        level,
-        text,
-        id,
-        // Image
-        image,
-        alt,
-        caption,
-        // Video
-        url,
-        title,
-        thumbnail,
-        // Button
-        text,
-        style,
-        size,
-        action,
-        // Link
-        openInNewTab,
-        // Quote
-        quote,
-        author,
-        // Accordion
-        // Content Scroll Container
-        items,
-        spacing,
-        // Artist Scroll Container
-        cardFormat,
-        // Event Scroll Container
-        events
-      },
-      isDefault,
-      scheduledPeriod
-    }
-  `;
-
-  const defaultHomepage = await executeQuery(defaultQuery, {}, perspective);
-  return { data: defaultHomepage };
 }
 
 /**
- * Load artist by slug with Visual Editing support
+ * Load homepage with Visual Editing support and full type safety
  */
-export async function loadArtist(slug: string, request?: Request) {
-  const perspective = getQueryPerspective(request);
-  
-  const query = `
-    *[_type == "artist" && slug.current == $slug][0]{
-      _id,
-      name,
-      slug,
-      image,
-      instrument,
-      country,
-      website,
-      socialMedia,
-      content,
-      publishingStatus,
-      scheduledPeriod
-    }
-  `;
+export async function loadHomepage(request?: Request): Promise<QueryResult<HomepageQueryResult>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
 
-  const data = await executeQuery(query, { slug }, perspective);
-  return { data };
+  return safeExecuteQuery<HomepageQueryResult>(activeHomepageQuery, {}, options)
 }
 
 /**
- * Load event by slug with Visual Editing support
+ * Load artist by slug with Visual Editing support and full type safety
  */
-export async function loadEvent(slug: string, request?: Request) {
-  const perspective = getQueryPerspective(request);
-  
-  const query = `
-    *[_type == "event" && slug.current == $slug][0]{
-      _id,
-      title,
-      slug,
-      image,
-      description,
-      buttonText,
-      buttonUrl,
-      buttonOpenInNewTab,
-      content,
-      artist[]->{
-        _id,
-        name,
-        slug,
-        image,
-        instrument,
-        content
-      },
-      venue->{
-        _id,
-        title,
-        linkText,
-        linkUrl,
-        address,
-        city
-      },
-      genre->{
-        _id,
-        title,
-        color
-      },
-      eventDate->{
-        _id,
-        title,
-        date
-      },
-      eventTime,
-      ticketUrl,
-      isFeatured,
-      publishingStatus,
-      scheduledPeriod
-    }
-  `;
+export async function loadArtist(slug: string, request?: Request): Promise<QueryResult<ArtistQueryResult>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
 
-  const data = await executeQuery(query, { slug }, perspective);
-  return { data };
+  return safeExecuteQuery<ArtistQueryResult>(artistBySlugQuery, { slug }, options)
 }
 
 /**
- * Load article by slug with Visual Editing support
+ * Load event by slug with Visual Editing support and full type safety
  */
-export async function loadArticle(slug: string, request?: Request) {
-  const perspective = getQueryPerspective(request);
-  
-  const query = `
-    *[_type == "article" && slug.current == $slug][0]{
-      _id,
-      title,
-      subtitle,
-      slug,
-      excerpt,
-      content,
-      mainImage,
-      author,
-      publishedAt,
-      categories,
-      tags,
-      publishingStatus,
-      scheduledPeriod
-    }
-  `;
+export async function loadEvent(slug: string, request?: Request): Promise<QueryResult<EventQueryResult>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
 
-  const data = await executeQuery(query, { slug }, perspective);
-  return { data };
+  return safeExecuteQuery<EventQueryResult>(eventBySlugQuery, { slug }, options)
 }
 
 /**
- * Load page by slug with Visual Editing support
+ * Load article by slug with Visual Editing support and full type safety
  */
-export async function loadPage(slug: string, request?: Request) {
-  const perspective = getQueryPerspective(request);
-  
-  const query = `
-    *[_type == "page" && slug.current == $slug][0]{
-      _id,
-      title,
-      slug,
-      content,
-      publishingStatus,
-      scheduledPeriod
-    }
-  `;
+export async function loadArticle(slug: string, request?: Request): Promise<QueryResult<ArticleQueryResult>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
 
-  const data = await executeQuery(query, { slug }, perspective);
-  return { data };
+  return safeExecuteQuery<ArticleQueryResult>(articleBySlugQuery, { slug }, options)
+}
+
+/**
+ * Load page by slug with Visual Editing support and full type safety
+ */
+export async function loadPage(slug: string, request?: Request): Promise<QueryResult<PageQueryResult>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
+
+  return safeExecuteQuery<PageQueryResult>(pageBySlugQuery, { slug }, options)
+}
+
+// ============================================================================
+// ADDITIONAL TYPE-SAFE QUERY FUNCTIONS
+// ============================================================================
+
+/**
+ * Load all events with type safety
+ */
+export async function loadAllEvents(request?: Request): Promise<QueryResult<EventQueryResult[]>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
+
+  return safeExecuteQuery<EventQueryResult[]>(allEventsQuery, {}, options)
+}
+
+/**
+ * Load featured events with type safety
+ */
+export async function loadFeaturedEvents(limit: number = 6, request?: Request): Promise<QueryResult<EventQueryResult[]>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
+
+  return safeExecuteQuery<EventQueryResult[]>(featuredEventsQuery, { limit }, options)
+}
+
+/**
+ * Load all artists with type safety
+ */
+export async function loadAllArtists(request?: Request): Promise<QueryResult<ArtistQueryResult[]>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
+
+  return safeExecuteQuery<ArtistQueryResult[]>(allArtistsQuery, {}, options)
+}
+
+/**
+ * Load site settings with type safety
+ */
+export async function loadSiteSettings(request?: Request): Promise<QueryResult<SiteSettingsQueryResult>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective, cache: 3600 } // Cache for 1 hour
+
+  return safeExecuteQuery<SiteSettingsQueryResult>(siteSettingsQuery, {}, options)
+}
+
+/**
+ * Generic query executor for custom queries
+ */
+export async function executeCustomQuery<T>(
+  query: string,
+  params: QueryParams = {},
+  request?: Request
+): Promise<QueryResult<T>> {
+  const perspective = getQueryPerspective(request)
+  const options: QueryOptions = { perspective }
+
+  return safeExecuteQuery<T>(query, params, options)
 }

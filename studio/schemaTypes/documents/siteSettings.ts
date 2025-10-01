@@ -1,5 +1,8 @@
 import {defineField, defineType} from 'sanity'
-import {CogIcon} from '@sanity/icons'
+import {CogIcon, ComposeIcon, ImageIcon, UsersIcon, HeartIcon} from '@sanity/icons'
+import {multilingualImageFields, imageFieldsets} from '../shared/imageFields'
+import {seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -8,39 +11,42 @@ export const siteSettings = defineType({
   icon: CogIcon,
   groups: [
     {
-      name: 'general',
-      title: 'Generelle innstillinger',
+      name: 'no',
+      title: '🇳🇴 Norsk',
+      icon: ComposeIcon,
       default: true,
     },
     {
-      name: 'festival',
-      title: 'Festivalinfo',
+      name: 'en',
+      title: '🇬🇧 English',
+      icon: ComposeIcon,
+    },
+    {
+      name: 'general',
+      title: 'Felles innhold',
+      icon: CogIcon,
+    },
+    {
+      name: 'identity',
+      title: 'Logoer & Identitet',
+      icon: HeartIcon,
     },
     {
       name: 'image',
       title: 'Årets festivalbilde',
+      icon: ImageIcon,
     },
-    {
-      name: 'contact',
-      title: 'Kontaktinformasjon',
-    },
-    {
-      name: 'social',
-      title: 'Sosiale medier',
-    },
+    seoGroup,
     {
       name: 'sponsors',
       title: 'Sponsorer',
-    },
-    {
-      name: 'newsletter',
-      title: 'Nyhetsbrev',
+      icon: UsersIcon,
     },
   ],
   fieldsets: [
     {
-      name: 'yearAndDates',
-      title: 'År og datoer',
+      name: 'festivalDates',
+      title: 'Festivaldatoer',
       options: {columns: 2},
     },
     {
@@ -48,33 +54,69 @@ export const siteSettings = defineType({
       title: 'Adresse',
       description: 'Lenke til Google Maps eller annen lokasjon',
     },
+    ...imageFieldsets,
   ],
   fields: [
+    // NORSK INNHOLD
     defineField({
-      name: 'festivalNumber',
-      title: 'Festivalnummer',
+      name: 'organizationName_no',
+      title: 'Festivalens navn (norsk)',
       type: 'string',
-      description: 'Hvilket nummer festivalen er (f.eks. 1, 2, 3 for første, andre, tredje festival)',
-      group: 'festival',
-      validation: (rule) => rule.required(),
+      group: 'no',
+      description: 'Navnet på organisasjonen/festivalen på norsk',
+      validation: componentValidation.title,
     }),
     defineField({
-      name: 'year',
-      title: 'Festivalår',
-      type: 'string',
-      initialValue: new Date().getFullYear().toString(),
-      group: 'festival',
-      validation: (rule) => rule.required(),
+      name: 'description_no',
+      title: 'Festivalbeskrivelse (norsk)',
+      type: 'text',
+      rows: 2,
+      description: 'Kort beskrivelse av festivalen og årets tema på norsk',
+      group: 'no',
     }),
+    defineField({
+      name: 'newsletterTitle_no',
+      title: 'Tittel for nyhetsbrev (norsk)',
+      type: 'string',
+      description: 'Tittel som vises på nyhetsbrev-signup skjema på norsk',
+      group: 'no',
+      initialValue: 'Meld deg på nyhetsbrev',
+    }),
+
+    // ENGELSK INNHOLD
+    defineField({
+      name: 'organizationName_en',
+      title: 'Festival name (English)',
+      type: 'string',
+      group: 'en',
+      description: 'Name of the organization/festival in English',
+    }),
+    defineField({
+      name: 'description_en',
+      title: 'Festival description (English)',
+      type: 'text',
+      rows: 2,
+      description: 'Short description of the festival and this year\'s theme in English',
+      group: 'en',
+    }),
+    defineField({
+      name: 'newsletterTitle_en',
+      title: 'Newsletter title (English)',
+      type: 'string',
+      description: 'Title shown on newsletter signup form in English',
+      group: 'en',
+    }),
+
+    // FELLES INNHOLD
     defineField({
       name: 'startDate',
       title: 'Startdato',
       type: 'reference',
       to: [{type: 'eventDate'}],
       description: 'Velg første dag av festivalen',
-      group: 'festival',
-      fieldset: 'yearAndDates',
-      validation: (rule) => rule.required(),
+      group: 'general',
+      fieldset: 'festivalDates',
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'endDate',
@@ -82,24 +124,16 @@ export const siteSettings = defineType({
       type: 'reference',
       to: [{type: 'eventDate'}],
       description: 'Velg siste dag av festivalen',
-      group: 'festival',
-      fieldset: 'yearAndDates',
-      validation: (rule) => rule.required(),
+      group: 'general',
+      fieldset: 'festivalDates',
+      validation: componentValidation.title,
     }),
 
-    defineField({
-      name: 'organizationName',
-      title: 'Festivalens navn',
-      type: 'string',
-      group: 'general',
-      description: 'Navnet på organisasjonen/festivalen',
-      validation: (rule) => rule.required(),
-    }),
     defineField({
       name: 'logos',
       title: 'Logoer',
       type: 'array',
-      group: 'general',
+      group: 'identity',
       description: 'Logoer for organisasjonen (hovedlogo, sekundær logo, etc.)',
       of: [
         {
@@ -110,14 +144,14 @@ export const siteSettings = defineType({
               title: 'Logonavn',
               type: 'string',
               description: 'F.eks. "Hovedlogo", "Sekundær logo", "Hvit logo"',
-              validation: (rule) => rule.required(),
+              validation: componentValidation.title,
             }),
             defineField({
               name: 'image',
               title: 'Logo',
               type: 'image',
               options: {hotspot: true},
-              validation: (rule) => rule.required(),
+              validation: componentValidation.image,
             }),
             defineField({
               name: 'description',
@@ -148,7 +182,7 @@ export const siteSettings = defineType({
       name: 'favicon',
       title: 'Favicon',
       type: 'image',
-      group: 'general',
+      group: 'identity',
       description: 'Liten ikon som vises i nettleserens faneblad',
     }),
     defineField({
@@ -156,21 +190,21 @@ export const siteSettings = defineType({
       title: 'E-post',
       type: 'email',
       description: 'Hoved e-postadresse for kontakt',
-      group: 'contact',
+      group: 'general',
     }),
     defineField({
       name: 'phone',
       title: 'Telefon',
       type: 'string',
       description: 'Telefonnummer for kontakt',
-      group: 'contact',
+      group: 'general',
     }),
     defineField({
       name: 'address',
       title: 'Postadresse',
       type: 'string',
       description: 'F.eks. Storgata 3, 0150 Byen',
-      group: 'contact',
+      group: 'general',
       fieldset: 'addressInfo',
     }),
     defineField({
@@ -178,22 +212,16 @@ export const siteSettings = defineType({
       title: 'Lenke-URL',
       type: 'url',
       description: 'Lenke til kart eller nettside (f.eks. Google Maps)',
-      group: 'contact',
+      group: 'general',
       fieldset: 'addressInfo',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Hvis adresse er fylt ut, må URL også fylles ut
-        if (context.document?.address && !value) {
-          return 'Lenke-URL bør fylles ut når adresse er definert'
-        }
-        return true
-      }),
+      validation: crossFieldValidation.requiredWhen('address', true),
     }),
     defineField({
       name: 'openInNewTab',
       title: 'Åpne i ny fane',
       type: 'boolean',
       description: 'Åpner lenken i en ny fane (anbefalt for eksterne lenker)',
-      group: 'contact',
+      group: 'general',
       fieldset: 'addressInfo',
       initialValue: true,
     }),
@@ -201,7 +229,7 @@ export const siteSettings = defineType({
       name: 'socialMedia',
       title: 'Sosiale medier',
       type: 'array',
-      group: 'social',
+      group: 'general',
       description: 'Legg til de sosiale mediene du ønsker å vise',
       of: [
         {
@@ -281,77 +309,19 @@ export const siteSettings = defineType({
       ],
     }),
     defineField({
-      name: 'newsletterTitle',
-      title: 'Tittel for nyhetsbrev',
-      type: 'string',
-      description: 'Tittel som vises på nyhetsbrev-signup skjema',
-      group: 'newsletter',
-      initialValue: 'Meld deg på nyhetsbrev',
-    }),
-    defineField({
       name: 'newsletterUrl',
-      title: 'Lenke til påmeldingsskjema',
+      title: 'Nyhetsbrev påmeldingslenke',
       type: 'url',
-      description: 'Skjemaet finner du hos nyhetsbrevleverandør (f.eks. Make, Mailchimp)',
-      group: 'newsletter',
-    }),
-    defineField({
-      name: 'description',
-      title: 'Festivalbeskrivelse',
-      type: 'text',
-      rows: 2,
-      description: 'Kort beskrivelse av festivalen og årets tema',
+      description: 'Lenke til nyhetsbrev påmeldingsskjema hos din leverandør (f.eks. Make, Mailchimp)',
       group: 'general',
     }),
+    ...multilingualImageFields('featuredImage'),
     defineField({
-      name: 'featuredImage',
-      title: 'Bilde',
-      type: 'image',
-      description: 'Last opp eller velg et bilde som representerer årets festival - brukes når sider deles på sosiale medier',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Festivalbilde må lastes opp'
-        }
-        return true
-      }),
-      options: {
-        hotspot: true,
-        accept: 'image/*',
-      },
-    }),
-    defineField({
-      name: 'featuredImageCredit',
-      title: 'Kreditering',
-      type: 'string',
-      description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Kreditering må fylles ut'
-        }
-        return true
-      }),
-    }),
-    defineField({
-      name: 'featuredImageAlt',
-      title: 'Alt-tekst',
-      type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet og SEO',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Alt-tekst må fylles ut'
-        }
-        return true
-      }),
-    }),
-    defineField({
-      name: 'featuredImageCaption',
-      title: 'Bildetekst',
-      type: 'string',
-      description: 'Valgfri tekst som kan vises med bildet',
-      group: 'image',
+      name: 'defaultSeo',
+      title: 'Standard SEO (fallback)',
+      type: 'seo',
+      description: 'Brukes som fallback når sider ikke har egne SEO-felt utfylt',
+      group: 'seo',
     }),
   ],
   preview: {

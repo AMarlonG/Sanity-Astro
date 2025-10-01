@@ -1,5 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
+import {componentValidation, componentSpecificValidation} from '../../shared/validation'
+import type {ImageData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const imageComponent = defineType({
   name: 'imageComponent',
@@ -14,7 +16,7 @@ export const imageComponent = defineType({
       type: 'image',
       description:
         'Last opp eller velg et bilde. Sanity optimaliserer bildet automatisk for nettsiden.',
-      validation: (Rule) => Rule.required().error('Bilde er påkrevd'),
+      validation: componentValidation.image,
       options: {
         hotspot: true,
         accept: 'image/*',
@@ -41,7 +43,7 @@ export const imageComponent = defineType({
       type: 'string',
       description:
         'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
-      validation: (Rule) => Rule.required().error('Kreditering er påkrevd'),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'alt',
@@ -49,7 +51,7 @@ export const imageComponent = defineType({
       type: 'string',
       description:
         'Beskriv bildet for tilgjengelighet og SEO.',
-      validation: (Rule) => Rule.required().error('Alt-tekst er påkrevd'),
+      validation: componentSpecificValidation.imageAlt,
     }),
     defineField({
       name: 'caption',
@@ -69,8 +71,8 @@ export const imageComponent = defineType({
       const formatText = aspectRatio ? ` • Format: ${aspectRatio}` : ''
 
       return {
-        title: title || 'Bilde uten alt-tekst',
-        subtitle: (subtitle || 'Ingen bildetekst') + formatText,
+        title: 'Bilde',
+        subtitle: `${title || 'Uten alt-tekst'} • ${(subtitle || 'Ingen bildetekst')}${formatText}`,
         media: media || DocumentIcon,
       }
     },
@@ -78,14 +80,7 @@ export const imageComponent = defineType({
 })
 
 // Funksjon for å generere HTML fra bilde-data
-export function generateImageHtml(data: {
-  image?: any
-  alt: string
-  caption?: string
-  alignment?: string
-  size?: string
-  aspectRatio?: string
-}): string {
+export const generateImageHtml: ComponentHTMLGenerator<ImageData> = (data: ImageData): string => {
   if (!data.alt) {
     return ''
   }
@@ -140,18 +135,21 @@ export function generateImageHtml(data: {
   return html
 }
 
+// TypeScript interface for image optimization options
+export interface ImageOptimizationOptions {
+  width?: number
+  height?: number
+  quality?: number
+  format?: 'webp' | 'jpg' | 'png'
+  fit?: 'clip' | 'crop' | 'fill' | 'fillmax' | 'max' | 'scale' | 'min'
+}
+
 // Funksjon for å generere optimaliserte bilde-URLer
 // Merk: Dette krever @sanity/image-url pakken
 export function generateOptimizedImageUrl(
   imageAsset: any,
-  options: {
-    width?: number
-    height?: number
-    quality?: number
-    format?: 'webp' | 'jpg' | 'png'
-    fit?: 'clip' | 'crop' | 'fill' | 'fillmax' | 'max' | 'scale' | 'min'
-  } = {},
-) {
+  options: ImageOptimizationOptions = {},
+): string | null {
   if (!imageAsset?.asset?.url) {
     return null
   }
@@ -174,7 +172,34 @@ export function generateOptimizedImageUrl(
 
 // HTML escape utility function
 function escapeHtml(text: string): string {
-  const div = document.createElement('div')
-  div.textContent = text
-  return div.innerHTML
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+// Type-safe validation functions
+export const imageValidationRules = {
+  image: componentValidation.image as ValidationRule,
+  alt: componentSpecificValidation.imageAlt as ValidationRule,
+  title: componentValidation.title as ValidationRule,
+} as const
+
+// Utility function to check if image has valid asset
+export function hasValidImageAsset(imageData: ImageData): boolean {
+  return !!(imageData.image?.asset?.url)
+}
+
+// Utility function to build responsive image srcset
+export function buildResponsiveImageSrcSet(imageAsset: any, baseWidth: number = 800): string {
+  if (!imageAsset?.asset?.url) return ''
+
+  const baseUrl = imageAsset.asset.url
+  const sizes = [400, 600, 800, 1200, 1600]
+
+  return sizes
+    .map(width => `${baseUrl}?auto=format&fit=crop&w=${width}&q=80 ${width}w`)
+    .join(', ')
 }

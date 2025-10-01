@@ -2,6 +2,12 @@ import {defineField, defineType} from 'sanity'
 import {CalendarIcon, ImageIcon, UsersIcon, ClockIcon, LinkIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
 import {eventTimeOptions} from '../../lib/timeUtils'
+import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
+import {seoFields, seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
+import {eventSlugValidation} from '../../lib/slugValidation'
+import type {EventData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const event = defineType({
   name: 'event',
@@ -9,93 +15,40 @@ export const event = defineType({
   type: 'document',
   icon: CalendarIcon,
 
+  orderings: [
+    { title: 'Navn A–Å', name: 'nameAsc', by: [{ field: 'title_no', direction: 'asc' }] },
+    { title: 'Nylig opprettet', name: 'createdDesc', by: [{ field: '_createdAt', direction: 'desc' }] },
+  ],
   groups: [
     {
-      name: 'basic',
-      title: 'Arrangementinfo',
-      icon: CalendarIcon,
+      name: 'no',
+      title: '🇳🇴 Norsk',
+      icon: ComposeIcon,
       default: true,
     },
     {
-      name: 'artists',
-      title: 'Artister',
-      icon: UsersIcon,
-    },
-    {
-      name: 'composers',
-      title: 'Komponister',
+      name: 'en',
+      title: '🇬🇧 English',
       icon: ComposeIcon,
     },
     {
-      name: 'image',
-      title: 'Hovedbilde',
-      icon: ImageIcon,
+      name: 'basic',
+      title: 'Felles innhold',
+      icon: CogIcon,
     },
-    {
-      name: 'content',
-      title: 'Innhold',
-      icon: ComposeIcon,
-    },
+    imageGroup,
     {
       name: 'scheduling',
       title: 'Publisering',
       icon: CogIcon,
     },
+    seoGroup,
+  ],
+  fieldsets: [
+    ...imageFieldsets,
   ],
   fields: [
-    defineField({
-      name: 'title',
-      title: 'Navn på arrangement',
-      type: 'string',
-      group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Kun vis advarsel hvis brukeren prøver å publisere uten tittel
-        if (!value && context.document?.publishingStatus === 'published') {
-          return 'Navn på arrangement bør fylles ut før publisering'
-        }
-        return true
-      }),
-    }),
-    defineField({
-      name: 'slug',
-      title: 'URL',
-      type: 'slug',
-      description: 'Trykk generer for å lage URL',
-      group: 'basic',
-      options: {
-        source: 'title',
-        maxLength: 96,
-      },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Kun vis advarsel hvis tittel finnes men slug mangler
-        if (!value?.current && context.document?.title) {
-          return 'Trykk generer for å lage URL'
-        }
-        return true
-      }),
-    }),
-    defineField({
-      name: 'excerpt',
-      title: 'Ingress',
-      type: 'text',
-      description: 'Kort beskrivelse av arrangementet (vises i lister)',
-      group: 'basic',
-      rows: 2,
-      validation: (Rule) => Rule.warning().max(100).custom((value, context) => {
-        if (!value && context.document?.publishingStatus === 'published') {
-          return 'Ingress bør fylles ut før publisering'
-        }
-        return true
-      }),
-    }),
-    defineField({
-      name: 'genre',
-      title: 'Sjanger',
-      type: 'reference',
-      to: [{type: 'genre'}],
-      description: 'Velg sjanger for arrangementet',
-      group: 'basic',
-    }),
+    // BASE (shared content)
     defineField({
       name: 'artist',
       title: 'Artister',
@@ -107,13 +60,7 @@ export const event = defineType({
         }
       ],
       description: 'Velg artister som opptrer på arrangementet',
-      group: 'artists',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.length && context.document?.publishingStatus === 'published') {
-          return 'Minst en artist bør velges før publisering'
-        }
-        return true
-      }),
+      group: 'basic',
     }),
     defineField({
       name: 'composers',
@@ -126,7 +73,15 @@ export const event = defineType({
         }
       ],
       description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
-      group: 'composers',
+      group: 'basic',
+    }),
+    defineField({
+      name: 'ticketUrl',
+      title: 'Billett-URL',
+      type: 'url',
+      description: 'Link til billettsystem for dette arrangementet (valgfritt)',
+      group: 'basic',
+      validation: componentValidation.url
     }),
     defineField({
       name: 'venue',
@@ -149,6 +104,9 @@ export const event = defineType({
       to: [{type: 'eventDate'}],
       description: 'Velg fra de konfigurerte festivaldatoene',
       group: 'basic',
+      options: {
+        sort: [{field: 'date', direction: 'asc'}],
+      },
       validation: (Rule) => Rule.warning().custom((value) => {
         if (!value) {
           return 'Dato må velges'
@@ -206,62 +164,99 @@ export const event = defineType({
         return true
       }),
     }),
+    ...multilingualImageFields('image'),
+    // NORSK INNHOLD
     defineField({
-      name: 'content',
-      title: 'Arrangementsinnhold',
-      type: 'pageBuilderWithoutTitle',
-      description: 'Bygg arrangement-siden med komponenter og innhold (arrangementsnavn er allerede H1)',
-      group: 'content',
+      name: 'title_no',
+      title: 'Navn på arrangement (norsk)',
+      type: 'string',
+      description: 'Arrangementsnavn på norsk',
+      validation: componentValidation.title,
+      group: 'no',
     }),
     defineField({
-      name: 'image',
-      title: 'Hovedbilde',
-      type: 'image',
-      description: 'Hovedbilde for arrangementet - brukes på arrangementssiden og når siden deles på sosiale medier',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Hovedbilde bør lastes opp'
-        }
-        return true
-      }),
+      name: 'slug_no',
+      title: 'URL (norsk)',
+      type: 'slug',
+      description: 'URL-vennlig versjon av norsk arrangementsnavn',
+      group: 'no',
       options: {
-        hotspot: true,
-        accept: 'image/*',
+        source: 'title_no',
+        maxLength: 96,
       },
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await eventSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
     }),
     defineField({
-      name: 'imageCredit',
-      title: 'Kreditering',
-      type: 'string',
-      description: 'Hvem som har tatt eller eier bildet (f.eks. "Foto: John Doe" eller "Kilde: Unsplash")',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (context.document?.image && !value) {
-          return 'Kreditering bør fylles ut når bilde er lastet opp'
-        }
-        return true
-      }),
+      name: 'excerpt_no',
+      title: 'Ingress (norsk)',
+      type: 'text',
+      description: 'Kort beskrivelse av arrangementet på norsk (vises i lister)',
+      group: 'no',
+      rows: 2,
+      validation: componentValidation.description,
     }),
     defineField({
-      name: 'imageAlt',
-      title: 'Alt-tekst',
+      name: 'content_no',
+      title: 'Arrangementsinnhold (norsk)',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Bygg norsk arrangement-side med komponenter og innhold (arrangementsnavn er allerede H1)',
+      group: 'no',
+    }),
+
+    // ENGELSK INNHOLD
+    defineField({
+      name: 'title_en',
+      title: 'Event name (English)',
       type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet og SEO',
-      group: 'image',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (context.document?.image && !value) {
-          return 'Alt-tekst bør fylles ut når bilde er lastet opp'
-        }
-        return true
-      }),
+      description: 'Event name in English',
+      group: 'en',
     }),
     defineField({
-      name: 'imageCaption',
-      title: 'Bildetekst',
-      type: 'string',
-      description: 'Valgfri tekst som kan vises med bildet',
-      group: 'image',
+      name: 'slug_en',
+      title: 'URL (English)',
+      type: 'slug',
+      description: 'URL-friendly version of English event name',
+      group: 'en',
+      options: {
+        source: 'title_en',
+        maxLength: 96,
+      },
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await eventSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
+    }),
+    defineField({
+      name: 'excerpt_en',
+      title: 'Excerpt (English)',
+      type: 'text',
+      description: 'Short description of the event in English (shown in lists)',
+      group: 'en',
+      rows: 2,
+      validation: componentValidation.description,
+    }),
+    defineField({
+      name: 'content_en',
+      title: 'Event content (English)',
+      type: 'pageBuilderWithoutTitle',
+      description: 'Build English event page with components and content (event name is already H1)',
+      group: 'en',
+      components: {
+        input: createMirrorPortableTextInput('content_no')
+      },
     }),
     defineField({
       name: 'publishingStatus',
@@ -276,7 +271,7 @@ export const event = defineType({
         layout: 'radio'
       },
       initialValue: 'published',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'scheduling',
     }),
     defineField({
@@ -298,16 +293,7 @@ export const event = defineType({
           type: 'datetime',
           description: 'Når dette arrangementet blir synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Startdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
         {
           name: 'endDate',
@@ -315,76 +301,46 @@ export const event = defineType({
           type: 'datetime',
           description: 'Når dette arrangementet slutter å være synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Sluttdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
       ],
     }),
+    ...seoFields,
   ],
   preview: {
     select: {
-      title: 'title',
-      venue: 'venue.title',
-      artists: 'artist[].name',
-      media: 'image.image',
+      title_no: 'title_no',
+      title_en: 'title_en',
+      media: 'image',
       eventDate: 'eventDate.title',
       eventDateDate: 'eventDate.date',
       startTime: 'eventTime.startTime',
-      endTime: 'eventTime.endTime',
-      genre: 'genre.title',
-      publishingStatus: 'publishingStatus',
-      scheduledStart: 'scheduledPeriod.startDate',
-      scheduledEnd: 'scheduledPeriod.endDate',
-      isFeatured: 'isFeatured',
+      _id: '_id',
     },
     prepare(selection) {
-      const {title, venue, artists, media, eventDate, eventDateDate, startTime, endTime, genre, publishingStatus, scheduledStart, scheduledEnd, isFeatured} = selection
-      
-      // Status indicator logic
-      let statusText = 'Utkast';
-      
-      if (publishingStatus === 'published') {
-        statusText = 'Publisert';
-      } else if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
-        const now = new Date();
-        const start = new Date(scheduledStart);
-        const end = new Date(scheduledEnd);
-        
-        if (now >= start && now <= end) {
-          statusText = 'Live';
-        } else if (now < start) {
-          statusText = 'Venter';
-        } else {
-          statusText = 'Utløpt';
-        }
-      }
-      
-      const artistNames = artists?.length ? artists.join(', ') : 'Ingen artister'
+      const {title_no, title_en, media, eventDate, eventDateDate, startTime, _id} = selection
+
+      const isPublished = _id && !_id.startsWith('drafts.')
+      const statusText = isPublished ? 'Publisert' : 'Utkast'
+      const title = title_no || title_en || 'Uten navn'
+
+      // Date and time info
       const dateString = eventDateDate
         ? new Date(eventDateDate).toLocaleDateString('nb-NO')
-        : 'Ingen dato'
+        : null
+      const dateLabel = eventDate && dateString ? `${eventDate} (${dateString})` : (dateString || 'Ingen dato')
+      const timeText = startTime ? ` kl. ${startTime}` : ''
+      const dateTimeText = `${dateLabel}${timeText}`
 
-      let timeString = ''
-      if (startTime && endTime) {
-        timeString = ` • ${startTime}-${endTime}`
-      } else if (startTime) {
-        timeString = ` • ${startTime}`
-      }
+      // Language flags based on which languages have content
+      const languageFlags = []
+      if (title_no) languageFlags.push('🇳🇴')
+      if (title_en) languageFlags.push('🇬🇧')
+      const flagsText = languageFlags.length > 0 ? languageFlags.join(' ') + ' • ' : ''
 
-      const dateLabel = eventDate ? `${eventDate} (${dateString})` : dateString
-      const genreLabel = genre ? ` • ${genre}` : ''
-      
       return {
         title: title,
-        subtitle: `${dateLabel}${timeString} • ${venue || 'Ingen venue'} • ${artistNames}${genreLabel} • ${statusText}`,
+        subtitle: `${dateTimeText}\n${flagsText}${statusText}`,
         media: media,
       }
     },

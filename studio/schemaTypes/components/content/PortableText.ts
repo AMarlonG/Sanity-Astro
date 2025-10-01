@@ -1,5 +1,7 @@
 import {defineType, defineArrayMember} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons'
+import {componentValidation, componentSpecificValidation} from '../../shared/validation'
+import type {PortableTextData, PortableTextBlock, PortableTextSpan, PortableTextMarkDefinition, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const portableText = defineType({
   name: 'portableText',
@@ -42,7 +44,7 @@ export const portableText = defineType({
                     scheme: ['http', 'https', 'mailto', 'tel'],
                   })
                     .required()
-                    .error('Please provide a valid URL'),
+                    .error('Må være en gyldig URL'),
               },
               {
                 name: 'openInNewTab',
@@ -70,8 +72,7 @@ export const portableText = defineType({
           type: 'string',
           title: 'Alternative text',
           description: 'Important for SEO and accessibility.',
-          validation: (Rule) =>
-            Rule.required().error('Alternative text is required for accessibility'),
+          validation: componentSpecificValidation.imageAlt,
         },
         {
           name: 'caption',
@@ -84,29 +85,13 @@ export const portableText = defineType({
   ],
 })
 
-// TypeScript interfaces for PortableText
-export interface PortableTextBlock {
-  _type: string
-  _key: string
-  style?: string
-  listItem?: string
-  level?: number
-  children?: PortableTextSpan[]
-  markDefs?: PortableTextMarkDefinition[]
-  [key: string]: any
-}
+// Main HTML generation function
+export const generatePortableTextHtml: ComponentHTMLGenerator<PortableTextData> = (data: PortableTextData): string => {
+  if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
+    return ''
+  }
 
-export interface PortableTextSpan {
-  _type: 'span'
-  _key: string
-  text: string
-  marks?: string[]
-}
-
-export interface PortableTextMarkDefinition {
-  _type: string
-  _key: string
-  [key: string]: any
+  return renderPortableText(data.content)
 }
 
 // Default components for rendering PortableText to HTML
@@ -248,6 +233,28 @@ export function generateTableOfContents(blocks: PortableTextBlock[]): string {
 
   toc += '</ol></nav>'
   return toc
+}
+
+// Type-safe validation functions
+export const portableTextValidationRules = {
+  content: componentValidation.title as ValidationRule,
+} as const
+
+// Utility function to validate PortableText has content
+export function hasValidPortableTextContent(data: PortableTextData): boolean {
+  return !!(data.content && Array.isArray(data.content) && data.content.length > 0)
+}
+
+// Utility function to get word count from PortableText
+export function getPortableTextWordCount(data: PortableTextData): number {
+  const plainText = toPlainText(data.content)
+  return plainText.split(/\s+/).filter(word => word.length > 0).length
+}
+
+// Utility function to get reading time estimate
+export function getPortableTextReadingTime(data: PortableTextData, wordsPerMinute: number = 200): number {
+  const wordCount = getPortableTextWordCount(data)
+  return Math.ceil(wordCount / wordsPerMinute)
 }
 
 // Utility function to validate PortableText structure

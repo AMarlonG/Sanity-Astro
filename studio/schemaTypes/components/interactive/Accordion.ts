@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, TiersIcon} from '@sanity/icons'
 import {generateQuoteHtml} from '../content/Quote'
+import {componentValidation, contentValidation} from '../../shared/validation'
+import type {AccordionData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const accordionComponent = defineType({
   name: 'accordionComponent',
@@ -13,7 +15,7 @@ export const accordionComponent = defineType({
       title: 'Tittel',
       type: 'string',
       description: 'Hovedtittel for nedtrekksmenyen',
-      validation: (Rule) => Rule.required().error('Tittel er påkrevd'),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'description',
@@ -26,7 +28,7 @@ export const accordionComponent = defineType({
       title: 'Paneler',
       type: 'array',
       description: 'Lag seksjoner som kan klikkes for å åpne og lukke innhold',
-      validation: (Rule) => Rule.required().min(1).error('Minst ett panel er påkrevd'),
+      validation: contentValidation.accordionPanels,
       of: [
         {
           type: 'object',
@@ -37,7 +39,7 @@ export const accordionComponent = defineType({
               name: 'title',
               title: 'Panel-tittel',
               type: 'string',
-              validation: (Rule) => Rule.required().error('Panel-tittel er påkrevd'),
+              validation: componentValidation.title,
             },
             {
               name: 'content',
@@ -99,8 +101,8 @@ export const accordionComponent = defineType({
     prepare({title, panelCount}) {
       const count = panelCount?.length || 0
       return {
-        title: title || 'Accordion uten tittel',
-        subtitle: `${count} panel${count !== 1 ? 'er' : ''}`,
+        title: 'Nedtrekksmeny',
+        subtitle: `${title || 'Uten tittel'} • ${count} panel${count !== 1 ? 'er' : ''}`,
         media: TiersIcon,
       }
     },
@@ -108,14 +110,7 @@ export const accordionComponent = defineType({
 })
 
 // Funksjon for å generere HTML fra accordion-data
-export function generateAccordionHtml(data: {
-  title: string
-  description?: string
-  panels: Array<{
-    title: string
-    content: any[]
-  }>
-}): string {
+export const generateAccordionHtml: ComponentHTMLGenerator<AccordionData> = (data: AccordionData): string => {
   if (!data.title || !data.panels || data.panels.length === 0) {
     return ''
   }
@@ -178,4 +173,28 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
+}
+
+// Type-safe validation functions
+export const accordionValidationRules = {
+  title: componentValidation.title as ValidationRule,
+  panels: contentValidation.accordionPanels as ValidationRule,
+} as const
+
+// Utility function to validate accordion has required content
+export function hasValidAccordionContent(data: AccordionData): boolean {
+  return !!(data.title && data.panels && data.panels.length > 0)
+}
+
+// Utility function to get accordion panel count
+export function getAccordionPanelCount(data: AccordionData): number {
+  return data.panels?.length || 0
+}
+
+// Utility function to generate unique IDs for accordion panels
+export function generateAccordionIds(baseId: string, panelCount: number): Array<{panelId: string; buttonId: string}> {
+  return Array.from({length: panelCount}, (_, index) => ({
+    panelId: `${baseId}-panel-${index}`,
+    buttonId: `${baseId}-button-${index}`,
+  }))
 }

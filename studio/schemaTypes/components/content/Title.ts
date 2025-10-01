@@ -1,11 +1,16 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons'
+import {componentValidation, componentSpecificValidation} from '../../shared/validation'
+import type {TitleData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 // HTML escape utility function
 export function escapeHtml(text: string): string {
-  const div = document.createElement('div')
-  div.textContent = text
-  return div.innerHTML
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 }
 
 export const title = defineType({
@@ -19,16 +24,14 @@ export const title = defineType({
       title: 'Hovedtittel (H1)',
       type: 'string',
       description: 'Hovedtittelen til dokumentet. Denne vises som en H1-tag.',
-      validation: (Rule) =>
-        Rule.required().error('Hovedtittel er påkrevd for SEO og tilgjengelighet'),
+      validation: componentSpecificValidation.headingText,
     }),
     defineField({
       name: 'subtitle',
       title: 'Undertittel (H2)',
       type: 'string',
       description: 'Valgfri undertittel som vises som en H2-tag under hovedtittelen.',
-      validation: (Rule) =>
-        Rule.max(200).warning('Undertitler bør være korte for bedre lesbarhet'),
+      validation: componentSpecificValidation.headingText,
     }),
   ],
   preview: {
@@ -38,8 +41,8 @@ export const title = defineType({
     },
     prepare({title, subtitle}) {
       return {
-        title: title || 'Uten tittel',
-        subtitle: subtitle ? `Undertittel: ${subtitle}` : 'Ingen undertittel',
+        title: 'Tittel',
+        subtitle: `${title || 'Uten tittel'}${subtitle ? ` • Undertittel: ${subtitle}` : ''}`,
         media: DocumentTextIcon,
       }
     },
@@ -47,7 +50,7 @@ export const title = defineType({
 })
 
 // Function to generate HTML from title data
-export function generateTitleHtml(data: {mainTitle: string; subtitle?: string}): string {
+export const generateTitleHtml: ComponentHTMLGenerator<TitleData> = (data: TitleData): string => {
   if (!data.mainTitle) {
     return ''
   }
@@ -62,4 +65,34 @@ export function generateTitleHtml(data: {mainTitle: string; subtitle?: string}):
   }
 
   return html
+}
+
+// Type-safe validation functions
+export const titleValidationRules = {
+  mainTitle: componentSpecificValidation.headingText as ValidationRule,
+  subtitle: componentSpecificValidation.headingText as ValidationRule,
+} as const
+
+// Utility function to validate title has required content
+export function hasValidTitleContent(data: TitleData): boolean {
+  return !!(data.mainTitle && data.mainTitle.trim().length > 0)
+}
+
+// Utility function to generate SEO-friendly title
+export function generateSeoTitle(data: TitleData, siteName?: string): string {
+  const parts = []
+
+  if (data.mainTitle) {
+    parts.push(data.mainTitle)
+  }
+
+  if (data.subtitle) {
+    parts.push(data.subtitle)
+  }
+
+  if (siteName) {
+    parts.push(siteName)
+  }
+
+  return parts.join(' | ')
 }

@@ -1,5 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
+import {componentValidation, contentValidation} from '../../shared/validation'
+import type {ArtistScrollContainerData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const artistScrollContainer = defineType({
   name: 'artistScrollContainer',
@@ -12,7 +14,7 @@ export const artistScrollContainer = defineType({
       title: 'Tittel',
       type: 'string',
       description: 'Tittel for artist scroll-containeren (valgfritt)',
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'items',
@@ -20,7 +22,7 @@ export const artistScrollContainer = defineType({
       type: 'array',
       description: 'Legg til mellom 2 og 8 artister som skal vises i horisontal scroll',
       of: [{type: 'reference', to: [{type: 'artist'}]}],
-      validation: (Rule) => Rule.max(8).min(2),
+      validation: contentValidation.scrollContainerItems,
     }),
     defineField({
       name: 'showScrollbar',
@@ -52,8 +54,8 @@ export const artistScrollContainer = defineType({
     prepare({title, items, cardFormat}) {
       const itemCount = items?.length || 0
       return {
-        title: title || 'Artist Scroll Container',
-        subtitle: `${itemCount} artister • ${cardFormat}`,
+        title: 'Artister',
+        subtitle: `${title || 'Scroll Container'} • ${itemCount} artister • ${cardFormat}`,
         media: DocumentIcon,
       }
     },
@@ -61,12 +63,7 @@ export const artistScrollContainer = defineType({
 })
 
 // Funksjon for å generere HTML fra artist scroll container data
-export function generateArtistScrollHtml(data: {
-  title?: string
-  items?: any[]
-  showScrollbar?: boolean
-  cardFormat?: string
-}): string {
+export const generateArtistScrollHtml: ComponentHTMLGenerator<ArtistScrollContainerData> = (data: ArtistScrollContainerData): string => {
   if (!data.items || data.items.length === 0) {
     return ''
   }
@@ -123,4 +120,133 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
+}
+
+// Type-safe validation functions
+export const artistScrollContainerValidationRules = {
+  title: componentValidation.title as ValidationRule,
+  items: contentValidation.scrollContainerItems as ValidationRule,
+} as const
+
+// Utility function to validate artist scroll container has content
+export function hasValidArtistScrollContent(data: ArtistScrollContainerData): boolean {
+  return !!(data.items && data.items.length > 0)
+}
+
+// Utility function to get artist count
+export function getArtistCount(data: ArtistScrollContainerData): number {
+  return data.items?.length || 0
+}
+
+// Utility function to generate container classes
+export function generateArtistScrollClasses(data: ArtistScrollContainerData): string[] {
+  const classes = ['artist-scroll-container']
+
+  if (!data.showScrollbar) {
+    classes.push('hide-scrollbar')
+  }
+
+  if (data.cardFormat) {
+    classes.push(`card-format-${data.cardFormat.replace(':', '-')}`)
+  } else {
+    classes.push('card-format-16-9')
+  }
+
+  return classes
+}
+
+// Utility function to check if format is valid
+export function isValidCardFormat(format: string): boolean {
+  return ['16:9', '4:5'].includes(format)
+}
+
+// Utility function to generate scroll container CSS
+export function generateArtistScrollCSS(): string {
+  return `
+    .artist-scroll-container {
+      width: 100%;
+      overflow-x: auto;
+      padding: 1rem 0;
+    }
+
+    .artist-scroll-container.hide-scrollbar {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .artist-scroll-container.hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .artist-scroll-wrapper {
+      display: flex;
+      gap: 1rem;
+      padding: 0 1rem;
+    }
+
+    .artist-item {
+      flex: 0 0 auto;
+      min-width: 200px;
+      max-width: 300px;
+    }
+
+    .artist-card {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .artist-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .artist-image {
+      width: 100%;
+      aspect-ratio: var(--card-aspect-ratio, 16/9);
+      overflow: hidden;
+    }
+
+    .artist-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-format-16-9 .artist-image {
+      --card-aspect-ratio: 16/9;
+    }
+
+    .card-format-4-5 .artist-image {
+      --card-aspect-ratio: 4/5;
+    }
+
+    .artist-content {
+      padding: 1rem;
+    }
+
+    .artist-name {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .artist-genres {
+      font-size: 0.9rem;
+      color: var(--text-secondary, #666);
+      margin-bottom: 0.5rem;
+    }
+
+    .artist-bio {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: var(--text-secondary, #666);
+    }
+
+    .artist-scroll-title {
+      margin: 0 0 1rem 1rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  `
 }

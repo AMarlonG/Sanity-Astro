@@ -2,7 +2,6 @@ import {homepage} from './documents/homepage'
 import {programPage} from './documents/programPage'
 import {artistPage} from './documents/artistPage'
 import {artist} from './documents/artist'
-import {genre} from './documents/genres'
 import {composer} from './documents/composer'
 import {siteSettings} from './documents/siteSettings'
 import {event} from './documents/event'
@@ -10,18 +9,19 @@ import {venue} from './documents/venue'
 import {eventDate} from './documents/eventDate'
 import {page} from './documents/page'
 import {article} from './documents/article'
+import {error404} from './documents/error404'
+import {error500} from './documents/error500'
 
 // Importer komponenter
 import * as components from './components'
 // Importer objekter
-import {socialMediaType} from './objects/socialMediaFields'
+import {seoType} from './objects/seoFields'
 
 export const schemaTypes = [
   homepage,
   programPage,
   artistPage,
   artist,
-  genre,
   composer,
   siteSettings,
   event,
@@ -29,8 +29,10 @@ export const schemaTypes = [
   eventDate,
   page,
   article,
+  error404,
+  error500,
   // Objekter
-  socialMediaType,
+  seoType,
   // Komponenter - sørg for at alle er registrert
   components.title,
   components.quoteComponent,

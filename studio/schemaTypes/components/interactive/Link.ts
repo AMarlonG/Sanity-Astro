@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon} from '@sanity/icons'
 import {externalURLValidation} from '../../../lib/urlValidation'
+import {componentSpecificValidation} from '../../shared/validation'
+import type {ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const linkComponent = defineType({
   name: 'linkComponent',
@@ -13,7 +15,7 @@ export const linkComponent = defineType({
       title: 'Lenketekst',
       type: 'string',
       description: 'Teksten som vises som lenke',
-      validation: (Rule) => Rule.required().error('Lenketekst er påkrevd'),
+      validation: componentSpecificValidation.linkText,
     }),
     defineField({
       name: 'linkType',
@@ -93,27 +95,55 @@ export const linkComponent = defineType({
       title: 'text',
       linkType: 'linkType',
       openInNewTab: 'openInNewTab',
+      url: 'url',
+      email: 'email',
+      phone: 'phone',
+      internalLink: 'internalLink.slug.current',
     },
-    prepare({title, linkType, openInNewTab}) {
+    prepare({title, linkType, openInNewTab, url, email, phone, internalLink}) {
+      // Bestem hvilken URL/lenke som skal vises
+      let linkDisplay = linkType || 'ingen lenke'
+
+      if (linkType === 'url' && url) {
+        linkDisplay = url.length > 30 ? `${url.substring(0, 30)}...` : url
+      } else if (linkType === 'email' && email) {
+        linkDisplay = email
+      } else if (linkType === 'phone' && phone) {
+        linkDisplay = phone
+      } else if (linkType === 'internal' && internalLink) {
+        linkDisplay = `/${internalLink}`
+      }
+
       return {
-        title: title || 'Lenke uten tekst',
-        subtitle: `${linkType || 'ingen lenke'}${openInNewTab ? ' (ny fane)' : ''}`,
+        title: 'Lenke',
+        subtitle: `${title || 'Uten tekst'} • ${linkDisplay}${openInNewTab ? ' (ny fane)' : ''}`,
         media: DocumentIcon,
       }
     },
   },
 })
 
-// Funksjon for å generere HTML fra lenke-data
-export function generateLinkHtml(data: {
+// TypeScript interface for Link component data
+export interface LinkComponentData {
   text: string
-  linkType: string
-  internalLink?: any
+  linkType: 'internal' | 'url' | 'email' | 'phone'
+  internalLink?: {
+    slug: {
+      current: string
+    }
+  }
   url?: string
   email?: string
   phone?: string
   openInNewTab: boolean
-}): string {
+  accessibility?: {
+    ariaLabel?: string
+    ariaDescribedBy?: string
+  }
+}
+
+// Funksjon for å generere HTML fra lenke-data
+export const generateLinkHtml: ComponentHTMLGenerator<LinkComponentData> = (data: LinkComponentData): string => {
   if (!data.text || !data.linkType) {
     return ''
   }
@@ -172,4 +202,26 @@ function escapeHtml(text: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;')
+}
+
+// Type-safe validation functions
+export const linkValidationRules = {
+  text: componentSpecificValidation.linkText as ValidationRule,
+  url: (Rule: any) => Rule.custom(externalURLValidation) as ValidationRule,
+} as const
+
+// Utility function to build href from link data
+export function buildLinkHref(data: LinkComponentData): string {
+  switch (data.linkType) {
+    case 'internal':
+      return data.internalLink?.slug?.current ? `/${data.internalLink.slug.current}` : '#'
+    case 'url':
+      return data.url || '#'
+    case 'email':
+      return data.email ? `mailto:${data.email}` : '#'
+    case 'phone':
+      return data.phone ? `tel:${data.phone}` : '#'
+    default:
+      return '#'
+  }
 }
