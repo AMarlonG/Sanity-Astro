@@ -4,6 +4,7 @@ import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPorta
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
 import {componentValidation, crossFieldValidation} from '../shared/validation'
+import {artistSlugValidation} from '../../lib/slugValidation'
 import type {ArtistData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const artist = defineType({
@@ -62,7 +63,15 @@ export const artist = defineType({
         source: 'name',
         maxLength: 96,
       },
-      validation: componentValidation.slug,
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await artistSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
       group: 'basic',
     }),
 

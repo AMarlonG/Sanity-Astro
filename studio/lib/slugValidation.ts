@@ -41,3 +41,6 @@ export function createUniqueSlugValidation(documentType: string) {
 export const venueSlugValidation = createUniqueSlugValidation('venue')
 export const artistSlugValidation = createUniqueSlugValidation('artist')
 export const eventSlugValidation = createUniqueSlugValidation('event')
+export const articleSlugValidation = createUniqueSlugValidation('article')
+export const pageSlugValidation = createUniqueSlugValidation('page')
+export const eventDateSlugValidation = createUniqueSlugValidation('eventDate')

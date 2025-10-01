@@ -4,6 +4,7 @@ import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPorta
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
 import {componentValidation, crossFieldValidation} from '../shared/validation'
+import {pageSlugValidation} from '../../lib/slugValidation'
 import type {PageData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const page = defineType({
@@ -58,7 +59,15 @@ export const page = defineType({
         source: 'title_no',
         maxLength: 96,
       },
-      validation: componentValidation.slug,
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await pageSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
     }),
     defineField({
       name: 'content_no',
@@ -86,7 +95,15 @@ export const page = defineType({
         source: 'title_en',
         maxLength: 96,
       },
-      validation: componentValidation.slug,
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await pageSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
     }),
     defineField({
       name: 'content_en',

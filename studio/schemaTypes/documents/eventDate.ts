@@ -2,6 +2,7 @@ import {defineField, defineType} from 'sanity'
 import {CalendarIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {DateNoDisplayInput, DateEnDisplayInput} from '../../components/LocalizedDateDisplay'
 import {componentValidation} from '../shared/validation'
+import {eventDateSlugValidation} from '../../lib/slugValidation'
 
 export const eventDate = defineType({
   name: 'eventDate',
@@ -67,7 +68,15 @@ export const eventDate = defineType({
         },
         maxLength: 96,
       },
-      validation: componentValidation.slug,
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await eventDateSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
     }),
 
     defineField({
@@ -99,7 +108,15 @@ export const eventDate = defineType({
         },
         maxLength: 96,
       },
-      validation: componentValidation.slug,
+      validation: (Rule) =>
+        Rule.required().custom(async (value, context) => {
+          // Først sjekk avansert slug-validering for unikhet
+          const slugValidation = await eventDateSlugValidation(value, context)
+          if (slugValidation !== true) return slugValidation
+
+          // Så sjekk standard slug-validering
+          return componentValidation.slug(Rule).validate(value, context)
+        }),
     }),
 
     defineField({
