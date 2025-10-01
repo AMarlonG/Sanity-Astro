@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, PlayIcon} from '@sanity/icons'
 import {componentValidation} from '../../shared/validation'
+import type {VideoData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const videoComponent = defineType({
   name: 'videoComponent',
@@ -190,20 +191,7 @@ export const videoComponent = defineType({
 })
 
 // Funksjon for å generere HTML fra video-data
-export function generateVideoHtml(data: {
-  videoType: string
-  video?: any
-  youtubeUrl?: string
-  vimeoUrl?: string
-  externalUrl?: string
-  title?: string
-  description?: string
-  autoplay?: boolean
-  muted?: boolean
-  controls?: boolean
-  loop?: boolean
-  aspectRatio?: string
-}): string {
+export const generateVideoHtml: ComponentHTMLGenerator<VideoData> = (data: VideoData): string => {
   // Sjekk at vi har en video-URL først
   const hasVideo =
     (data.videoType === 'sanity' && data.video?.asset?.url) ||
@@ -340,14 +328,18 @@ function extractVimeoId(url: string): string | null {
 
 // HTML escape utility function
 function escapeHtml(text: string): string {
-  const div = document.createElement('div')
-  div.textContent = text
-  return div.innerHTML
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
 }
 
 // Type-safe validation functions
 export const videoValidationRules = {
   title: componentValidation.title as ValidationRule,
+  videoType: componentValidation.title as ValidationRule,
 } as const
 
 // Utility function to validate video data has required fields

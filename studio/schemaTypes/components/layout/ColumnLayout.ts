@@ -330,36 +330,11 @@ export function generateColumnLayoutHtml(data: {
   const itemsHtml = data.items.map((item, index) => {
     let itemHtml = ''
     
-    // Import and use appropriate component generators
-    switch (item._type) {
-      case 'title':
-        const {generateTitleHtml} = require('./Title')
-        itemHtml = generateTitleHtml(item)
-        break
-      case 'headingComponent':
-        const {generateHeadingHtml} = require('./Heading')
-        itemHtml = generateHeadingHtml(item)
-        break
-      case 'imageComponent':
-        const {generateImageHtml} = require('./Image')
-        itemHtml = generateImageHtml(item)
-        break
-      case 'videoComponent':
-        const {generateVideoHtml} = require('./Video')
-        itemHtml = generateVideoHtml(item)
-        break
-      case 'buttonComponent':
-        const {generateButtonHtml} = require('./Button')
-        itemHtml = generateButtonHtml(item)
-        break
-      case 'quoteComponent':
-        const {generateQuoteHtml} = require('./Quote')
-        itemHtml = generateQuoteHtml(item)
-        break
-      // Add other component types as needed
-      default:
-        itemHtml = `<div class="component-placeholder">Unsupported component: ${item._type}</div>`
-    }
+    // Component rendering will be handled by the frontend framework
+    // Here we just provide a placeholder that indicates the component type
+    itemHtml = `<div class="component-container" data-type="${item._type}">
+      <!-- Component: ${item._type} will be rendered here -->
+    </div>`
 
     return `<div class="layout-item" data-index="${index}">${itemHtml}</div>`
   }).join('\n')
@@ -457,3 +432,76 @@ export const responsiveLayoutCSS = `
   min-width: 0; /* Prevents flex/grid overflow */
 }
 `
+
+// Type-safe validation functions
+export const columnLayoutValidationRules = {
+  layoutType: (Rule: any) => Rule.required().error('Layout-type må velges') as ValidationRule,
+  items: contentValidation.gridLayoutItems as ValidationRule,
+} as const
+
+// Utility function to validate column layout has content
+export function hasValidColumnLayoutContent(data: ResponsiveLayoutData): boolean {
+  return !!(data.items && data.items.length > 0)
+}
+
+// Utility function to get column layout item count
+export function getColumnLayoutItemCount(data: ResponsiveLayoutData): number {
+  return data.items?.length || 0
+}
+
+// Utility function to generate responsive grid classes
+export function generateResponsiveGridClasses(data: ResponsiveLayoutData): string[] {
+  const classes: string[] = []
+
+  if (data.layoutType === 'columns') {
+    classes.push(`grid-desktop-${data.desktopColumns || '2'}`)
+    classes.push(`grid-tablet-${data.tabletColumns || '2'}`)
+    classes.push(`grid-mobile-${data.mobileColumns || '1'}`)
+  }
+
+  if (data.layoutType === 'flexbox') {
+    classes.push(`flex-${data.flexDirection || 'row'}`)
+    if (data.flexWrap) classes.push('flex-wrap')
+  }
+
+  return classes
+}
+
+// Utility function to generate gap classes
+export function generateGapClasses(data: ResponsiveLayoutData): string[] {
+  const classes: string[] = []
+
+  if (data.gap) {
+    classes.push(`gap-desktop-${data.gap.desktop || 'medium'}`)
+    classes.push(`gap-mobile-${data.gap.mobile || 'medium'}`)
+  }
+
+  return classes
+}
+
+// Utility function to generate alignment classes
+export function generateAlignmentClasses(data: ResponsiveLayoutData): string[] {
+  const classes: string[] = []
+
+  if (data.alignment) {
+    classes.push(`justify-${data.alignment.horizontal || 'start'}`)
+    classes.push(`align-${data.alignment.vertical || 'start'}`)
+  }
+
+  return classes
+}
+
+// Utility function to get all layout classes
+export function getAllLayoutClasses(data: ResponsiveLayoutData): string[] {
+  const classes = [
+    'responsive-layout',
+    `layout-${data.layoutType || 'columns'}`,
+    `width-${data.containerWidth || 'full'}`,
+  ]
+
+  classes.push(...generateResponsiveGridClasses(data))
+  classes.push(...generateGapClasses(data))
+  classes.push(...generateAlignmentClasses(data))
+
+  return classes
+}

@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {BlockElementIcon} from '@sanity/icons'
 import {componentValidation, contentValidation} from '../../shared/validation'
+import type {GridLayoutData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const gridLayout = defineType({
   name: 'gridLayout',
@@ -280,10 +281,123 @@ export const gridTemplateCSS = `
     grid-template-columns: 1fr !important;
     grid-template-areas: none !important;
   }
-  
+
   .grid-template-hero .grid-item,
   .grid-template-magazine .grid-item {
     grid-area: auto !important;
   }
 }
 `
+
+// Function to generate HTML from grid layout data
+export const generateGridLayoutHtml: ComponentHTMLGenerator<GridLayoutData> = (data: GridLayoutData): string => {
+  if (!data.gridItems || data.gridItems.length === 0) {
+    return ''
+  }
+
+  const templateClass = `grid-template-${data.gridTemplate}`
+  const gapClass = `gap-${data.gap?.desktop || 'medium'}`
+  const mobileGapClass = `gap-mobile-${data.gap?.mobile || 'medium'}`
+
+  let html = `<div class="grid-layout ${templateClass} ${gapClass} ${mobileGapClass}"`
+
+  // Add custom grid areas for custom template
+  if (data.gridTemplate === 'custom' && data.gridAreas) {
+    const escapedGridAreas = escapeHtml(data.gridAreas)
+    html += ` style="grid-template-areas: ${escapedGridAreas};"`
+  }
+
+  html += '>'
+
+  // Generate grid items
+  data.gridItems.forEach((item, index) => {
+    let itemClass = 'grid-item'
+
+    if (data.gridTemplate === 'custom' && item.gridArea) {
+      html += `\n  <div class="${itemClass}" style="grid-area: ${escapeHtml(item.gridArea)};">`
+    } else if (item.span) {
+      const spanStyle = `grid-column: span ${item.span.columns || 1}; grid-row: span ${item.span.rows || 1};`
+      html += `\n  <div class="${itemClass}" style="${spanStyle}">`
+    } else {
+      html += `\n  <div class="${itemClass}">`
+    }
+
+    // Add component content (simplified - in real implementation would render components)
+    if (item.component && item.component.length > 0) {
+      html += `\n    <!-- Grid item ${index + 1} components would be rendered here -->`
+      html += `\n    <div class="grid-item-content">`
+      html += `\n      <!-- Component type: ${item.component[0]?._type || 'unknown'} -->`
+      html += `\n    </div>`
+    }
+
+    html += `\n  </div>`
+  })
+
+  html += '\n</div>'
+  return html
+}
+
+// HTML escape utility function
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+// Type-safe validation functions
+export const gridLayoutValidationRules = {
+  gridTemplate: componentValidation.title as ValidationRule,
+  gridItems: contentValidation.gridLayoutItems as ValidationRule,
+} as const
+
+// Utility function to validate grid layout has content
+export function hasValidGridLayoutContent(data: GridLayoutData): boolean {
+  return !!(data.gridItems && data.gridItems.length > 0)
+}
+
+// Utility function to get grid item count
+export function getGridItemCount(data: GridLayoutData): number {
+  return data.gridItems?.length || 0
+}
+
+// Utility function to generate CSS grid template areas
+export function generateGridTemplateAreas(data: GridLayoutData): string {
+  if (data.gridTemplate === 'custom' && data.gridAreas) {
+    return data.gridAreas
+  }
+
+  // Return predefined template areas
+  switch (data.gridTemplate) {
+    case 'hero':
+      return '"main sidebar1" "main sidebar2"'
+    case 'magazine':
+      return '"header header aside" "content content aside"'
+    case 'masonry':
+      return '' // Masonry doesn't use template areas
+    default:
+      return ''
+  }
+}
+
+// Utility function to check if grid template supports custom areas
+export function supportsCustomAreas(template: string): boolean {
+  return template === 'custom'
+}
+
+// Utility function to get responsive grid classes
+export function getResponsiveGridClasses(data: GridLayoutData): string[] {
+  const classes: string[] = []
+
+  if (data.responsiveGrid?.tabletBehavior) {
+    classes.push(`tablet-${data.responsiveGrid.tabletBehavior}`)
+  }
+
+  if (data.responsiveGrid?.mobileBehavior) {
+    classes.push(`mobile-${data.responsiveGrid.mobileBehavior}`)
+  }
+
+  return classes
+}

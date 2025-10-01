@@ -3,20 +3,24 @@ import type { APIRoute } from 'astro';
 import { sanityClient } from 'sanity:client';
 import imageUrlBuilder from '@sanity/image-url';
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types';
-import { 
-  rateLimit, 
-  validateContentType, 
-  InputValidator, 
-  getCORSHeaders, 
-  getSecurityHeaders 
+import {
+  rateLimit,
+  validateContentType,
+  InputValidator,
+  getCORSHeaders,
+  getSecurityHeaders
 } from '../../lib/security';
 import { formatDateForLanguage } from '../../../../shared/utils/dates';
-
-interface FilterOptions {
-  eventDate?: string;
-  genre?: string;
-  venue?: string;
-}
+import type {
+  EventFilterFormData,
+  FormSubmissionResult,
+  FormSecurityCheck
+} from '../../lib/form-utils'
+import {
+  validateFormData,
+  eventFilterFormFields,
+  formDataProcessors
+} from '../../lib/form-utils'
 
 // Type for arrangement hentet fra Sanity
 interface Event {
@@ -61,29 +65,37 @@ const urlFor = (source: SanityImageSource) =>
     ? imageUrlBuilder({ projectId, dataset }).image(source)
     : null;
 
-// Enhanced filter validation using security utilities
-function validateFilters(filters: FilterOptions): FilterOptions {
-  const validated: FilterOptions = {};
-  
+// Enhanced filter validation using type-safe form utilities
+function validateFilters(filters: EventFilterFormData): EventFilterFormData {
+  // Use the centralized form validation
+  const validationResult = validateFormData(filters, eventFilterFormFields)
+
+  if (!validationResult.isValid) {
+    // Log validation errors for debugging
+    console.warn('Filter validation errors:', validationResult.errors)
+  }
+
+  const validated: EventFilterFormData = {}
+
   // Validate and sanitize eventDate
-  const validDate = InputValidator.validateDate(filters.eventDate || null);
+  const validDate = InputValidator.validateDate(filters.eventDate || null)
   if (validDate) {
-    validated.eventDate = validDate;
+    validated.eventDate = validDate
   }
-  
+
   // Validate and sanitize genre slug
-  const validGenre = InputValidator.validateSlug(filters.genre || null);
+  const validGenre = InputValidator.validateSlug(filters.genre || null)
   if (validGenre) {
-    validated.genre = validGenre;
+    validated.genre = validGenre
   }
-  
+
   // Validate and sanitize venue slug
-  const validVenue = InputValidator.validateSlug(filters.venue || null);
+  const validVenue = InputValidator.validateSlug(filters.venue || null)
   if (validVenue) {
-    validated.venue = validVenue;
+    validated.venue = validVenue
   }
-  
-  return validated;
+
+  return validated
 }
 
 // Use enhanced HTML escaping from security utilities
@@ -224,16 +236,21 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Parse and validate input data
-    const rawData = await request.text();
-    const formData = new URLSearchParams(rawData);
-    
-    // Enhanced filter validation
+    // Parse and validate input data using type-safe form utilities
+    const rawData = await request.text()
+    const formData = new URLSearchParams(rawData)
+
+    // Parse form data using centralized processor
+    const parsedData = formDataProcessors.parseFormData(
+      new FormData(Object.fromEntries(formData.entries()) as any)
+    ) as EventFilterFormData
+
+    // Enhanced filter validation with type safety
     const filters = validateFilters({
       eventDate: formData.get('eventDate') || undefined,
       genre: formData.get('genre') || undefined,
       venue: formData.get('venue') || undefined,
-    });
+    })
 
     // Hent eventDates for å generere faner
     const eventDates = await sanityClient.fetch(

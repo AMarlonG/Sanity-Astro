@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {ExpandIcon} from '@sanity/icons'
+import type {SpacerData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const spacer = defineType({
   name: 'spacer',
@@ -117,12 +118,7 @@ export const spacer = defineType({
 })
 
 // Generate HTML for spacer
-export function generateSpacerHtml(data: {
-  type: string
-  size?: {desktop: string, mobile: string}
-  showDivider?: boolean
-  dividerStyle?: string
-}): string {
+export const generateSpacerHtml: ComponentHTMLGenerator<SpacerData> = (data: SpacerData): string => {
   const desktopSize = data.size?.desktop || 'medium'
   const mobileSize = data.size?.mobile || 'medium'
   
@@ -206,3 +202,77 @@ export const spacerCSS = `
   .spacer-mobile-xxl { --spacer-size: 3rem !important; }
 }
 `
+
+// Type-safe validation functions
+export const spacerValidationRules = {
+  type: (Rule: any) => Rule.required().error('Type avstand må velges') as ValidationRule,
+} as const
+
+// Utility function to validate spacer has required content
+export function hasValidSpacerContent(data: SpacerData): boolean {
+  return !!(data.type && data.size)
+}
+
+// Utility function to get spacer size value in rem
+export function getSpacerSizeValue(size: string, viewport: 'desktop' | 'mobile' = 'desktop'): string {
+  const sizeMaps = {
+    desktop: {
+      xs: '0.5rem',
+      small: '1rem',
+      medium: '2rem',
+      large: '3rem',
+      xl: '4rem',
+      xxl: '6rem',
+      xxxl: '8rem',
+    },
+    mobile: {
+      xs: '0.25rem',
+      small: '0.5rem',
+      medium: '1rem',
+      large: '1.5rem',
+      xl: '2rem',
+      xxl: '3rem',
+    },
+  }
+
+  return sizeMaps[viewport][size as keyof typeof sizeMaps[typeof viewport]] || sizeMaps[viewport].medium
+}
+
+// Utility function to generate spacer classes
+export function generateSpacerClasses(data: SpacerData): string[] {
+  const desktopSize = data.size?.desktop || 'medium'
+  const mobileSize = data.size?.mobile || 'medium'
+
+  const classes = [
+    'spacer',
+    `spacer-${data.type}`,
+    `spacer-desktop-${desktopSize}`,
+    `spacer-mobile-${mobileSize}`,
+  ]
+
+  if (data.showDivider && data.type === 'section') {
+    classes.push('spacer-with-divider')
+    classes.push(`spacer-divider-${data.dividerStyle || 'solid'}`)
+  }
+
+  return classes
+}
+
+// Utility function to check if spacer supports divider
+export function supportsDivider(type: string): boolean {
+  return type === 'section'
+}
+
+// Utility function to get accessibility attributes
+export function getSpacerAccessibilityAttributes(data: SpacerData): Record<string, string> {
+  const attributes: Record<string, string> = {
+    'role': 'separator',
+    'aria-hidden': 'true',
+  }
+
+  if (data.type === 'section' && data.showDivider) {
+    attributes['aria-orientation'] = 'horizontal'
+  }
+
+  return attributes
+}
