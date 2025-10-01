@@ -1,27 +1,67 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { sanityClient } from '../lib/sanity';
+import { PageBuilder } from '../components/PageBuilder.astro';
+
+// Fetch 500 error page content from Sanity
+const errorPageData = await sanityClient.fetch(`
+  *[_type == "error500"][0] {
+    title_no,
+    title_en,
+    content_no,
+    content_en,
+    image,
+    imageAlt_no,
+    imageAlt_en,
+    imageCredit_no,
+    imageCredit_en
+  }
+`);
+
+// Fallback content if no Sanity content exists
+const fallbackContent = {
+  title_no: "500 - Serverfeil",
+  title_en: "500 - Server Error",
+  message_no: "Det oppstod en teknisk feil på serveren. Vårt team har blitt varslet og jobber med saken.",
+  message_en: "A technical error occurred on the server. Our team has been notified and is working on the issue."
+};
+
+// Use Sanity content or fallback
+const pageTitle = errorPageData?.title_no || fallbackContent.title_no;
 ---
 
-<Layout title="500 - Serverfeil">
-  <main class="error-page">
-    <h1 class="error-code error-code--danger">500</h1>
-    <h2 class="error-title">Oisann! Noe gikk galt</h2>
-    <p class="error-message">
-      Det oppstod en teknisk feil på serveren. Vårt team har blitt varslet og jobber med saken. Prøv gjerne igjen om litt.
-    </p>
-    <div class="error-actions">
-      <button onclick="window.location.reload()" class="btn btn-primary">
-        Prøv på nytt
-      </button>
-      <a href="/" class="btn btn-secondary">
-        Gå til forsiden
-      </a>
-    </div>
-  </main>
+<Layout
+  title={pageTitle}
+  noIndex={true}
+>
+  {errorPageData?.content_no ? (
+    <!-- Use Sanity content if available -->
+    <main class="error-page-custom">
+      <h1>{pageTitle}</h1>
+      <PageBuilder content={errorPageData.content_no} />
+    </main>
+  ) : (
+    <!-- Fallback to hardcoded content -->
+    <main class="error-page">
+      <h1 class="error-code error-code--danger">500</h1>
+      <h2 class="error-title">Oisann! Noe gikk galt</h2>
+      <p class="error-message">
+        {fallbackContent.message_no} Prøv gjerne igjen om litt.
+      </p>
+      <div class="error-actions">
+        <button onclick="window.location.reload()" class="btn btn-primary">
+          Prøv på nytt
+        </button>
+        <a href="/" class="btn btn-secondary">
+          Gå til forsiden
+        </a>
+      </div>
+    </main>
+  )}
 </Layout>
 
 <style>
-  .error-page {
+  .error-page, .error-page-custom {
     min-height: 60vh;
     display: flex;
     flex-direction: column;
