@@ -3,6 +3,8 @@ import {CalendarIcon, ImageIcon, UsersIcon, ClockIcon, LinkIcon, ComposeIcon, Co
 import {imageComponent} from '../components/Image'
 import {eventTimeOptions} from '../../lib/timeUtils'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
+import {seoFields, seoGroup} from '../objects/seoFields'
 
 export const event = defineType({
   name: 'event',
@@ -31,23 +33,16 @@ export const event = defineType({
       title: 'Felles innhold',
       icon: CogIcon,
     },
+    imageGroup,
     {
       name: 'scheduling',
       title: 'Publisering',
       icon: CogIcon,
     },
+    seoGroup,
   ],
   fieldsets: [
-    {
-      name: 'altText',
-      title: 'Alt-tekst',
-      options: {columns: 2},
-    },
-    {
-      name: 'imageCredit',
-      title: 'Kreditering',
-      options: {columns: 2},
-    },
+    ...imageFieldsets,
   ],
   fields: [
     // BASE (shared content)
@@ -76,6 +71,17 @@ export const event = defineType({
       ],
       description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
       group: 'basic',
+    }),
+    defineField({
+      name: 'ticketUrl',
+      title: 'Billett-URL',
+      type: 'url',
+      description: 'Link til billettsystem for dette arrangementet (valgfritt)',
+      group: 'basic',
+      validation: (Rule) => Rule.uri({
+        allowRelative: false,
+        scheme: ['http', 'https']
+      })
     }),
     defineField({
       name: 'venue',
@@ -158,50 +164,7 @@ export const event = defineType({
         return true
       }),
     }),
-    defineField({
-      name: 'image',
-      title: 'Hovedbilde',
-      type: 'image',
-      description: 'Hovedbilde for arrangementet - brukes på arrangementssiden og når siden deles på sosiale medier',
-      group: 'basic',
-      options: {
-        hotspot: true,
-        accept: 'image/*',
-      },
-    }),
-    defineField({
-      name: 'imageCredit_no',
-      title: 'Kreditering (norsk)',
-      type: 'string',
-      description: 'Hvem som har tatt eller eier bildet på norsk (f.eks. "Foto: John Doe")',
-      group: 'basic',
-      fieldset: 'imageCredit',
-    }),
-    defineField({
-      name: 'imageCredit_en',
-      title: 'Kreditering (English)',
-      type: 'string',
-      description: 'Who took or owns the image in English (e.g. "Photo: John Doe")',
-      group: 'basic',
-      fieldset: 'imageCredit',
-    }),
-    defineField({
-      name: 'imageAlt_no',
-      title: 'Alt-tekst (norsk)',
-      type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet på norsk',
-      group: 'basic',
-      fieldset: 'altText',
-    }),
-    defineField({
-      name: 'imageAlt_en',
-      title: 'Alt-tekst (English)',
-      type: 'string',
-      description: 'Describe the image for accessibility in English',
-      group: 'basic',
-      fieldset: 'altText',
-    }),
-
+    ...multilingualImageFields('image'),
     // NORSK INNHOLD
     defineField({
       name: 'title_no',
@@ -354,6 +317,7 @@ export const event = defineType({
         },
       ],
     }),
+    ...seoFields,
   ],
   preview: {
     select: {

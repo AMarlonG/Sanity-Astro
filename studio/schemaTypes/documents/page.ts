@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
-import {DocumentIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {DocumentIcon, ComposeIcon, CogIcon, ImageIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
+import {seoFields, seoGroup} from '../objects/seoFields'
 
 export const page = defineType({
   name: 'page',
@@ -23,11 +25,16 @@ export const page = defineType({
       title: '🇬🇧 English',
       icon: ComposeIcon,
     },
+    imageGroup,
     {
       name: 'publishing',
       title: 'Publisering',
       icon: CogIcon,
     },
+    seoGroup,
+  ],
+  fieldsets: [
+    ...imageFieldsets,
   ],
   fields: [
     // NORSK INNHOLD
@@ -99,6 +106,10 @@ export const page = defineType({
         input: createMirrorPortableTextInput('content_no')
       },
     }),
+
+    // HOVEDBILDE
+    ...multilingualImageFields('image'),
+
     defineField({
       name: 'publishingStatus',
       title: 'Publiseringsstatus',
@@ -164,6 +175,7 @@ export const page = defineType({
       ],
       group: 'publishing',
     }),
+    ...seoFields,
   ],
   preview: {
     select: {

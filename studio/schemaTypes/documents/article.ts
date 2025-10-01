@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, ImageIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
+import {seoFields, seoGroup} from '../objects/seoFields'
 
 export const article = defineType({
   name: 'article',
@@ -23,28 +25,16 @@ export const article = defineType({
       title: '🇬🇧 English',
       icon: ComposeIcon,
     },
-    {
-      name: 'image',
-      title: 'Hovedbilde',
-      icon: ImageIcon,
-    },
+    imageGroup,
     {
       name: 'publishing',
       title: 'Publisering',
       icon: CogIcon,
     },
+    seoGroup,
   ],
   fieldsets: [
-    {
-      name: 'altText',
-      title: 'Alt-tekst',
-      options: {columns: 2},
-    },
-    {
-      name: 'imageCredit',
-      title: 'Kreditering',
-      options: {columns: 2},
-    },
+    ...imageFieldsets,
   ],
   fields: [
     // NORSK INNHOLD
@@ -136,49 +126,7 @@ export const article = defineType({
     }),
 
     // HOVEDBILDE
-    defineField({
-      name: 'image',
-      title: 'Hovedbilde (valgfritt)',
-      type: 'image',
-      description: 'Valgfritt hovedbilde for sosiale medier og hero-seksjon. Kan også legge inn bilder direkte i innholdet.',
-      group: 'image',
-      options: {
-        hotspot: true,
-        accept: 'image/*',
-      },
-    }),
-    defineField({
-      name: 'imageCredit_no',
-      title: 'Kreditering (norsk)',
-      type: 'string',
-      description: 'Hvem som har tatt eller eier bildet på norsk (f.eks. "Foto: John Doe")',
-      group: 'image',
-      fieldset: 'imageCredit',
-    }),
-    defineField({
-      name: 'imageCredit_en',
-      title: 'Kreditering (English)',
-      type: 'string',
-      description: 'Who took or owns the image in English (e.g. "Photo: John Doe")',
-      group: 'image',
-      fieldset: 'imageCredit',
-    }),
-    defineField({
-      name: 'imageAlt_no',
-      title: 'Alt-tekst (norsk)',
-      type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet på norsk',
-      group: 'image',
-      fieldset: 'altText',
-    }),
-    defineField({
-      name: 'imageAlt_en',
-      title: 'Alt-tekst (English)',
-      type: 'string',
-      description: 'Describe the image for accessibility in English',
-      group: 'image',
-      fieldset: 'altText',
-    }),
+    ...multilingualImageFields('image'),
     defineField({
       name: 'publishingStatus',
       title: 'Publiseringsstatus',
@@ -244,6 +192,7 @@ export const article = defineType({
         },
       ],
     }),
+    ...seoFields,
   ],
   preview: {
     select: {

@@ -13,7 +13,7 @@ import {article} from './documents/article'
 // Importer komponenter
 import * as components from './components'
 // Importer objekter
-import {socialMediaType} from './objects/socialMediaFields'
+import {seoType} from './objects/seoFields'
 
 export const schemaTypes = [
   homepage,
@@ -28,7 +28,7 @@ export const schemaTypes = [
   page,
   article,
   // Objekter
-  socialMediaType,
+  seoType,
   // Komponenter - sørg for at alle er registrert
   components.title,
   components.quoteComponent,

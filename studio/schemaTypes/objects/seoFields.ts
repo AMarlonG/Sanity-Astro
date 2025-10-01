@@ -1,58 +1,67 @@
-import {defineField} from 'sanity'
+import {defineField, defineType} from 'sanity'
 import {SearchIcon} from '@sanity/icons'
 
 /**
- * Reusable SEO fields for documents
+ * Modern SEO object type with fallback logic
+ * Uses page content as fallback if SEO fields are empty
+ */
+export const seoType = defineType({
+  name: 'seo',
+  title: 'SEO',
+  type: 'object',
+  icon: SearchIcon,
+  fields: [
+    defineField({
+      name: 'title',
+      title: 'SEO-tittel',
+      type: 'string',
+      description: 'Vises i søkemotorer og som fane-tittel. Hvis tom, brukes sidens hovedtittel.',
+      validation: (Rule) => Rule.max(60).warning('Hold deg under 60 tegn for beste resultat'),
+    }),
+    defineField({
+      name: 'description',
+      title: 'SEO-beskrivelse',
+      type: 'text',
+      rows: 3,
+      description: 'Kort sammendrag for søkemotorer og sosiale medier. Hvis tom, brukes sidens ingress.',
+      validation: (Rule) => Rule.max(160).warning('Hold deg under 160 tegn for beste resultat'),
+    }),
+    defineField({
+      name: 'noIndex',
+      title: 'Skjul fra søkemotorer',
+      type: 'boolean',
+      description: 'Forhindre at denne siden indekseres av søkemotorer',
+      initialValue: false,
+    }),
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      description: 'description',
+      noIndex: 'noIndex',
+    },
+    prepare({title, description, noIndex}) {
+      const status = noIndex ? '🚫 Skjult fra søkemotorer' : '✅ Synlig for søkemotorer'
+      const content = title || description ? `${title || 'Ingen tittel'} • ${description || 'Ingen beskrivelse'}` : 'Bruker fallback fra sideinnhold'
+
+      return {
+        title: 'SEO-innstillinger',
+        subtitle: `${content} • ${status} • Hovedbilde brukes for deling`,
+        media: SearchIcon,
+      }
+    },
+  },
+})
+
+/**
+ * Reusable SEO field for documents
  */
 export const seoFields = [
   defineField({
     name: 'seo',
-    title: 'SEO',
-    type: 'object',
+    title: 'SEO-innstillinger',
+    type: 'seo',
     group: 'seo',
-    fields: [
-      defineField({
-        name: 'metaTitle',
-        title: 'Meta tittel',
-        type: 'string',
-        description: 'Tittel for søkemotorer (50-60 tegn)',
-        validation: (Rule) => Rule.max(60).warning('Bør være under 60 tegn for beste resultat'),
-      }),
-      defineField({
-        name: 'metaDescription',
-        title: 'Meta beskrivelse',
-        type: 'text',
-        rows: 3,
-        description: 'Beskrivelse for søkemotorer (150-160 tegn)',
-        validation: (Rule) => Rule.max(160).warning('Bør være under 160 tegn for beste resultat'),
-      }),
-      defineField({
-        name: 'ogImage',
-        title: 'Open Graph bilde',
-        type: 'image',
-        description: 'Bilde som vises når lenken deles på sosiale medier (1200x630px anbefalt)',
-        options: {
-          hotspot: true,
-        },
-      }),
-      defineField({
-        name: 'keywords',
-        title: 'Nøkkelord',
-        type: 'array',
-        of: [{type: 'string'}],
-        description: 'Legg til relevante søkeord',
-        options: {
-          layout: 'tags',
-        },
-      }),
-      defineField({
-        name: 'noIndex',
-        title: 'Skjul fra søkemotorer',
-        type: 'boolean',
-        description: 'Forhindre at denne siden indekseres av søkemotorer',
-        initialValue: false,
-      }),
-    ],
   }),
 ]
 

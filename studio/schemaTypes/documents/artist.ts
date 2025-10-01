@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
-import {UserIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {UserIcon, ComposeIcon, CogIcon, ImageIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
+import {seoFields, seoGroup} from '../objects/seoFields'
 
 export const artist = defineType({
   name: 'artist',
@@ -28,23 +30,16 @@ export const artist = defineType({
       title: '🇬🇧 English',
       icon: ComposeIcon,
     },
+    imageGroup,
     {
       name: 'scheduling',
       title: 'Publisering',
       icon: CogIcon,
     },
+    seoGroup,
   ],
   fieldsets: [
-    {
-      name: 'altText',
-      title: 'Alt-tekst',
-      options: {columns: 2},
-    },
-    {
-      name: 'imageCredit',
-      title: 'Kreditering',
-      options: {columns: 2},
-    },
+    ...imageFieldsets,
   ],
   fields: [
     // BASE (shared content)
@@ -127,49 +122,7 @@ export const artist = defineType({
         input: createMirrorPortableTextInput('content_no')
       },
     }),
-    defineField({
-      name: 'image',
-      title: 'Hovedbilde',
-      type: 'image',
-      description: 'Hovedbilde for artisten - brukes på artistsiden og når siden deles på sosiale medier',
-      group: 'basic',
-      options: {
-        hotspot: true,
-        accept: 'image/*',
-      },
-    }),
-    defineField({
-      name: 'imageCredit_no',
-      title: 'Kreditering (norsk)',
-      type: 'string',
-      description: 'Hvem som har tatt eller eier bildet på norsk (f.eks. "Foto: John Doe")',
-      group: 'basic',
-      fieldset: 'imageCredit',
-    }),
-    defineField({
-      name: 'imageCredit_en',
-      title: 'Kreditering (English)',
-      type: 'string',
-      description: 'Who took or owns the image in English (e.g. "Photo: John Doe")',
-      group: 'basic',
-      fieldset: 'imageCredit',
-    }),
-    defineField({
-      name: 'imageAlt_no',
-      title: 'Alt-tekst (norsk)',
-      type: 'string',
-      description: 'Beskriv bildet for tilgjengelighet på norsk',
-      group: 'basic',
-      fieldset: 'altText',
-    }),
-    defineField({
-      name: 'imageAlt_en',
-      title: 'Alt-tekst (English)',
-      type: 'string',
-      description: 'Describe the image for accessibility in English',
-      group: 'basic',
-      fieldset: 'altText',
-    }),
+    ...multilingualImageFields('image'),
     defineField({
       name: 'publishingStatus',
       title: 'Publiseringsstatus',
@@ -249,6 +202,7 @@ export const artist = defineType({
       group: 'basic',
       validation: (Rule) => Rule.unique(),
     }),
+    ...seoFields,
   ],
   preview: {
     select: {
