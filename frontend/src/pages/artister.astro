@@ -29,7 +29,7 @@ const pageTitle = artistsPage?.title || 'Artister';
   >
     {artists.map((artist) => (
       <article class="artist-card card">
-        <a href={`/artister/${artist.slug.current}`} class="artist-link">
+        <a href={`/artister/${artist.slug}`} class="artist-link">
           {artist.image && (
             <div class="artist-image">
               <Image

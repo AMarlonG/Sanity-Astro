@@ -282,6 +282,68 @@ export class SanityDataService {
       entries: Array.from(cache.keys())
     };
   }
+
+  // OPTIMIZED LIST METHODS - Light queries for fast loading
+  async getEventsListLight(options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.eventsListLight(),
+      {},
+      options,
+      'events:list-light',
+      CACHE_DURATION.events
+    );
+  }
+
+  async getArtistsListLight(options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.artistsListLight(),
+      {},
+      options,
+      'artists:list-light',
+      CACHE_DURATION.artists
+    );
+  }
+
+  async getArticlesListLight(options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.articlesListLight(),
+      {},
+      options,
+      'articles:list-light',
+      CACHE_DURATION.articles
+    );
+  }
+
+  // DETAILED CONTENT METHODS - Full content for detail pages
+  async getEventDetailBySlug(slug: string, options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.eventDetailBySlug(slug),
+      {},
+      options,
+      `event:detail:${slug}`,
+      CACHE_DURATION.events
+    );
+  }
+
+  async getArtistDetailBySlug(slug: string, options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.artistDetailBySlug(slug),
+      {},
+      options,
+      `artist:detail:${slug}`,
+      CACHE_DURATION.artists
+    );
+  }
+
+  async getArticleDetailBySlug(slug: string, options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.articleDetailBySlug(slug),
+      {},
+      options,
+      `article:detail:${slug}`,
+      CACHE_DURATION.articles
+    );
+  }
 }
 
 // Create default instance with Visual Editing support

@@ -240,7 +240,7 @@ export const SECTION_FRAGMENTS = {
         eventDate->{date},
         eventTime,
         venue->{name},
-        artists[]->{name},
+        artist[]->{name},
         image{
           asset->{url},
           alt

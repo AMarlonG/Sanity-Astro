@@ -4,9 +4,8 @@
 
 import { createMultilingualField, createMultilingualSlug, type Language } from '../utils/language.js';
 
-// PageBuilder content query
-const CONTENT_QUERY = `
-  content[]{
+// Shared component query fragment - reusable for both content and content_no/content_en
+const COMPONENT_QUERY_FRAGMENT = `
     _key,
     _type,
     _type == "title" => {
@@ -120,9 +119,11 @@ const CONTENT_QUERY = `
       title,
       items[]->{
         name,
-        slug,
+        slug_no,
+        slug_en,
         image,
-        bio,
+        excerpt_no,
+        excerpt_en,
         genres[]->{title}
       },
       showScrollbar,
@@ -132,7 +133,147 @@ const CONTENT_QUERY = `
       title,
       items[]->{
         title,
-        slug,
+        "slug": slug.current,
+        eventDate->{date},
+        eventTime,
+        venue->{title},
+        image
+      },
+      showScrollbar,
+      cardFormat
+    }
+`;
+
+// PageBuilder content query using shared fragment
+const CONTENT_QUERY = `
+  content[]{
+    ${COMPONENT_QUERY_FRAGMENT}
+    _type == "title" => {
+      mainTitle,
+      subtitle
+    },
+    _type == "headingComponent" => {
+      text,
+      level,
+      alignment,
+      id
+    },
+    _type == "portableTextBlock" => {
+      title,
+      content
+    },
+    _type == "imageComponent" => {
+      image{
+        asset->{
+          _id,
+          url
+        }
+      },
+      alt,
+      caption,
+      credit,
+      size,
+      aspectRatio,
+      alignment
+    },
+    _type == "videoComponent" => {
+      url,
+      title,
+      autoplay,
+      controls,
+      thumbnail
+    },
+    _type == "quoteComponent" => {
+      quote,
+      author
+    },
+    _type == "buttonComponent" => {
+      text,
+      url,
+      variant,
+      style,
+      size,
+      action
+    },
+    _type == "linkComponent" => {
+      text,
+      url,
+      linkType,
+      internalLink,
+      openInNewTab
+    },
+    _type == "accordionComponent" => {
+      title,
+      description,
+      panels[]
+    },
+    _type == "countdownComponent" => {
+      title,
+      targetEvent,
+      style
+    },
+    _type == "columnLayout" => {
+      layoutType,
+      desktopColumns,
+      containerWidth,
+      items
+    },
+    _type == "gridLayout" => {
+      gridTemplate,
+      gridItems
+    },
+    _type == "spacer" => {
+      type,
+      size,
+      showDivider
+    },
+    _type == "contentScrollContainer" => {
+      title,
+      items[]{
+        _key,
+        _type,
+        _type == "imageComponent" => {
+          image{
+            asset->{
+              _id,
+              url
+            }
+          },
+          alt,
+          caption,
+          credit
+        },
+        _type == "videoComponent" => {
+          url,
+          title
+        },
+        _type == "quoteComponent" => {
+          quote,
+          author
+        }
+      },
+      format,
+      showScrollbar
+    },
+    _type == "artistScrollContainer" => {
+      title,
+      items[]->{
+        name,
+        slug_no,
+        slug_en,
+        image,
+        excerpt_no,
+        excerpt_en,
+        genres[]->{title}
+      },
+      showScrollbar,
+      cardFormat
+    },
+    _type == "eventScrollContainer" => {
+      title,
+      items[]->{
+        title,
+        "slug": slug.current,
         eventDate->{date},
         eventTime,
         venue->{title},
@@ -187,17 +328,17 @@ export const QueryBuilder = {
     *[_type == "programPage"][0] {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       excerpt,
-      ${CONTENT_QUERY},
+      ${MULTILINGUAL_CONTENT_QUERY},
       selectedEvents[]->{
         _id,
         title,
-        slug,
+        "slug": slug.current,
         eventDate->{date, title},
         eventTime,
         venue->{name},
-        artists[]->{name},
+        artist[]->{name},
         image{
           asset->{url},
           alt
@@ -213,13 +354,13 @@ export const QueryBuilder = {
     *[_type == "artistPage"][0] {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       excerpt,
-      ${CONTENT_QUERY},
+      ${MULTILINGUAL_CONTENT_QUERY},
       selectedArtists[]->{
         _id,
         name,
-        slug,
+        "slug": slug.current,
         excerpt,
         instrument,
         country,
@@ -237,7 +378,7 @@ export const QueryBuilder = {
     *[_type == "${contentType}"] | order(${orderBy}) {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       _createdAt,
       _updatedAt,
       isPublished
@@ -311,10 +452,10 @@ export const QueryBuilder = {
         address,
         city
       },
-      artists[]->{
+      artist[]->{
         _id,
         name,
-        slug,
+        "slug": slug.current,
         image{
           asset->{url},
           alt
@@ -335,11 +476,11 @@ export const QueryBuilder = {
     *[_type == "event" && isPublished == true] | order(eventDate->date asc) {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       eventDate->{date},
       eventTime,
       venue->{name},
-      artists[]->{name},
+      artist[]->{name},
       image{
         asset->{url},
         alt
@@ -352,7 +493,7 @@ export const QueryBuilder = {
     *[_type == "artist"] | order(name asc) {
       _id,
       name,
-      slug,
+      "slug": slug.current,
       description,
       image{
         asset->{url},
@@ -366,7 +507,7 @@ export const QueryBuilder = {
     *[_type == "article"] | order(_createdAt desc) {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       excerpt,
       publishedAt,
       author->{name},
@@ -393,10 +534,10 @@ export const QueryBuilder = {
     *[_type == "event" && isPublished == true && eventDate._ref == "${dateId}"] | order(eventTime asc) {
       _id,
       title,
-      slug,
+      "slug": slug.current,
       eventTime,
       venue->{name},
-      artists[]->{name},
+      artist[]->{name},
       image{
         asset->{url},
         alt
@@ -413,12 +554,257 @@ export const QueryBuilder = {
       _id,
       _type,
       title,
-      slug,
+      "slug": slug.current,
       description,
       image{
         asset->{url},
         alt
       }
+    }
+  `,
+
+  // OPTIMIZED LIST QUERIES - Light queries for fast list views
+  eventsListLight: () => `
+    *[_type == "event" && (
+      publishingStatus == "published" ||
+      (publishingStatus == "scheduled" &&
+       now() >= scheduledPeriod.startDate &&
+       now() <= scheduledPeriod.endDate)
+    )] | order(eventDate->date asc) {
+      _id,
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      eventDate->{
+        title_display_no,
+        title_display_en,
+        date
+      },
+      eventTime{
+        startTime,
+        endTime
+      },
+      venue->{
+        title,
+        slug
+      },
+      genre->{
+        title,
+        slug
+      }
+    }
+  `,
+
+  artistsListLight: () => `
+    *[_type == "artist" && (
+      publishingStatus == "published" ||
+      (publishingStatus == "scheduled" &&
+       now() >= scheduledPeriod.startDate &&
+       now() <= scheduledPeriod.endDate)
+    )] | order(name asc) {
+      _id,
+      name,
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
+      instrument_no,
+      instrument_en,
+      image{
+        asset->{
+          _id,
+          url
+        },
+        alt
+      }
+    }
+  `,
+
+  articlesListLight: () => `
+    *[_type == "article" && (
+      publishingStatus == "published" ||
+      (publishingStatus == "scheduled" &&
+       now() >= scheduledPeriod.startDate &&
+       now() <= scheduledPeriod.endDate)
+    )] | order(_createdAt desc) {
+      _id,
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
+      _createdAt,
+      author->{
+        name,
+        slug
+      },
+      image{
+        asset->{url},
+        alt
+      }
+    }
+  `,
+
+  // DETAILED QUERIES - Full content for detail pages
+  eventDetailBySlug: (slug: string) => `
+    *[_type == "event" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0]{
+      _id,
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
+      ${MULTILINGUAL_CONTENT_QUERY},
+      eventDate->{
+        title_display_no,
+        title_display_en,
+        date
+      },
+      eventTime{
+        startTime,
+        endTime
+      },
+      venue->{
+        _id,
+        title,
+        "slug": slug.current,
+        address,
+        linkUrl,
+        linkText
+      },
+      artist[]->{
+        _id,
+        name,
+        slug_no,
+        slug_en,
+        image{
+          asset->{url},
+          alt
+        }
+      },
+      image{
+        asset->{
+          _id,
+          url,
+          metadata{
+            dimensions{
+              width,
+              height,
+              aspectRatio
+            },
+            lqip
+          }
+        },
+        hotspot,
+        crop,
+        alt,
+        caption,
+        credit
+      },
+      genre->{
+        title,
+        slug
+      },
+      ticketUrl,
+      publishingStatus,
+      scheduledPeriod,
+      _createdAt,
+      _updatedAt
+    }
+  `,
+
+  artistDetailBySlug: (slug: string) => `
+    *[_type == "artist" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0]{
+      _id,
+      name,
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
+      instrument_no,
+      instrument_en,
+      country,
+      ${MULTILINGUAL_CONTENT_QUERY},
+      image{
+        asset->{
+          _id,
+          url,
+          metadata{
+            dimensions{
+              width,
+              height,
+              aspectRatio
+            },
+            lqip
+          }
+        },
+        hotspot,
+        crop,
+        alt,
+        caption,
+        credit
+      },
+      websiteUrl,
+      spotifyUrl,
+      instagramUrl,
+      publishingStatus,
+      scheduledPeriod,
+      _createdAt,
+      _updatedAt
+    }
+  `,
+
+  articleDetailBySlug: (slug: string) => `
+    *[_type == "article" && (slug_no.current == "${slug}" || slug_en.current == "${slug}" || slug.current == "${slug}")][0]{
+      _id,
+      title_no,
+      title_en,
+      ${createMultilingualField('title')},
+      ${COMMON_FRAGMENTS.multilingualSlugFields},
+      excerpt_no,
+      excerpt_en,
+      ${createMultilingualField('excerpt')},
+      ${MULTILINGUAL_CONTENT_QUERY},
+      author->{
+        name,
+        "slug": slug.current,
+        image{
+          asset->{url},
+          alt
+        }
+      },
+      image{
+        asset->{
+          _id,
+          url,
+          metadata{
+            dimensions{
+              width,
+              height,
+              aspectRatio
+            },
+            lqip
+          }
+        },
+        hotspot,
+        crop,
+        alt,
+        caption,
+        credit
+      },
+      categories[]->{
+        title,
+        slug
+      },
+      publishingStatus,
+      scheduledPeriod,
+      _createdAt,
+      _updatedAt
     }
   `
 };
@@ -569,9 +955,11 @@ const MULTILINGUAL_CONTENT_QUERY = `
       title,
       items[]->{
         name,
-        slug,
+        slug_no,
+        slug_en,
         image,
-        bio,
+        excerpt_no,
+        excerpt_en,
         genres[]->{title}
       },
       showScrollbar,
@@ -581,7 +969,7 @@ const MULTILINGUAL_CONTENT_QUERY = `
       title,
       items[]->{
         title,
-        slug,
+        "slug": slug.current,
         eventDate->{date},
         eventTime,
         venue->{title},
@@ -705,9 +1093,11 @@ const MULTILINGUAL_CONTENT_QUERY = `
       title,
       items[]->{
         name,
-        slug,
+        slug_no,
+        slug_en,
         image,
-        bio,
+        excerpt_no,
+        excerpt_en,
         genres[]->{title}
       },
       showScrollbar,
@@ -717,7 +1107,7 @@ const MULTILINGUAL_CONTENT_QUERY = `
       title,
       items[]->{
         title,
-        slug,
+        "slug": slug.current,
         eventDate->{date},
         eventTime,
         venue->{title},

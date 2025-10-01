@@ -1,6 +1,7 @@
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
 
 // Import all components that can be used in content blocks
+import Title from '../components/Title.astro';
 import PortableText from '../components/PortableText.astro';
 import Heading from '../components/Heading.astro';
 import Image from '../components/Image.astro';
@@ -19,6 +20,7 @@ import Spacer from '../components/Spacer.astro';
 
 // Component registry mapping Sanity block types to Astro components
 export const componentRegistry: Record<string, AstroComponentFactory> = {
+  title: Title,
   portableTextBlock: PortableText,
   headingComponent: Heading,
   imageComponent: Image,

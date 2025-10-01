@@ -30,7 +30,7 @@ const pageTitle = programPage?.title || 'Program';
   >
     {events.map((event) => (
       <article class="event-card card" data-event-date={event.eventDate?.date}>
-        <a href={`/program/${event.slug.current}`} class="event-link">
+        <a href={`/program/${event.slug}`} class="event-link">
           {event.image && (
             <div class="event-image">
               <Image

@@ -30,7 +30,7 @@ const pageTitle = articlesPage?.title || 'Artikler';
   >
     {articles.map((article) => (
       <article class="article-card card">
-        <a href={`/artikler/${article.slug.current}`} class="article-link">
+        <a href={`/artikler/${article.slug}`} class="article-link">
           {article.image && (
             <div class="article-image">
               <Image
