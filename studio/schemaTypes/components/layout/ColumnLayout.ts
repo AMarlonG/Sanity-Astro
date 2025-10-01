@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {EllipsisHorizontalIcon} from '@sanity/icons'
+import {contentValidation} from '../../shared/validation'
 
 export const columnLayout = defineType({
   name: 'columnLayout',
@@ -42,7 +43,7 @@ export const columnLayout = defineType({
         ],
       },
       initialValue: 'columns',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().error('Layout-type må velges'),
     }),
 
     // Desktop Layout
@@ -251,7 +252,7 @@ export const columnLayout = defineType({
         {type: 'artistScrollContainer'},
         {type: 'eventScrollContainer'},
       ],
-      validation: (Rule) => Rule.min(1).max(12).error('Må ha mellom 1 og 12 komponenter'),
+      validation: contentValidation.gridLayoutItems,
     }),
   ],
   preview: {

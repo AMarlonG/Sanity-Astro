@@ -21,7 +21,7 @@ export const spacer = defineType({
         ],
       },
       initialValue: 'vertical',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().error('Type avstand må velges'),
     }),
 
     defineField({

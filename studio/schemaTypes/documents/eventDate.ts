@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {CalendarIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {DateNoDisplayInput, DateEnDisplayInput} from '../../components/LocalizedDateDisplay'
+import {componentValidation} from '../shared/validation'
 
 export const eventDate = defineType({
   name: 'eventDate',
@@ -32,12 +33,7 @@ export const eventDate = defineType({
       type: 'date',
       description: 'Velg dato for arrangementet (ukedag vises automatisk)',
       group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Dato må velges'
-        }
-        return true
-      }),
+      validation: (Rule) => Rule.required().error('Dato må velges'),
     }),
 
     defineField({
@@ -71,12 +67,7 @@ export const eventDate = defineType({
         },
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.date) {
-          return 'Trykk generer for å lage norsk URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
 
     defineField({
@@ -108,12 +99,7 @@ export const eventDate = defineType({
         },
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.date) {
-          return 'Click generate to create English URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
 
     defineField({

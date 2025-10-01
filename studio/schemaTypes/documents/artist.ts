@@ -3,6 +3,8 @@ import {UserIcon, ComposeIcon, CogIcon, ImageIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
+import type {ArtistData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const artist = defineType({
   name: 'artist',
@@ -48,7 +50,7 @@ export const artist = defineType({
       title: 'Navn på artist',
       type: 'string',
       description: 'Artistnavn (samme på alle språk)',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'basic',
     }),
     defineField({
@@ -60,12 +62,7 @@ export const artist = defineType({
         source: 'name',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.name) {
-          return 'Trykk generer for å lage URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
       group: 'basic',
     }),
 
@@ -76,7 +73,7 @@ export const artist = defineType({
       type: 'text',
       description: 'Kort beskrivelse på norsk (vises i lister)',
       rows: 2,
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.description,
       group: 'no',
     }),
     defineField({
@@ -84,7 +81,7 @@ export const artist = defineType({
       title: 'Instrument (norsk)',
       type: 'string',
       description: 'Instrumentbeskrivelse på norsk',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
     }),
     defineField({
@@ -102,7 +99,7 @@ export const artist = defineType({
       type: 'text',
       description: 'Short description in English (shown in lists)',
       rows: 2,
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.description,
       group: 'en',
     }),
     defineField({
@@ -136,7 +133,7 @@ export const artist = defineType({
         layout: 'radio'
       },
       initialValue: 'published',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'scheduling',
     }),
     defineField({
@@ -158,16 +155,7 @@ export const artist = defineType({
           type: 'datetime',
           description: 'Når denne artisten blir synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Startdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
         {
           name: 'endDate',
@@ -175,16 +163,7 @@ export const artist = defineType({
           type: 'datetime',
           description: 'Når denne artisten slutter å være synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Sluttdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
       ],
     }),

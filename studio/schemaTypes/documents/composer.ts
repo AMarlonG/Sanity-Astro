@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {ComposeIcon} from '@sanity/icons'
+import {componentValidation} from '../shared/validation'
 
 export const composer = defineType({
   name: 'composer',
@@ -11,13 +12,7 @@ export const composer = defineType({
       name: 'name',
       title: 'Navn på komponist',
       type: 'string',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Kun vis advarsel hvis brukeren prøver å publisere
-        if (!value && context.document?.publishingStatus === 'published') {
-          return 'Navn på komponist bør fylles ut før publisering'
-        }
-        return true
-      }),
+      validation: componentValidation.title,
     }),
   ],
   preview: {

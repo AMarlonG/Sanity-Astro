@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentIcon, TiersIcon} from '@sanity/icons'
 import {generateQuoteHtml} from '../content/Quote'
+import {componentValidation, contentValidation} from '../../shared/validation'
 
 export const accordionComponent = defineType({
   name: 'accordionComponent',
@@ -13,7 +14,7 @@ export const accordionComponent = defineType({
       title: 'Tittel',
       type: 'string',
       description: 'Hovedtittel for nedtrekksmenyen',
-      validation: (Rule) => Rule.required().error('Tittel er påkrevd'),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'description',
@@ -26,7 +27,7 @@ export const accordionComponent = defineType({
       title: 'Paneler',
       type: 'array',
       description: 'Lag seksjoner som kan klikkes for å åpne og lukke innhold',
-      validation: (Rule) => Rule.required().min(1).error('Minst ett panel er påkrevd'),
+      validation: contentValidation.accordionPanels,
       of: [
         {
           type: 'object',
@@ -37,7 +38,7 @@ export const accordionComponent = defineType({
               name: 'title',
               title: 'Panel-tittel',
               type: 'string',
-              validation: (Rule) => Rule.required().error('Panel-tittel er påkrevd'),
+              validation: componentValidation.title,
             },
             {
               name: 'content',

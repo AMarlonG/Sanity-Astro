@@ -3,6 +3,8 @@ import {DocumentIcon, ImageIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
+import type {ArticleData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const article = defineType({
   name: 'article',
@@ -43,7 +45,7 @@ export const article = defineType({
       title: 'Artikkeltittel (norsk)',
       type: 'string',
       description: 'Artikkeltittel på norsk',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
     }),
     defineField({
@@ -56,12 +58,7 @@ export const article = defineType({
         source: 'title_no',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_no) {
-          return 'Trykk generer for å lage norsk URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
     defineField({
       name: 'excerpt_no',
@@ -70,7 +67,7 @@ export const article = defineType({
       description: 'Kort beskrivelse av artikkelen på norsk (vises i lister)',
       group: 'no',
       rows: 2,
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.description,
     }),
     defineField({
       name: 'content_no',
@@ -98,12 +95,7 @@ export const article = defineType({
         source: 'title_en',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_en) {
-          return 'Click generate to create English URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
     defineField({
       name: 'excerpt_en',
@@ -112,7 +104,7 @@ export const article = defineType({
       description: 'Short description of the article in English (shown in lists)',
       group: 'en',
       rows: 2,
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.description,
     }),
     defineField({
       name: 'content_en',
@@ -140,7 +132,7 @@ export const article = defineType({
         layout: 'radio'
       },
       initialValue: 'published',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'publishing',
     }),
     defineField({
@@ -162,16 +154,7 @@ export const article = defineType({
           type: 'datetime',
           description: 'Når denne artikkelen blir synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Startdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
         {
           name: 'endDate',
@@ -179,16 +162,7 @@ export const article = defineType({
           type: 'datetime',
           description: 'Når denne artikkelen slutter å være synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Sluttdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
       ],
     }),

@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons'
+import {componentValidation, componentSpecificValidation} from '../../shared/validation'
 
 // HTML escape utility function
 export function escapeHtml(text: string): string {
@@ -19,16 +20,14 @@ export const title = defineType({
       title: 'Hovedtittel (H1)',
       type: 'string',
       description: 'Hovedtittelen til dokumentet. Denne vises som en H1-tag.',
-      validation: (Rule) =>
-        Rule.required().error('Hovedtittel er påkrevd for SEO og tilgjengelighet'),
+      validation: componentSpecificValidation.headingText,
     }),
     defineField({
       name: 'subtitle',
       title: 'Undertittel (H2)',
       type: 'string',
       description: 'Valgfri undertittel som vises som en H2-tag under hovedtittelen.',
-      validation: (Rule) =>
-        Rule.max(200).warning('Undertitler bør være korte for bedre lesbarhet'),
+      validation: componentSpecificValidation.headingText,
     }),
   ],
   preview: {

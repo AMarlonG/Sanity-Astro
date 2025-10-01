@@ -1,11 +1,33 @@
 import {defineField, defineType} from 'sanity'
 import {AddCommentIcon} from '@sanity/icons'
+import {componentSpecificValidation, componentValidation} from '../../shared/validation'
+import type {QuoteData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 // HTML escape utility function (imported from Title.ts)
 export function escapeHtml(text: string): string {
   const div = document.createElement('div')
   div.textContent = text
   return div.innerHTML
+}
+
+// Type-safe validation functions
+export const quoteValidationRules = {
+  quote: componentSpecificValidation.quoteText as ValidationRule,
+  author: componentValidation.shortTitle as ValidationRule,
+  source: componentValidation.longDescription as ValidationRule,
+  cite: componentValidation.url as ValidationRule,
+} as const
+
+// Utility function to format quote attribution
+export function formatQuoteAttribution(author?: string, source?: string): string {
+  if (!author && !source) return ''
+  if (author && source) return `${author}, ${source}`
+  return author || source || ''
+}
+
+// Utility function to validate quote has required content
+export function hasValidQuoteContent(data: QuoteData): boolean {
+  return !!(data.quote && data.quote.trim().length > 0)
 }
 
 export const quoteComponent = defineType({
@@ -19,31 +41,28 @@ export const quoteComponent = defineType({
       title: 'Sitat',
       type: 'text',
       description: 'Sitatet som skal vises',
-      validation: (Rule) => Rule.required().min(1).max(500),
+      validation: componentSpecificValidation.quoteText,
     }),
     defineField({
       name: 'author',
       title: 'Forfatter',
       type: 'string',
       description: 'Hvem som har sagt sitatet',
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.shortTitle,
     }),
     defineField({
       name: 'source',
       title: 'Kilde',
       type: 'string',
       description: 'Hvor sitatet kommer fra (bok, artikkel, etc.)',
-      validation: (Rule) => Rule.max(200),
+      validation: componentValidation.longDescription,
     }),
     defineField({
       name: 'cite',
       title: 'Kilde-URL',
       type: 'url',
       description: 'Valgfri URL til den opprinnelige kilden.',
-      validation: (Rule) =>
-        Rule.uri({
-          scheme: ['http', 'https'],
-        }).warning('Vennligst oppgi en gyldig URL'),
+      validation: componentValidation.url,
     }),
   ],
   preview: {
@@ -68,12 +87,7 @@ export const quoteComponent = defineType({
 })
 
 // Function to generate HTML from quote data
-export function generateQuoteHtml(data: {
-  quote: string
-  author?: string
-  source?: string
-  cite?: string
-}): string {
+export const generateQuoteHtml: ComponentHTMLGenerator<QuoteData> = (data: QuoteData): string => {
   if (!data.quote) {
     return ''
   }

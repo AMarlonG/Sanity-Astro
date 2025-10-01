@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {ClockIcon} from '@sanity/icons'
+import {componentValidation} from '../../shared/validation'
 
 export const countdownComponent = defineType({
   name: 'countdownComponent',
@@ -19,7 +20,7 @@ export const countdownComponent = defineType({
       type: 'reference',
       to: [{type: 'event'}],
       description: 'Velg hvilket arrangement det skal telles ned til',
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.required().error('Arrangement må velges'),
     }),
     defineField({
       name: 'style',

@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {CalendarIcon} from '@sanity/icons'
+import {componentValidation, contentValidation} from '../../shared/validation'
 
 export const eventScrollContainer = defineType({
   name: 'eventScrollContainer',
@@ -12,7 +13,7 @@ export const eventScrollContainer = defineType({
       title: 'Tittel',
       type: 'string',
       description: 'Tittel for event scroll-containeren (valgfritt)',
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.title,
     }),
         defineField({
       name: 'items',
@@ -20,7 +21,7 @@ export const eventScrollContainer = defineType({
       type: 'array',
       description: 'Legg til mellom 2 og 8 arrangementer som skal vises i horisontal scroll',
               of: [{type: 'reference', to: [{type: 'event'}]}],
-      validation: (Rule) => Rule.max(8).min(2),
+      validation: contentValidation.scrollContainerItems,
     }),
     defineField({
       name: 'showScrollbar',

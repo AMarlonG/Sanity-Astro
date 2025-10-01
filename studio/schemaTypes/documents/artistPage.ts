@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {UsersIcon, ComposeIcon, UserIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {componentValidation} from '../shared/validation'
+import type {ArtistPageData} from '../shared/types'
 
 export const artistPage = defineType({
   name: 'artistPage',
@@ -34,7 +36,7 @@ export const artistPage = defineType({
       type: 'string',
       description: 'Tittel på artistsiden på norsk',
       initialValue: 'Artister',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
     }),
     defineField({
@@ -47,7 +49,7 @@ export const artistPage = defineType({
         maxLength: 96,
       },
       initialValue: {current: 'artister'},
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.slug,
       group: 'no',
     }),
     defineField({
@@ -56,7 +58,7 @@ export const artistPage = defineType({
       type: 'text',
       description: 'Kort beskrivelse av artistsiden på norsk',
       rows: 2,
-      validation: (Rule) => Rule.max(200),
+      validation: componentValidation.longDescription,
       group: 'no',
     }),
     defineField({
@@ -84,12 +86,7 @@ export const artistPage = defineType({
         source: 'title_en',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_en) {
-          return 'Click generate to create English URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
       group: 'en',
     }),
     defineField({
@@ -98,7 +95,7 @@ export const artistPage = defineType({
       type: 'text',
       description: 'Short description of the artists page in English',
       rows: 2,
-      validation: (Rule) => Rule.max(200),
+      validation: componentValidation.longDescription,
       group: 'en',
     }),
     defineField({

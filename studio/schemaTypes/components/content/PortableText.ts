@@ -1,5 +1,6 @@
 import {defineType, defineArrayMember} from 'sanity'
 import {DocumentTextIcon} from '@sanity/icons'
+import {componentValidation, componentSpecificValidation} from '../../shared/validation'
 
 export const portableText = defineType({
   name: 'portableText',
@@ -42,7 +43,7 @@ export const portableText = defineType({
                     scheme: ['http', 'https', 'mailto', 'tel'],
                   })
                     .required()
-                    .error('Please provide a valid URL'),
+                    .error('Må være en gyldig URL'),
               },
               {
                 name: 'openInNewTab',
@@ -70,8 +71,7 @@ export const portableText = defineType({
           type: 'string',
           title: 'Alternative text',
           description: 'Important for SEO and accessibility.',
-          validation: (Rule) =>
-            Rule.required().error('Alternative text is required for accessibility'),
+          validation: componentSpecificValidation.imageAlt,
         },
         {
           name: 'caption',

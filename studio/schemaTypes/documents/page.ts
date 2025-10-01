@@ -3,6 +3,8 @@ import {DocumentIcon, ComposeIcon, CogIcon, ImageIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
+import type {PageData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const page = defineType({
   name: 'page',
@@ -43,7 +45,7 @@ export const page = defineType({
       title: 'Sidetittel (norsk)',
       type: 'string',
       description: 'Tittel på siden på norsk',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
     }),
     defineField({
@@ -56,12 +58,7 @@ export const page = defineType({
         source: 'title_no',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_no) {
-          return 'Trykk generer for å lage norsk URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
     defineField({
       name: 'content_no',
@@ -89,12 +86,7 @@ export const page = defineType({
         source: 'title_en',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_en) {
-          return 'Click generate to create English URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
     defineField({
       name: 'content_en',
@@ -123,7 +115,7 @@ export const page = defineType({
         layout: 'radio'
       },
       initialValue: 'published',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'publishing',
     }),
     defineField({
@@ -144,16 +136,7 @@ export const page = defineType({
           type: 'datetime',
           description: 'Når denne siden blir synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Startdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
         {
           name: 'endDate',
@@ -161,16 +144,7 @@ export const page = defineType({
           type: 'datetime',
           description: 'Når denne siden slutter å være synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Sluttdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
       ],
       group: 'publishing',

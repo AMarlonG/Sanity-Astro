@@ -1,5 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {SearchIcon} from '@sanity/icons'
+import {seoValidation} from '../shared/validation'
+import type {SeoFieldsData, ValidationRule, SchemaGroup} from '../shared/types'
 
 /**
  * Modern SEO object type with fallback logic
@@ -16,7 +18,7 @@ export const seoType = defineType({
       title: 'SEO-tittel',
       type: 'string',
       description: 'Vises i søkemotorer og som fane-tittel. Hvis tom, brukes sidens hovedtittel.',
-      validation: (Rule) => Rule.max(60).warning('Hold deg under 60 tegn for beste resultat'),
+      validation: seoValidation.metaTitle,
     }),
     defineField({
       name: 'description',
@@ -24,7 +26,7 @@ export const seoType = defineType({
       type: 'text',
       rows: 3,
       description: 'Kort sammendrag for søkemotorer og sosiale medier. Hvis tom, brukes sidens ingress.',
-      validation: (Rule) => Rule.max(160).warning('Hold deg under 160 tegn for beste resultat'),
+      validation: seoValidation.metaDescription,
     }),
     defineField({
       name: 'noIndex',
@@ -66,8 +68,54 @@ export const seoFields = [
 ]
 
 // Helper to add SEO group to document schemas
-export const seoGroup = {
+export const seoGroup: SchemaGroup = {
   name: 'seo',
   title: 'SEO',
   icon: SearchIcon,
+}
+
+// Type-safe validation functions
+export const seoValidationRules = {
+  metaTitle: seoValidation.metaTitle as ValidationRule,
+  metaDescription: seoValidation.metaDescription as ValidationRule,
+} as const
+
+// Utility function to validate SEO data
+export function validateSeoData(data: SeoFieldsData): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+
+  if (data.title && data.title.length > 60) {
+    errors.push('SEO-tittel bør være under 60 tegn for optimal visning i søkemotorer')
+  }
+
+  if (data.description && data.description.length > 160) {
+    errors.push('SEO-beskrivelse bør være under 160 tegn for optimal visning i søkemotorer')
+  }
+
+  if (data.title && data.title.length < 10) {
+    errors.push('SEO-tittel bør være minst 10 tegn lang')
+  }
+
+  if (data.description && data.description.length < 50) {
+    errors.push('SEO-beskrivelse bør være minst 50 tegn lang')
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  }
+}
+
+// Utility function to generate fallback SEO data
+export function generateFallbackSeoData(pageData: {
+  title?: string
+  excerpt?: string
+  image?: any
+}): Partial<SeoFieldsData> {
+  return {
+    title: pageData.title,
+    description: pageData.excerpt,
+    image: pageData.image,
+    noIndex: false,
+  }
 }

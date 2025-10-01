@@ -1,5 +1,7 @@
 import {defineField} from 'sanity'
 import {ImageIcon} from '@sanity/icons'
+import {componentValidation, componentSpecificValidation, seoValidation} from './validation'
+import type {ValidationRule, SchemaGroup} from './types'
 
 /**
  * Reusable multilingual image fields for documents
@@ -25,12 +27,7 @@ export const multilingualImageFields = (fieldNamePrefix = 'image') => {
       type: 'image',
       description,
       group: 'image',
-      validation: isRequired ? (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Festivalbilde må lastes opp'
-        }
-        return true
-      }) : undefined,
+      validation: isRequired ? componentValidation.image : componentValidation.optionalImage,
       options: {
         hotspot: true,
         accept: 'image/*',
@@ -59,13 +56,7 @@ export const multilingualImageFields = (fieldNamePrefix = 'image') => {
     description: 'Beskriv bildet for tilgjengelighet på norsk',
     group: 'image',
     fieldset: 'altText',
-    validation: (Rule) => Rule.warning().custom((value, context) => {
-      const imageExists = context.document?.[fieldNamePrefix]
-      if (imageExists && !value) {
-        return 'Alt-tekst anbefales når bilde er valgt'
-      }
-      return true
-    }),
+    validation: componentSpecificValidation.imageAlt,
   }),
   defineField({
     name: `${fieldNamePrefix}Alt_en`,
@@ -74,13 +65,7 @@ export const multilingualImageFields = (fieldNamePrefix = 'image') => {
     description: 'Describe the image for accessibility in English',
     group: 'image',
     fieldset: 'altText',
-    validation: (Rule) => Rule.warning().custom((value, context) => {
-      const imageExists = context.document?.[fieldNamePrefix]
-      if (imageExists && !value) {
-        return 'Alt text recommended when image is selected'
-      }
-      return true
-    }),
+    validation: componentSpecificValidation.imageAlt,
   }),
   ]
 }
@@ -104,7 +89,7 @@ export const imageFieldsets = [
 /**
  * Standard image group for documents
  */
-export const imageGroup = {
+export const imageGroup: SchemaGroup = {
   name: 'image',
   title: 'Hovedbilde',
   icon: ImageIcon,
@@ -141,7 +126,7 @@ export const singleImageFields = (
         hotspot: true,
         accept: 'image/*',
       },
-      validation: required ? (Rule) => Rule.required().error('Bilde er påkrevd') : undefined,
+      validation: required ? componentValidation.image : componentValidation.optionalImage,
     }),
   ]
 
@@ -182,13 +167,7 @@ export const singleImageFields = (
         description: 'Beskriv bildet for tilgjengelighet på norsk',
         group: 'image',
         fieldset: 'altText',
-        validation: (Rule) => Rule.warning().custom((value, context) => {
-          const imageExists = context.document?.[fieldNamePrefix]
-          if (imageExists && !value) {
-            return 'Alt-tekst anbefales når bilde er valgt'
-          }
-          return true
-        }),
+        validation: componentSpecificValidation.imageAlt,
       })
     )
   }
@@ -202,13 +181,7 @@ export const singleImageFields = (
         description: 'Describe the image for accessibility in English',
         group: 'image',
         fieldset: 'altText',
-        validation: (Rule) => Rule.warning().custom((value, context) => {
-          const imageExists = context.document?.[fieldNamePrefix]
-          if (imageExists && !value) {
-            return 'Alt text recommended when image is selected'
-          }
-          return true
-        }),
+        validation: componentSpecificValidation.imageAlt,
       })
     )
   }
@@ -242,4 +215,59 @@ export interface ImageFieldConfig {
   description?: string
   language?: 'no' | 'en' | 'both'
   required?: boolean
+}
+
+// Type-safe validation functions for images
+export const imageValidationRules = {
+  image: componentValidation.image as ValidationRule,
+  optionalImage: componentValidation.optionalImage as ValidationRule,
+  imageAlt: componentSpecificValidation.imageAlt as ValidationRule,
+} as const
+
+// Utility function to validate multilingual image data
+export function validateMultilingualImageData(
+  data: MultilingualImageData,
+  fieldPrefix: string = 'image'
+): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
+  const imageField = data[fieldPrefix]
+  const altNoField = data[`${fieldPrefix}Alt_no`]
+  const altEnField = data[`${fieldPrefix}Alt_en`]
+
+  if (imageField && !altNoField && !altEnField) {
+    errors.push('Minst én alt-tekst (norsk eller engelsk) må fylles ut når bilde er valgt')
+  }
+
+  if (altNoField && altNoField.length < 10) {
+    errors.push('Norsk alt-tekst bør være minst 10 tegn lang')
+  }
+
+  if (altEnField && altEnField.length < 10) {
+    errors.push('Engelsk alt-tekst bør være minst 10 tegn lang')
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  }
+}
+
+// Utility function to get the appropriate alt text based on language
+export function getLocalizedAltText(
+  data: MultilingualImageData,
+  fieldPrefix: string,
+  language: 'no' | 'en'
+): string | undefined {
+  const altField = language === 'no' ? `${fieldPrefix}Alt_no` : `${fieldPrefix}Alt_en`
+  return data[altField]
+}
+
+// Utility function to get the appropriate credit based on language
+export function getLocalizedCredit(
+  data: MultilingualImageData,
+  fieldPrefix: string,
+  language: 'no' | 'en'
+): string | undefined {
+  const creditField = language === 'no' ? `${fieldPrefix}Credit_no` : `${fieldPrefix}Credit_en`
+  return data[creditField]
 }

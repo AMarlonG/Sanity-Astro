@@ -1,5 +1,6 @@
 import {defineField} from 'sanity'
 import {ClipboardIcon} from '@sanity/icons'
+import {componentValidation} from '../shared/validation'
 
 /**
  * Workflow status tracking for editorial control
@@ -21,7 +22,7 @@ export const workflowFields = [
       ],
       layout: 'radio',
     },
-    validation: (Rule) => Rule.required(),
+    validation: (Rule) => Rule.required().error('Redaksjonell status må velges'),
   }),
   
   defineField({

@@ -1,5 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {BlockContentIcon} from '@sanity/icons'
+import {componentSpecificValidation, componentValidation} from '../../shared/validation'
+import type {HeadingData, ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 // HTML escape utility function (imported from Title.ts)
 export function escapeHtml(text: string): string {
@@ -7,6 +9,12 @@ export function escapeHtml(text: string): string {
   div.textContent = text
   return div.innerHTML
 }
+
+// Type-safe validation functions
+export const headingValidationRules = {
+  level: componentValidation.title as ValidationRule,
+  text: componentSpecificValidation.headingText as ValidationRule,
+} as const
 
 export const heading = defineType({
   name: 'headingComponent',
@@ -29,14 +37,14 @@ export const heading = defineType({
           {title: 'H6 - Minste overskrift', value: 'h6'},
         ],
       },
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'text',
       title: 'Overskriftstekst',
       type: 'string',
       description: 'Teksten som skal vises som overskrift',
-      validation: (Rule) => Rule.required().min(1).max(200),
+      validation: componentSpecificValidation.headingText,
     }),
     defineField({
       name: 'id',
@@ -76,11 +84,7 @@ export const heading = defineType({
 })
 
 // Function to generate HTML from heading data
-export function generateHeadingHtml(data: {
-  level: 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-  text: string
-  id?: {current: string}
-}): string {
+export const generateHeadingHtml: ComponentHTMLGenerator<HeadingData> = (data: HeadingData): string => {
   if (!data.text || !data.level) {
     return ''
   }
@@ -111,11 +115,23 @@ export function generateHeadingId(text: string): string {
     .trim()
 }
 
+// TypeScript interface for heading hierarchy validation
+export interface HeadingHierarchyValidation {
+  isValid: boolean
+  errors: string[]
+}
+
+// TypeScript interface for heading in hierarchy
+export interface HeadingInHierarchy {
+  level: string
+  text: string
+}
+
 // Validation function to check heading hierarchy
 export function validateHeadingHierarchy(
-  headings: Array<{level: string; text: string}>,
+  headings: HeadingInHierarchy[],
   hasTitleH2?: boolean,
-): {isValid: boolean; errors: string[]} {
+): HeadingHierarchyValidation {
   const errors: string[] = []
 
   // Check if H2 exists when title has H2

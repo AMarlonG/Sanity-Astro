@@ -5,6 +5,8 @@ import {eventTimeOptions} from '../../lib/timeUtils'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
 import {seoFields, seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
+import type {EventData, ValidationRule, MultilingualDocument} from '../shared/types'
 
 export const event = defineType({
   name: 'event',
@@ -78,10 +80,7 @@ export const event = defineType({
       type: 'url',
       description: 'Link til billettsystem for dette arrangementet (valgfritt)',
       group: 'basic',
-      validation: (Rule) => Rule.uri({
-        allowRelative: false,
-        scheme: ['http', 'https']
-      })
+      validation: componentValidation.url
     }),
     defineField({
       name: 'venue',
@@ -171,7 +170,7 @@ export const event = defineType({
       title: 'Navn på arrangement (norsk)',
       type: 'string',
       description: 'Arrangementsnavn på norsk',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
     }),
     defineField({
@@ -184,12 +183,7 @@ export const event = defineType({
         source: 'title_no',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_no) {
-          return 'Trykk generer for å lage norsk URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
     defineField({
       name: 'excerpt_no',
@@ -198,7 +192,7 @@ export const event = defineType({
       description: 'Kort beskrivelse av arrangementet på norsk (vises i lister)',
       group: 'no',
       rows: 2,
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.description,
     }),
     defineField({
       name: 'content_no',
@@ -226,12 +220,7 @@ export const event = defineType({
         source: 'title_en',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_en) {
-          return 'Click generate to create English URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
     }),
     defineField({
       name: 'excerpt_en',
@@ -240,7 +229,7 @@ export const event = defineType({
       description: 'Short description of the event in English (shown in lists)',
       group: 'en',
       rows: 2,
-      validation: (Rule) => Rule.max(100),
+      validation: componentValidation.description,
     }),
     defineField({
       name: 'content_en',
@@ -265,7 +254,7 @@ export const event = defineType({
         layout: 'radio'
       },
       initialValue: 'published',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'scheduling',
     }),
     defineField({
@@ -287,16 +276,7 @@ export const event = defineType({
           type: 'datetime',
           description: 'Når dette arrangementet blir synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Startdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
         {
           name: 'endDate',
@@ -304,16 +284,7 @@ export const event = defineType({
           type: 'datetime',
           description: 'Når dette arrangementet slutter å være synlig på nettsiden',
           fieldset: 'timing',
-          validation: (Rule) => Rule.required().custom((value, context) => {
-            const status = context.document?.publishingStatus
-            if (status === 'scheduled' && !value) {
-              return 'Sluttdato må velges for planlagt periode'
-            }
-            if (status !== 'scheduled') {
-              return true
-            }
-            return true
-          }),
+          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
         },
       ],
     }),

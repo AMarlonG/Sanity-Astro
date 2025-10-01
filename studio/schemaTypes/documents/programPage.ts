@@ -1,6 +1,8 @@
 import {defineField, defineType} from 'sanity'
 import {CalendarIcon, ComposeIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
+import {componentValidation} from '../shared/validation'
+import type {ProgramPageData} from '../shared/types'
 
 export const programPage = defineType({
   name: 'programPage',
@@ -34,7 +36,7 @@ export const programPage = defineType({
       type: 'string',
       description: 'Tittel på programsiden på norsk',
       initialValue: 'Program',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
     }),
     defineField({
@@ -47,7 +49,7 @@ export const programPage = defineType({
         maxLength: 96,
       },
       initialValue: {current: 'program'},
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.slug,
       group: 'no',
     }),
     defineField({
@@ -56,7 +58,7 @@ export const programPage = defineType({
       type: 'text',
       description: 'Kort beskrivelse av programsiden på norsk',
       rows: 2,
-      validation: (Rule) => Rule.max(200),
+      validation: componentValidation.longDescription,
       group: 'no',
     }),
     defineField({
@@ -84,12 +86,7 @@ export const programPage = defineType({
         source: 'title_en',
         maxLength: 96,
       },
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        if (!value?.current && context.document?.title_en) {
-          return 'Click generate to create English URL'
-        }
-        return true
-      }),
+      validation: componentValidation.slug,
       group: 'en',
     }),
     defineField({
@@ -98,7 +95,7 @@ export const programPage = defineType({
       type: 'text',
       description: 'Short description of the program page in English',
       rows: 2,
-      validation: (Rule) => Rule.max(200),
+      validation: componentValidation.longDescription,
       group: 'en',
     }),
     defineField({

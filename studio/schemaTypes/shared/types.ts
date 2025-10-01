@@ -165,31 +165,227 @@ export interface EventScrollContainerData extends ScrollContainerData {
 // Document interfaces
 export interface EventData {
   _id?: string
-  title: string
-  slug: { current: string }
-  content?: GlobalComponentData[]
-  eventDate?: { date: string }
-  eventTime?: string
-  venue?: { title: string }
-  artists?: Array<{ name: string }>
+  _type: 'event'
+  // Artists and composers
+  artist?: Array<{
+    _ref: string
+    _type: 'reference'
+  }>
+  composers?: Array<{
+    _ref: string
+    _type: 'reference'
+  }>
+  // Basic event info
+  ticketUrl?: string
+  venue?: {
+    _ref: string
+    _type: 'reference'
+  }
+  eventDate?: {
+    _ref: string
+    _type: 'reference'
+  }
+  eventTime?: {
+    startTime?: string
+    endTime?: string
+  }
+  // Multilingual content
+  title_no?: string
+  slug_no?: { current: string }
+  excerpt_no?: string
+  content_no?: GlobalComponentData[]
+  title_en?: string
+  slug_en?: { current: string }
+  excerpt_en?: string
+  content_en?: GlobalComponentData[]
+  // Image
   image?: ImageData['image']
-  buttonText?: string
-  buttonUrl?: string
-  buttonOpenInNewTab?: boolean
+  image_no?: ImageData['image']
+  image_en?: ImageData['image']
+  // Publishing
+  publishingStatus: 'published' | 'draft' | 'scheduled'
+  scheduledPeriod?: {
+    startDate?: string
+    endDate?: string
+  }
+  // SEO
+  seo?: SeoFieldsData
 }
 
 export interface ArtistData {
   _id?: string
+  _type: 'artist'
+  // Basic info
   name: string
   slug: { current: string }
-  content?: GlobalComponentData[]
+  // Multilingual content
+  excerpt_no?: string
+  instrument_no?: string
+  content_no?: GlobalComponentData[]
+  excerpt_en?: string
+  instrument_en?: string
+  content_en?: GlobalComponentData[]
+  // Image
   image?: ImageData['image']
-  bio?: string
-  genres?: Array<{ title: string }>
+  image_no?: ImageData['image']
+  image_en?: ImageData['image']
+  // Publishing
+  publishingStatus: 'published' | 'draft' | 'scheduled'
+  scheduledPeriod?: {
+    startDate?: string
+    endDate?: string
+  }
+  // Related events
+  events?: Array<{
+    _ref: string
+    _type: 'reference'
+  }>
+  // SEO
+  seo?: SeoFieldsData
+}
+
+export interface PageData {
+  _id?: string
+  _type: 'page'
+  // Multilingual content
+  title_no?: string
+  slug_no?: { current: string }
+  content_no?: GlobalComponentData[]
+  title_en?: string
+  slug_en?: { current: string }
+  content_en?: GlobalComponentData[]
+  // Image
+  image?: ImageData['image']
+  image_no?: ImageData['image']
+  image_en?: ImageData['image']
+  // Publishing
+  publishingStatus: 'published' | 'draft' | 'scheduled'
+  scheduledPeriod?: {
+    startDate?: string
+    endDate?: string
+  }
+  // SEO
+  seo?: SeoFieldsData
+}
+
+export interface ArticleData {
+  _id?: string
+  _type: 'article'
+  // Multilingual content
+  title_no?: string
+  slug_no?: { current: string }
+  excerpt_no?: string
+  content_no?: GlobalComponentData[]
+  title_en?: string
+  slug_en?: { current: string }
+  excerpt_en?: string
+  content_en?: GlobalComponentData[]
+  // Image
+  image?: ImageData['image']
+  image_no?: ImageData['image']
+  image_en?: ImageData['image']
+  // Publishing
+  publishingStatus: 'published' | 'draft' | 'scheduled'
+  scheduledPeriod?: {
+    startDate?: string
+    endDate?: string
+  }
+  // SEO
+  seo?: SeoFieldsData
+}
+
+export interface ProgramPageData {
+  _id?: string
+  _type: 'programPage'
+  // Multilingual content
+  title_no?: string
+  slug_no?: { current: string }
+  excerpt_no?: string
+  content_no?: GlobalComponentData[]
+  title_en?: string
+  slug_en?: { current: string }
+  excerpt_en?: string
+  content_en?: GlobalComponentData[]
+  // Selected events
+  selectedEvents?: Array<{
+    _ref: string
+    _type: 'reference'
+  }>
+  // SEO
+  seo?: SeoFieldsData
+}
+
+export interface ArtistPageData {
+  _id?: string
+  _type: 'artistPage'
+  // Multilingual content
+  title_no?: string
+  slug_no?: { current: string }
+  excerpt_no?: string
+  content_no?: GlobalComponentData[]
+  title_en?: string
+  slug_en?: { current: string }
+  excerpt_en?: string
+  content_en?: GlobalComponentData[]
+  // Selected artists
+  selectedArtists?: Array<{
+    _ref: string
+    _type: 'reference'
+  }>
+  // SEO
+  seo?: SeoFieldsData
+}
+
+export interface HomepageData {
+  _id?: string
+  _type: 'homepage'
+  // Administrative title for Studio overview
+  adminTitle?: string
+  // Multilingual content (no title/slug fields - content starts with H1)
+  content_no?: GlobalComponentData[]
+  content_en?: GlobalComponentData[]
+  // Homepage type and scheduling
+  homePageType: 'default' | 'scheduled'
+  scheduledPeriod?: {
+    startDate?: string
+    endDate?: string
+  }
+  // SEO
+  seo?: SeoFieldsData
+}
+
+// SEO fields interface
+export interface SeoFieldsData {
+  title?: string
+  description?: string
+  keywords?: string[]
+  image?: ImageData['image']
+  noIndex?: boolean
+}
+
+// Publishing status types
+export type PublishingStatus = 'published' | 'draft' | 'scheduled'
+
+export interface ScheduledPeriod {
+  startDate?: string
+  endDate?: string
+}
+
+// Multilingual document interface
+export interface MultilingualDocument {
+  title_no?: string
+  slug_no?: { current: string }
+  content_no?: GlobalComponentData[]
+  title_en?: string
+  slug_en?: { current: string }
+  content_en?: GlobalComponentData[]
+  publishingStatus: PublishingStatus
+  scheduledPeriod?: ScheduledPeriod
+  seo?: SeoFieldsData
 }
 
 // Utility types
-export type ComponentType = 
+export type ComponentType =
   | 'title'
   | 'headingComponent'
   | 'portableTextBlock'
@@ -206,6 +402,8 @@ export type ComponentType =
   | 'contentScrollContainer'
   | 'artistScrollContainer'
   | 'eventScrollContainer'
+
+export type DocumentType = 'event' | 'artist' | 'page' | 'article' | 'homepage' | 'programPage' | 'artistPage'
 
 export type PageBuilderComponent = GlobalComponentData & {
   _type: ComponentType
@@ -230,4 +428,134 @@ export interface ComponentPreview {
   title: string
   subtitle?: string
   media?: any
+}
+
+// Utility type helpers
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>
+
+// Language support types
+export type SupportedLanguage = 'no' | 'en'
+export type LocalizedContent<T> = {
+  [K in SupportedLanguage as `${string}_${K}`]: T
+}
+
+// Document state types
+export interface DocumentState {
+  isPublished: boolean
+  isDraft: boolean
+  isScheduled: boolean
+  isLive?: boolean
+  isExpired?: boolean
+}
+
+// Utility functions for type checking
+export const isValidComponentType = (type: string): type is ComponentType => {
+  return [
+    'title',
+    'headingComponent',
+    'portableTextBlock',
+    'quoteComponent',
+    'imageComponent',
+    'videoComponent',
+    'buttonComponent',
+    'enhancedButtonComponent',
+    'linkComponent',
+    'accordionComponent',
+    'columnLayout',
+    'gridLayout',
+    'spacer',
+    'contentScrollContainer',
+    'artistScrollContainer',
+    'eventScrollContainer',
+  ].includes(type)
+}
+
+export const isValidDocumentType = (type: string): type is DocumentType => {
+  return ['event', 'artist', 'page', 'article', 'homepage', 'programPage', 'artistPage'].includes(type)
+}
+
+export const isValidPublishingStatus = (status: string): status is PublishingStatus => {
+  return ['published', 'draft', 'scheduled'].includes(status)
+}
+
+// Type guards for document interfaces
+export const isEventData = (data: any): data is EventData => {
+  return data && data._type === 'event'
+}
+
+export const isArtistData = (data: any): data is ArtistData => {
+  return data && data._type === 'artist'
+}
+
+export const isPageData = (data: any): data is PageData => {
+  return data && data._type === 'page'
+}
+
+export const isArticleData = (data: any): data is ArticleData => {
+  return data && data._type === 'article'
+}
+
+export const isProgramPageData = (data: any): data is ProgramPageData => {
+  return data && data._type === 'programPage'
+}
+
+export const isArtistPageData = (data: any): data is ArtistPageData => {
+  return data && data._type === 'artistPage'
+}
+
+export const isHomepageData = (data: any): data is HomepageData => {
+  return data && data._type === 'homepage'
+}
+
+// Utility function to get localized content
+export function getLocalizedField<T>(
+  data: any,
+  fieldName: string,
+  language: SupportedLanguage,
+  fallbackLanguage: SupportedLanguage = 'no'
+): T | undefined {
+  const localizedFieldName = `${fieldName}_${language}`
+  const fallbackFieldName = `${fieldName}_${fallbackLanguage}`
+
+  return data[localizedFieldName] || data[fallbackFieldName]
+}
+
+// Utility function to check if document has content in a specific language
+export function hasContentInLanguage(
+  data: MultilingualDocument,
+  language: SupportedLanguage
+): boolean {
+  const titleField = `title_${language}`
+  const contentField = `content_${language}`
+
+  return !!(data[titleField as keyof MultilingualDocument] ||
+           data[contentField as keyof MultilingualDocument])
+}
+
+// Utility function to determine document state
+export function getDocumentState(document: any): DocumentState {
+  const isPublished = document._id && !document._id.startsWith('drafts.')
+  const isDraft = !isPublished
+  const isScheduled = document.publishingStatus === 'scheduled'
+
+  let isLive = false
+  let isExpired = false
+
+  if (isScheduled && document.scheduledPeriod?.startDate && document.scheduledPeriod?.endDate) {
+    const now = new Date()
+    const start = new Date(document.scheduledPeriod.startDate)
+    const end = new Date(document.scheduledPeriod.endDate)
+
+    isLive = now >= start && now <= end
+    isExpired = now > end
+  }
+
+  return {
+    isPublished,
+    isDraft,
+    isScheduled,
+    isLive,
+    isExpired,
+  }
 }

@@ -2,6 +2,7 @@ import {defineField, defineType} from 'sanity'
 import {CogIcon, ComposeIcon, ImageIcon, UsersIcon, HeartIcon} from '@sanity/icons'
 import {multilingualImageFields, imageFieldsets} from '../shared/imageFields'
 import {seoGroup} from '../objects/seoFields'
+import {componentValidation, crossFieldValidation} from '../shared/validation'
 
 export const siteSettings = defineType({
   name: 'siteSettings',
@@ -63,7 +64,7 @@ export const siteSettings = defineType({
       type: 'string',
       group: 'no',
       description: 'Navnet på organisasjonen/festivalen på norsk',
-      validation: (rule) => rule.required(),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'description_no',
@@ -115,7 +116,7 @@ export const siteSettings = defineType({
       description: 'Velg første dag av festivalen',
       group: 'general',
       fieldset: 'festivalDates',
-      validation: (rule) => rule.required(),
+      validation: componentValidation.title,
     }),
     defineField({
       name: 'endDate',
@@ -125,7 +126,7 @@ export const siteSettings = defineType({
       description: 'Velg siste dag av festivalen',
       group: 'general',
       fieldset: 'festivalDates',
-      validation: (rule) => rule.required(),
+      validation: componentValidation.title,
     }),
 
     defineField({
@@ -143,14 +144,14 @@ export const siteSettings = defineType({
               title: 'Logonavn',
               type: 'string',
               description: 'F.eks. "Hovedlogo", "Sekundær logo", "Hvit logo"',
-              validation: (rule) => rule.required(),
+              validation: componentValidation.title,
             }),
             defineField({
               name: 'image',
               title: 'Logo',
               type: 'image',
               options: {hotspot: true},
-              validation: (rule) => rule.required(),
+              validation: componentValidation.image,
             }),
             defineField({
               name: 'description',
@@ -213,13 +214,7 @@ export const siteSettings = defineType({
       description: 'Lenke til kart eller nettside (f.eks. Google Maps)',
       group: 'general',
       fieldset: 'addressInfo',
-      validation: (Rule) => Rule.warning().custom((value, context) => {
-        // Hvis adresse er fylt ut, må URL også fylles ut
-        if (context.document?.address && !value) {
-          return 'Lenke-URL bør fylles ut når adresse er definert'
-        }
-        return true
-      }),
+      validation: crossFieldValidation.requiredWhen('address', true),
     }),
     defineField({
       name: 'openInNewTab',

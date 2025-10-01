@@ -2,6 +2,8 @@ import {defineField, defineType} from 'sanity'
 import {DocumentIcon, ComposeIcon, CogIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 import {seoFields, seoGroup} from '../objects/seoFields'
+import {componentValidation} from '../shared/validation'
+import type {HomepageData} from '../shared/types'
 
 export const homepage = defineType({
   name: 'homepage',
@@ -39,7 +41,7 @@ export const homepage = defineType({
       title: 'Administrativ tittel',
       type: 'string',
       description: '⚠️ Kun for Studio-oversikt - vises IKKE på nettsiden. Bruk beskrivende navn som "Juleforsiden 2024" eller "Påskekampanje"',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'admin',
     }),
 

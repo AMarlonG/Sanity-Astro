@@ -2,6 +2,7 @@ import {defineField, defineType} from 'sanity'
 import {WarningOutlineIcon, ComposeIcon} from '@sanity/icons'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
 import {multilingualImageFields, imageFieldsets, imageGroup} from '../shared/imageFields'
+import {componentValidation} from '../shared/validation'
 
 export const error404 = defineType({
   name: 'error404',
@@ -33,7 +34,7 @@ export const error404 = defineType({
       title: 'Sidetittel (norsk)',
       type: 'string',
       description: 'Hovedtittel på 404-siden på norsk',
-      validation: (Rule) => Rule.required(),
+      validation: componentValidation.title,
       group: 'no',
       initialValue: '404 - Side ikke funnet',
     }),

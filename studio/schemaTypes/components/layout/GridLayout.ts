@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {BlockElementIcon} from '@sanity/icons'
+import {componentValidation, contentValidation} from '../../shared/validation'
 
 export const gridLayout = defineType({
   name: 'gridLayout',
@@ -79,7 +80,7 @@ export const gridLayout = defineType({
                 {type: 'buttonComponent'},
                 {type: 'linkComponent'},
               ],
-              validation: (Rule) => Rule.max(1).error('Kun én komponent per grid item'),
+              validation: contentValidation.gridLayoutItems,
             }),
             defineField({
               name: 'gridArea',
@@ -106,14 +107,14 @@ export const gridLayout = defineType({
                   title: 'Kolonner',
                   type: 'number',
                   initialValue: 1,
-                  validation: (Rule) => Rule.min(1).max(6),
+                  validation: componentValidation.positiveNumber,
                 }),
                 defineField({
                   name: 'rows',
                   title: 'Rader',
                   type: 'number',
                   initialValue: 1,
-                  validation: (Rule) => Rule.min(1).max(4),
+                  validation: componentValidation.positiveNumber,
                 }),
               ],
             }),
@@ -138,7 +139,7 @@ export const gridLayout = defineType({
           },
         },
       ],
-      validation: (Rule) => Rule.min(1).max(8).error('Må ha mellom 1 og 8 grid items'),
+      validation: contentValidation.gridLayoutItems,
     }),
 
     // Responsive breakpoints
