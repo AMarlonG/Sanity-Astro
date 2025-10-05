@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import DynamicComponent from "../../components/DynamicComponent.astro";
 import { createDataService } from "../../lib/sanity/dataService.js";
 import { getMultilingualContent } from "../../lib/utils/language.js";
+import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
 
 const { slug } = Astro.params;
 
@@ -62,20 +63,25 @@ export async function getStaticPaths() {
           <p class="artist-country">{artist.country}</p>
         )}
 
-        {artist.image && (
+        {artist.image?.image && (
           <figure class="artist-main-image">
             <picture>
+              <source
+                srcset={getResponsiveSrcSet(artist.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.HERO)}
+                type="image/webp"
+                sizes="(max-width: 768px) 100vw, 500px"
+              />
               <img
-                src={artist.image.asset.url}
-                alt={artist.imageAlt || artist.name}
-                loading="lazy"
+                src={getOptimizedImageUrl(artist.image.image, 500, null, IMAGE_QUALITY.HERO)}
+                alt={artist.image.alt || artist.name}
+                loading="eager"
                 decoding="async"
               />
             </picture>
-            {(artist.imageCaption || artist.imageCredit) && (
+            {(artist.image.caption || artist.image.credit) && (
               <figcaption class="image-caption">
-                {artist.imageCaption && <span class="caption-text">{artist.imageCaption}</span>}
-                {artist.imageCredit && <span class="image-credit">{artist.imageCredit}</span>}
+                {artist.image.caption && <span class="caption-text">{artist.image.caption}</span>}
+                {artist.image.credit && <span class="image-credit">{artist.image.credit}</span>}
               </figcaption>
             )}
           </figure>

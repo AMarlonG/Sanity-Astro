@@ -7,6 +7,7 @@ import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './deskStructure'
 import {placeholderTextPlugin} from './plugins/placeholderTextPlugin'
+import {addEventToProgramPageAction} from './actions/addEventToProgramPageAction'
 
 // Custom Norwegian i18n resources to override publish button text
 const customNorwegianResources = {
@@ -124,6 +125,17 @@ export default defineConfig({
     types: schemaTypes,
   },
 
+  document: {
+    actions: (prev, context) => {
+      // Replace default publish action with our custom one for event documents
+      if (context.schemaType === 'event') {
+        return prev.map((action) =>
+          action.action === 'publish' ? addEventToProgramPageAction : action
+        )
+      }
+      return prev
+    },
+  },
 
   // Override default Norwegian translations
   i18n: {

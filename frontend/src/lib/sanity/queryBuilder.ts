@@ -63,7 +63,22 @@ const PAGE_CONTENT_WITH_LINKS = buildContentProjection()
 
 const EVENT_IMAGE_SELECTION = `
   "image": {
-    "image": image,
+    "image": image{
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height,
+            aspectRatio
+          },
+          lqip
+        }
+      },
+      hotspot,
+      crop
+    },
     "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
     "credit": coalesce(imageCredit_no, imageCredit_en)
   }
@@ -128,7 +143,22 @@ const EVENT_BASE_FIELDS = `
 
 const ARTIST_IMAGE_SELECTION = `
   "image": {
-    "image": image,
+    "image": image{
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height,
+            aspectRatio
+          },
+          lqip
+        }
+      },
+      hotspot,
+      crop
+    },
     "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
     "credit": coalesce(imageCredit_no, imageCredit_en)
   }
@@ -160,7 +190,22 @@ const ARTIST_BASE_FIELDS = `
 
 const ARTICLE_IMAGE_SELECTION = `
   "image": {
-    "image": image,
+    "image": image{
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height,
+            aspectRatio
+          },
+          lqip
+        }
+      },
+      hotspot,
+      crop
+    },
     "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
     "credit": coalesce(imageCredit_no, imageCredit_en)
   }

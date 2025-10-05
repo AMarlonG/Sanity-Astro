@@ -4,6 +4,7 @@ import DynamicComponent from '../../components/DynamicComponent.astro';
 import { createDataService } from '../../lib/sanity/dataService.js';
 import { formatDateForLanguage } from '../../lib/utils/dates';
 import { getMultilingualContent } from "../../lib/utils/language.js";
+import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
 
 const { slug } = Astro.params;
 
@@ -51,13 +52,18 @@ export async function getStaticPaths() {
       <header>
         <h1>{event.title}</h1>
 
-        {event.image && (
+        {event.image?.image && (
           <figure class="event-image">
             <picture>
+              <source
+                srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.HERO, IMAGE_QUALITY.HERO)}
+                type="image/webp"
+                sizes="(max-width: 768px) 100vw, 800px"
+              />
               <img
-                src={event.image.asset.url}
+                src={getOptimizedImageUrl(event.image.image, 800, null, IMAGE_QUALITY.HERO)}
                 alt={event.image.alt || event.title}
-                loading="lazy"
+                loading="eager"
                 decoding="async"
               />
             </picture>
@@ -101,11 +107,11 @@ export async function getStaticPaths() {
                 {event.artists.map((artist) => (
                   <li>
                     <span class="artist-name">{artist.name}</span>
-                    {artist.image && (
+                    {artist.image?.image && (
                       <picture>
                         <img
-                          src={artist.image.asset.url}
-                          alt={artist.image.alt || artist.name}
+                          src={getOptimizedImageUrl(artist.image.image, 64, 64, IMAGE_QUALITY.THUMBNAIL)}
+                          alt={artist.imageAlt || artist.name}
                           class="artist-avatar"
                           loading="lazy"
                           decoding="async"

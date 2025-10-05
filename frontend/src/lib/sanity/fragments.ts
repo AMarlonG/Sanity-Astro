@@ -34,8 +34,23 @@ export const CONTENT_FRAGMENTS = {
         asset->{
           _id,
           url,
-          metadata
+          metadata {
+            dimensions {
+              width,
+              height,
+              aspectRatio
+            },
+            lqip,
+            palette {
+              dominant {
+                background,
+                foreground
+              }
+            }
+          }
         },
+        hotspot,
+        crop,
         alt,
         caption
       },
@@ -202,7 +217,17 @@ export const SECTION_FRAGMENTS = {
         title,
         slug,
         image{
-          asset->{url},
+          asset->{
+            url,
+            metadata {
+              dimensions {
+                width,
+                height
+              }
+            }
+          },
+          hotspot,
+          crop,
           alt
         }
       },
@@ -221,7 +246,17 @@ export const SECTION_FRAGMENTS = {
         name,
         slug,
         image{
-          asset->{url},
+          asset->{
+            url,
+            metadata {
+              dimensions {
+                width,
+                height
+              }
+            }
+          },
+          hotspot,
+          crop,
           alt
         },
         description
@@ -245,7 +280,17 @@ export const SECTION_FRAGMENTS = {
         venue->{name},
         artist[]->{name},
         image{
-          asset->{url},
+          asset->{
+            url,
+            metadata {
+              dimensions {
+                width,
+                height
+              }
+            }
+          },
+          hotspot,
+          crop,
           alt
         }
       },
