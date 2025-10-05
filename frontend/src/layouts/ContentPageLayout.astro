@@ -5,6 +5,7 @@ import { getMultilingualContent, detectLanguage } from '../lib/utils/language.js
 
 interface Props {
   title: string;
+  excerpt?: string;
   pageContent?: any[];
   pageDocument?: any; // Full document with multilingual content
   backLinkText?: string;
@@ -16,6 +17,7 @@ const currentLang = detectLanguage(Astro.request);
 
 const {
   title,
+  excerpt,
   pageContent = [],
   pageDocument,
   backLinkText = currentLang === 'en' ? "← Back to homepage" : "← Tilbake til forsiden",
@@ -38,6 +40,9 @@ const slugEn = pageDocument?.slug_en;
       <h1 class="page-title">
         {title}
       </h1>
+      {excerpt && (
+        <p class="page-excerpt">{excerpt}</p>
+      )}
     </header>
 
     <!-- Page content from schema -->
@@ -69,6 +74,13 @@ const slugEn = pageDocument?.slug_en;
   .page-title {
     margin: 0 0 var(--space-2) 0;
     color: var(--color-text-primary);
+  }
+
+  .page-excerpt {
+    margin: var(--space-3) 0 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
   }
 
   .page-content {

@@ -299,9 +299,9 @@ const buildPageBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type
 const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
   _id,
   _type,
-  title,
+  ${createMultilingualField('title')},
   "slug": slug.current,
-  excerpt,
+  ${createMultilingualField('excerpt')},
   content_no[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },

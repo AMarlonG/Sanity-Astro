@@ -140,6 +140,7 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
   /* Return full page for regular requests */
   <ContentPageLayout
     title={pageTitle}
+    excerpt={programPage?.excerpt}
     pageDocument={programPage}
   >
     <DateFilter
