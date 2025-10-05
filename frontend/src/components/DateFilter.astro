@@ -3,29 +3,29 @@ import { formatDateWithWeekday } from '../lib/utils/dates';
 
 interface Props {
   availableDates: Array<{ date: string; title?: string }>;
-  currentDate?: string;
   language: 'no' | 'en';
-  endpoint: string;
 }
 
-const { availableDates, currentDate, language, endpoint } = Astro.props;
+const { availableDates, language } = Astro.props;
 
 // Extract unique dates from events and sort
 const uniqueDates = Array.from(
   new Set(availableDates.map(d => d.date))
 ).sort();
+
+// Get current date from URL
+const currentDate = Astro.url.searchParams.get('date') || '';
 ---
 
 {uniqueDates.length > 0 && (
   <div class="date-filter">
-    <div class="date-filter-buttons" id="date-filter-buttons">
+    <div class="date-filter-buttons">
       <button
         class:list={['date-button', { active: !currentDate }]}
-        hx-get={endpoint}
+        hx-get={language === 'no' ? '/program' : '/en/program'}
         hx-target="#event-results"
         hx-swap="innerHTML"
         hx-push-url="true"
-        data-date=""
         type="button"
       >
         {language === 'no' ? 'Alle datoer' : 'All dates'}
@@ -34,11 +34,10 @@ const uniqueDates = Array.from(
       {uniqueDates.map(date => (
         <button
           class:list={['date-button', { active: currentDate === date }]}
-          hx-get={`${endpoint}?date=${date}`}
+          hx-get={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
           hx-target="#event-results"
           hx-swap="innerHTML"
           hx-push-url="true"
-          data-date={date}
           type="button"
         >
           {formatDateWithWeekday(date, language)}

@@ -46,25 +46,29 @@ const eventsByDate = events.reduce((acc, event) => {
 const sortedDates = Object.values(eventsByDate).sort((a, b) =>
   new Date(a.date).getTime() - new Date(b.date).getTime()
 );
+
+// Get date filter from URL
+const dateFilter = Astro.url.searchParams.get('date') || undefined;
+
+// Filter dates if date parameter is present
+const filteredDates = dateFilter
+  ? sortedDates.filter(d => d.date === dateFilter)
+  : sortedDates;
+
+// Check if this is an htmx request
+const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
 ---
 
-<ContentPageLayout
-  title={pageTitle}
-  pageDocument={programPage}
->
-  <DateFilter
-    availableDates={availableDates}
-    language="no"
-    endpoint="/program"
-  />
-
-  {sortedDates.length > 0 ? (
-    sortedDates.map(({ displayTitle, events: dateEvents }) => (
-      <section class="content-section date-section">
-        <h3 class="date-title">{displayTitle}</h3>
-        <div class="grid events-grid">
-          {dateEvents.map((event) => (
-            <article class="event-card card" data-event-date={event.eventDate?.date}>
+{isHtmxRequest ? (
+  /* Return only the filtered event results for htmx */
+  <Fragment>
+    {filteredDates.length > 0 ? (
+      filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
+        <section class="content-section date-section" data-date={date}>
+          <h3 class="date-title">{displayTitle}</h3>
+          <div class="grid events-grid">
+            {dateEvents.map((event) => (
+              <article class="event-card card" data-event-date={event.eventDate?.date}>
               <a href={`/program/${event.slug}`} class="event-link">
                 {event.image?.image && (
                   <div class="event-image">
@@ -120,20 +124,108 @@ const sortedDates = Object.values(eventsByDate).sort((a, b) =>
               </a>
             </article>
           ))}
+          </div>
+        </section>
+      ))
+    ) : (
+      <section class="content-section">
+        <div class="no-results">
+          <h3 class="no-results-title">Ingen arrangementer funnet</h3>
+          <p class="no-results-text">Ingen arrangementer for denne datoen</p>
         </div>
       </section>
-    ))
-  ) : (
-    <section class="content-section">
-      <div class="no-results">
-        <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-        <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
-      </div>
-    </section>
-  )}
-</ContentPageLayout>
+    )}
+  </Fragment>
+) : (
+  /* Return full page for regular requests */
+  <ContentPageLayout
+    title={pageTitle}
+    pageDocument={programPage}
+  >
+    <DateFilter
+      availableDates={availableDates}
+      language="no"
+    />
 
-  <style>
+    <div id="event-results">
+      {filteredDates.length > 0 ? (
+        filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
+        <section class="content-section date-section" data-date={date}>
+          <h3 class="date-title">{displayTitle}</h3>
+          <div class="grid events-grid">
+            {dateEvents.map((event) => (
+              <article class="event-card card" data-event-date={event.eventDate?.date}>
+              <a href={`/program/${event.slug}`} class="event-link">
+                {event.image?.image && (
+                  <div class="event-image">
+                    <picture>
+                      <source
+                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                        type="image/webp"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
+                      <img
+                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                        alt={event.image.alt || event.title}
+                        loading="lazy"
+                        decoding="async"
+                        class="event-card-image"
+                      />
+                    </picture>
+                  </div>
+                )}
+                <div class="event-content">
+                  <h4 class="event-title">{event.title}</h4>
+
+                  <div class="event-meta">
+                    {event.eventTime && (
+                      <div class="event-detail">
+                        <span class="event-label">Tid:</span>
+                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
+                      </div>
+                    )}
+
+                    {event.venue && (
+                      <div class="event-detail">
+                        <span class="event-label">Sted:</span>
+                        <span>{event.venue.title}</span>
+                      </div>
+                    )}
+
+                    {event.artists && event.artists.length > 0 && (
+                      <div class="event-detail">
+                        <span class="event-label">Artister:</span>
+                        <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
+                      </div>
+                    )}
+
+                    {event.genre && (
+                      <div class="event-genre">
+                        <span class="event-label">Sjanger:</span>
+                        <span class="genre-name">{event.genre.title}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </a>
+            </article>
+          ))}
+          </div>
+        </section>
+      ))
+    ) : (
+      <section class="content-section">
+        <div class="no-results">
+          <h3 class="no-results-title">Ingen arrangementer funnet</h3>
+          <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
+        </div>
+      </section>
+      )}
+    </div>
+  </ContentPageLayout>
+)}
+
+<style>
     /* Section Layout */
     .content-section {
       margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
