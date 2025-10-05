@@ -23,9 +23,10 @@ const currentDate = Astro.url.searchParams.get('date') || '';
       <button
         class:list={['date-button', { active: !currentDate }]}
         hx-get={language === 'no' ? '/program' : '/en/program'}
-        hx-target="#event-results"
-        hx-swap="innerHTML swap:0.1s"
+        hx-target="#program-content"
+        hx-swap="outerHTML swap:0.1s"
         hx-push-url="true"
+        hx-select="#program-content"
         type="button"
       >
         {language === 'no' ? 'Alle datoer' : 'All dates'}
@@ -35,9 +36,10 @@ const currentDate = Astro.url.searchParams.get('date') || '';
         <button
           class:list={['date-button', { active: currentDate === date }]}
           hx-get={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
-          hx-target="#event-results"
-          hx-swap="innerHTML swap:0.1s"
+          hx-target="#program-content"
+          hx-swap="outerHTML swap:0.1s"
           hx-push-url="true"
+          hx-select="#program-content"
           type="button"
         >
           {formatDateWithWeekday(date, language)}

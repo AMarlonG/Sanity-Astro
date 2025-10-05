@@ -3,6 +3,7 @@ import { sanityClient } from "sanity:client";
 import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import { detectLanguage } from "../lib/utils/language.js";
+import { stegaClean } from '@sanity/client/stega';
 
 interface Props {
   title?: string
@@ -116,10 +117,10 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 
         const eventDate = event.eventDate?.date ? new Date(event.eventDate.date) : null
         const dateString = eventDate ? eventDate.toLocaleDateString('nb-NO') : ''
-        const timeString = event.eventTime || ''
-        const venueName = event.venue?.title || ''
-        const artistNames = event.artists?.map((artist: any) => artist.name).join(', ') || ''
-        const eventSlug = event.slug?.current || ''
+        const timeString = stegaClean(event.eventTime || '')
+        const venueName = stegaClean(event.venue?.title || '')
+        const artistNames = stegaClean(event.artists?.map((artist: any) => artist.name).join(', ') || '')
+        const eventSlug = stegaClean(event.slug?.current || '')
 
         const eventImage = event.image || null
         const imageAlt = event.imageAlt || event.title || ''
@@ -150,7 +151,7 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
                 </div>
               )}
               <div class="event-content">
-                <h4 class="event-title">{event.title || ''}</h4>
+                <h4 class="event-title">{stegaClean(event.title || '')}</h4>
                 {(showDate || showTime) && (dateString || timeString) && (
                   <time class="event-datetime" dateTime={dateTimeValue}>
                     {showDate && dateString && <span class="event-date">{dateString}</span>}

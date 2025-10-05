@@ -62,100 +62,33 @@ const dateFilter = Astro.url.searchParams.get('date') || undefined;
 const filteredDates = dateFilter
   ? sortedDates.filter(d => d.date === dateFilter)
   : sortedDates;
-
-// Check if this is an htmx request
-const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
 ---
 
-{isHtmxRequest ? (
-  /* Return only the filtered event results for htmx */
-  <Fragment>
-    {filteredDates.length > 0 ? (
-      filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
-        <section class="content-section date-section" data-date={date}>
-          <h3 class="date-title">{displayTitle}</h3>
-          <div class="grid events-grid">
-            {dateEvents.map((event) => (
-              <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-card-link">
-                  <div class="event-header">
-                    <h4 class="event-title">{event.title}</h4>
-                    <div class="event-meta">
-                      <div class="event-detail">
-                        {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
-                      </div>
-                    </div>
-                  </div>
+<ContentPageLayout
+  title={pageTitle}
+  excerpt={programPage?.excerpt}
+  pageDocument={programPage}
+>
+  <div id="program-content">
+      <DateFilter
+        availableDates={availableDates}
+        language="no"
+      />
 
-                  {event.image?.image && (
-                    <div class="event-image">
-                      <picture>
-                        <source
-                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                          type="image/webp"
-                          sizes="(max-width: 768px) 100vw, 400px"
-                        />
-                        <img
-                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                          alt={event.image.alt || event.title}
-                          loading="lazy"
-                          decoding="async"
-                          class="event-card-image"
-                        />
-                      </picture>
-                    </div>
-                  )}
-                </a>
-
-                <div class="event-actions">
-                  {event.ticketType === 'free' ? (
-                    <span class="ticket-info">Gratis</span>
-                  ) : event.ticketUrl ? (
-                    <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Kjøp billetter</a>
-                  ) : (
-                    <span class="ticket-info">Salget starter snart</span>
-                  )}
-                </div>
-            </article>
-          ))}
-          </div>
-        </section>
-      ))
-    ) : (
-      <section class="content-section">
-        <div class="no-results">
-          <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-          <p class="no-results-text">Ingen arrangementer for denne datoen</p>
-        </div>
-      </section>
-    )}
-  </Fragment>
-) : (
-  /* Return full page for regular requests */
-  <ContentPageLayout
-    title={pageTitle}
-    excerpt={programPage?.excerpt}
-    pageDocument={programPage}
-  >
-    <DateFilter
-      availableDates={availableDates}
-      language="no"
-    />
-
-    <div id="event-results">
+      <div id="event-results">
       {filteredDates.length > 0 ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
-          <h3 class="date-title">{displayTitle}</h3>
+          <h3 class="date-title">{stegaClean(displayTitle)}</h3>
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
                 <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-card-link">
                   <div class="event-header">
-                    <h4 class="event-title">{event.title}</h4>
+                    <h4 class="event-title">{stegaClean(event.title)}</h4>
                     <div class="event-meta">
                       <div class="event-detail">
-                        {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
+                        {stegaClean(event.venue?.title)}{event.venue && event.eventTime && ', '}{event.eventTime && `${stegaClean(event.eventTime.startTime)} - ${stegaClean(event.eventTime.endTime)}`}
                       </div>
                     </div>
                   </div>
@@ -202,9 +135,9 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
         </div>
       </section>
       )}
-    </div>
-  </ContentPageLayout>
-)}
+      </div>
+  </div>
+</ContentPageLayout>
 
 <style>
     /* Section Layout */
