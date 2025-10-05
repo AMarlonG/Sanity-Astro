@@ -18,13 +18,14 @@ const uniqueDates = Array.from(
 
 {uniqueDates.length > 0 && (
   <div class="date-filter">
-    <div class="date-filter-buttons">
+    <div class="date-filter-buttons" id="date-filter-buttons">
       <button
         class:list={['date-button', { active: !currentDate }]}
         hx-get={endpoint}
         hx-target="#event-results"
         hx-swap="innerHTML"
         hx-push-url="true"
+        data-date=""
         type="button"
       >
         {language === 'no' ? 'Alle datoer' : 'All dates'}
@@ -37,6 +38,7 @@ const uniqueDates = Array.from(
           hx-target="#event-results"
           hx-swap="innerHTML"
           hx-push-url="true"
+          data-date={date}
           type="button"
         >
           {formatDateWithWeekday(date, language)}
@@ -79,9 +81,10 @@ const uniqueDates = Array.from(
   }
 
   .date-button.active {
-    background: var(--color-text-primary);
-    color: var(--color-bg-primary);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-primary);
     border-color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
   }
 
   .date-button:focus-visible {

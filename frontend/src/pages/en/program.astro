@@ -8,14 +8,11 @@ import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WI
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Get date filter from URL
-const dateFilter = Astro.url.searchParams.get('date') || undefined;
-
-// Fetch filtered events
-const events = await dataService.getFilteredProgramEvents(dateFilter);
-
 // Fetch program page content for metadata
 const programPage = await dataService.getProgramPage();
+
+// Get events from programPage.selectedEvents
+const events = programPage?.selectedEvents || [];
 
 // Fallback values
 const pageTitle = programPage?.title || 'Program';
@@ -28,298 +25,241 @@ const availableDates = events
     title: event.eventDate.title
   }));
 
-// Check if this is an htmx request
-const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
+// Group events by date
+const eventsByDate = events.reduce((acc, event) => {
+  if (!event.eventDate?.date) return acc;
+
+  const dateKey = event.eventDate.date;
+  if (!acc[dateKey]) {
+    acc[dateKey] = {
+      date: event.eventDate.date,
+      displayTitle: event.eventDate.title || formatDateWithWeekday(event.eventDate.date, 'en'),
+      events: []
+    };
+  }
+  acc[dateKey].events.push(event);
+  return acc;
+}, {} as Record<string, { date: string; displayTitle: string; events: typeof events }>);
+
+// Sort dates chronologically
+const sortedDates = Object.values(eventsByDate).sort((a, b) =>
+  new Date(a.date).getTime() - new Date(b.date).getTime()
+);
 ---
 
-{isHtmxRequest ? (
-  <!-- Return only event cards for htmx requests -->
-  <Fragment>
-    {events.length > 0 ? events.map((event) => (
-      <article class="event-card card" data-event-date={event.eventDate?.date}>
-        <a href={`/en/program/${event.slug}`} class="event-link">
-          {event.image?.image && (
-            <div class="event-image">
-              <picture>
-                <source
-                  srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                  type="image/webp"
-                  sizes="(max-width: 768px) 100vw, 400px"
-                />
-                <img
-                  src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                  alt={event.image.alt || event.title}
-                  loading="lazy"
-                  decoding="async"
-                  class="event-card-image"
-                />
-              </picture>
-            </div>
-          )}
-          <div class="event-content">
-            <h3 class="event-title">{event.title}</h3>
+<ContentPageLayout
+  title={pageTitle}
+  pageDocument={programPage}
+>
+  <DateFilter
+    availableDates={availableDates}
+    language="en"
+    endpoint="/en/program"
+  />
 
-            <div class="event-meta">
-              {event.eventDate && (
-                <div class="event-detail">
-                  <span class="event-label">Date:</span>
-                  <span>{formatDateWithWeekday(event.eventDate.date, 'en')}</span>
-                </div>
-              )}
+  {sortedDates.length > 0 ? (
+    sortedDates.map(({ displayTitle, events: dateEvents }) => (
+      <section class="content-section date-section">
+        <h3 class="date-title">{displayTitle}</h3>
+        <div class="grid events-grid">
+          {dateEvents.map((event) => (
+            <article class="event-card card" data-event-date={event.eventDate?.date}>
+              <a href={`/en/program/${event.slug}`} class="event-link">
+                {event.image?.image && (
+                  <div class="event-image">
+                    <picture>
+                      <source
+                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                        type="image/webp"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
+                      <img
+                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                        alt={event.image.alt || event.title}
+                        loading="lazy"
+                        decoding="async"
+                        class="event-card-image"
+                      />
+                    </picture>
+                  </div>
+                )}
+                <div class="event-content">
+                  <h4 class="event-title">{event.title}</h4>
 
-              {event.eventTime && (
-                <div class="event-detail">
-                  <span class="event-label">Time:</span>
-                  <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                </div>
-              )}
+                  <div class="event-meta">
+                    {event.eventTime && (
+                      <div class="event-detail">
+                        <span class="event-label">Time:</span>
+                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
+                      </div>
+                    )}
 
-              {event.venue && (
-                <div class="event-detail">
-                  <span class="event-label">Venue:</span>
-                  <span>{event.venue.title}</span>
-                </div>
-              )}
+                    {event.venue && (
+                      <div class="event-detail">
+                        <span class="event-label">Venue:</span>
+                        <span>{event.venue.title}</span>
+                      </div>
+                    )}
 
-              {event.artists && event.artists.length > 0 && (
-                <div class="event-detail">
-                  <span class="event-label">Artists:</span>
-                  <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
-                </div>
-              )}
+                    {event.artists && event.artists.length > 0 && (
+                      <div class="event-detail">
+                        <span class="event-label">Artists:</span>
+                        <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
+                      </div>
+                    )}
 
-              {event.genre && (
-                <div class="event-genre">
-                  <span class="event-label">Genre:</span>
-                  <span class="genre-name">{event.genre.title}</span>
+                    {event.genre && (
+                      <div class="event-genre">
+                        <span class="event-label">Genre:</span>
+                        <span class="genre-name">{event.genre.title}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </a>
-      </article>
-    )) : (
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    ))
+  ) : (
+    <section class="content-section">
       <div class="no-results">
         <h3 class="no-results-title">No events found</h3>
-        <p class="no-results-text">Try another date or remove the filter</p>
-      </div>
-    )}
-  </Fragment>
-) : (
-  <!-- Return full page for regular requests -->
-  <ContentPageLayout
-    title={pageTitle}
-    pageDocument={programPage}
-  >
-    <DateFilter
-      availableDates={availableDates}
-      currentDate={dateFilter}
-      language="en"
-      endpoint="/en/program"
-    />
-
-    <section class="content-section events-section">
-      <h2 class="section-title">All events</h2>
-      <div class="grid events-grid" id="event-results">
-        {events.length > 0 ? events.map((event) => (
-        <article class="event-card card" data-event-date={event.eventDate?.date}>
-          <a href={`/en/program/${event.slug}`} class="event-link">
-            {event.image?.image && (
-              <div class="event-image">
-                <picture>
-                  <source
-                    srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                    type="image/webp"
-                    sizes="(max-width: 768px) 100vw, 400px"
-                  />
-                  <img
-                    src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                    alt={event.image.alt || event.title}
-                    loading="lazy"
-                    decoding="async"
-                    class="event-card-image"
-                  />
-                </picture>
-              </div>
-            )}
-            <div class="event-content">
-              <h3 class="event-title">{event.title}</h3>
-
-              <div class="event-meta">
-                {event.eventDate && (
-                  <div class="event-detail">
-                    <span class="event-label">Date:</span>
-                    <span>{formatDateWithWeekday(event.eventDate.date, 'en')}</span>
-                  </div>
-                )}
-
-                {event.eventTime && (
-                  <div class="event-detail">
-                    <span class="event-label">Time:</span>
-                    <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                  </div>
-                )}
-
-                {event.venue && (
-                  <div class="event-detail">
-                    <span class="event-label">Venue:</span>
-                    <span>{event.venue.title}</span>
-                  </div>
-                )}
-
-                {event.artists && event.artists.length > 0 && (
-                  <div class="event-detail">
-                    <span class="event-label">Artists:</span>
-                    <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
-                  </div>
-                )}
-
-                {event.genre && (
-                  <div class="event-genre">
-                    <span class="event-label">Genre:</span>
-                    <span class="genre-name">{event.genre.title}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </a>
-        </article>
-        )) : (
-          <div class="no-results">
-            <h3 class="no-results-title">No events found</h3>
-            <p class="no-results-text">Try another date or remove the filter</p>
-          </div>
-        )}
+        <p class="no-results-text">No events have been added yet</p>
       </div>
     </section>
-  </ContentPageLayout>
-)}
+  )}
+</ContentPageLayout>
 
-  <style>
-    /* Section Layout */
-    .content-section {
-      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
-    }
+<style>
+  /* Section Layout */
+  .content-section {
+    margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+  }
 
-    .section-title {
-      margin: 0 0 var(--space-4) 0;
-      color: var(--color-text-primary);
-      font-size: var(--font-size-2xl);
-    }
+  .date-section {
+    margin-block-end: var(--space-8);
+  }
 
-    /* Intrinsic Grid System */
-    .grid {
-      container-type: inline-size;
-      display: grid;
-      gap: clamp(var(--space-4), 3vw, var(--space-6));
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
-    }
+  .date-title {
+    margin: 0 0 var(--space-4) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+  }
 
-    /* No Results State */
-    .no-results {
-      text-align: center;
-      padding: var(--space-8) var(--space-4);
-      color: var(--color-text-secondary);
-    }
+  /* Intrinsic Grid System */
+  .grid {
+    container-type: inline-size;
+    display: grid;
+    gap: clamp(var(--space-4), 3vw, var(--space-6));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
+  }
 
-    .no-results-title {
-      margin: 0 0 var(--space-2) 0;
-      color: var(--color-text-primary);
+  /* No Results State */
+  .no-results {
+    text-align: center;
+    padding: var(--space-8) var(--space-4);
+    color: var(--color-text-secondary);
+  }
+
+  .no-results-title {
+    margin: 0 0 var(--space-2) 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-xl);
+  }
+
+  .no-results-text {
+    margin: 0;
+    font-size: var(--font-size-base);
+  }
+
+  /* Event Card Specific Styles */
+  .event-card {
+    container-type: inline-size;
+    overflow: hidden;
+    transition: box-shadow var(--transition-base);
+  }
+
+  .event-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .event-image {
+    position: relative;
+    height: clamp(250px, 30cqw, 400px);
+    overflow: hidden;
+    aspect-ratio: 4/5;
+  }
+
+  .event-image picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .event-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .event-content {
+    padding: 0;
+  }
+
+  .event-title {
+    margin: 0 0 var(--space-3) 0;
+    color: var(--color-text-primary);
+    font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
+    line-height: var(--line-height-tight);
+  }
+
+  .event-meta {
+    color: var(--color-text-secondary);
+    font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
+    line-height: var(--line-height-normal);
+  }
+
+  .event-detail {
+    margin-block-end: var(--space-2);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .event-label {
+    font-weight: var(--font-weight-medium);
+    flex-shrink: 0;
+    min-width: 4rem;
+  }
+
+  .event-genre {
+    margin-block-start: var(--space-3);
+    padding-block-start: var(--space-3);
+    border-block-start: 1px solid var(--color-border-light);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .genre-name {
+    color: var(--color-text-disabled);
+    font-size: var(--font-size-sm);
+  }
+
+  /* Container Query Enhancements */
+  @container (min-width: 350px) {
+    .event-title {
       font-size: var(--font-size-xl);
     }
 
-    .no-results-text {
-      margin: 0;
+    .event-meta {
       font-size: var(--font-size-base);
     }
-
-    /* Event Card Specific Styles */
-    .event-card {
-      container-type: inline-size;
-      overflow: hidden;
-      transition: box-shadow var(--transition-base);
-    }
-
-    .event-link {
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-
-    .event-image {
-      position: relative;
-      height: clamp(250px, 30cqw, 400px);
-      overflow: hidden;
-      aspect-ratio: 4/5;
-    }
-
-    .event-image picture {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .event-card-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .event-content {
-      padding: 0;
-    }
-
-    .event-title {
-      margin: 0 0 var(--space-3) 0;
-      color: var(--color-text-primary);
-      font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
-      line-height: var(--line-height-tight);
-    }
-
-    .event-meta {
-      color: var(--color-text-secondary);
-      font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
-      line-height: var(--line-height-normal);
-    }
-
-    .event-detail {
-      margin-block-end: var(--space-2);
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-    }
-
-    .event-label {
-      font-weight: var(--font-weight-medium);
-      flex-shrink: 0;
-      min-width: 4rem;
-    }
-
-    .event-genre {
-      margin-block-start: var(--space-3);
-      padding-block-start: var(--space-3);
-      border-block-start: 1px solid var(--color-border-light);
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-    }
-
-    .genre-name {
-      color: var(--color-text-disabled);
-      font-size: var(--font-size-sm);
-    }
-
-    /* Container Query Enhancements */
-    @container (min-width: 350px) {
-      .event-title {
-        font-size: var(--font-size-xl);
-      }
-
-      .event-meta {
-        font-size: var(--font-size-base);
-      }
-    }
-  </style>
-
-</ContentPageLayout>
+  }
+</style>

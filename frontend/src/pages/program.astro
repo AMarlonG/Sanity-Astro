@@ -9,14 +9,11 @@ import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WI
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Get date filter from URL
-const dateFilter = Astro.url.searchParams.get('date') || undefined;
-
-// Fetch filtered events
-const events = await dataService.getFilteredProgramEvents(dateFilter);
-
 // Hent program-siden innhold for metadata
 const programPage = await dataService.getProgramPage();
+
+// Get events from programPage.selectedEvents
+const events = programPage?.selectedEvents || [];
 
 // Fallback values
 const pageTitle = programPage?.title || 'Program';
@@ -29,172 +26,112 @@ const availableDates = events
     title: event.eventDate.title
   }));
 
-// Check if this is an htmx request
-const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
+// Group events by date
+const eventsByDate = events.reduce((acc, event) => {
+  if (!event.eventDate?.date) return acc;
+
+  const dateKey = event.eventDate.date;
+  if (!acc[dateKey]) {
+    acc[dateKey] = {
+      date: event.eventDate.date,
+      displayTitle: event.eventDate.title || formatDateWithWeekday(event.eventDate.date, 'no'),
+      events: []
+    };
+  }
+  acc[dateKey].events.push(event);
+  return acc;
+}, {} as Record<string, { date: string; displayTitle: string; events: typeof events }>);
+
+// Sort dates chronologically
+const sortedDates = Object.values(eventsByDate).sort((a, b) =>
+  new Date(a.date).getTime() - new Date(b.date).getTime()
+);
 ---
 
-{isHtmxRequest ? (
-  <!-- Return only event cards for htmx requests (CardGrid structure maintained) -->
-  <Fragment>
-    {events.length > 0 ? events.map((event) => (
-      <article class="event-card card" data-event-date={event.eventDate?.date}>
-        <a href={`/program/${event.slug}`} class="event-link">
-          {event.image?.image && (
-            <div class="event-image">
-              <picture>
-                <source
-                  srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                  type="image/webp"
-                  sizes="(max-width: 768px) 100vw, 400px"
-                />
-                <img
-                  src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                  alt={event.image.alt || event.title}
-                  loading="lazy"
-                  decoding="async"
-                  class="event-card-image"
-                />
-              </picture>
-            </div>
-          )}
-          <div class="event-content">
-            <h3 class="event-title">{event.title}</h3>
+<ContentPageLayout
+  title={pageTitle}
+  pageDocument={programPage}
+>
+  <DateFilter
+    availableDates={availableDates}
+    language="no"
+    endpoint="/program"
+  />
 
-            <div class="event-meta">
-              {event.eventDate && (
-                <div class="event-detail">
-                  <span class="event-label">Dato:</span>
-                  <span>{formatDateWithWeekday(event.eventDate.date, 'no')}</span>
-                </div>
-              )}
+  {sortedDates.length > 0 ? (
+    sortedDates.map(({ displayTitle, events: dateEvents }) => (
+      <section class="content-section date-section">
+        <h3 class="date-title">{displayTitle}</h3>
+        <div class="grid events-grid">
+          {dateEvents.map((event) => (
+            <article class="event-card card" data-event-date={event.eventDate?.date}>
+              <a href={`/program/${event.slug}`} class="event-link">
+                {event.image?.image && (
+                  <div class="event-image">
+                    <picture>
+                      <source
+                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                        type="image/webp"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
+                      <img
+                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                        alt={event.image.alt || event.title}
+                        loading="lazy"
+                        decoding="async"
+                        class="event-card-image"
+                      />
+                    </picture>
+                  </div>
+                )}
+                <div class="event-content">
+                  <h4 class="event-title">{event.title}</h4>
 
-              {event.eventTime && (
-                <div class="event-detail">
-                  <span class="event-label">Tid:</span>
-                  <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                </div>
-              )}
+                  <div class="event-meta">
+                    {event.eventTime && (
+                      <div class="event-detail">
+                        <span class="event-label">Tid:</span>
+                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
+                      </div>
+                    )}
 
-              {event.venue && (
-                <div class="event-detail">
-                  <span class="event-label">Sted:</span>
-                  <span>{event.venue.title}</span>
-                </div>
-              )}
+                    {event.venue && (
+                      <div class="event-detail">
+                        <span class="event-label">Sted:</span>
+                        <span>{event.venue.title}</span>
+                      </div>
+                    )}
 
-              {event.artists && event.artists.length > 0 && (
-                <div class="event-detail">
-                  <span class="event-label">Artister:</span>
-                  <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
-                </div>
-              )}
+                    {event.artists && event.artists.length > 0 && (
+                      <div class="event-detail">
+                        <span class="event-label">Artister:</span>
+                        <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
+                      </div>
+                    )}
 
-              {event.genre && (
-                <div class="event-genre">
-                  <span class="event-label">Sjanger:</span>
-                  <span class="genre-name">{event.genre.title}</span>
+                    {event.genre && (
+                      <div class="event-genre">
+                        <span class="event-label">Sjanger:</span>
+                        <span class="genre-name">{event.genre.title}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </a>
-      </article>
-    )) : (
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    ))
+  ) : (
+    <section class="content-section">
       <div class="no-results">
         <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-        <p class="no-results-text">Prøv en annen dato eller fjern filteret</p>
-      </div>
-    )}
-  </Fragment>
-) : (
-  <!-- Return full page for regular requests -->
-  <ContentPageLayout
-    title={pageTitle}
-    pageDocument={programPage}
-  >
-    <DateFilter
-      availableDates={availableDates}
-      currentDate={dateFilter}
-      language="no"
-      endpoint="/program"
-    />
-
-    <section class="content-section events-section">
-      <h2 class="section-title">Alle arrangementer</h2>
-      <div class="grid events-grid" id="event-results">
-        {events.length > 0 ? events.map((event) => (
-        <article class="event-card card" data-event-date={event.eventDate?.date}>
-          <a href={`/program/${event.slug}`} class="event-link">
-            {event.image?.image && (
-              <div class="event-image">
-                <picture>
-                  <source
-                    srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                    type="image/webp"
-                    sizes="(max-width: 768px) 100vw, 400px"
-                  />
-                  <img
-                    src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                    alt={event.image.alt || event.title}
-                    loading="lazy"
-                    decoding="async"
-                    class="event-card-image"
-                  />
-                </picture>
-              </div>
-            )}
-            <div class="event-content">
-              <h3 class="event-title">{event.title}</h3>
-
-              <div class="event-meta">
-                {event.eventDate && (
-                  <div class="event-detail">
-                    <span class="event-label">Dato:</span>
-                    <span>{formatDateWithWeekday(event.eventDate.date, 'no')}</span>
-                  </div>
-                )}
-
-                {event.eventTime && (
-                  <div class="event-detail">
-                    <span class="event-label">Tid:</span>
-                    <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                  </div>
-                )}
-
-                {event.venue && (
-                  <div class="event-detail">
-                    <span class="event-label">Sted:</span>
-                    <span>{event.venue.title}</span>
-                  </div>
-                )}
-
-                {event.artists && event.artists.length > 0 && (
-                  <div class="event-detail">
-                    <span class="event-label">Artister:</span>
-                    <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
-                  </div>
-                )}
-
-                {event.genre && (
-                  <div class="event-genre">
-                    <span class="event-label">Sjanger:</span>
-                    <span class="genre-name">{event.genre.title}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </a>
-        </article>
-        )) : (
-          <div class="no-results">
-            <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-            <p class="no-results-text">Prøv en annen dato eller fjern filteret</p>
-          </div>
-        )}
+        <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
       </div>
     </section>
-  </ContentPageLayout>
-)}
+  )}
+</ContentPageLayout>
 
   <style>
     /* Section Layout */
@@ -202,10 +139,15 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
       margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
     }
 
-    .section-title {
+    .date-section {
+      margin-block-end: var(--space-8);
+    }
+
+    .date-title {
       margin: 0 0 var(--space-4) 0;
       color: var(--color-text-primary);
-      font-size: var(--font-size-2xl);
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
     }
 
     /* Intrinsic Grid System */

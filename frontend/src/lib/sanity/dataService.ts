@@ -186,14 +186,6 @@ export class SanityDataService {
     );
   }
 
-  async getFilteredProgramEvents(dateFilter?: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.filteredProgramEvents(dateFilter),
-      options,
-      `program:filtered:${dateFilter || 'all'}`,
-      CACHE_DURATION.events
-    );
-  }
 
   // Cache management
   clearCache(): void {
