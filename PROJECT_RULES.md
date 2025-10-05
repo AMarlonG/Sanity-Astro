@@ -111,6 +111,18 @@ If the answer to #4 is "yes", then probably don't change it.
 **Solution**: Always re-read this section after compression to restore proper working patterns.
 
 ### Git Workflow
+
+**Branch Management:**
+- **Update branch from main when starting work on it**:
+  ```bash
+  git checkout <branch-name>
+  git merge main  # Get latest changes from main
+  ```
+- **Update again if you need changes from main** during development
+- **Update before merging back to main** to resolve conflicts in the branch first
+- **Don't automatically update all branches** - only update when actively working on them
+
+**Commit & Push Guidelines:**
 - **Suggest pushing changes proactively** after completing logical milestones:
   - ✅ After adding new features or functionality
   - ✅ After completing implementation phases
