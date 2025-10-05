@@ -24,7 +24,7 @@ const currentDate = Astro.url.searchParams.get('date') || '';
         class:list={['date-button', { active: !currentDate }]}
         hx-get={language === 'no' ? '/program' : '/en/program'}
         hx-target="#event-results"
-        hx-swap="innerHTML"
+        hx-swap="innerHTML swap:0.1s"
         hx-push-url="true"
         type="button"
       >
@@ -36,7 +36,7 @@ const currentDate = Astro.url.searchParams.get('date') || '';
           class:list={['date-button', { active: currentDate === date }]}
           hx-get={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
           hx-target="#event-results"
-          hx-swap="innerHTML"
+          hx-swap="innerHTML swap:0.1s"
           hx-push-url="true"
           type="button"
         >
