@@ -1,0 +1,97 @@
+---
+import { formatDateWithWeekday } from '../lib/utils/dates';
+
+interface Props {
+  availableDates: Array<{ date: string; title?: string }>;
+  currentDate?: string;
+  language: 'no' | 'en';
+  endpoint: string;
+}
+
+const { availableDates, currentDate, language, endpoint } = Astro.props;
+
+// Extract unique dates from events and sort
+const uniqueDates = Array.from(
+  new Set(availableDates.map(d => d.date))
+).sort();
+---
+
+{uniqueDates.length > 0 && (
+  <div class="date-filter">
+    <div class="date-filter-buttons">
+      <button
+        class:list={['date-button', { active: !currentDate }]}
+        hx-get={endpoint}
+        hx-target="#event-results"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+        type="button"
+      >
+        {language === 'no' ? 'Alle datoer' : 'All dates'}
+      </button>
+
+      {uniqueDates.map(date => (
+        <button
+          class:list={['date-button', { active: currentDate === date }]}
+          hx-get={`${endpoint}?date=${date}`}
+          hx-target="#event-results"
+          hx-swap="innerHTML"
+          hx-push-url="true"
+          type="button"
+        >
+          {formatDateWithWeekday(date, language)}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
+
+<style>
+  .date-filter {
+    margin-block-end: var(--space-6);
+    border-block-end: 1px solid var(--color-border-light);
+    padding-block-end: var(--space-4);
+  }
+
+  .date-filter-buttons {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .date-button {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    white-space: nowrap;
+  }
+
+  .date-button:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-dark);
+  }
+
+  .date-button.active {
+    background: var(--color-text-primary);
+    color: var(--color-bg-primary);
+    border-color: var(--color-text-primary);
+  }
+
+  .date-button:focus-visible {
+    outline: 2px solid var(--color-border-dark);
+    outline-offset: 2px;
+  }
+
+  /* htmx loading state */
+  .date-button.htmx-request {
+    opacity: 0.6;
+    cursor: wait;
+  }
+</style>

@@ -384,6 +384,15 @@ const EVENTS_BY_DATE_QUERY = defineQuery(`*[_type == "event" && publishingStatus
   ${EVENT_BASE_FIELDS}
 }`)
 
+const FILTERED_PROGRAM_EVENTS_QUERY = defineQuery(`*[_type == "programPage"][0]{
+  _id,
+  "events": selectedEvents[
+    !defined($dateFilter) || eventDate->date == $dateFilter
+  ]->{
+    ${EVENT_BASE_FIELDS}
+  }
+}.events | order(eventDate->date asc, eventTime.startTime asc)`)
+
 const SLUGS_FOR_TYPE_QUERY = defineQuery(`*[_type == $type && defined(slug.current)]{ "params": { "slug": slug.current } }`)
 
 const SEARCH_CONTENT_QUERY = defineQuery(`*[_type in $types && (
@@ -439,6 +448,9 @@ export const QueryBuilder = {
   },
   searchContent(searchTerm: string, types: string[]): QueryDefinition<{search: string; types: string[]}> {
     return {query: SEARCH_CONTENT_QUERY, params: {search: `*${searchTerm}*`, types}}
+  },
+  filteredProgramEvents(dateFilter?: string): QueryDefinition<{dateFilter: string | null}> {
+    return {query: FILTERED_PROGRAM_EVENTS_QUERY, params: {dateFilter: dateFilter || null}}
   }
 } as const
 
