@@ -91,10 +91,13 @@ export const INTERACTIVE_FRAGMENTS = {
       ${BASE_COMPONENT_FIELDS},
       text,
       linkType,
+      anchorId,
       internalLink->{
         _id,
         _type,
-        slug,
+        "slug": {
+          "current": coalesce(slug.current, slug_no.current, slug_en.current)
+        },
         title
       },
       url,

@@ -42,12 +42,14 @@ export interface TitleData extends GlobalComponentData {
 
 export interface LinkComponentData extends GlobalComponentData {
   text: string
-  linkType: 'internal' | 'url' | 'email' | 'phone'
+  linkType: 'internal' | 'anchor' | 'url' | 'email' | 'phone'
   internalLink?: {
-    slug: {
+    _type?: string
+    slug?: {
       current: string
-    }
+    } | string
   }
+  anchorId?: string
   url?: string
   email?: string
   phone?: string
@@ -790,7 +792,7 @@ export function validatePageBuilderComponent(component: any): ComponentValidatio
         result.isValid = false
         result.errors.push('Link component requires text field')
       }
-      if (!component.linkType || !['internal', 'url', 'email', 'phone'].includes(component.linkType)) {
+      if (!component.linkType || !['internal', 'anchor', 'url', 'email', 'phone'].includes(component.linkType)) {
         result.isValid = false
         result.errors.push('Link component requires valid linkType')
       }

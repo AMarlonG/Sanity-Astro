@@ -21,12 +21,14 @@ export const linkComponent = defineType({
       name: 'linkType',
       title: 'Lenketype',
       type: 'string',
+      description: 'Velg hva slags lenke du vil lage: til en side i løsningen, en bestemt seksjon på siden, eller en ekstern adresse.',
       options: {
         list: [
           {title: 'Intern lenke', value: 'internal'},
-          {title: 'Ekstern URL', value: 'url'},
-          {title: 'E-post', value: 'email'},
-          {title: 'Telefon', value: 'phone'},
+          {title: 'Seksjon på denne siden', value: 'anchor'},
+          {title: 'Ekstern nettside', value: 'url'},
+          {title: 'E-postadresse', value: 'email'},
+          {title: 'Telefonnummer', value: 'phone'},
         ],
       },
       initialValue: 'internal',
@@ -35,15 +37,51 @@ export const linkComponent = defineType({
       name: 'internalLink',
       title: 'Intern lenke',
       type: 'reference',
-      description: 'Velg en side fra nettstedet',
+      description: 'Søk frem siden du vil lenke til (f.eks. Program, Artistsiden, artikler eller arrangementer).',
       hidden: ({parent}) => parent?.linkType !== 'internal',
-              to: [{type: 'homepage'}, {type: 'page'}, {type: 'article'}, {type: 'event'}],
+      to: [
+        {type: 'homepage'},
+        {type: 'page'},
+        {type: 'programPage'},
+        {type: 'artistPage'},
+        {type: 'article'},
+        {type: 'event'}
+      ],
+    }),
+    defineField({
+      name: 'anchorId',
+      title: 'Seksjons-ID (anker)',
+      type: 'string',
+      description: 'Skriv inn ID-en til seksjonen du vil hoppe til (uten #-tegn). Eksempel: "programdetaljer" gir lenke til #programdetaljer.',
+      hidden: ({parent}) => parent?.linkType !== 'anchor',
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const linkType = context?.parent?.linkType
+
+          if (linkType !== 'anchor') {
+            return true
+          }
+
+          if (!value) {
+            return 'Seksjons-ID må fylles ut'
+          }
+
+          if (value.length > 80) {
+            return 'Seksjons-ID må være under 80 tegn'
+          }
+
+          if (!/^[A-Za-z][A-Za-z0-9_\-:.]*$/.test(value)) {
+            return 'Bruk bokstaver eller tall, og eventuelt bindestrek, understrek, kolon eller punktum. Ikke ta med #-tegnet.'
+          }
+
+          return true
+        }),
     }),
     defineField({
       name: 'url',
       title: 'URL',
       type: 'url',
-      description: 'F.eks. https://example.com',
+      description: 'For eksterne nettsteder. Husk https:// i starten.',
       hidden: ({parent}) => parent?.linkType !== 'url',
       validation: (Rule) => Rule.custom(externalURLValidation),
     }),
@@ -98,9 +136,25 @@ export const linkComponent = defineType({
       url: 'url',
       email: 'email',
       phone: 'phone',
-      internalLink: 'internalLink.slug.current',
+      internalLinkType: 'internalLink->_type',
+      internalLinkSlug: 'internalLink->slug.current',
+      internalLinkSlugNo: 'internalLink->slug_no.current',
+      internalLinkSlugEn: 'internalLink->slug_en.current',
+      anchorId: 'anchorId',
     },
-    prepare({title, linkType, openInNewTab, url, email, phone, internalLink}) {
+    prepare({
+      title,
+      linkType,
+      openInNewTab,
+      url,
+      email,
+      phone,
+      internalLinkType,
+      internalLinkSlug,
+      internalLinkSlugNo,
+      internalLinkSlugEn,
+      anchorId
+    }) {
       // Bestem hvilken URL/lenke som skal vises
       let linkDisplay = linkType || 'ingen lenke'
 
@@ -110,8 +164,24 @@ export const linkComponent = defineType({
         linkDisplay = email
       } else if (linkType === 'phone' && phone) {
         linkDisplay = phone
-      } else if (linkType === 'internal' && internalLink) {
-        linkDisplay = `/${internalLink}`
+      } else if (linkType === 'anchor' && anchorId) {
+        linkDisplay = `#${anchorId}`
+      } else if (linkType === 'internal') {
+        const previewLink: LinkComponentData['internalLink'] | undefined = internalLinkType
+          ? {
+              _type: internalLinkType,
+              slug: internalLinkSlug
+                ? {current: internalLinkSlug}
+                : internalLinkSlugNo
+                  ? {current: internalLinkSlugNo}
+                  : internalLinkSlugEn
+                    ? {current: internalLinkSlugEn}
+                    : undefined
+            }
+          : undefined
+
+        const resolved = resolveInternalHref(previewLink)
+        linkDisplay = resolved || 'Intern lenke'
       }
 
       return {
@@ -126,12 +196,14 @@ export const linkComponent = defineType({
 // TypeScript interface for Link component data
 export interface LinkComponentData {
   text: string
-  linkType: 'internal' | 'url' | 'email' | 'phone'
+  linkType: 'internal' | 'anchor' | 'url' | 'email' | 'phone'
   internalLink?: {
-    slug: {
+    _type?: string
+    slug?: {
       current: string
-    }
+    } | string
   }
+  anchorId?: string
   url?: string
   email?: string
   phone?: string
@@ -139,6 +211,33 @@ export interface LinkComponentData {
   accessibility?: {
     ariaLabel?: string
     ariaDescribedBy?: string
+  }
+}
+
+const getSlugValue = (link?: LinkComponentData['internalLink']): string | undefined => {
+  if (!link) return undefined
+  if (typeof link.slug === 'string') return link.slug
+  return link.slug?.current
+}
+
+const resolveInternalHref = (link?: LinkComponentData['internalLink']): string | undefined => {
+  if (!link) return undefined
+  const slugValue = getSlugValue(link) || ''
+
+  switch (link._type) {
+    case 'homepage':
+      return '/'
+    case 'programPage':
+      return '/program'
+    case 'artistPage':
+      return '/artister'
+    case 'article':
+      return slugValue ? `/artikler/${slugValue}` : undefined
+    case 'event':
+      return slugValue ? `/program/${slugValue}` : undefined
+    case 'page':
+    default:
+      return slugValue ? `/${slugValue}` : undefined
   }
 }
 
@@ -157,8 +256,16 @@ export const generateLinkHtml: ComponentHTMLGenerator<LinkComponentData> = (data
 
   switch (data.linkType) {
     case 'internal':
-      if (data.internalLink?.slug?.current) {
-        href = `/${data.internalLink.slug.current}`
+      {
+        const resolved = resolveInternalHref(data.internalLink)
+        if (resolved) {
+          href = resolved
+        }
+      }
+      break
+    case 'anchor':
+      if (data.anchorId) {
+        href = data.anchorId.startsWith('#') ? data.anchorId : `#${data.anchorId}`
       }
       break
     case 'url':
@@ -214,7 +321,9 @@ export const linkValidationRules = {
 export function buildLinkHref(data: LinkComponentData): string {
   switch (data.linkType) {
     case 'internal':
-      return data.internalLink?.slug?.current ? `/${data.internalLink.slug.current}` : '#'
+      return resolveInternalHref(data.internalLink) || '#'
+    case 'anchor':
+      return data.anchorId ? (data.anchorId.startsWith('#') ? data.anchorId : `#${data.anchorId}`) : '#'
     case 'url':
       return data.url || '#'
     case 'email':

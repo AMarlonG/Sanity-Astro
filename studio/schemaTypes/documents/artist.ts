@@ -55,10 +55,10 @@ export const artist = defineType({
       group: 'basic',
     }),
     defineField({
-      name: 'slug',
-      title: 'URL',
+      name: 'slug_no',
+      title: 'URL (norsk)',
       type: 'slug',
-      description: 'URL-vennlig versjon av artistnavn (brukes på alle språk)',
+      description: 'URL-vennlig versjon av artistnavn på norsk (f.eks. "kunstner-navn")',
       options: {
         source: 'name',
         maxLength: 96,
@@ -72,7 +72,19 @@ export const artist = defineType({
           // Så sjekk standard slug-validering
           return componentValidation.slug(Rule).validate(value, context)
         }),
-      group: 'basic',
+      group: 'no',
+    }),
+    defineField({
+      name: 'slug_en',
+      title: 'URL (English)',
+      type: 'slug',
+      description: 'URL-friendly version of artist name in English (e.g. "artist-name")',
+      options: {
+        source: 'name',
+        maxLength: 96,
+      },
+      validation: componentValidation.slug,
+      group: 'en',
     }),
 
     // NORSK INNHOLD

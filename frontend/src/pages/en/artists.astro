@@ -1,0 +1,157 @@
+---
+import ContentPageLayout from '../../layouts/ContentPageLayout.astro';
+import CardGrid from '../../components/CardGrid.astro';
+import Image from '../../components/Image.astro';
+import { createDataService } from '../../lib/sanity/dataService.js';
+
+// Create data service with Visual Editing support
+const dataService = createDataService(Astro.request);
+
+// Fetch artists page content from artistPage schema
+const artistsPage = await dataService.getArtistPage();
+
+// Use only selected artists from artistPage
+const artists = artistsPage?.selectedArtists || [];
+
+// Fallback values
+const pageTitle = artistsPage?.title || 'Artists';
+---
+
+<ContentPageLayout
+  title={pageTitle}
+  pageDocument={artistsPage}
+>
+  <CardGrid
+    title="All artists"
+    items={artists}
+    gridType="artists"
+    noResultsTitle="No artists published"
+  >
+    {artists.map((artist) => (
+      <article class="artist-card card">
+        <a href={`/en/artists/${artist.slug}`} class="artist-link">
+          {artist.image && (
+            <div class="artist-image">
+              <Image
+                image={artist.image.image}
+                alt={artist.image.alt || artist.name}
+                caption=""
+                credit=""
+                size="full"
+                aspectRatio="1:1"
+                alignment="center"
+                className="artist-card-image"
+              />
+            </div>
+          )}
+          <div class="artist-content">
+            <h3 class="artist-name">{artist.name}</h3>
+
+            {artist.bio && (
+              <p class="artist-bio">
+                {artist.bio.length > 150 ? `${artist.bio.substring(0, 150)}...` : artist.bio}
+              </p>
+            )}
+
+            {artist.genres && artist.genres.length > 0 && (
+              <div class="artist-genres">
+                {artist.genres.map((genre: any) => (
+                  <span class="genre-tag">{genre.title}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </a>
+      </article>
+    ))}
+  </CardGrid>
+
+  <style>
+    /* Artist Card Specific Styles */
+    .artist-card {
+      container-type: inline-size;
+      overflow: hidden;
+      transition: box-shadow var(--transition-base);
+    }
+
+    .artist-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .artist-image {
+      position: relative;
+      height: clamp(200px, 25cqw, 300px);
+      overflow: hidden;
+      aspect-ratio: 1;
+    }
+
+    .artist-card-image .image-container {
+      margin: 0;
+      height: 100%;
+    }
+
+    .artist-card-image .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+    }
+
+    .artist-card-image .image-caption {
+      display: none;
+    }
+
+    .artist-content {
+      padding: 0;
+    }
+
+    .artist-name {
+      margin: 0 0 var(--space-2) 0;
+      color: var(--color-text-primary);
+      font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
+      line-height: var(--line-height-tight);
+    }
+
+    .artist-bio {
+      margin: 0 0 var(--space-3) 0;
+      color: var(--color-text-secondary);
+      font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
+      line-height: var(--line-height-normal);
+    }
+
+    .artist-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .genre-tag {
+      padding: var(--space-1) var(--space-2);
+      background: var(--color-surface);
+      border-radius: var(--radius-sm);
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Container Query Enhancements */
+    @container (min-width: 300px) {
+      .artist-name {
+        font-size: var(--font-size-xl);
+      }
+
+      .artist-bio {
+        font-size: var(--font-size-base);
+      }
+    }
+
+    @container (min-width: 350px) {
+      .artist-image {
+        height: 250px;
+      }
+    }
+  </style>
+
+</ContentPageLayout>

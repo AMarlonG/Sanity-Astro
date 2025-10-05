@@ -24,11 +24,18 @@ export const LANGUAGE_LABELS: Record<Language, string> = {
 
 /**
  * Get language from URL or request
- * Currently returns default language, but can be extended for URL-based language switching
+ * Detects language based on /en/ prefix in URL path
  */
 export function detectLanguage(request?: Request, url?: URL): Language {
-  // For now, always return Norwegian as default
-  // Future: implement URL-based language detection (/en/artister vs /artister)
+  // Try to get URL from request if not provided
+  const requestUrl = url || (request ? new URL(request.url) : null);
+
+  // Check if URL path starts with /en/
+  if (requestUrl?.pathname.startsWith('/en/') || requestUrl?.pathname === '/en') {
+    return 'en';
+  }
+
+  // Default to Norwegian
   return DEFAULT_LANGUAGE;
 }
 

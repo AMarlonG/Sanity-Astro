@@ -122,9 +122,9 @@ export class SanityDataService {
   // Page methods
   async getPageBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
-      QueryBuilder.pageBySlug(slug),
+      QueryBuilder.pageBySlug(slug, this.language),
       options,
-      `page:${slug}`,
+      `page:${slug}:${this.language}`,
       CACHE_DURATION.page
     );
   }
@@ -150,9 +150,9 @@ export class SanityDataService {
   // Article methods
   async getArticleBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
-      QueryBuilder.articleBySlug(slug),
+      QueryBuilder.articleBySlug(slug, this.language),
       options,
-      `article:${slug}`,
+      `article:${slug}:${this.language}`,
       CACHE_DURATION.articles
     );
   }
@@ -169,9 +169,9 @@ export class SanityDataService {
   // Artist methods
   async getArtistBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
-      QueryBuilder.artistBySlug(slug),
+      QueryBuilder.artistBySlug(slug, this.language),
       options,
-      `artist:${slug}`,
+      `artist:${slug}:${this.language}`,
       CACHE_DURATION.artists
     );
   }
@@ -179,9 +179,9 @@ export class SanityDataService {
   // Event methods
   async getEventBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
-      QueryBuilder.eventBySlug(slug),
+      QueryBuilder.eventBySlug(slug, this.language),
       options,
-      `event:${slug}`,
+      `event:${slug}:${this.language}`,
       CACHE_DURATION.events
     );
   }

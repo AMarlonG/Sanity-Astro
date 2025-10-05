@@ -1,12 +1,14 @@
 ---
 export interface Props {
   text: string
-  linkType: 'internal' | 'url' | 'email' | 'phone'
+  linkType: 'internal' | 'anchor' | 'url' | 'email' | 'phone'
   internalLink?: {
+    _type?: string
     slug?: {
       current: string
-    }
+    } | string
   }
+  anchorId?: string
   url?: string
   email?: string
   phone?: string
@@ -22,6 +24,7 @@ const {
   text,
   linkType,
   internalLink,
+  anchorId,
   url,
   email,
   phone,
@@ -29,6 +32,35 @@ const {
   accessibility,
   className = ''
 } = Astro.props
+
+const internalSlug = typeof internalLink?.slug === 'string'
+  ? internalLink.slug
+  : internalLink?.slug?.current
+
+const resolveInternalHref = () => {
+  if (!internalLink) {
+    return undefined
+  }
+
+  const slugValue = internalSlug || ''
+
+  switch (internalLink._type) {
+    case 'homepage':
+      return '/'
+    case 'programPage':
+      return '/program'
+    case 'artistPage':
+      return '/artister'
+    case 'article':
+      return slugValue ? `/artikler/${slugValue}` : undefined
+    case 'event':
+      return slugValue ? `/program/${slugValue}` : undefined
+    case 'page':
+      return slugValue ? `/${slugValue}` : undefined
+    default:
+      return slugValue ? `/${slugValue}` : undefined
+  }
+}
 
 // Generer href basert på lenketype
 let href = '#'
@@ -38,8 +70,17 @@ let isValidLink = false
 
 switch (linkType) {
   case 'internal':
-    if (internalLink?.slug?.current) {
-      href = `/${internalLink.slug.current}`
+    {
+      const resolved = resolveInternalHref()
+      if (resolved) {
+        href = resolved
+        isValidLink = true
+      }
+    }
+    break
+  case 'anchor':
+    if (anchorId) {
+      href = anchorId.startsWith('#') ? anchorId : `#${anchorId}`
       isValidLink = true
     }
     break
@@ -71,7 +112,7 @@ switch (linkType) {
 
 // Fallback for ugyldige lenker
 if (!isValidLink) {
-  console.warn('Link component: Invalid or missing link data', { linkType, internalLink, url, email, phone })
+  console.warn('Link component: Invalid or missing link data', { linkType, internalLink, anchorId, url, email, phone })
 }
 
 // Bygg ARIA-attributter

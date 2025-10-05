@@ -1,7 +1,7 @@
 ---
 import Layout from './Layout.astro';
 import DynamicComponent from '../components/DynamicComponent.astro';
-import { getMultilingualContent } from '../lib/utils/language.js';
+import { getMultilingualContent, detectLanguage } from '../lib/utils/language.js';
 
 interface Props {
   title: string;
@@ -11,21 +11,28 @@ interface Props {
   backLinkUrl?: string;
 }
 
+// Detect current language
+const currentLang = detectLanguage(Astro.request);
+
 const {
   title,
   pageContent = [],
   pageDocument,
-  backLinkText = "← Tilbake til forsiden",
-  backLinkUrl = "/"
+  backLinkText = currentLang === 'en' ? "← Back to homepage" : "← Tilbake til forsiden",
+  backLinkUrl = currentLang === 'en' ? "/en" : "/"
 } = Astro.props;
 
 // Get multilingual content if pageDocument is provided, otherwise use pageContent
 const content = pageDocument
   ? (getMultilingualContent(pageDocument) || pageDocument?.content || pageContent)
   : pageContent;
+
+// Extract slug information from pageDocument if available
+const slugNo = pageDocument?.slug_no;
+const slugEn = pageDocument?.slug_en;
 ---
 
-<Layout title={`${title} - Sanity + Astro`}>
+<Layout title={`${title} - Sanity + Astro`} slugNo={slugNo} slugEn={slugEn}>
   <main class="container">
     <header class="page-header">
       <h1 class="page-title">

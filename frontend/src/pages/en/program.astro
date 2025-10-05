@@ -1,17 +1,17 @@
 ---
-import ContentPageLayout from '../layouts/ContentPageLayout.astro';
-import CardGrid from '../components/CardGrid.astro';
-import Image from '../components/Image.astro';
-import { createDataService } from '../lib/sanity/dataService.js';
-import { formatDateForLanguage } from '../lib/utils/dates';
+import ContentPageLayout from '../../layouts/ContentPageLayout.astro';
+import CardGrid from '../../components/CardGrid.astro';
+import Image from '../../components/Image.astro';
+import { createDataService } from '../../lib/sanity/dataService.js';
+import { formatDateForLanguage } from '../../lib/utils/dates';
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Hent program-siden innhold fra programPage schema
+// Fetch program page content from programPage schema
 const programPage = await dataService.getProgramPage();
 
-// Bruk kun valgte arrangementer fra programPage
+// Use only selected events from programPage
 const events = programPage?.selectedEvents || [];
 
 // Fallback values
@@ -23,14 +23,14 @@ const pageTitle = programPage?.title || 'Program';
   pageDocument={programPage}
 >
   <CardGrid
-    title="Alle arrangementer"
+    title="All events"
     items={events}
     gridType="events"
-    noResultsTitle="Ingen arrangementer publisert"
+    noResultsTitle="No events published"
   >
     {events.map((event) => (
       <article class="event-card card" data-event-date={event.eventDate?.date}>
-        <a href={`/program/${event.slug}`} class="event-link">
+        <a href={`/en/program/${event.slug}`} class="event-link">
           {event.image && (
             <div class="event-image">
               <Image
@@ -51,35 +51,35 @@ const pageTitle = programPage?.title || 'Program';
             <div class="event-meta">
               {event.eventDate && (
                 <div class="event-detail">
-                  <span class="event-label">Dato:</span>
-                  <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'no')})</span>
+                  <span class="event-label">Date:</span>
+                  <span>{event.eventDate.title} ({formatDateForLanguage(event.eventDate.date, 'en')})</span>
                 </div>
               )}
 
               {event.eventTime && (
                 <div class="event-detail">
-                  <span class="event-label">Tid:</span>
+                  <span class="event-label">Time:</span>
                   <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
                 </div>
               )}
 
               {event.venue && (
                 <div class="event-detail">
-                  <span class="event-label">Sted:</span>
+                  <span class="event-label">Venue:</span>
                   <span>{event.venue.title}</span>
                 </div>
               )}
 
               {event.artists && event.artists.length > 0 && (
                 <div class="event-detail">
-                  <span class="event-label">Artister:</span>
+                  <span class="event-label">Artists:</span>
                   <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
                 </div>
               )}
 
               {event.genre && (
                 <div class="event-genre">
-                  <span class="event-label">Sjanger:</span>
+                  <span class="event-label">Genre:</span>
                   <span class="genre-name">{event.genre.title}</span>
                 </div>
               )}

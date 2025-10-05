@@ -1,5 +1,8 @@
 ---
 import { VisualEditing } from "@sanity/astro/visual-editing";
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import HreflangTags from '../components/HreflangTags.astro';
+import { detectLanguage, type Language } from '../lib/utils/language.js';
 
 // Import CSS files in order
 import '../styles/reset.css';
@@ -9,12 +12,20 @@ import '../styles/global.css';
 export interface Props {
   title: string;
   description?: string;
+  slugNo?: string;
+  slugEn?: string;
 }
 
-const { 
-  title, 
-  description = "Moderne web-applikasjon med Sanity CMS og Astro frontend"
+const {
+  title,
+  description = "Moderne web-applikasjon med Sanity CMS og Astro frontend",
+  slugNo,
+  slugEn
 } = Astro.props;
+
+// Detect current language from URL
+const currentLang: Language = detectLanguage(Astro.request);
+const currentPath = new URL(Astro.request.url).pathname;
 
 // Check if Visual Editing should be enabled
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
@@ -23,7 +34,7 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 ---
 
 <!DOCTYPE html>
-<html lang="no">
+<html lang={currentLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
@@ -31,14 +42,22 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
-    
+
+    <!-- Hreflang tags for SEO -->
+    <HreflangTags
+      currentLang={currentLang}
+      currentPath={currentPath}
+      slugNo={slugNo}
+      slugEn={slugEn}
+    />
+
     <!-- Preload critical resources for faster transitions -->
     <link rel="preload" href="/htmx.min.js" as="script" />
-    
+
     <!-- Optimize resource hints -->
     <link rel="dns-prefetch" href="//cdn.sanity.io" />
     <link rel="preconnect" href="//cdn.sanity.io" crossorigin />
-    
+
     <!-- Minimal critical styles -->
     <style>
       /* Prevent layout shift during data loading */
@@ -46,10 +65,28 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
         min-height: 50vh;
         contain: layout style paint;
       }
+
+      /* Language switcher positioning */
+      .language-switcher-container {
+        position: fixed;
+        top: var(--space-4, 1rem);
+        right: var(--space-4, 1rem);
+        z-index: 100;
+      }
     </style>
-    
+
   </head>
   <body>
+    <!-- Language switcher -->
+    <div class="language-switcher-container">
+      <LanguageSwitcher
+        currentLang={currentLang}
+        currentPath={currentPath}
+        slugNo={slugNo}
+        slugEn={slugEn}
+      />
+    </div>
+
     <div id="app" class="page-content">
       <slot />
     </div>

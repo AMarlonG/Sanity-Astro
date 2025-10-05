@@ -1,0 +1,55 @@
+---
+import type { Language } from '../lib/utils/language';
+
+interface Props {
+  currentLang: Language;
+  currentPath: string;
+  slugNo?: string;
+  slugEn?: string;
+}
+
+const { currentLang, currentPath, slugNo, slugEn } = Astro.props;
+
+// Get base URL from environment or request
+const baseUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://example.com';
+
+// Build Norwegian URL (without trailing slash)
+const buildNorwegianUrl = (): string => {
+  if (slugNo) {
+    // Extract the path prefix (e.g., /artister/, /program/, /artikler/)
+    const pathParts = currentPath.replace(/^\/en\/?/, '').split('/').filter(p => p);
+    pathParts[pathParts.length - 1] = slugNo;
+    return `${baseUrl}/${pathParts.join('/')}`;
+  }
+  // For non-dynamic pages, just remove /en/ prefix
+  const cleanPath = currentPath.replace(/^\/en\/?/, '/');
+  if (cleanPath === '/' || cleanPath === '') {
+    return baseUrl;
+  }
+  return `${baseUrl}${cleanPath}`;
+};
+
+// Build English URL (without trailing slash)
+const buildEnglishUrl = (): string => {
+  if (slugEn) {
+    // Extract the path prefix and add /en/
+    const pathParts = currentPath.replace(/^\/en\/?/, '').split('/').filter(p => p);
+    pathParts[pathParts.length - 1] = slugEn;
+    return `${baseUrl}/en/${pathParts.join('/')}`;
+  }
+  // For non-dynamic pages, add /en prefix
+  if (currentPath === '/' || currentPath === '') {
+    return `${baseUrl}/en`;
+  }
+  const cleanPath = currentPath.replace(/^\/en\/?/, '');
+  return `${baseUrl}/en/${cleanPath}`;
+};
+
+const norwegianUrl = buildNorwegianUrl();
+const englishUrl = buildEnglishUrl();
+---
+
+<!-- Hreflang tags for multilingual SEO -->
+<link rel="alternate" hreflang="no" href={norwegianUrl} />
+<link rel="alternate" hreflang="en" href={englishUrl} />
+<link rel="alternate" hreflang="x-default" href={norwegianUrl} />

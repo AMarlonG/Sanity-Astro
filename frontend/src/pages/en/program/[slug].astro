@@ -1,9 +1,9 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import DynamicComponent from '../../components/DynamicComponent.astro';
-import { createDataService } from '../../lib/sanity/dataService.js';
-import { formatDateForLanguage } from '../../lib/utils/dates';
-import { getMultilingualContent } from "../../lib/utils/language.js";
+import Layout from '../../../layouts/Layout.astro';
+import DynamicComponent from '../../../components/DynamicComponent.astro';
+import { createDataService } from '../../../lib/sanity/dataService.js';
+import { formatDateForLanguage } from '../../../lib/utils/dates';
+import { getMultilingualContent } from "../../../lib/utils/language.js";
 
 const { slug } = Astro.params;
 
@@ -27,8 +27,8 @@ try {
   return Astro.redirect('/404');
 }
 
-// Get appropriate content array
-const content = getMultilingualContent(event) || event.content;
+// Get English content
+const content = getMultilingualContent(event, 'en') || event.content_en || event.content;
 
 export async function getStaticPaths() {
   // In development, return empty array for on-demand rendering
@@ -36,7 +36,7 @@ export async function getStaticPaths() {
     return [];
   }
 
-  const dataService = new (await import("../../lib/sanity/dataService.js")).SanityDataService();
+  const dataService = new (await import("../../../lib/sanity/dataService.js")).SanityDataService();
   return await dataService.getSlugsForType('event');
 }
 ---
@@ -44,7 +44,7 @@ export async function getStaticPaths() {
 <Layout title={`${event.title} - Event`}>
   <main>
     <nav class="breadcrumb">
-      <a href="/program">← Tilbake til program</a>
+      <a href="/en/program">← Back to program</a>
     </nav>
 
     <article>
@@ -67,21 +67,21 @@ export async function getStaticPaths() {
         <div class="event-info">
           {event.eventDate && (
             <div class="event-detail">
-              <strong>📅 Dato:</strong>
-              <span>{formatDateForLanguage(event.eventDate.date, 'no')}</span>
+              <strong>📅 Date:</strong>
+              <span>{formatDateForLanguage(event.eventDate.date, 'en')}</span>
             </div>
           )}
 
           {event.eventTime && (
             <div class="event-detail">
-              <strong>🕰️ Klokkeslett:</strong>
+              <strong>🕰️ Time:</strong>
               <span>{event.eventTime}</span>
             </div>
           )}
 
           {event.venue && (
             <div class="event-detail">
-              <strong>🎭 Sted:</strong>
+              <strong>🎭 Venue:</strong>
               <span>
                 {event.venue.name}
                 {event.venue.address && (
@@ -96,7 +96,7 @@ export async function getStaticPaths() {
 
           {event.artists && event.artists.length > 0 && (
             <div class="event-detail artists">
-              <strong>🎤 Artister:</strong>
+              <strong>🎤 Artists:</strong>
               <ul>
                 {event.artists.map((artist) => (
                   <li>
@@ -120,7 +120,7 @@ export async function getStaticPaths() {
 
           {event.price && (
             <div class="event-detail price">
-              <strong>🎫 Pris:</strong>
+              <strong>🎫 Price:</strong>
               <span>{event.price}</span>
             </div>
           )}
@@ -134,7 +134,7 @@ export async function getStaticPaths() {
               rel="noopener noreferrer"
               class="ticket-button"
             >
-              Kjøp billetter
+              Buy tickets
             </a>
           </div>
         )}
@@ -319,4 +319,3 @@ export async function getStaticPaths() {
     }
   }
 </style>
-

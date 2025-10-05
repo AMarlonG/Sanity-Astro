@@ -6,6 +6,7 @@ import {nbNOLocale} from '@sanity/locale-nb-no'
 import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './deskStructure'
+import {placeholderTextPlugin} from './plugins/placeholderTextPlugin'
 
 // Custom Norwegian i18n resources to override publish button text
 const customNorwegianResources = {
@@ -37,6 +38,7 @@ export default defineConfig({
     visionTool(),
     nbNOLocale(),
     unsplashImageAsset(),
+    placeholderTextPlugin(),
     presentationTool({
       previewUrl: {
         origin: 'http://localhost:4321',

@@ -1,10 +1,65 @@
 import {defineQuery} from 'groq'
-import {createMultilingualField} from '../utils/language.js'
+import {createMultilingualField, type Language} from '../utils/language.js'
 
 export interface QueryDefinition<P extends Record<string, unknown> = Record<string, unknown>> {
   query: ReturnType<typeof defineQuery>
   params: P
 }
+
+const MAX_CONTENT_DEPTH = 2
+
+const buildContentProjection = (depth = 0): string => {
+  if (depth >= MAX_CONTENT_DEPTH) {
+    return '...'
+  }
+
+  const nested = buildContentProjection(depth + 1)
+
+  return `
+    ...,
+    _type == "linkComponent" => {
+      ...,
+      "internalLink": select(
+        linkType == "internal" && defined(internalLink) => internalLink->{
+          _type,
+          "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+          "slug_no": slug_no.current,
+          "slug_en": slug_en.current
+        },
+        defined(internalLink) => internalLink
+      )
+    },
+    _type == "columnLayout" => {
+      ...,
+      items[]{${nested}}
+    },
+    _type == "gridLayout" => {
+      ...,
+      gridItems[]{${nested}}
+    },
+    _type == "contentScrollContainer" => {
+      ...,
+      items[]{${nested}}
+    },
+    _type == "artistScrollContainer" => {
+      ...,
+      items[]{${nested}}
+    },
+    _type == "eventScrollContainer" => {
+      ...,
+      items[]{${nested}}
+    },
+    _type == "accordionComponent" => {
+      ...,
+      panels[]{
+        ...,
+        content[]{${nested}}
+      }
+    }
+  `
+}
+
+const PAGE_CONTENT_WITH_LINKS = buildContentProjection()
 
 const EVENT_IMAGE_SELECTION = `
   "image": {
@@ -48,7 +103,9 @@ const EVENT_BASE_FIELDS = `
   "artists": artist[]->{
     _id,
     name,
-    "slug": slug.current,
+    slug_no,
+    slug_en,
+    "slug": coalesce(slug_no.current, slug_en.current, slug.current),
     image,
     "imageAlt": coalesce(imageAlt_no, imageAlt_en)
   },
@@ -60,8 +117,12 @@ const EVENT_BASE_FIELDS = `
   ticketUrl,
   publishingStatus,
   scheduledPeriod,
-  content_no,
-  content_en,
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   seo
 `
 
@@ -83,10 +144,15 @@ const ARTIST_BASE_FIELDS = `
   "instrument": coalesce(instrument_no, instrument_en),
   country,
   ${ARTIST_IMAGE_SELECTION},
-  slug,
-  "slug": slug.current,
-  content_no,
-  content_en,
+  slug_no,
+  slug_en,
+  "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   publishingStatus,
   scheduledPeriod,
   seo
@@ -119,16 +185,32 @@ const ARTICLE_BASE_FIELDS = `
     name,
     "slug": slug.current
   },
-  content_no,
-  content_en,
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   seo
 `
 
-const SLUG_MATCH_FRAGMENT = `[$slug in [
-  slug_no.current,
-  slug_en.current,
-  slug.current
-]]`
+// Language-aware slug matching helper
+const buildSlugMatch = (language: Language = 'no'): string => {
+  if (language === 'en') {
+    // For English: prioritize slug_en, fallback to slug_no and legacy slug
+    return `[$slug in [slug_en.current, slug_no.current, slug.current]]`
+  }
+  // For Norwegian (default): prioritize slug_no, fallback to slug_en and legacy slug
+  return `[$slug in [slug_no.current, slug_en.current, slug.current]]`
+}
+
+// Helper to get correct slug projection based on language
+const buildSlugProjection = (language: Language = 'no'): string => {
+  if (language === 'en') {
+    return `"slug": coalesce(slug_en.current, slug_no.current, slug.current)`
+  }
+  return `"slug": coalesce(slug_no.current, slug_en.current, slug.current)`
+}
 
 // Queries
 const HOMEPAGE_QUERY = defineQuery(`*[_type == "homepage" && (
@@ -140,23 +222,32 @@ const HOMEPAGE_QUERY = defineQuery(`*[_type == "homepage" && (
   ${createMultilingualField('title')},
   title_no,
   title_en,
-  content_no,
-  content_en,
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   homePageType,
   scheduledPeriod,
   seo
 }`)
 
-const PAGE_BY_SLUG_QUERY = defineQuery(`*[_type == "page" && ${SLUG_MATCH_FRAGMENT}][0]{
+// Language-aware query builders
+const buildPageBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "page" && ${buildSlugMatch(language)}][0]{
   _id,
   _type,
   ${createMultilingualField('title')},
   ${createMultilingualField('excerpt')},
-  "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+  ${buildSlugProjection(language)},
   "slug_no": slug_no.current,
   "slug_en": slug_en.current,
-  content_no,
-  content_en,
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   seo
 }`)
 
@@ -166,8 +257,12 @@ const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
   title,
   "slug": slug.current,
   excerpt,
-  content_no,
-  content_en,
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   seo,
   selectedEvents[]->{
     ${EVENT_BASE_FIELDS}
@@ -180,8 +275,12 @@ const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   title,
   "slug": slug.current,
   excerpt,
-  content_no,
-  content_en,
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
   seo,
   selectedArtists[]->{
     ${ARTIST_BASE_FIELDS},
@@ -193,11 +292,11 @@ const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   }
 }`)
 
-const EVENT_BY_SLUG_QUERY = defineQuery(`*[_type == "event" && ${SLUG_MATCH_FRAGMENT}][0]{
+const buildEventBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "event" && ${buildSlugMatch(language)}][0]{
   ${EVENT_BASE_FIELDS}
 }`)
 
-const ARTIST_BY_SLUG_QUERY = defineQuery(`*[_type == "artist" && ${SLUG_MATCH_FRAGMENT}][0]{
+const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && ${buildSlugMatch(language)}][0]{
   ${ARTIST_BASE_FIELDS},
   instagram,
   facebook,
@@ -208,7 +307,7 @@ const ARTIST_BY_SLUG_QUERY = defineQuery(`*[_type == "artist" && ${SLUG_MATCH_FR
   instagramUrl
 }`)
 
-const ARTICLE_BY_SLUG_QUERY = defineQuery(`*[_type == "article" && ${SLUG_MATCH_FRAGMENT}][0]{
+const buildArticleBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "article" && ${buildSlugMatch(language)}][0]{
   ${ARTICLE_BASE_FIELDS}
 }`)
 
@@ -257,8 +356,8 @@ export const QueryBuilder = {
   homepage(): QueryDefinition {
     return {query: HOMEPAGE_QUERY, params: {}}
   },
-  pageBySlug(slug: string): QueryDefinition<{slug: string}> {
-    return {query: PAGE_BY_SLUG_QUERY, params: {slug}}
+  pageBySlug(slug: string, language: Language = 'no'): QueryDefinition<{slug: string}> {
+    return {query: buildPageBySlugQuery(language), params: {slug}}
   },
   programPage(): QueryDefinition {
     return {query: PROGRAM_PAGE_QUERY, params: {}}
@@ -266,14 +365,14 @@ export const QueryBuilder = {
   artistPage(): QueryDefinition {
     return {query: ARTIST_PAGE_QUERY, params: {}}
   },
-  eventBySlug(slug: string): QueryDefinition<{slug: string}> {
-    return {query: EVENT_BY_SLUG_QUERY, params: {slug}}
+  eventBySlug(slug: string, language: Language = 'no'): QueryDefinition<{slug: string}> {
+    return {query: buildEventBySlugQuery(language), params: {slug}}
   },
-  artistBySlug(slug: string): QueryDefinition<{slug: string}> {
-    return {query: ARTIST_BY_SLUG_QUERY, params: {slug}}
+  artistBySlug(slug: string, language: Language = 'no'): QueryDefinition<{slug: string}> {
+    return {query: buildArtistBySlugQuery(language), params: {slug}}
   },
-  articleBySlug(slug: string): QueryDefinition<{slug: string}> {
-    return {query: ARTICLE_BY_SLUG_QUERY, params: {slug}}
+  articleBySlug(slug: string, language: Language = 'no'): QueryDefinition<{slug: string}> {
+    return {query: buildArticleBySlugQuery(language), params: {slug}}
   },
   publishedArticles(): QueryDefinition {
     return {query: PUBLISHED_ARTICLES_QUERY, params: {}}

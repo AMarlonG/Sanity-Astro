@@ -6,7 +6,7 @@ export const componentValidation = {
   // Text fields
   title: (Rule: any) => Rule.required().min(1).max(100).warning('Titler bør være mellom 1-100 tegn'),
   shortTitle: (Rule: any) => Rule.max(50).warning('Korte titler bør være under 50 tegn'),
-  description: (Rule: any) => Rule.max(500).warning('Beskrivelser bør være under 500 tegn'),
+  description: (Rule: any) => Rule.max(150).warning('Beskrivelser bør være under 150 tegn'),
   longDescription: (Rule: any) => Rule.max(2000).warning('Lange beskrivelser bør være under 2000 tegn'),
   
   // URL fields
