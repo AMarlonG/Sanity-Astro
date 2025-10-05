@@ -62,6 +62,10 @@ export default defineConfig({
                   title: doc?.title || 'Untitled artist',
                   href: `/artister/${doc?.slug}`,
                 },
+                {
+                  title: `${doc?.title || 'Untitled artist'} (EN)`,
+                  href: `/en/artists/${doc?.slug}`,
+                },
               ],
             }),
           },

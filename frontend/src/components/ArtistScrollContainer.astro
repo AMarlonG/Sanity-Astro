@@ -32,7 +32,7 @@ if (items && items.length > 0) {
     const ARTIST_QUERY = `*[_type == "artist" && _id in $artistIds]{
       _id,
       name,
-      slug,
+      "slug": slug.current,
       "image": image.image,
       "imageAlt": image.alt,
       instrument,
@@ -76,7 +76,7 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
         const artistImageAlt = artist.imageAlt || artistName || ''
         const artistInstrument = artist.instrument || ''
         const artistCountry = artist.country || ''
-        const artistSlug = artist.slug?.current || ''
+        const artistSlug = artist.slug || ''
 
         // Beregn høyde basert på cardFormat
         const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
@@ -85,7 +85,7 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 
         return (
           <li class="artist-item">
-            <a href={`/kunstnere/${artistSlug}`} class="artist-card-link">
+            <a href={`/artister/${artistSlug}`} class="artist-card-link">
               <article class="artist-card">
                 {artistImage && (
                   <div class="artist-image">

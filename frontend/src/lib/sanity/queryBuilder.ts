@@ -120,9 +120,7 @@ const EVENT_BASE_FIELDS = `
   "artists": artist[]->{
     _id,
     name,
-    slug_no,
-    slug_en,
-    "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+    "slug": slug.current,
     image,
     "imageAlt": coalesce(imageAlt_no, imageAlt_en)
   },
@@ -177,9 +175,7 @@ const ARTIST_BASE_FIELDS = `
   "instrument": coalesce(instrument_no, instrument_en),
   country,
   ${ARTIST_IMAGE_SELECTION},
-  slug_no,
-  slug_en,
-  "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+  "slug": slug.current,
   content_no[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
@@ -344,7 +340,7 @@ const buildEventBySlugQuery = (language: Language = 'no') => defineQuery(`*[_typ
   ${EVENT_BASE_FIELDS}
 }`)
 
-const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && ${buildSlugMatch(language)}][0]{
+const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && slug.current == $slug][0]{
   ${ARTIST_BASE_FIELDS},
   instagram,
   facebook,

@@ -110,10 +110,12 @@ export const INTERACTIVE_FRAGMENTS = {
       internalLink->{
         _id,
         _type,
-        "slug": {
-          "current": coalesce(slug.current, slug_no.current, slug_en.current)
-        },
-        title
+        "slug": slug.current,
+        "slug_no": slug_no.current,
+        "slug_en": slug_en.current,
+        title,
+        title_no,
+        title_en
       },
       url,
       email,
