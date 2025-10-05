@@ -1,5 +1,6 @@
 export const prerender = false;
 import type { APIRoute } from 'astro';
+import {defineQuery} from 'groq';
 import { sanityClient } from 'sanity:client';
 import imageUrlBuilder from '@sanity/image-url';
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types';
@@ -11,51 +12,38 @@ import {
   getSecurityHeaders
 } from '../../lib/security';
 import { formatDateForLanguage } from '../../../../shared/utils/dates';
-import type {
-  EventFilterFormData,
-  FormSubmissionResult,
-  FormSecurityCheck
-} from '../../lib/form-utils'
-import {
-  validateFormData,
-  eventFilterFormFields,
-  formDataProcessors
-} from '../../lib/form-utils'
 
-// Type for arrangement hentet fra Sanity
-interface Event {
+interface EventFilterFormData {
+  eventDate?: string;
+  genre?: string;
+  venue?: string;
+}
+
+interface EventResult {
   _id: string;
   title: string;
-  slug: { current: string };
-  eventTime?: {
-    startTime: string;
-    endTime: string;
+  slug: string;
+  image?: {
+    image?: SanityImageSource;
+    alt?: string;
   };
   eventDate?: {
-    title: string;
-    date: string;
+    date?: string;
+    title?: string;
+  };
+  eventTime?: {
+    startTime?: string;
+    endTime?: string;
   };
   venue?: {
-    title: string;
-    slug: { current: string };
+    title?: string;
   };
   genre?: {
-    title: string;
-    slug: { current: string };
+    title?: string;
   };
   artists?: Array<{
-    name: string;
-    slug: { current: string };
+    name?: string;
   }>;
-  image?: {
-    image?: any;
-    alt?: string;
-    caption?: string;
-    credit?: string;
-    aspectRatio?: string;
-    alignment?: string;
-    size?: string;
-  };
 }
 
 // Opprett Sanity Image URL Builder
@@ -65,16 +53,7 @@ const urlFor = (source: SanityImageSource) =>
     ? imageUrlBuilder({ projectId, dataset }).image(source)
     : null;
 
-// Enhanced filter validation using type-safe form utilities
 function validateFilters(filters: EventFilterFormData): EventFilterFormData {
-  // Use the centralized form validation
-  const validationResult = validateFormData(filters, eventFilterFormFields)
-
-  if (!validationResult.isValid) {
-    // Log validation errors for debugging
-    console.warn('Filter validation errors:', validationResult.errors)
-  }
-
   const validated: EventFilterFormData = {}
 
   // Validate and sanitize eventDate
@@ -101,8 +80,7 @@ function validateFilters(filters: EventFilterFormData): EventFilterFormData {
 // Use enhanced HTML escaping from security utilities
 const escapeHtml = InputValidator.sanitizeString;
 
-// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
-const getImageUrl = (image: any, width: number, height: number) => {
+const getImageUrl = (image: SanityImageSource | undefined, width: number, height: number) => {
   if (!image || !urlFor) return '';
   const imageBuilder = urlFor(image);
   return imageBuilder
@@ -110,9 +88,7 @@ const getImageUrl = (image: any, width: number, height: number) => {
     : '';
 };
 
-// Generer HTML for et enkelt arrangement
-function generateEventHtml(event: Event): string {
-  // Generer bilde-HTML hvis bilde finnes
+function generateEventHtml(event: EventResult): string {
   let imageHtml = '';
   if (event.image?.image) {
     const imageUrl = getImageUrl(event.image.image, 400, 300);
@@ -134,33 +110,33 @@ function generateEventHtml(event: Event): string {
 
   return `
     <div style="border: 1px solid #e9ecef; border-radius: 12px; background: white; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-      <a href="/program/${event.slug.current}" style="text-decoration: none; color: inherit; display: block;">
+      <a href="/program/${escapeHtml(event.slug)}" style="text-decoration: none; color: inherit; display: block;">
         ${imageHtml}
         <div style="padding: 1.25rem;">
           <h3 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1.2rem; line-height: 1.3;">${escapeHtml(event.title)}</h3>
           <div style="color: #666; font-size: 0.9rem; line-height: 1.4;">
             ${
-              event.eventDate
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Dato:</span><span>${escapeHtml(event.eventDate.title)} (${escapeHtml(formatDateForLanguage(event.eventDate.date, 'no'))})</span></div>`
+              event.eventDate?.date
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Dato:</span><span>${escapeHtml(event.eventDate.title || '')}${event.eventDate.date ? ` (${escapeHtml(formatDateForLanguage(event.eventDate.date, 'no'))})` : ''}</span></div>`
                 : ''
             }
             ${
-              event.eventTime
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Tid:</span><span>${escapeHtml(event.eventTime.startTime)} - ${escapeHtml(event.eventTime.endTime)}</span></div>`
+              event.eventTime?.startTime
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Tid:</span><span>${escapeHtml(event.eventTime.startTime)}${event.eventTime.endTime ? ` - ${escapeHtml(event.eventTime.endTime)}` : ''}</span></div>`
                 : ''
             }
             ${
-              event.venue
+              event.venue?.title
                 ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 3rem;">Sted:</span><span>${escapeHtml(event.venue.title)}</span></div>`
                 : ''
             }
             ${
               event.artists && event.artists.length > 0
-                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 4rem;">Artister:</span><span>${event.artists.map((artist) => escapeHtml(artist.name)).join(', ')}</span></div>`
+                ? `<div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 4rem;">Artister:</span><span>${event.artists.map((artist) => escapeHtml(artist.name || '')).filter(Boolean).join(', ')}</span></div>`
                 : ''
             }
             ${
-              event.genre
+              event.genre?.title
                 ? `<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #f0f0f0; display: flex; align-items: center; gap: 0.5rem;"><span style="font-weight: 600; min-width: 4rem;">Sjanger:</span><span style="color: #999; font-size: 0.85rem;">${escapeHtml(event.genre.title)}</span></div>`
                 : ''
             }
@@ -238,71 +214,47 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Parse and validate input data using type-safe form utilities
     const rawData = await request.text()
-    const formData = new URLSearchParams(rawData)
+    const searchParams = new URLSearchParams(rawData)
 
-    // Parse form data using centralized processor
-    const parsedData = formDataProcessors.parseFormData(
-      new FormData(Object.fromEntries(formData.entries()) as any)
-    ) as EventFilterFormData
-
-    // Enhanced filter validation with type safety
     const filters = validateFilters({
-      eventDate: formData.get('eventDate') || undefined,
-      genre: formData.get('genre') || undefined,
-      venue: formData.get('venue') || undefined,
+      eventDate: searchParams.get('eventDate') || undefined,
+      genre: searchParams.get('genre') || undefined,
+      venue: searchParams.get('venue') || undefined,
     })
 
-    // Hent eventDates for å generere faner
-    const eventDates = await sanityClient.fetch(
-      `*[_type == "eventDate" && isActive == true] | order(date asc)`
-    );
-
-    // Bygg GROQ-spørring
-    let query = `*[_type == "event" && isPublished == true`;
-    let queryParams: any = {};
-
-    if (filters.eventDate) {
-      query += ` && eventDate->date == $eventDate`;
-      queryParams.eventDate = filters.eventDate;
-    }
-
-    if (filters.genre) {
-      query += ` && genre->slug.current == $genre`;
-      queryParams.genre = filters.genre;
-    }
-
-    if (filters.venue) {
-      query += ` && venue->slug.current == $venue`;
-      queryParams.venue = filters.venue;
-    }
-
-    query += `] | order(eventDate->date asc) {
+    const FILTER_EVENTS_QUERY = defineQuery(`*[
+      _type == "event"
+      && publishingStatus == "published"
+      && (!defined($eventDate) || eventDate->date == $eventDate)
+      && (!defined($genre) || genre->slug.current == $genre)
+      && (!defined($venue) || venue->slug.current == $venue)
+    ] | order(eventDate->date asc, eventTime.startTime asc){
       _id,
-      title,
-      slug,
-      eventTime{
-        startTime,
-        endTime
+      title_no,
+      title_en,
+      "title": coalesce(title_no, title_en, title),
+      "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+      "image": {
+        "image": image,
+        "alt": coalesce(imageAlt_no, imageAlt_en, image.alt)
       },
+      eventTime,
       eventDate->{
-        title,
-        date
+        date,
+        title_display_no,
+        title_display_en,
+        "title": coalesce(title_display_no, title_display_en)
       },
-      venue->{
-        title,
-        slug
-      },
-      genre->{
-        title,
-        slug
-      },
-      artists[]->{
-        name,
-        slug
-      },
-      image
-    }`;
-    const events: Event[] = await sanityClient.fetch(query, queryParams);
+      venue->{title},
+      genre->{title},
+      "artists": artist[]->{name}
+    }`)
+
+    const events = await sanityClient.fetch<EventResult[]>(FILTER_EVENTS_QUERY, {
+      eventDate: filters.eventDate || undefined,
+      genre: filters.genre || undefined,
+      venue: filters.venue || undefined,
+    });
 
     // Generer HTML for arrangementene med antall resultater
     const resultsCountText = `Viser ${events.length} arrangement${events.length === 1 ? '' : 'er'}`;

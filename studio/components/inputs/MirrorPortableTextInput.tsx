@@ -34,9 +34,9 @@ export function createMirrorPortableTextInput(sourceField: string) {
           <Flex align="center" justify="space-between" gap={3}>
             <Text size={1} muted style={{ flex: 1 }}>
               {isEmpty ? (
-                <>💡 <strong>Norsk innhold tilgjengelig</strong></>
+                <>Tips: <strong>Norsk innhold tilgjengelig</strong></>
               ) : (
-                <>🔄 <strong>Hent innhold fra norsk versjon</strong></>
+                <>Kopier: <strong>Hent innhold fra norsk versjon</strong></>
               )}
             </Text>
             <Button

@@ -12,13 +12,13 @@ export const siteSettings = defineType({
   groups: [
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
       default: true,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
     {

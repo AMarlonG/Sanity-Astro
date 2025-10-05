@@ -22,21 +22,21 @@ export const event = defineType({
   groups: [
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
       default: true,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
+    imageGroup,
     {
       name: 'basic',
       title: 'Felles innhold',
       icon: CogIcon,
     },
-    imageGroup,
     {
       name: 'scheduling',
       title: 'Publisering',
@@ -230,13 +230,27 @@ export const event = defineType({
         maxLength: 96,
       },
       validation: (Rule) =>
-        Rule.required().custom(async (value, context) => {
-          // Først sjekk avansert slug-validering for unikhet
+        Rule.custom(async (value, context) => {
+          const doc = context.document as any
+          const hasEnglishContent = doc?.title_en || doc?.excerpt_en || (doc?.content_en && doc.content_en.length > 0)
+
+          if (hasEnglishContent && !value?.current) {
+            return 'URL (English) må settes når engelsk innhold er fylt ut'
+          }
+
+          if (!value?.current) {
+            return true
+          }
+
           const slugValidation = await eventSlugValidation(value, context)
           if (slugValidation !== true) return slugValidation
 
-          // Så sjekk standard slug-validering
-          return componentValidation.slug(Rule).validate(value, context)
+          const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+          if (!slugRegex.test(value.current)) {
+            return 'URL må bare inneholde små bokstaver, tall og bindestreker'
+          }
+
+          return true
         }),
     }),
     defineField({
@@ -334,8 +348,8 @@ export const event = defineType({
 
       // Language flags based on which languages have content
       const languageFlags = []
-      if (title_no) languageFlags.push('🇳🇴')
-      if (title_en) languageFlags.push('🇬🇧')
+      if (title_no) languageFlags.push('NO')
+      if (title_en) languageFlags.push('EN')
       const flagsText = languageFlags.length > 0 ? languageFlags.join(' ') + ' • ' : ''
 
       return {

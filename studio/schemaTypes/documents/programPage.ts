@@ -13,13 +13,13 @@ export const programPage = defineType({
   groups: [
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
       default: true,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
     {
@@ -136,9 +136,9 @@ export const programPage = defineType({
     prepare({title_no, title_en, slug_no, slug_en, hasNorwegian, hasEnglish}) {
       // Language status
       const languages: string[] = [];
-      if (hasNorwegian || title_no) languages.push('🇳🇴');
-      if (hasEnglish || title_en) languages.push('🇬🇧');
-      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+      if (hasNorwegian || title_no) languages.push('NO');
+      if (hasEnglish || title_en) languages.push('EN');
+      const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
       const title = title_no || title_en || 'Programside';
       const slug = slug_no || slug_en || 'program';

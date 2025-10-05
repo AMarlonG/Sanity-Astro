@@ -18,13 +18,9 @@ export interface ImageUrlOptions {
   blur?: number;
 }
 
-export interface ResponsiveImageSet {
+export interface ResponsiveImageSource {
   format: string;
-  sources: Array<{
-    url: string;
-    descriptor: string;
-    width: number;
-  }>;
+  srcset: string;
 }
 
 export interface ImageMetadata {
@@ -87,29 +83,29 @@ export function createResponsiveImageSet(
   formats: string[] = ['avif', 'webp', 'jpg'],
   aspectRatio?: number,
   quality: number = 80
-): ResponsiveImageSet[] {
+): ResponsiveImageSource[] {
   if (!source) return [];
   
-  return formats.map(format => ({
-    format,
-    sources: widths.map(width => {
+  return formats.map((format) => {
+    const parts = widths.map((width) => {
       const height = aspectRatio ? Math.round(width / aspectRatio) : undefined;
       const url = createOptimizedImageUrl(source, {
         width,
         height,
         format: format as any,
-        quality: format === 'avif' ? 50 : (format === 'webp' ? 75 : quality),
+        quality: format === 'avif' ? 50 : format === 'webp' ? 75 : quality,
         auto: 'format',
         fit: 'crop'
       });
-      
-      return {
-        url: url || '',
-        descriptor: `${width}w`,
-        width
-      };
-    })
-  }));
+
+      return url ? `${url} ${width}w` : null;
+    }).filter((part): part is string => Boolean(part));
+
+    return {
+      format,
+      srcset: parts.join(', ')
+    };
+  });
 }
 
 /**

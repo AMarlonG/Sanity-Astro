@@ -19,13 +19,13 @@ export const article = defineType({
   groups: [
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
       default: true,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
     imageGroup,
@@ -105,13 +105,27 @@ export const article = defineType({
         maxLength: 96,
       },
       validation: (Rule) =>
-        Rule.required().custom(async (value, context) => {
-          // Først sjekk avansert slug-validering for unikhet
+        Rule.custom(async (value, context) => {
+          const doc = context.document as any
+          const hasEnglishContent = doc?.title_en || doc?.excerpt_en || (doc?.content_en && doc.content_en.length > 0)
+
+          if (hasEnglishContent && !value?.current) {
+            return 'URL (English) må settes når engelsk innhold er fylt ut'
+          }
+
+          if (!value?.current) {
+            return true
+          }
+
           const slugValidation = await articleSlugValidation(value, context)
           if (slugValidation !== true) return slugValidation
 
-          // Så sjekk standard slug-validering
-          return componentValidation.slug(Rule).validate(value, context)
+          const slugRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+          if (!slugRegex.test(value.current)) {
+            return 'URL må bare inneholde små bokstaver, tall og bindestreker'
+          }
+
+          return true
         }),
     }),
     defineField({
@@ -220,9 +234,9 @@ export const article = defineType({
 
       // Language status
       const languages: string[] = [];
-      if (title_no || excerpt_no || content_no) languages.push('🇳🇴');
-      if (title_en || excerpt_en || content_en) languages.push('🇬🇧');
-      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+      if (title_no || excerpt_no || content_no) languages.push('NO');
+      if (title_en || excerpt_en || content_en) languages.push('EN');
+      const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
       const title = title_no || title_en || 'Uten tittel';
 

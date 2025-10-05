@@ -27,27 +27,27 @@ export const pageBuilderWithoutTitle = defineType({
       groups: [
         {
           name: 'layout',
-          title: '📐 Layout & Struktur',
+          title: 'Layout & Struktur',
           of: ['columnLayout', 'gridLayout', 'spacer'],
         },
         {
           name: 'content',
-          title: '📝 Innhold',
+          title: 'Innhold',
           of: ['headingComponent', 'portableTextBlock', 'quoteComponent'],
         },
         {
           name: 'media',
-          title: '🖼️ Media',
+          title: 'Media',
           of: ['imageComponent', 'videoComponent'],
         },
         {
           name: 'interactive',
-          title: '🔘 Interaktiv',
+          title: 'Interaktiv',
           of: ['buttonComponent', 'linkComponent', 'accordionComponent', 'countdownComponent'],
         },
         {
           name: 'sections',
-          title: '📦 Seksjoner',
+          title: 'Seksjoner',
           of: ['contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer'],
         },
       ],

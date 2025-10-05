@@ -92,15 +92,14 @@ describe('Image Utilities', () => {
       
       // Check each format has all width variants
       imageSets.forEach(set => {
-        expect(set.sources).toHaveLength(3) // 3 widths
-        expect(set.sources[0].width).toBe(400)
-        expect(set.sources[1].width).toBe(800)
-        expect(set.sources[2].width).toBe(1200)
+        expect(set.srcset).toContain('400w')
+        expect(set.srcset).toContain('800w')
+        expect(set.srcset).toContain('1200w')
       })
     })
 
     it('handles empty image gracefully', () => {
-      const imageSets = createResponsiveImageSet(null)
+      const imageSets = createResponsiveImageSet(undefined as unknown as any)
       expect(imageSets).toEqual([])
     })
 
@@ -114,9 +113,8 @@ describe('Image Utilities', () => {
       const aspectRatio = 16/9 // 1.777...
       
       const imageSets = createResponsiveImageSet(mockImage, [800], ['jpg'], aspectRatio)
-      
-      const url = imageSets[0].sources[0].url
-      expect(url).toContain('h=450') // 800 / (16/9) = 450
+
+      expect(imageSets[0].srcset).toContain('h=450') // 800 / (16/9) = 450
     })
   })
 

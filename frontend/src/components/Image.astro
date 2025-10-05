@@ -3,10 +3,7 @@ import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import { 
   createOptimizedImageUrl,
   createResponsiveImageSet,
-  createLQIP,
-  extractImageMetadata,
-  generateSizesAttribute,
-  type ImageMetadata
+  createLQIP
 } from '../lib/imageUtils';
 
 interface Props {
@@ -82,9 +79,6 @@ const getAutoSizes = (size: string): string => {
 const imageWidths = getImageWidths(size);
 const imageSizes = sizes || getAutoSizes(size);
 
-// Extract metadata for enhanced features (with fallback)
-const metadata: ImageMetadata = image ? extractImageMetadata(image) : {};
-
 // Generate responsive image sets (only if image exists)
 const responsiveImageSets = image ? createResponsiveImageSet(
   image, 
@@ -119,7 +113,9 @@ const fetchPriority = priority ? 'high' : 'auto';
 >
   {image ? (
     <picture>
-      {responsiveImageSets.map((format) => (
+      {responsiveImageSets
+        .filter((format) => format.srcset.length > 0)
+        .map((format) => (
         <source
           srcset={format.srcset}
           sizes={imageSizes}

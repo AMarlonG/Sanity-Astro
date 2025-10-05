@@ -1,5 +1,5 @@
 import { sanityClient } from 'sanity:client';
-import { QueryBuilder, buildQueryParams, type QueryOptions } from './queryBuilder.js';
+import { QueryBuilder, buildQueryParams, type QueryDefinition, type QueryOptions } from './queryBuilder.js';
 import { transformMultilingualDocument, detectLanguage, type Language } from '../utils/language.js';
 
 // Cache configuration - shorter cache in development
@@ -67,8 +67,7 @@ export class SanityDataService {
 
   // Execute query with caching and multilingual transformation
   async fetch<T = any>(
-    query: string,
-    params: any = {},
+    definition: QueryDefinition,
     options: QueryOptions = {},
     cacheKey?: string,
     cacheDuration?: number,
@@ -76,6 +75,7 @@ export class SanityDataService {
   ): Promise<T> {
     const mergedOptions = { ...this.defaultOptions, ...options };
     const queryParams = buildQueryParams(mergedOptions);
+    const {query, params} = definition;
 
     // Generate cache key including language
     const finalCacheKey = cacheKey || getCacheKey(query, { ...params, ...queryParams, lang: this.language });
@@ -113,7 +113,6 @@ export class SanityDataService {
   async getHomepage(options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.homepage(),
-      {},
       options,
       'homepage',
       CACHE_DURATION.homepage
@@ -124,7 +123,6 @@ export class SanityDataService {
   async getPageBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.pageBySlug(slug),
-      {},
       options,
       `page:${slug}`,
       CACHE_DURATION.page
@@ -134,7 +132,6 @@ export class SanityDataService {
   async getProgramPage(options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.programPage(),
-      {},
       options,
       'programPage',
       CACHE_DURATION.page
@@ -144,21 +141,9 @@ export class SanityDataService {
   async getArtistPage(options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.artistPage(),
-      {},
       options,
       'artistPage',
       CACHE_DURATION.page
-    );
-  }
-
-  // Content type methods
-  async getContentByType(contentType: string, orderBy?: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.contentByType(contentType, orderBy),
-      {},
-      options,
-      `content:${contentType}`,
-      CACHE_DURATION.default
     );
   }
 
@@ -166,7 +151,6 @@ export class SanityDataService {
   async getArticleBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.articleBySlug(slug),
-      {},
       options,
       `article:${slug}`,
       CACHE_DURATION.articles
@@ -176,7 +160,6 @@ export class SanityDataService {
   async getPublishedArticles(options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.publishedArticles(),
-      {},
       options,
       'articles:published',
       CACHE_DURATION.articles
@@ -187,19 +170,8 @@ export class SanityDataService {
   async getArtistBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.artistBySlug(slug),
-      {},
       options,
       `artist:${slug}`,
-      CACHE_DURATION.artists
-    );
-  }
-
-  async getPublishedArtists(options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.publishedArtists(),
-      {},
-      options,
-      'artists:published',
       CACHE_DURATION.artists
     );
   }
@@ -208,66 +180,9 @@ export class SanityDataService {
   async getEventBySlug(slug: string, options: QueryOptions = {}) {
     return this.fetch(
       QueryBuilder.eventBySlug(slug),
-      {},
       options,
       `event:${slug}`,
       CACHE_DURATION.events
-    );
-  }
-
-  async getPublishedEvents(options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.publishedEvents(),
-      {},
-      options,
-      'events:published',
-      CACHE_DURATION.events
-    );
-  }
-
-  async getEventDates(options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.eventDates(),
-      {},
-      options,
-      'events:dates',
-      CACHE_DURATION.events
-    );
-  }
-
-  async getEventsByDate(dateId: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.eventsByDate(dateId),
-      {},
-      options,
-      `events:date:${dateId}`,
-      CACHE_DURATION.events
-    );
-  }
-
-  // Search methods
-  async searchContent(
-    searchTerm: string,
-    types: string[] = ['article', 'event', 'artist'],
-    options: QueryOptions = {}
-  ) {
-    return this.fetch(
-      QueryBuilder.searchContent(searchTerm, types),
-      {},
-      options,
-      `search:${searchTerm}:${types.join(',')}`,
-      300 // Short cache for search
-    );
-  }
-
-  // Utility methods
-  async getSlugsForType(contentType: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.slugsForType(contentType),
-      {},
-      options,
-      `slugs:${contentType}`,
-      CACHE_DURATION.default
     );
   }
 
@@ -283,67 +198,6 @@ export class SanityDataService {
     };
   }
 
-  // OPTIMIZED LIST METHODS - Light queries for fast loading
-  async getEventsListLight(options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.eventsListLight(),
-      {},
-      options,
-      'events:list-light',
-      CACHE_DURATION.events
-    );
-  }
-
-  async getArtistsListLight(options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.artistsListLight(),
-      {},
-      options,
-      'artists:list-light',
-      CACHE_DURATION.artists
-    );
-  }
-
-  async getArticlesListLight(options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.articlesListLight(),
-      {},
-      options,
-      'articles:list-light',
-      CACHE_DURATION.articles
-    );
-  }
-
-  // DETAILED CONTENT METHODS - Full content for detail pages
-  async getEventDetailBySlug(slug: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.eventDetailBySlug(slug),
-      {},
-      options,
-      `event:detail:${slug}`,
-      CACHE_DURATION.events
-    );
-  }
-
-  async getArtistDetailBySlug(slug: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.artistDetailBySlug(slug),
-      {},
-      options,
-      `artist:detail:${slug}`,
-      CACHE_DURATION.artists
-    );
-  }
-
-  async getArticleDetailBySlug(slug: string, options: QueryOptions = {}) {
-    return this.fetch(
-      QueryBuilder.articleDetailBySlug(slug),
-      {},
-      options,
-      `article:detail:${slug}`,
-      CACHE_DURATION.articles
-    );
-  }
 }
 
 // Create default instance with Visual Editing support

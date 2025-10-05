@@ -18,12 +18,12 @@ export const eventDate = defineType({
     },
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
   ],
@@ -152,7 +152,7 @@ export const eventDate = defineType({
       }).format(d)
       const title = formatted.charAt(0).toUpperCase() + formatted.slice(1)
 
-      const langs = [slug_no && '🇳🇴', slug_en && '🇬🇧'].filter(Boolean).join(' ')
+      const langs = [slug_no && 'NO', slug_en && 'EN'].filter(Boolean).join(' ')
       const status = isActive ? 'Aktiv' : 'Inaktiv'
 
       return {

@@ -1,79 +1,99 @@
 import type { APIRoute } from 'astro';
+import {defineQuery} from 'groq';
 import { sanityClient } from 'sanity:client';
+
+const EVENT_COUNTDOWN_QUERY = defineQuery(`*[_type == "event" && _id == $eventId][0]{
+  eventDate->{date},
+  eventTime
+}`);
+
+const NORWEGIAN_STRINGS = {
+  started: 'Arrangementet har startet!',
+  prefix: 'Festivalen starter om ',
+  day: ['dag', 'dager'],
+  hour: ['time', 'timer'],
+  minute: ['minutt', 'minutter']
+} as const;
+
+const ENGLISH_STRINGS = {
+  started: 'The event has started!',
+  prefix: 'The festival begins in ',
+  day: ['day', 'days'],
+  hour: ['hour', 'hours'],
+  minute: ['minute', 'minutes']
+} as const;
+
+const LOCALE_MAP = {
+  no: NORWEGIAN_STRINGS,
+  en: ENGLISH_STRINGS
+} as const;
+
+type SupportedLocale = keyof typeof LOCALE_MAP;
 
 export const GET: APIRoute = async ({ url }) => {
   const eventId = url.searchParams.get('eventId');
-  
+  const locale = (url.searchParams.get('lang')?.toLowerCase() as SupportedLocale) || 'no';
+
   if (!eventId) {
     return new Response('Event ID required', { status: 400 });
   }
-  
-  // Fetch event data
-  const event = await sanityClient.fetch(
-    `*[_type == "event" && _id == $eventId][0]{
-      title,
-      eventDate,
-      eventTime
-    }`,
-    { eventId }
-  );
-  
-  if (!event) {
+
+  const strings = LOCALE_MAP[locale] || NORWEGIAN_STRINGS;
+
+  const event = await sanityClient.fetch<{
+    eventDate?: {date?: string};
+    eventTime?: {startTime?: string; endTime?: string};
+  } | null>(EVENT_COUNTDOWN_QUERY, {eventId});
+
+  if (!event?.eventDate?.date) {
     return new Response('Event not found', { status: 404 });
   }
-  
-  // Calculate time remaining
+
   const eventDate = new Date(event.eventDate.date);
-  // Clean eventTime of any Unicode characters
-  const cleanTime = event.eventTime.startTime.replace(/[^\d:]/g, '').trim();
-  const timeParts = cleanTime.split(':');
-  const hours = parseInt(timeParts[0] || '0', 10);
-  const minutes = parseInt(timeParts[1] || '0', 10);
-  eventDate.setHours(hours, minutes, 0, 0);
-  
+  const cleanTime = event.eventTime?.startTime?.replace(/[^\d:]/g, '').trim();
+  if (cleanTime && cleanTime.length >= 4) {
+    const [hours = '0', minutes = '0'] = cleanTime.split(':');
+    eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+  }
+
   const now = new Date();
   const diff = eventDate.getTime() - now.getTime();
-  
+
   if (diff <= 0) {
-    // Event has started
     const html = `
       <div class="countdown__display">
-        <p class="countdown__expired">Arrangementet har startet!</p>
+        <p class="countdown__expired">${strings.started}</p>
       </div>
     `;
     return new Response(html, {
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' }
     });
   }
-  
-  // Calculate days, hours, minutes
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hoursRemaining = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutesRemaining = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-  // Build HTML response as sentence
-  let sentence = '';
-  
+
+  const minutesTotal = Math.floor(diff / (1000 * 60));
+  const days = Math.floor(minutesTotal / (60 * 24));
+  const hours = Math.floor((minutesTotal - days * 24 * 60) / 60);
+  const minutes = minutesTotal - days * 24 * 60 - hours * 60;
+
+  const parts: string[] = [];
   if (days > 0) {
-    sentence += `${days} ${days === 1 ? 'dag' : 'dager'}, `;
+    parts.push(`${days} ${days === 1 ? strings.day[0] : strings.day[1]}`);
   }
-  
-  if (hoursRemaining > 0 || days > 0) {
-    sentence += `${hoursRemaining} ${hoursRemaining === 1 ? 'time' : 'timer'} og `;
+  if (hours > 0 || days > 0) {
+    parts.push(`${hours} ${hours === 1 ? strings.hour[0] : strings.hour[1]}`);
   }
-  
-  sentence += `${minutesRemaining} ${minutesRemaining === 1 ? 'minutt' : 'minutter'}`;
-  
+  parts.push(`${minutes} ${minutes === 1 ? strings.minute[0] : strings.minute[1]}`);
+
   const html = `
     <div class="countdown__display">
       <p class="countdown__sentence">
-        <span class="countdown__title-inline">Festivalen starter om </span>${sentence}
+        <span class="countdown__title-inline">${strings.prefix}</span>${parts.join(', ')}
       </p>
     </div>
   `;
-  
+
   return new Response(html, {
-    headers: { 
+    headers: {
       'Content-Type': 'text/html',
       'Cache-Control': 'no-cache'
     }

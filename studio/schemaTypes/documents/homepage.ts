@@ -19,12 +19,12 @@ export const homepage = defineType({
     },
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
     {
@@ -40,7 +40,7 @@ export const homepage = defineType({
       name: 'adminTitle',
       title: 'Administrativ tittel',
       type: 'string',
-      description: '⚠️ Kun for Studio-oversikt - vises IKKE på nettsiden. Bruk beskrivende navn som "Juleforsiden 2024" eller "Påskekampanje"',
+      description: 'OBS: Kun for Studio-oversikt - vises IKKE på nettsiden. Bruk beskrivende navn som "Juleforsiden 2024" eller "Påskekampanje"',
       validation: componentValidation.title,
       group: 'admin',
     }),
@@ -125,8 +125,8 @@ export const homepage = defineType({
     prepare({adminTitle, homePageType, startDate, endDate, hasNorwegian, hasEnglish}) {
       // Language status
       const languages: string[] = [];
-      if (hasNorwegian) languages.push('🇳🇴');
-      if (hasEnglish) languages.push('🇬🇧');
+      if (hasNorwegian) languages.push('NO');
+      if (hasEnglish) languages.push('EN');
       const langStatus = languages.length > 0 ? ` • ${languages.join(' ')}` : '';
 
       // Period status

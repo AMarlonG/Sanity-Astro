@@ -25,12 +25,12 @@ export const artist = defineType({
     },
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
     imageGroup,
@@ -228,9 +228,9 @@ export const artist = defineType({
 
       // Language status
       const languages: string[] = [];
-      if (hasNorwegian || excerpt_no || instrument_no) languages.push('🇳🇴');
-      if (hasEnglish || excerpt_en || instrument_en) languages.push('🇬🇧');
-      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+      if (hasNorwegian || excerpt_no || instrument_no) languages.push('NO');
+      if (hasEnglish || excerpt_en || instrument_en) languages.push('EN');
+      const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
       const instrument = instrument_no || instrument_en || 'Ukjent instrument';
 

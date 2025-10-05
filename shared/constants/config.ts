@@ -1,8 +1,16 @@
 // Delt konfigurasjon for Sanity prosjektet
+const PROJECT_ID = process.env.SANITY_STUDIO_PROJECT_ID
+  || process.env.PUBLIC_SANITY_PROJECT_ID
+  || '';
+
+const DATASET = process.env.SANITY_STUDIO_DATASET
+  || process.env.PUBLIC_SANITY_DATASET
+  || 'production';
+
 export const SANITY_CONFIG = {
-  projectId: process.env.SANITY_STUDIO_PROJECT_ID || '',
-  dataset: process.env.SANITY_STUDIO_DATASET || 'production',
-  apiVersion: '2024-01-01',
+  projectId: PROJECT_ID,
+  dataset: DATASET,
+  apiVersion: '2025-01-01',
   useCdn: process.env.NODE_ENV === 'production',
 } as const;
 

@@ -10,7 +10,7 @@ export function createUniqueSlugValidation(documentType: string) {
     if (!slug?.current) return true
 
     const {document, getClient} = context
-    const client = getClient({apiVersion: '2023-05-03'})
+    const client = getClient({apiVersion: '2025-01-01'})
     
     // Get the current document ID, handling both published and draft documents
     const currentDocId = document?._id?.replace(/^drafts\./, '')

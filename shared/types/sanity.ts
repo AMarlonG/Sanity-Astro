@@ -12,109 +12,120 @@ export interface Artist extends SanityDocument {
   _type: 'artist';
   name: string;
   slug: { current: string };
-  description?: any[];
+  excerpt_no?: string;
+  excerpt_en?: string;
+  instrument_no?: string;
+  instrument_en?: string;
+  country?: string;
   image?: SanityImage;
-  url?: string;
+  imageAlt_no?: string;
+  imageAlt_en?: string;
+  content_no?: any[];
+  content_en?: any[];
   instagram?: string;
   facebook?: string;
   spotify?: string;
   youtube?: string;
-  content?: any[];
-  contentEn?: any[];
+  websiteUrl?: string;
+  spotifyUrl?: string;
+  instagramUrl?: string;
+  publishingStatus?: 'published' | 'draft' | 'scheduled';
+  scheduledPeriod?: {
+    startDate?: string;
+    endDate?: string;
+  };
 }
 
 export interface Event extends SanityDocument {
   _type: 'event';
-  title: string;
-  titleEn?: string;
-  slug: { current: string };
-  eventDates?: EventDate[];
-  artists?: Artist[];
-  description?: any[];
+  title_no?: string;
+  title_en?: string;
+  slug_no?: { current: string };
+  slug_en?: { current: string };
+  excerpt_no?: string;
+  excerpt_en?: string;
+  content_no?: any[];
+  content_en?: any[];
   image?: SanityImage;
-  venue?: Venue;
-  genres?: Genre[];
+  imageAlt_no?: string;
+  imageAlt_en?: string;
+  eventDate?: {
+    _ref: string;
+  };
+  eventTime?: {
+    startTime?: string;
+    endTime?: string;
+  };
+  venue?: {
+    _ref: string;
+  };
+  artist?: Array<{ _ref: string }>;
+  genre?: { _ref: string };
   ticketUrl?: string;
-  isFeatured?: boolean;
-  buttonText?: string;
-  buttonTextEn?: string;
-  buttonUrl?: string;
-  buttonOpenInNewTab?: boolean;
-  content?: any[];
-  contentEn?: any[];
+  publishingStatus?: 'published' | 'draft' | 'scheduled';
+  scheduledPeriod?: {
+    startDate?: string;
+    endDate?: string;
+  };
+  seo?: Record<string, unknown>;
 }
 
-export interface EventDate {
-  _key: string;
+export interface EventDate extends SanityDocument {
+  _type: 'eventDate';
   date: string;
-  startTime?: string;
-  endTime?: string;
-  doorsOpen?: string;
+  title_display_no?: string;
+  title_display_en?: string;
+  slug_no?: { current: string };
+  slug_en?: { current: string };
+  isActive?: boolean;
 }
 
 export interface Venue extends SanityDocument {
   _type: 'venue';
-  name: string;
-  nameEn?: string;
   title: string;
-  titleEn?: string;
   slug: { current: string };
   address?: string;
   city?: string;
-  capacity?: number;
-  description?: any[];
-  image?: SanityImage;
-  website?: string;
-  coordinates?: {
-    lat: number;
-    lng: number;
-  };
-  linkText?: string;
-  linkTextEn?: string;
   linkUrl?: string;
-}
-
-export interface Genre extends SanityDocument {
-  _type: 'genre';
-  name: string;
-  title: string;
-  titleEn?: string;
-  slug: { current: string };
-  description?: string;
-  color?: string;
+  openInNewTab?: boolean;
 }
 
 export interface Article extends SanityDocument {
   _type: 'article';
-  title: string;
-  titleEn?: string;
-  subtitle?: string;
-  subtitleEn?: string;
-  slug: { current: string };
-  excerpt?: string;
-  content?: any[];
-  contentEn?: any[];
-  mainImage?: SanityImage;
-  author?: string;
-  publishedAt?: string;
-  categories?: string[];
-  tags?: string[];
-  isPublished?: boolean;
+  title_no?: string;
+  title_en?: string;
+  slug_no?: { current: string };
+  slug_en?: { current: string };
+  excerpt_no?: string;
+  excerpt_en?: string;
+  content_no?: any[];
+  content_en?: any[];
+  image?: SanityImage;
+  imageAlt_no?: string;
+  imageAlt_en?: string;
+  publishingStatus?: 'published' | 'draft' | 'scheduled';
   scheduledPeriod?: {
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
   };
+  publishedAt?: string;
+  author?: { _ref: string } | string;
+  seo?: Record<string, unknown>;
 }
 
 export interface Homepage extends SanityDocument {
   _type: 'homepage';
-  title: string;
-  content?: any[];
-  isDefault?: boolean;
+  adminTitle?: string;
+  title_no?: string;
+  title_en?: string;
+  content_no?: any[];
+  content_en?: any[];
+  homePageType?: 'default' | 'scheduled';
   scheduledPeriod?: {
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
   };
+  seo?: Record<string, unknown>;
 }
 
 export interface SanityImage {

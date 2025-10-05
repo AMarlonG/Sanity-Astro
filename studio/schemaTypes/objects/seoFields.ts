@@ -43,7 +43,7 @@ export const seoType = defineType({
       noIndex: 'noIndex',
     },
     prepare({title, description, noIndex}) {
-      const status = noIndex ? '🚫 Skjult fra søkemotorer' : '✅ Synlig for søkemotorer'
+      const status = noIndex ? 'Skjult fra søkemotorer' : 'Synlig for søkemotorer'
       const content = title || description ? `${title || 'Ingen tittel'} • ${description || 'Ingen beskrivelse'}` : 'Bruker fallback fra sideinnhold'
 
       return {

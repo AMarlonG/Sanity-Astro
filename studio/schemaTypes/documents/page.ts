@@ -19,13 +19,13 @@ export const page = defineType({
   groups: [
     {
       name: 'no',
-      title: '🇳🇴 Norsk',
+      title: 'Norsk (NO)',
       icon: ComposeIcon,
       default: true,
     },
     {
       name: 'en',
-      title: '🇬🇧 English',
+      title: 'English (EN)',
       icon: ComposeIcon,
     },
     imageGroup,
@@ -200,9 +200,9 @@ export const page = defineType({
 
       // Language status
       const languages: string[] = [];
-      if (hasNorwegian || title_no) languages.push('🇳🇴');
-      if (hasEnglish || title_en) languages.push('🇬🇧');
-      const langStatus = languages.length > 0 ? languages.join(' ') : '⚠️';
+      if (hasNorwegian || title_no) languages.push('NO');
+      if (hasEnglish || title_en) languages.push('EN');
+      const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
       const title = title_no || title_en || 'Uten tittel';
 
