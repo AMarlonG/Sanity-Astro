@@ -67,37 +67,25 @@ const {
     }
   }
 
-  /* Events Grid */
-  .events-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(320px, 28ch)), 1fr));
-  }
-
-  @container (min-width: 600px) {
-    .events-grid {
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 35ch), 1fr));
-    }
-  }
-
-  @container (min-width: 900px) {
-    .events-grid {
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
-    }
-  }
-
-  /* Artists Grid */
+  /* Events & Artists Grids - Intrinsic responsive layout */
+  .events-grid,
   .artists-grid {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, max(280px, 25ch)), 1fr));
+    --min-card-size: 260px;
+    --ideal-card-size: 320px;
+    --max-card-size: 380px;
+
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--min-card-size)), var(--ideal-card-size))
+    );
   }
 
-  @container (min-width: 600px) {
+  /* Limit to 3 columns on larger containers */
+  @container (min-width: 1000px) {
+    .events-grid,
     .artists-grid {
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 30ch), 1fr));
-    }
-  }
-
-  @container (min-width: 900px) {
-    .artists-grid {
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 35ch), 1fr));
+      grid-template-columns: repeat(3, minmax(var(--min-card-size), var(--max-card-size)));
+      justify-content: center;
     }
   }
 
