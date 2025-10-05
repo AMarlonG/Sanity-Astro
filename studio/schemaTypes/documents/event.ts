@@ -16,6 +16,14 @@ export const event = defineType({
   icon: CalendarIcon,
 
   orderings: [
+    {
+      title: 'Dato og tidspunkt',
+      name: 'dateAndTime',
+      by: [
+        { field: 'eventDate.date', direction: 'asc' },
+        { field: 'eventTime.startTime', direction: 'asc' }
+      ]
+    },
     { title: 'Navn A–Å', name: 'nameAsc', by: [{ field: 'title_no', direction: 'asc' }] },
     { title: 'Nylig opprettet', name: 'createdDesc', by: [{ field: '_createdAt', direction: 'desc' }] },
   ],
