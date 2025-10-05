@@ -68,50 +68,44 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <div class="event-header">
-                  <h4 class="event-title">{event.title}</h4>
-                  {event.excerpt_en && (
-                    <p class="event-excerpt">{event.excerpt_en}</p>
-                  )}
-                  <div class="event-meta">
-                    {event.venue && (
+                <a href={`/en/program/${event.slug}`} class="event-card-link">
+                  <div class="event-header">
+                    <h4 class="event-title">{event.title}</h4>
+                    <div class="event-meta">
                       <div class="event-detail">
-                        <span class="event-label">Venue:</span>
-                        <span>{event.venue.title}</span>
+                        {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
                       </div>
-                    )}
-                    {event.eventTime && (
-                      <div class="event-detail">
-                        <span class="event-label">Time:</span>
-                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                      </div>
+                    </div>
+                    {event.excerpt_en && (
+                      <p class="event-excerpt">{event.excerpt_en}</p>
                     )}
                   </div>
-                </div>
 
-                {event.image?.image && (
-                  <div class="event-image">
-                    <picture>
-                      <source
-                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                        type="image/webp"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
-                      <img
-                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                        alt={event.image.alt || event.title}
-                        loading="lazy"
-                        decoding="async"
-                        class="event-card-image"
-                      />
-                    </picture>
-                  </div>
-                )}
+                  {event.image?.image && (
+                    <div class="event-image">
+                      <picture>
+                        <source
+                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                          type="image/webp"
+                          sizes="(max-width: 768px) 100vw, 400px"
+                        />
+                        <img
+                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                          alt={event.image.alt || event.title}
+                          loading="lazy"
+                          decoding="async"
+                          class="event-card-image"
+                        />
+                      </picture>
+                    </div>
+                  )}
+                </a>
 
                 <div class="event-actions">
-                  <a href={`/en/program/${event.slug}`} class="btn btn-link">Read more</a>
-                  {event.ticketUrl && (
+                  {event.ticketUrl ? (
                     <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
+                  ) : (
+                    <span class="ticket-info">Tickets available soon</span>
                   )}
                 </div>
             </article>
@@ -149,50 +143,44 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <div class="event-header">
-                  <h4 class="event-title">{event.title}</h4>
-                  {event.excerpt_en && (
-                    <p class="event-excerpt">{event.excerpt_en}</p>
-                  )}
-                  <div class="event-meta">
-                    {event.venue && (
+                <a href={`/en/program/${event.slug}`} class="event-card-link">
+                  <div class="event-header">
+                    <h4 class="event-title">{event.title}</h4>
+                    <div class="event-meta">
                       <div class="event-detail">
-                        <span class="event-label">Venue:</span>
-                        <span>{event.venue.title}</span>
+                        {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
                       </div>
-                    )}
-                    {event.eventTime && (
-                      <div class="event-detail">
-                        <span class="event-label">Time:</span>
-                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                      </div>
+                    </div>
+                    {event.excerpt_en && (
+                      <p class="event-excerpt">{event.excerpt_en}</p>
                     )}
                   </div>
-                </div>
 
-                {event.image?.image && (
-                  <div class="event-image">
-                    <picture>
-                      <source
-                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                        type="image/webp"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
-                      <img
-                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                        alt={event.image.alt || event.title}
-                        loading="lazy"
-                        decoding="async"
-                        class="event-card-image"
-                      />
-                    </picture>
-                  </div>
-                )}
+                  {event.image?.image && (
+                    <div class="event-image">
+                      <picture>
+                        <source
+                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                          type="image/webp"
+                          sizes="(max-width: 768px) 100vw, 400px"
+                        />
+                        <img
+                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                          alt={event.image.alt || event.title}
+                          loading="lazy"
+                          decoding="async"
+                          class="event-card-image"
+                        />
+                      </picture>
+                    </div>
+                  )}
+                </a>
 
                 <div class="event-actions">
-                  <a href={`/en/program/${event.slug}`} class="btn btn-link">Read more</a>
-                  {event.ticketUrl && (
+                  {event.ticketUrl ? (
                     <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
+                  ) : (
+                    <span class="ticket-info">Tickets available soon</span>
                   )}
                 </div>
             </article>
@@ -261,6 +249,18 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .event-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
   }
 
   /* Event Header (above image) */
@@ -326,8 +326,12 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
   .event-actions {
     padding: var(--space-4);
     display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .event-actions-row {
+    display: flex;
   }
 
   .btn {
@@ -342,14 +346,14 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
     border: 1px solid;
   }
 
-  .btn-link {
+  .event-link {
     color: var(--color-primary-500);
-    border-color: var(--color-primary-500);
-    background: transparent;
+    text-decoration: underline;
+    font-size: var(--font-size-sm);
   }
 
-  .btn-link:hover {
-    background: var(--color-primary-50);
+  .event-link:hover {
+    color: var(--color-primary-600);
   }
 
   .btn-primary {
@@ -361,6 +365,12 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
   .btn-primary:hover {
     background: var(--color-primary-600);
     border-color: var(--color-primary-600);
+  }
+
+  .ticket-info {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-style: italic;
   }
 
   /* Container Query Enhancements */
