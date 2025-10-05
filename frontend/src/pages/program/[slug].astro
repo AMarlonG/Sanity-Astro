@@ -132,7 +132,11 @@ export async function getStaticPaths() {
           )}
         </div>
 
-        {event.ticketUrl && (
+        {event.ticketType === 'free' ? (
+          <div class="ticket-section">
+            <span class="ticket-info-text">Gratis inngang</span>
+          </div>
+        ) : event.ticketUrl ? (
           <div class="ticket-section">
             <a
               href={event.ticketUrl}
@@ -142,6 +146,10 @@ export async function getStaticPaths() {
             >
               Kjøp billetter
             </a>
+          </div>
+        ) : (
+          <div class="ticket-section">
+            <span class="ticket-info-text">Salget starter snart</span>
           </div>
         )}
       </header>
@@ -288,6 +296,15 @@ export async function getStaticPaths() {
   .ticket-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  }
+
+  .ticket-info-text {
+    display: inline-block;
+    color: #6c757d;
+    padding: 1rem 2rem;
+    font-weight: 500;
+    font-size: 1.1rem;
+    font-style: italic;
   }
 
   .event-description {

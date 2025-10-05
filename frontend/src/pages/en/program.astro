@@ -41,10 +41,17 @@ const eventsByDate = events.reduce((acc, event) => {
   return acc;
 }, {} as Record<string, { date: string; displayTitle: string; events: typeof events }>);
 
-// Sort dates chronologically
-const sortedDates = Object.values(eventsByDate).sort((a, b) =>
-  new Date(a.date).getTime() - new Date(b.date).getTime()
-);
+// Sort dates chronologically and sort events within each date by time
+const sortedDates = Object.values(eventsByDate)
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  .map(dateGroup => ({
+    ...dateGroup,
+    events: dateGroup.events.sort((a, b) => {
+      const timeA = a.eventTime?.startTime || '';
+      const timeB = b.eventTime?.startTime || '';
+      return timeA.localeCompare(timeB);
+    })
+  }));
 
 // Get date filter from URL
 const dateFilter = Astro.url.searchParams.get('date') || undefined;
@@ -76,9 +83,6 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
                         {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
                       </div>
                     </div>
-                    {event.excerpt_en && (
-                      <p class="event-excerpt">{event.excerpt_en}</p>
-                    )}
                   </div>
 
                   {event.image?.image && (
@@ -102,7 +106,9 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
                 </a>
 
                 <div class="event-actions">
-                  {event.ticketUrl ? (
+                  {event.ticketType === 'free' ? (
+                    <span class="ticket-info">Free</span>
+                  ) : event.ticketUrl ? (
                     <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
                   ) : (
                     <span class="ticket-info">Tickets available soon</span>
@@ -151,9 +157,6 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
                         {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
                       </div>
                     </div>
-                    {event.excerpt_en && (
-                      <p class="event-excerpt">{event.excerpt_en}</p>
-                    )}
                   </div>
 
                   {event.image?.image && (
@@ -177,7 +180,9 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
                 </a>
 
                 <div class="event-actions">
-                  {event.ticketUrl ? (
+                  {event.ticketType === 'free' ? (
+                    <span class="ticket-info">Free</span>
+                  ) : event.ticketUrl ? (
                     <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
                   ) : (
                     <span class="ticket-info">Tickets available soon</span>

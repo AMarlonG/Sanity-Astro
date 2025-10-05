@@ -131,6 +131,7 @@ const EVENT_BASE_FIELDS = `
     title,
     slug
   },
+  ticketType,
   ticketUrl,
   publishingStatus,
   scheduledPeriod,
