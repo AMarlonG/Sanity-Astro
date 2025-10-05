@@ -103,6 +103,8 @@ const EVENT_BASE_FIELDS = `
   slug_no,
   slug_en,
   "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+  excerpt_no,
+  excerpt_en,
   ${createMultilingualField('excerpt')},
   ${EVENT_IMAGE_SELECTION},
   ${EVENT_DATE_SELECTION},
@@ -129,6 +131,7 @@ const EVENT_BASE_FIELDS = `
     title,
     slug
   },
+  ticketType,
   ticketUrl,
   publishingStatus,
   scheduledPeriod,

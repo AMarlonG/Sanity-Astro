@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {CalendarIcon, ImageIcon, UsersIcon, ClockIcon, LinkIcon, ComposeIcon, CogIcon} from '@sanity/icons'
+import {CalendarIcon, ImageIcon, UsersIcon, ClockIcon, LinkIcon, ComposeIcon, CogIcon, CreditCardIcon} from '@sanity/icons'
 import {imageComponent} from '../components/Image'
 import {eventTimeOptions} from '../../lib/timeUtils'
 import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPortableTextInput'
@@ -36,6 +36,11 @@ export const event = defineType({
       name: 'basic',
       title: 'Felles innhold',
       icon: CogIcon,
+    },
+    {
+      name: 'ticketing',
+      title: 'Billett-info',
+      icon: CreditCardIcon,
     },
     {
       name: 'scheduling',
@@ -76,12 +81,39 @@ export const event = defineType({
       group: 'basic',
     }),
     defineField({
+      name: 'ticketType',
+      title: 'Type billett',
+      type: 'string',
+      description: 'Velg om det er billettsalg eller gratis arrangement',
+      group: 'ticketing',
+      options: {
+        list: [
+          { title: 'Billettsalg', value: 'ticketed' },
+          { title: 'Gratis', value: 'free' },
+        ],
+        layout: 'radio',
+      },
+      validation: (Rule) => Rule.required().error('Velg type billett'),
+      initialValue: 'ticketed',
+    }),
+    defineField({
       name: 'ticketUrl',
       title: 'Billett-URL',
       type: 'url',
-      description: 'Link til billettsystem for dette arrangementet (valgfritt)',
-      group: 'basic',
-      validation: componentValidation.url
+      description: 'Link til billettsystem (kreves kun for billettsalg)',
+      group: 'ticketing',
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const ticketType = (context.document as any)?.ticketType
+          if (ticketType === 'ticketed' && !value) {
+            return 'Billett-URL er påkrevd når det er billettsalg'
+          }
+          if (value) {
+            return componentValidation.url(Rule).validate(value, context)
+          }
+          return true
+        }),
+      hidden: ({ document }) => document?.ticketType !== 'ticketed',
     }),
     defineField({
       name: 'venue',

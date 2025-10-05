@@ -41,97 +41,169 @@ const eventsByDate = events.reduce((acc, event) => {
   return acc;
 }, {} as Record<string, { date: string; displayTitle: string; events: typeof events }>);
 
-// Sort dates chronologically
-const sortedDates = Object.values(eventsByDate).sort((a, b) =>
-  new Date(a.date).getTime() - new Date(b.date).getTime()
-);
+// Sort dates chronologically and sort events within each date by time
+const sortedDates = Object.values(eventsByDate)
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  .map(dateGroup => ({
+    ...dateGroup,
+    events: dateGroup.events.sort((a, b) => {
+      const timeA = a.eventTime?.startTime || '';
+      const timeB = b.eventTime?.startTime || '';
+      return timeA.localeCompare(timeB);
+    })
+  }));
+
+// Get date filter from URL
+const dateFilter = Astro.url.searchParams.get('date') || undefined;
+
+// Filter dates if date parameter is present
+const filteredDates = dateFilter
+  ? sortedDates.filter(d => d.date === dateFilter)
+  : sortedDates;
+
+// Check if this is an htmx request
+const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
 ---
 
-<ContentPageLayout
-  title={pageTitle}
-  excerpt={programPage?.excerpt}
-  pageDocument={programPage}
->
-  <DateFilter
-    availableDates={availableDates}
-    language="en"
-    endpoint="/en/program"
-  />
-
-  {sortedDates.length > 0 ? (
-    sortedDates.map(({ displayTitle, events: dateEvents }) => (
-      <section class="content-section date-section">
-        <h3 class="date-title">{displayTitle}</h3>
-        <div class="grid events-grid">
-          {dateEvents.map((event) => (
-            <article class="event-card card" data-event-date={event.eventDate?.date}>
-              <a href={`/en/program/${event.slug}`} class="event-link">
-                {event.image?.image && (
-                  <div class="event-image">
-                    <picture>
-                      <source
-                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                        type="image/webp"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
-                      <img
-                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                        alt={event.image.alt || event.title}
-                        loading="lazy"
-                        decoding="async"
-                        class="event-card-image"
-                      />
-                    </picture>
+{isHtmxRequest ? (
+  /* Return only the filtered event results for htmx */
+  <Fragment>
+    {filteredDates.length > 0 ? (
+      filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
+        <section class="content-section date-section" data-date={date}>
+          <h3 class="date-title">{displayTitle}</h3>
+          <div class="grid events-grid">
+            {dateEvents.map((event) => (
+              <article class="event-card card" data-event-date={event.eventDate?.date}>
+                <a href={`/en/program/${event.slug}`} class="event-card-link">
+                  <div class="event-header">
+                    <h4 class="event-title">{event.title}</h4>
+                    <div class="event-meta">
+                      <div class="event-detail">
+                        {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
+                      </div>
+                    </div>
                   </div>
-                )}
-                <div class="event-content">
-                  <h4 class="event-title">{event.title}</h4>
 
-                  <div class="event-meta">
-                    {event.eventTime && (
-                      <div class="event-detail">
-                        <span class="event-label">Time:</span>
-                        <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-                      </div>
-                    )}
+                  {event.image?.image && (
+                    <div class="event-image">
+                      <picture>
+                        <source
+                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                          type="image/webp"
+                          sizes="(max-width: 768px) 100vw, 400px"
+                        />
+                        <img
+                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                          alt={event.image.alt || event.title}
+                          loading="lazy"
+                          decoding="async"
+                          class="event-card-image"
+                        />
+                      </picture>
+                    </div>
+                  )}
+                </a>
 
-                    {event.venue && (
-                      <div class="event-detail">
-                        <span class="event-label">Venue:</span>
-                        <span>{event.venue.title}</span>
-                      </div>
-                    )}
-
-                    {event.artists && event.artists.length > 0 && (
-                      <div class="event-detail">
-                        <span class="event-label">Artists:</span>
-                        <span>{event.artists.map((artist: any) => artist.name).join(', ')}</span>
-                      </div>
-                    )}
-
-                    {event.genre && (
-                      <div class="event-genre">
-                        <span class="event-label">Genre:</span>
-                        <span class="genre-name">{event.genre.title}</span>
-                      </div>
-                    )}
-                  </div>
+                <div class="event-actions">
+                  {event.ticketType === 'free' ? (
+                    <span class="ticket-info">Free</span>
+                  ) : event.ticketUrl ? (
+                    <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
+                  ) : (
+                    <span class="ticket-info">Tickets available soon</span>
+                  )}
                 </div>
-              </a>
             </article>
           ))}
+          </div>
+        </section>
+      ))
+    ) : (
+      <section class="content-section">
+        <div class="no-results">
+          <h3 class="no-results-title">No events found</h3>
+          <p class="no-results-text">No events for this date</p>
         </div>
       </section>
-    ))
-  ) : (
-    <section class="content-section">
-      <div class="no-results">
-        <h3 class="no-results-title">No events found</h3>
-        <p class="no-results-text">No events have been added yet</p>
-      </div>
-    </section>
-  )}
-</ContentPageLayout>
+    )}
+  </Fragment>
+) : (
+  /* Return full page for regular requests */
+  <ContentPageLayout
+    title={pageTitle}
+    excerpt={programPage?.excerpt}
+    pageDocument={programPage}
+  >
+    <DateFilter
+      availableDates={availableDates}
+      language="en"
+      endpoint="/en/program"
+    />
+
+    <div id="event-results">
+      {filteredDates.length > 0 ? (
+        filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
+        <section class="content-section date-section" data-date={date}>
+          <h3 class="date-title">{displayTitle}</h3>
+          <div class="grid events-grid">
+            {dateEvents.map((event) => (
+              <article class="event-card card" data-event-date={event.eventDate?.date}>
+                <a href={`/en/program/${event.slug}`} class="event-card-link">
+                  <div class="event-header">
+                    <h4 class="event-title">{event.title}</h4>
+                    <div class="event-meta">
+                      <div class="event-detail">
+                        {event.venue?.title}{event.venue && event.eventTime && ', '}{event.eventTime && `${event.eventTime.startTime} - ${event.eventTime.endTime}`}
+                      </div>
+                    </div>
+                  </div>
+
+                  {event.image?.image && (
+                    <div class="event-image">
+                      <picture>
+                        <source
+                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                          type="image/webp"
+                          sizes="(max-width: 768px) 100vw, 400px"
+                        />
+                        <img
+                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                          alt={event.image.alt || event.title}
+                          loading="lazy"
+                          decoding="async"
+                          class="event-card-image"
+                        />
+                      </picture>
+                    </div>
+                  )}
+                </a>
+
+                <div class="event-actions">
+                  {event.ticketType === 'free' ? (
+                    <span class="ticket-info">Free</span>
+                  ) : event.ticketUrl ? (
+                    <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
+                  ) : (
+                    <span class="ticket-info">Tickets available soon</span>
+                  )}
+                </div>
+            </article>
+          ))}
+          </div>
+        </section>
+      ))
+    ) : (
+      <section class="content-section">
+        <div class="no-results">
+          <h3 class="no-results-title">No events found</h3>
+          <p class="no-results-text">No events have been added yet</p>
+        </div>
+      </section>
+      )}
+    </div>
+  </ContentPageLayout>
+)}
 
 <style>
   /* Section Layout */
@@ -176,24 +248,70 @@ const sortedDates = Object.values(eventsByDate).sort((a, b) =>
     font-size: var(--font-size-base);
   }
 
-  /* Event Card Specific Styles */
+  /* Event Card */
   .event-card {
     container-type: inline-size;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    transition: box-shadow var(--transition-base);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
   }
 
-  .event-link {
+  .event-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .event-card-link {
     text-decoration: none;
     color: inherit;
     display: block;
   }
 
+  /* Event Header (above image) */
+  .event-header {
+    padding: var(--space-4);
+    padding-block-end: var(--space-3);
+  }
+
+  .event-title {
+    margin: 0 0 var(--space-2) 0;
+    color: var(--color-text-primary);
+    font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
+    line-height: var(--line-height-tight);
+  }
+
+  .event-excerpt {
+    margin: 0 0 var(--space-3) 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+  }
+
+  .event-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+  }
+
+  .event-detail {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .event-label {
+    font-weight: var(--font-weight-medium);
+    flex-shrink: 0;
+  }
+
+  /* Event Image */
   .event-image {
     position: relative;
-    height: clamp(250px, 30cqw, 400px);
-    overflow: hidden;
+    width: 100%;
     aspect-ratio: 4/5;
+    overflow: hidden;
   }
 
   .event-image picture {
@@ -209,48 +327,55 @@ const sortedDates = Object.values(eventsByDate).sort((a, b) =>
     display: block;
   }
 
-  .event-content {
-    padding: 0;
-  }
-
-  .event-title {
-    margin: 0 0 var(--space-3) 0;
-    color: var(--color-text-primary);
-    font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
-    line-height: var(--line-height-tight);
-  }
-
-  .event-meta {
-    color: var(--color-text-secondary);
-    font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
-    line-height: var(--line-height-normal);
-  }
-
-  .event-detail {
-    margin-block-end: var(--space-2);
+  /* Event Actions (below image) */
+  .event-actions {
+    padding: var(--space-4);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: var(--space-2);
   }
 
-  .event-label {
-    font-weight: var(--font-weight-medium);
-    flex-shrink: 0;
-    min-width: 4rem;
-  }
-
-  .event-genre {
-    margin-block-start: var(--space-3);
-    padding-block-start: var(--space-3);
-    border-block-start: 1px solid var(--color-border-light);
+  .event-actions-row {
     display: flex;
-    align-items: center;
-    gap: var(--space-2);
   }
 
-  .genre-name {
-    color: var(--color-text-disabled);
+  .btn {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
     font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+    text-align: center;
+    transition: all var(--transition-base);
+    border: 1px solid;
+  }
+
+  .event-link {
+    color: var(--color-primary-500);
+    text-decoration: underline;
+    font-size: var(--font-size-sm);
+  }
+
+  .event-link:hover {
+    color: var(--color-primary-600);
+  }
+
+  .btn-primary {
+    color: white;
+    background: var(--color-primary-500);
+    border-color: var(--color-primary-500);
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-600);
+    border-color: var(--color-primary-600);
+  }
+
+  .ticket-info {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    font-style: italic;
   }
 
   /* Container Query Enhancements */
@@ -259,8 +384,41 @@ const sortedDates = Object.values(eventsByDate).sort((a, b) =>
       font-size: var(--font-size-xl);
     }
 
+    .event-excerpt {
+      font-size: var(--font-size-base);
+    }
+
     .event-meta {
       font-size: var(--font-size-base);
     }
   }
 </style>
+
+<script>
+  // Update active button state after htmx swap
+  document.body.addEventListener('htmx:afterSwap', (event) => {
+    // Get the clicked button from the event
+    const trigger = event.detail.target;
+    if (!trigger) return;
+
+    // Find all filter buttons
+    const buttons = document.querySelectorAll('.date-button');
+
+    // Remove active class from all buttons
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Find which button was clicked by checking the URL
+    const url = new URL(window.location.href);
+    const dateParam = url.searchParams.get('date');
+
+    // Add active class to the correct button
+    buttons.forEach(btn => {
+      const btnUrl = new URL(btn.getAttribute('hx-get'), window.location.origin);
+      const btnDate = btnUrl.searchParams.get('date');
+
+      if ((!dateParam && !btnDate) || (dateParam && btnDate === dateParam)) {
+        btn.classList.add('active');
+      }
+    });
+  });
+</script>
