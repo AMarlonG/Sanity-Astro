@@ -1,45 +1,83 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import DynamicComponent from '../../../components/DynamicComponent.astro';
-import { createDataService } from '../../../lib/sanity/dataService.js';
 import { formatDateForLanguage } from '../../../lib/utils/dates';
 import { getMultilingualContent } from "../../../lib/utils/language.js";
 import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../../lib/imageHelpers';
+import type { SanityDocument } from '@sanity/client';
+import { loadQuery } from '../../../lib/sanity/loadQuery.js';
 
-const { slug } = Astro.params;
+// Generate static paths for all events with English slugs
+export async function getStaticPaths() {
+  const { data: events } = await loadQuery<SanityDocument[]>({
+    query: `*[_type == "event" && (defined(slug_en.current) || defined(slug_no.current))]`,
+  });
 
-if (!slug) {
-  return Astro.redirect('/404');
+  return events.map((event) => {
+    // Use English slug, fallback to Norwegian slug
+    const slug = event.slug_en?.current || event.slug_no?.current;
+    return {
+      params: { slug },
+    };
+  });
 }
 
-// Create data service with Visual Editing support
-const dataService = createDataService(Astro.request);
+const { params } = Astro;
 
-let event = null;
+// Fetch the specific event based on the slug parameter (English priority)
+const { data: event } = await loadQuery({
+  query: `*[_type == "event" && $slug in [slug_en.current, slug_no.current, slug.current]][0]{
+    _id,
+    _type,
+    title_en,
+    "title": title_en,
+    slug_en,
+    excerpt_en,
+    "image": {
+      "image": image{
+        asset->,
+        hotspot,
+        crop
+      },
+      "alt": coalesce(imageAlt_en, imageAlt_no, image.alt),
+      "credit": coalesce(imageCredit_en, imageCredit_no)
+    },
+    eventDate->{
+      _id,
+      date,
+      title_display_en,
+      "title": title_display_en
+    },
+    eventTime,
+    venue->{
+      _id,
+      title,
+      name,
+      address,
+      city,
+      "slug": slug.current
+    },
+    "artists": artist[]-> {
+      _id,
+      name,
+      "slug": slug.current,
+      image,
+      "imageAlt": coalesce(imageAlt_en, imageAlt_no)
+    },
+    ticketType,
+    ticketUrl,
+    content_en,
+    seo
+  }`,
+  params,
+});
 
-try {
-  event = await dataService.getEventBySlug(slug);
-
-  if (!event) {
-    return Astro.redirect('/404');
-  }
-} catch (error) {
-  console.error('Error loading event:', error);
+if (!event) {
   return Astro.redirect('/404');
 }
 
 // Get English content
-const content = getMultilingualContent(event, 'en') || event.content_en || event.content;
-
-export async function getStaticPaths() {
-  // In development, return empty array for on-demand rendering
-  if (import.meta.env.DEV) {
-    return [];
-  }
-
-  const dataService = new (await import("../../../lib/sanity/dataService.js")).SanityDataService();
-  return await dataService.getSlugsForType('event');
-}
+const content = getMultilingualContent(event, 'en') || event.content_en;
 ---
 
 <Layout title={`${event.title} - Event`}>
@@ -81,7 +119,7 @@ export async function getStaticPaths() {
           {event.eventTime && (
             <div class="event-detail">
               <strong>🕰️ Time:</strong>
-              <span>{event.eventTime}</span>
+              <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
             </div>
           )}
 
@@ -107,10 +145,10 @@ export async function getStaticPaths() {
                 {event.artists.map((artist) => (
                   <li>
                     <span class="artist-name">{artist.name}</span>
-                    {artist.image?.image && (
+                    {artist.image && (
                       <picture>
                         <img
-                          src={getOptimizedImageUrl(artist.image.image, 64, 64, IMAGE_QUALITY.THUMBNAIL)}
+                          src={getOptimizedImageUrl(artist.image, 64, 64, IMAGE_QUALITY.THUMBNAIL)}
                           alt={artist.imageAlt || artist.name}
                           class="artist-avatar"
                           loading="lazy"
@@ -123,18 +161,11 @@ export async function getStaticPaths() {
               </ul>
             </div>
           )}
-
-          {event.price && (
-            <div class="event-detail price">
-              <strong>🎫 Price:</strong>
-              <span>{event.price}</span>
-            </div>
-          )}
         </div>
 
         {event.ticketType === 'free' ? (
           <div class="ticket-section">
-            <span class="ticket-info-text">Free admission</span>
+            <span class="ticket-info-text">Free</span>
           </div>
         ) : event.ticketUrl ? (
           <div class="ticket-section">
@@ -149,16 +180,10 @@ export async function getStaticPaths() {
           </div>
         ) : (
           <div class="ticket-section">
-            <span class="ticket-info-text">Tickets available soon</span>
+            <span class="ticket-info-text">Sales starting soon</span>
           </div>
         )}
       </header>
-
-      {event.description && (
-        <div class="event-description">
-          <p>{event.description}</p>
-        </div>
-      )}
 
       {/* PageBuilder content from CMS */}
       {content && Array.isArray(content) && content.length > 0 && (
@@ -266,15 +291,6 @@ export async function getStaticPaths() {
     object-fit: cover;
   }
 
-  .price {
-    font-size: 1.1rem;
-  }
-
-  .price span {
-    font-weight: 600;
-    color: #28a745;
-  }
-
   .ticket-section {
     text-align: center;
     margin: 2rem 0;
@@ -305,12 +321,6 @@ export async function getStaticPaths() {
     font-weight: 500;
     font-size: 1.1rem;
     font-style: italic;
-  }
-
-  .event-description {
-    line-height: 1.6;
-    font-size: 1.1rem;
-    color: #495057;
   }
 
   @media (max-width: 768px) {

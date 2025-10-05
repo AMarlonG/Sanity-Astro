@@ -2,6 +2,7 @@
 import { sanityClient } from "sanity:client";
 import imageUrlBuilder from "@sanity/image-url";
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { detectLanguage } from "../lib/utils/language.js";
 
 interface Props {
   title?: string
@@ -26,6 +27,10 @@ const {
   sortBy = 'date-asc',
   cardFormat = '16:9'
 } = Astro.props
+
+// Detect current language from URL
+const currentLanguage = detectLanguage(Astro.request)
+const programPath = currentLanguage === 'en' ? '/en/program' : '/program'
 
 // Opprett Sanity Image URL Builder
 const { projectId, dataset } = sanityClient.config();
@@ -155,8 +160,8 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
                 {showVenue && venueName && <address class="event-venue">{venueName}</address>}
                 {showArtists && artistNames && <p class="event-artists">{artistNames}</p>}
                 {eventSlug && (
-                  <a href={`/arrangementer/${eventSlug}`} class="event-link">
-                    Les mer
+                  <a href={`${programPath}/${eventSlug}`} class="event-link">
+                    {currentLanguage === 'en' ? 'Read more' : 'Les mer'}
                   </a>
                 )}
                 {event.buttonText && (

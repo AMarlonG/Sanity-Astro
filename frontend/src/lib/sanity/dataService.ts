@@ -178,14 +178,27 @@ export class SanityDataService {
 
   // Event methods
   async getEventBySlug(slug: string, options: QueryOptions = {}) {
-    return this.fetch(
+    console.log('[DataService] Fetching event with slug:', slug, 'language:', this.language);
+    const result = await this.fetch(
       QueryBuilder.eventBySlug(slug, this.language),
       options,
       `event:${slug}:${this.language}`,
       CACHE_DURATION.events
     );
+    console.log('[DataService] Event query result:', result ? 'Found' : 'Not found');
+    return result;
   }
 
+  // Slug generation for static paths
+  async getSlugsForType(type: string, options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.slugsForType(type),
+      options,
+      `slugs:${type}`,
+      CACHE_DURATION.default,
+      false // Don't transform multilingual data for slug arrays
+    );
+  }
 
   // Cache management
   clearCache(): void {

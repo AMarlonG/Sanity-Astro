@@ -1,44 +1,70 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import DynamicComponent from "../../../components/DynamicComponent.astro";
-import { createDataService } from "../../../lib/sanity/dataService.js";
 import { getMultilingualContent } from "../../../lib/utils/language.js";
 import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../../lib/imageHelpers';
+import type { SanityDocument } from '@sanity/client';
+import { loadQuery } from '../../../lib/sanity/loadQuery.js';
 
-const { slug } = Astro.params;
+// Generate static paths for all artists
+export async function getStaticPaths() {
+  const { data: artists } = await loadQuery<SanityDocument[]>({
+    query: `*[_type == "artist" && defined(slug.current)]`,
+  });
 
-if (!slug) {
-  return Astro.redirect('/404');
+  return artists.map((artist) => {
+    return {
+      params: {
+        slug: artist.slug.current,
+      },
+    };
+  });
 }
 
-// Create data service with Visual Editing support
-const dataService = createDataService(Astro.request);
+const { params } = Astro;
 
-let artist = null;
+// Fetch the specific artist based on the slug parameter
+const { data: artist } = await loadQuery({
+  query: `*[_type == "artist" && slug.current == $slug][0]{
+    _id,
+    _type,
+    name,
+    excerpt_no,
+    excerpt_en,
+    instrument_no,
+    instrument_en,
+    "instrument": coalesce(instrument_en, instrument_no),
+    country,
+    "image": {
+      "image": image{
+        asset->,
+        hotspot,
+        crop
+      },
+      "alt": coalesce(imageAlt_en, imageAlt_no, image.alt),
+      "credit": coalesce(imageCredit_en, imageCredit_no)
+    },
+    "slug": slug.current,
+    content_no,
+    content_en,
+    instagram,
+    facebook,
+    spotify,
+    youtube,
+    websiteUrl,
+    spotifyUrl,
+    instagramUrl,
+    seo
+  }`,
+  params,
+});
 
-try {
-  artist = await dataService.getArtistBySlug(slug);
-
-  if (!artist) {
-    return Astro.redirect('/404');
-  }
-} catch (error) {
-  console.error('Error loading artist:', error);
+if (!artist) {
   return Astro.redirect('/404');
 }
 
 // Get English content
-const content = getMultilingualContent(artist, 'en') || artist.content_en || artist.content;
-
-export async function getStaticPaths() {
-  // In development, return empty array for on-demand rendering
-  if (import.meta.env.DEV) {
-    return [];
-  }
-
-  const dataService = new (await import("../../../lib/sanity/dataService.js")).SanityDataService();
-  return await dataService.getSlugsForType('artist');
-}
+const content = getMultilingualContent(artist, 'en') || artist.content_en;
 ---
 
 <Layout title={`${artist.name} - Artist`}>
@@ -48,47 +74,45 @@ export async function getStaticPaths() {
     </nav>
 
     <article>
-      <header class="artist-header">
+      <header>
         <h1>{artist.name}</h1>
 
-        {artist.excerpt && (
-          <p class="artist-excerpt">{artist.excerpt}</p>
-        )}
-
-        {artist.instrument && (
-          <p class="artist-instrument">{artist.instrument}</p>
-        )}
-
-        {artist.country && (
-          <p class="artist-country">{artist.country}</p>
-        )}
-
         {artist.image?.image && (
-          <figure class="artist-main-image">
+          <figure class="artist-image">
             <picture>
               <source
-                srcset={getResponsiveSrcSet(artist.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.HERO)}
+                srcset={getResponsiveSrcSet(artist.image.image, RESPONSIVE_WIDTHS.HERO, IMAGE_QUALITY.HERO)}
                 type="image/webp"
-                sizes="(max-width: 768px) 100vw, 500px"
+                sizes="(max-width: 768px) 100vw, 800px"
               />
               <img
-                src={getOptimizedImageUrl(artist.image.image, 500, null, IMAGE_QUALITY.HERO)}
+                src={getOptimizedImageUrl(artist.image.image, 800, null, IMAGE_QUALITY.HERO)}
                 alt={artist.image.alt || artist.name}
                 loading="eager"
                 decoding="async"
               />
             </picture>
-            {(artist.image.caption || artist.image.credit) && (
-              <figcaption class="image-caption">
-                {artist.image.caption && <span class="caption-text">{artist.image.caption}</span>}
-                {artist.image.credit && <span class="image-credit">{artist.image.credit}</span>}
-              </figcaption>
-            )}
           </figure>
         )}
+
+        <div class="artist-info">
+          {artist.instrument && (
+            <div class="artist-detail">
+              <strong>🎵 Instrument:</strong>
+              <span>{artist.instrument}</span>
+            </div>
+          )}
+
+          {artist.country && (
+            <div class="artist-detail">
+              <strong>🌍 Country:</strong>
+              <span>{artist.country}</span>
+            </div>
+          )}
+        </div>
       </header>
 
-      <!-- PageBuilder content from CMS -->
+      {/* PageBuilder content from CMS */}
       {content && Array.isArray(content) && content.length > 0 && (
         <div class="artist-content">
           {content.map((block) => (
@@ -116,7 +140,7 @@ export async function getStaticPaths() {
     text-decoration: none;
   }
 
-  .artist-header {
+  article header {
     margin-bottom: 3rem;
   }
 
@@ -124,51 +148,42 @@ export async function getStaticPaths() {
     font-size: 2.5rem;
     font-weight: bold;
     line-height: 1.2;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
   }
 
-  .artist-excerpt {
-    font-size: 1.2rem;
-    line-height: 1.4;
-    color: #666;
-    margin-bottom: 1.5rem;
-    font-style: italic;
+  .artist-image {
+    margin-bottom: 2rem;
   }
 
-  .artist-instrument,
-  .artist-country {
-    margin-bottom: 0.75rem;
-    font-size: 1rem;
-  }
-
-  .artist-main-image {
-    margin-top: 2rem;
-  }
-
-  .artist-main-image img {
+  .artist-image img {
     width: 100%;
-    max-width: 500px;
     height: auto;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
-  .image-caption {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: #555;
+  .artist-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
   }
 
-  .caption-text {
-    display: block;
-    font-style: italic;
+  .artist-detail {
+    display: flex;
+    margin-bottom: 1rem;
+    align-items: flex-start;
   }
 
-  .image-credit {
-    display: block;
-    margin-top: 0.25rem;
-    font-size: 0.8rem;
-    color: #777;
+  .artist-detail:last-child {
+    margin-bottom: 0;
+  }
+
+  .artist-detail strong {
+    min-width: 140px;
+    margin-right: 1rem;
+    color: #495057;
   }
 
   @media (max-width: 768px) {
@@ -181,7 +196,17 @@ export async function getStaticPaths() {
     }
 
     .artist-info {
-      padding: 1rem;
+      padding: 1.5rem;
+    }
+
+    .artist-detail {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .artist-detail strong {
+      margin-bottom: 0.25rem;
+      margin-right: 0;
     }
   }
 </style>

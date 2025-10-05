@@ -5,41 +5,80 @@ import { createDataService } from '../../lib/sanity/dataService.js';
 import { formatDateForLanguage } from '../../lib/utils/dates';
 import { getMultilingualContent } from "../../lib/utils/language.js";
 import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
+import type { SanityDocument } from '@sanity/client';
+import { loadQuery } from '../../lib/sanity/loadQuery.js';
 
-const { slug } = Astro.params;
+// Generate static paths for all events
+export async function getStaticPaths() {
+  const { data: events } = await loadQuery<SanityDocument[]>({
+    query: `*[_type == "event" && (defined(slug_no.current) || defined(slug_en.current))]`,
+  });
 
-if (!slug) {
-  return Astro.redirect('/404');
+  return events.map((event) => {
+    // Use Norwegian slug, fallback to English slug
+    const slug = event.slug_no?.current || event.slug_en?.current;
+    return {
+      params: { slug },
+    };
+  });
 }
 
-// Create data service with Visual Editing support
-const dataService = createDataService(Astro.request);
+const { params } = Astro;
 
-let event = null;
+// Fetch the specific event based on the slug parameter (Norwegian priority)
+const { data: event } = await loadQuery({
+  query: `*[_type == "event" && $slug in [slug_no.current, slug_en.current, slug.current]][0]{
+    _id,
+    _type,
+    title_no,
+    "title": title_no,
+    slug_no,
+    excerpt_no,
+    "image": {
+      "image": image{
+        asset->,
+        hotspot,
+        crop
+      },
+      "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
+      "credit": coalesce(imageCredit_no, imageCredit_en)
+    },
+    eventDate->{
+      _id,
+      date,
+      title_display_no,
+      "title": title_display_no
+    },
+    eventTime,
+    venue->{
+      _id,
+      title,
+      name,
+      address,
+      city,
+      "slug": slug.current
+    },
+    "artists": artist[]-> {
+      _id,
+      name,
+      "slug": slug.current,
+      image,
+      "imageAlt": coalesce(imageAlt_no, imageAlt_en)
+    },
+    ticketType,
+    ticketUrl,
+    content_no,
+    seo
+  }`,
+  params,
+});
 
-try {
-  event = await dataService.getEventBySlug(slug);
-
-  if (!event) {
-    return Astro.redirect('/404');
-  }
-} catch (error) {
-  console.error('Error loading event:', error);
+if (!event) {
   return Astro.redirect('/404');
 }
 
 // Get appropriate content array
-const content = getMultilingualContent(event) || event.content;
-
-export async function getStaticPaths() {
-  // In development, return empty array for on-demand rendering
-  if (import.meta.env.DEV) {
-    return [];
-  }
-
-  const dataService = new (await import("../../lib/sanity/dataService.js")).SanityDataService();
-  return await dataService.getSlugsForType('event');
-}
+const content = getMultilingualContent(event) || event.content_no;
 ---
 
 <Layout title={`${event.title} - Event`}>

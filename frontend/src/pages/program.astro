@@ -5,6 +5,7 @@ import DateFilter from '../components/DateFilter.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
 import { formatDateWithWeekday } from '../lib/utils/dates';
 import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/imageHelpers';
+import { stegaClean } from '@sanity/client/stega';
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
@@ -12,8 +13,8 @@ const dataService = createDataService(Astro.request);
 // Hent program-siden innhold for metadata
 const programPage = await dataService.getProgramPage();
 
-// Get events from programPage.selectedEvents
-const events = programPage?.selectedEvents || [];
+// Get events from programPage.selectedEvents and filter out null/undefined
+const events = (programPage?.selectedEvents || []).filter(event => event != null);
 
 // Fallback values
 const pageTitle = programPage?.title || 'Program';
@@ -22,13 +23,13 @@ const pageTitle = programPage?.title || 'Program';
 const availableDates = events
   .filter(event => event.eventDate?.date)
   .map(event => ({
-    date: event.eventDate.date,
-    title: event.eventDate.title
+    date: event.eventDate!.date,
+    title: event.eventDate!.title
   }));
 
 // Group events by date
 const eventsByDate = events.reduce((acc, event) => {
-  if (!event.eventDate?.date) return acc;
+  if (!event?.eventDate?.date) return acc;
 
   const dateKey = event.eventDate.date;
   if (!acc[dateKey]) {
@@ -76,7 +77,7 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <a href={`/program/${event.slug}`} class="event-card-link">
+                <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-card-link">
                   <div class="event-header">
                     <h4 class="event-title">{event.title}</h4>
                     <div class="event-meta">
@@ -149,7 +150,7 @@ const isHtmxRequest = Astro.request.headers.get('HX-Request') === 'true';
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <a href={`/program/${event.slug}`} class="event-card-link">
+                <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-card-link">
                   <div class="event-header">
                     <h4 class="event-title">{event.title}</h4>
                     <div class="event-meta">

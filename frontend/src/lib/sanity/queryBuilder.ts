@@ -384,7 +384,11 @@ const EVENTS_BY_DATE_QUERY = defineQuery(`*[_type == "event" && publishingStatus
 }`)
 
 
-const SLUGS_FOR_TYPE_QUERY = defineQuery(`*[_type == $type && defined(slug.current)]{ "params": { "slug": slug.current } }`)
+const SLUGS_FOR_TYPE_QUERY = defineQuery(`*[_type == $type && (defined(slug.current) || defined(slug_no.current) || defined(slug_en.current))]{
+  "params": {
+    "slug": coalesce(slug_no.current, slug_en.current, slug.current)
+  }
+}`)
 
 const SEARCH_CONTENT_QUERY = defineQuery(`*[_type in $types && (
   coalesce(title_no, title_en, title) match $search ||
