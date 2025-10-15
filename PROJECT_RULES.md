@@ -82,6 +82,45 @@ If the answer to #4 is "yes", then probably don't change it.
 - **Needs both servers running** on correct ports
 - **Environment variables must be set**: `SANITY_API_READ_TOKEN` and `PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true`
 
+### MCP Server Usage
+
+#### Generelt om MCP (Model Context Protocol)
+**Claude MCP Dokumentasjon:** https://docs.claude.com/en/docs/claude-code/mcp
+
+MCP-servere gir direkte tilgang til verktøy og systemer uten CLI-kommandoer. De reduserer kontekstbytte og gir strukturerte, typede svar som er lettere å jobbe med.
+
+**Når skal MCP brukes:**
+- ✅ Når vi trenger å hente/endre data fra eksterne systemer (Sanity)
+- ✅ Når vi trenger strukturert informasjon fra dokumentasjon (Astro Docs)
+- ✅ Når det forenkler workflow og reduserer Bash-kommandoer
+- ❌ Ikke bruk hvis standard verktøy er enklere eller raskere
+
+**Grunnprinsipp:** Bruk MCP når det gir faktisk verdi - ikke "fordi vi kan".
+
+**Verktøy-hierarki (viktig):**
+1. **MCP-servere FØRST** - Alltid bruk tilgjengelige MCP-servere som primærkilde
+2. **WebFetch/WebSearch som fallback** - Kun når MCP ikke er tilgjengelig eller ikke dekker behovet
+3. **CLI-kommandoer sist** - Kun når verken MCP eller WebFetch løser problemet
+
+Dette hierarkiet gjelder for alle agenter og all interaksjon med eksterne systemer.
+
+#### Spesifikke MCP-servere
+
+**Sanity MCP Server**
+- Dokumentasjon: https://www.sanity.io/docs/compute-and-ai/mcp-server
+- Bruk til: Hente innhold/data (GROQ queries), oppdatere/opprette dokumenter, sjekke schemas og content types, administrere releases og versjoner
+- Foretrekk over `npx sanity` CLI-kommandoer for queries og datahenting
+
+**Astro Docs MCP Server**
+- Dokumentasjon: https://docs.astro.build/en/guides/build-with-ai/#astro-docs-mcp-server
+- Bruk til: Søke i Astro-dokumentasjon, hente informasjon om Astro-funksjoner og API-er, best practices og kodeeksempler
+
+**TypeScript MCP Server (kommende)**
+- Dokumentasjon: (TBD)
+
+**HTMX MCP Server (kommende)**
+- Dokumentasjon: (TBD)
+
 ### File Editing Workflow
 - **Always read a file before editing it** to understand the current code and how the changes will alter the code
 - **Never attempt to edit based on assumptions** about file content from memory or previous sessions
@@ -101,6 +140,7 @@ If the answer to #4 is "yes", then probably don't change it.
 ✅ **Git Workflow**: Proactively suggest pushing after major changes/milestones
 ✅ **Agent Usage**: Use specialized agents when appropriate, follow tool usage patterns
 ✅ **Agent Rules**: Read relevant files in `.claude/agents/` for specific agent guidance
+✅ **MCP Usage**: Use MCP servers (Sanity, Astro Docs) when they provide value over CLI
 ✅ **Dependencies**: Keep stable, use Node.js 20.19.0, npm --legacy-peer-deps
 ✅ **Simplicity First**: Working code > "better" code, simple > complex
 ✅ **Visual Editing**: Maintain compatibility, test after changes
