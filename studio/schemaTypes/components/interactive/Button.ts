@@ -147,62 +147,6 @@ export const buttonComponent = defineType({
   },
 })
 
-// Funksjon for å generere HTML fra knapp-data
-export const generateButtonHtml: ComponentHTMLGenerator<ButtonData> = (data: ButtonData): string => {
-  if (!data.text) {
-    return ''
-  }
-
-  const escapedText = escapeHtml(data.text)
-  const escapedUrl = data.url ? escapeHtml(data.url) : '#'
-  
-  // Build class list
-  const classes = [
-    'btn',
-    `btn-${data.style || 'primary'}`,
-    `btn-${data.size || 'medium'}`,
-  ]
-  
-  if (data.fullWidth) classes.push('btn-full-width')
-  
-  // Icon HTML
-  let iconHtml = ''
-  if (data.icon && data.icon !== 'none') {
-    const iconClass = `icon-${data.icon}`
-    iconHtml = `<span class="${iconClass}" aria-hidden="true"></span>`
-  }
-  
-  // Content with icon positioning
-  let contentHtml = escapedText
-  if (iconHtml) {
-    contentHtml = data.iconPosition === 'before' 
-      ? `${iconHtml} ${escapedText}`
-      : `${escapedText} ${iconHtml}`
-  }
-  
-  // Build attributes
-  const attributes = [
-    `href="${escapedUrl}"`,
-    `class="${classes.join(' ')}"`,
-  ]
-  
-  if (data.openInNewTab || (data.url && data.url.startsWith('http'))) {
-    attributes.push('target="_blank"')
-    attributes.push('rel="noopener noreferrer"')
-  }
-
-  return `<a ${attributes.join(' ')}>${contentHtml}</a>`
-}
-
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
 // Type-safe validation functions
 export const buttonValidationRules = {
   text: componentSpecificValidation.buttonText as ValidationRule,

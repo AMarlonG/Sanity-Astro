@@ -1,9 +1,8 @@
 // Content Components
-export {title, generateTitleHtml, escapeHtml} from './content/Title'
+export {title, escapeHtml} from './content/Title'
 export {quoteComponent} from './content/Quote'
 export {
   heading as headingComponent,
-  generateHeadingHtml,
   generateHeadingId,
   validateHeadingHierarchy,
 } from './content/Heading'
@@ -20,18 +19,18 @@ export {
   type PortableTextMarkDefinition,
 } from './content/PortableText'
 export {portableTextBlock} from './content/PortableTextBlock'
-export {imageComponent, generateImageHtml, generateOptimizedImageUrl} from './content/Image'
-export {videoComponent, generateVideoHtml} from './content/Video'
+export {imageComponent, generateOptimizedImageUrl} from './content/Image'
+export {videoComponent} from './content/Video'
 
 // Layout Components
 export {columnLayout} from './layout/ColumnLayout'
 export {spacer} from './layout/Spacer'
 
 // Interactive Components
-export {accordionComponent, generateAccordionHtml} from './interactive/Accordion'
-export {buttonComponent, generateButtonHtml} from './interactive/Button'
+export {accordionComponent} from './interactive/Accordion'
+export {buttonComponent} from './interactive/Button'
 export {countdownComponent} from './interactive/Countdown'
-export {linkComponent, generateLinkHtml} from './interactive/Link'
+export {linkComponent} from './interactive/Link'
 
 // Section Components
 export {contentScrollContainer} from './sections/ContentScrollContainer'

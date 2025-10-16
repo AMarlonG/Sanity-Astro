@@ -79,62 +79,6 @@ export const imageComponent = defineType({
   },
 })
 
-// Funksjon for å generere HTML fra bilde-data
-export const generateImageHtml: ComponentHTMLGenerator<ImageData> = (data: ImageData): string => {
-  if (!data.alt) {
-    return ''
-  }
-
-  let imageUrl = ''
-  let crop = null
-  let hotspot = null
-
-  if (data.image) {
-    imageUrl = data.image.asset?.url
-    crop = data.image.crop
-    hotspot = data.image.hotspot
-  }
-
-  if (!imageUrl) {
-    return ''
-  }
-
-  const alignmentClass = data.alignment ? `image-${data.alignment}` : 'image-center'
-  const sizeClass = data.size ? `image-${data.size}` : 'image-medium'
-  const aspectRatioClass = data.aspectRatio
-    ? `image-aspect-${data.aspectRatio.replace(':', '-')}`
-    : 'image-aspect-16-9'
-
-  // Generer CSS for crop/hotspot hvis tilgjengelig
-  let imageStyle = ''
-  if (crop && hotspot) {
-    const {x, y} = hotspot
-    const {left, top, right, bottom} = crop
-
-    const cropX = left + (right - left) * x
-    const cropY = top + (bottom - top) * y
-
-    imageStyle = `object-position: ${cropX * 100}% ${cropY * 100}%;`
-  }
-
-  let html = `<div class="image-container ${alignmentClass} ${sizeClass} ${aspectRatioClass}">`
-
-  // Bruk picture-element for bedre responsivitet og format-støtte
-  html += `\n  <picture>`
-  html += `\n    <source srcset="${imageUrl}?auto=format&fit=crop&w=800&q=80" media="(min-width: 768px)">`
-  html += `\n    <source srcset="${imageUrl}?auto=format&fit=crop&w=600&q=80" media="(min-width: 480px)">`
-  html += `\n    <img src="${imageUrl}?auto=format&fit=crop&w=400&q=80" alt="${escapeHtml(data.alt)}" style="${imageStyle}" loading="lazy" />`
-  html += `\n  </picture>`
-
-  if (data.caption) {
-    html += `\n  <figcaption>${escapeHtml(data.caption)}</figcaption>`
-  }
-
-  html += '\n</div>'
-
-  return html
-}
-
 // TypeScript interface for image optimization options
 export interface ImageOptimizationOptions {
   width?: number

@@ -49,24 +49,6 @@ export const title = defineType({
   },
 })
 
-// Function to generate HTML from title data
-export const generateTitleHtml: ComponentHTMLGenerator<TitleData> = (data: TitleData): string => {
-  if (!data.mainTitle) {
-    return ''
-  }
-
-  const escapedMainTitle = escapeHtml(data.mainTitle)
-  const escapedSubtitle = data.subtitle ? escapeHtml(data.subtitle) : ''
-
-  let html = `<h1>${escapedMainTitle}</h1>`
-
-  if (escapedSubtitle) {
-    html += `\n<h2>${escapedSubtitle}</h2>`
-  }
-
-  return html
-}
-
 // Type-safe validation functions
 export const titleValidationRules = {
   mainTitle: componentSpecificValidation.headingText as ValidationRule,

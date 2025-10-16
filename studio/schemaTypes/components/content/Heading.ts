@@ -86,27 +86,6 @@ export const heading = defineType({
   },
 })
 
-// Function to generate HTML from heading data
-export const generateHeadingHtml: ComponentHTMLGenerator<HeadingData> = (data: HeadingData): string => {
-  if (!data.text || !data.level) {
-    return ''
-  }
-
-  const escapedText = escapeHtml(data.text)
-  const escapedId = data.id?.current ? escapeHtml(data.id.current) : ''
-
-  // Build attributes
-  const attributes: string[] = []
-
-  if (escapedId) {
-    attributes.push(`id="${escapedId}"`)
-  }
-
-  const attributesString = attributes.length > 0 ? ` ${attributes.join(' ')}` : ''
-
-  return `<${data.level}${attributesString}>${escapedText}</${data.level}>`
-}
-
 // Utility function to generate ID from text if not provided
 export function generateHeadingId(text: string): string {
   return text
