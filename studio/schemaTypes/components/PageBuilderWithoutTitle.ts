@@ -28,7 +28,7 @@ export const pageBuilderWithoutTitle = defineType({
         {
           name: 'layout',
           title: 'Layout & Struktur',
-          of: ['columnLayout', 'gridLayout', 'spacer'],
+          of: ['columnLayout', 'spacer'],
         },
         {
           name: 'content',
@@ -67,11 +67,6 @@ export const pageBuilderWithoutTitle = defineType({
       type: 'columnLayout',
       title: 'Responsiv Layout',
       icon: EllipsisHorizontalIcon,
-    },
-    {
-      type: 'gridLayout',
-      title: 'Grid Layout (Avansert)',
-      icon: BlockContentIcon,
     },
     {
       type: 'spacer',

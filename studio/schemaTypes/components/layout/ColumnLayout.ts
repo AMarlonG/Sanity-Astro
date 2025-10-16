@@ -252,7 +252,7 @@ export const columnLayout = defineType({
         {type: 'artistScrollContainer'},
         {type: 'eventScrollContainer'},
       ],
-      validation: contentValidation.gridLayoutItems,
+      validation: contentValidation.layoutItems,
     }),
   ],
   preview: {
@@ -436,7 +436,7 @@ export const responsiveLayoutCSS = `
 // Type-safe validation functions
 export const columnLayoutValidationRules = {
   layoutType: (Rule: any) => Rule.required().error('Layout-type må velges') as ValidationRule,
-  items: contentValidation.gridLayoutItems as ValidationRule,
+  items: contentValidation.layoutItems as ValidationRule,
 } as const
 
 // Utility function to validate column layout has content

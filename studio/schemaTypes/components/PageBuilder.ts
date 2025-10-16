@@ -29,7 +29,7 @@ export const pageBuilder = defineType({
         {
           name: 'layout',
           title: 'Layout & Struktur',
-          of: ['columnLayout', 'gridLayout', 'spacer'],
+          of: ['columnLayout', 'spacer'],
         },
         {
           name: 'content',
@@ -85,30 +85,6 @@ export const pageBuilder = defineType({
             title: `${layoutName} Layout`,
             subtitle: `${count || 0} komponenter • ${containerWidth || 'full'} bredde`,
             media: EllipsisHorizontalIcon,
-          }
-        },
-      },
-    },
-    {
-      type: 'gridLayout',
-      title: 'Grid Layout (Avansert)',
-      icon: BlockContentIcon,
-      preview: {
-        select: {
-          gridTemplate: 'gridTemplate',
-          itemCount: 'gridItems.length',
-        },
-        prepare({gridTemplate, itemCount}) {
-          const templateName = 
-            gridTemplate === 'hero' ? 'Hero Layout' :
-            gridTemplate === 'magazine' ? 'Magazine Layout' :
-            gridTemplate === 'masonry' ? 'Masonry Layout' :
-            'Custom Grid'
-          
-          return {
-            title: templateName,
-            subtitle: `${itemCount || 0} grid items`,
-            media: BlockContentIcon,
           }
         },
       },

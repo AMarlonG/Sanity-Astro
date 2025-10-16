@@ -64,9 +64,9 @@ export const contentValidation = {
     
   scrollContainerItems: (Rule: any) => Rule.min(2).max(8)
     .error('Scroll container må ha mellom 2 og 8 elementer'),
-    
-  gridLayoutItems: (Rule: any) => Rule.min(1).max(12)
-    .error('Grid layout må ha mellom 1 og 12 elementer'),
+
+  layoutItems: (Rule: any) => Rule.min(1).max(12)
+    .error('Layout må ha mellom 1 og 12 elementer'),
 }
 
 /**

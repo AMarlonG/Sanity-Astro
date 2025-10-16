@@ -171,27 +171,6 @@ export interface ResponsiveLayoutData extends GlobalComponentData {
   items: GlobalComponentData[]
 }
 
-export interface GridLayoutData extends GlobalComponentData {
-  gridTemplate: 'hero' | 'magazine' | 'masonry' | 'custom'
-  gridAreas?: string
-  gridItems: Array<{
-    component: GlobalComponentData[]
-    gridArea?: string
-    span?: {
-      columns: number
-      rows: number
-    }
-  }>
-  responsiveGrid?: {
-    tabletBehavior: 'keep' | 'two-columns' | 'stack'
-    mobileBehavior: 'stack' | 'two-columns'
-  }
-  gap?: {
-    desktop: string
-    mobile: string
-  }
-}
-
 export interface SpacerData extends GlobalComponentData {
   type: 'vertical' | 'horizontal' | 'section'
   size: {
@@ -458,7 +437,6 @@ export type ComponentType =
   | 'linkComponent'
   | 'accordionComponent'
   | 'columnLayout'
-  | 'gridLayout'
   | 'spacer'
   | 'contentScrollContainer'
   | 'artistScrollContainer'
@@ -478,7 +456,6 @@ export type PageBuilderComponent =
   | (LinkComponentData & { _type: 'linkComponent' })
   | (AccordionData & { _type: 'accordionComponent' })
   | (ResponsiveLayoutData & { _type: 'columnLayout' })
-  | (GridLayoutData & { _type: 'gridLayout' })
   | (SpacerData & { _type: 'spacer' })
   | (ScrollContainerData & { _type: 'contentScrollContainer' })
   | (ArtistScrollContainerData & { _type: 'artistScrollContainer' })
@@ -538,7 +515,6 @@ export const isValidComponentType = (type: string): type is ComponentType => {
     'linkComponent',
     'accordionComponent',
     'columnLayout',
-    'gridLayout',
     'spacer',
     'contentScrollContainer',
     'artistScrollContainer',
@@ -680,10 +656,6 @@ export const isResponsiveLayoutComponent = (component: PageBuilderComponent): co
   return component._type === 'columnLayout'
 }
 
-export const isGridLayoutComponent = (component: PageBuilderComponent): component is GridLayoutData & { _type: 'gridLayout' } => {
-  return component._type === 'gridLayout'
-}
-
 export const isSpacerComponent = (component: PageBuilderComponent): component is SpacerData & { _type: 'spacer' } => {
   return component._type === 'spacer'
 }
@@ -813,13 +785,6 @@ export function validatePageBuilderComponent(component: any): ComponentValidatio
       if (!Array.isArray(component.items)) {
         result.isValid = false
         result.errors.push('Column layout requires items array')
-      }
-      break
-
-    case 'gridLayout':
-      if (!Array.isArray(component.gridItems)) {
-        result.isValid = false
-        result.errors.push('Grid layout requires gridItems array')
       }
       break
 
@@ -960,14 +925,6 @@ export function extractTextContent(content: PageBuilderComponent[]): string {
       case 'columnLayout':
         if (isResponsiveLayoutComponent(component)) {
           textParts.push(extractTextContent(component.items))
-        }
-        break
-
-      case 'gridLayout':
-        if (isGridLayoutComponent(component)) {
-          component.gridItems.forEach(item => {
-            textParts.push(extractTextContent(item.component))
-          })
         }
         break
 
@@ -1152,7 +1109,7 @@ export function createComponentDependencyMap(content: PageBuilderComponent[]): M
       dependencies.push('nestedContent')
     }
 
-    if (isResponsiveLayoutComponent(component) || isGridLayoutComponent(component)) {
+    if (isResponsiveLayoutComponent(component)) {
       dependencies.push('layoutContent')
     }
 

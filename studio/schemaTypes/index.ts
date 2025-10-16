@@ -44,7 +44,6 @@ export const schemaTypes = [
   components.pageBuilder,
   components.pageBuilderWithoutTitle,
   components.columnLayout,
-  components.gridLayout,
   components.spacer,
   // Seksjoner
   components.contentScrollContainer,

@@ -15,7 +15,6 @@ import ArtistScrollContainer from '../components/ArtistScrollContainer.astro';
 import EventScrollContainer from '../components/EventScrollContainer.astro';
 import Countdown from '../components/Countdown.astro';
 import ColumnLayout from '../components/ColumnLayout.astro';
-import GridLayout from '../components/GridLayout.astro';
 import Spacer from '../components/Spacer.astro';
 
 // Component registry mapping Sanity block types to Astro components
@@ -34,7 +33,6 @@ export const componentRegistry: Record<string, AstroComponentFactory> = {
   eventScrollContainer: EventScrollContainer,
   countdownComponent: Countdown,
   columnLayout: ColumnLayout,
-  gridLayout: GridLayout,
   spacer: Spacer,
 } as const;
 

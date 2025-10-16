@@ -179,24 +179,6 @@ export const LAYOUT_FRAGMENTS = {
     }
   `,
 
-  gridLayout: `
-    _type == "gridLayout" => {
-      ${BASE_COMPONENT_FIELDS},
-      gridTemplate,
-      gridAreas,
-      gridItems[]{
-        component[]{
-          ${BASE_COMPONENT_FIELDS},
-          ...
-        },
-        gridArea,
-        span
-      },
-      responsiveGrid,
-      gap
-    }
-  `,
-
   spacer: `
     _type == "spacer" => {
       ${BASE_COMPONENT_FIELDS},

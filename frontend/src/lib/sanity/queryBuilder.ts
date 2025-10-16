@@ -33,10 +33,6 @@ const buildContentProjection = (depth = 0): string => {
       ...,
       items[]{${nested}}
     },
-    _type == "gridLayout" => {
-      ...,
-      gridItems[]{${nested}}
-    },
     _type == "contentScrollContainer" => {
       ...,
       items[]{${nested}}

@@ -25,7 +25,6 @@ export {videoComponent, generateVideoHtml} from './content/Video'
 
 // Layout Components
 export {columnLayout} from './layout/ColumnLayout'
-export {gridLayout} from './layout/GridLayout'
 export {spacer} from './layout/Spacer'
 
 // Interactive Components
