@@ -100,11 +100,19 @@ export const linkComponent = defineType({
       hidden: ({parent}) => parent?.linkType !== 'phone',
     }),
     defineField({
-      name: 'openInNewTab',
-      title: 'Åpne i ny fane',
-      type: 'boolean',
-      description: 'Åpner lenken i en ny fane (anbefalt for eksterne lenker)',
-      initialValue: false,
+      name: 'linkTarget',
+      title: 'Lenke-mål',
+      type: 'string',
+      description: 'Hvordan lenken skal åpnes',
+      options: {
+        list: [
+          { title: 'Samme fane', value: '_self' },
+          { title: 'Ny fane (anbefalt)', value: '_blank' }
+        ],
+        layout: 'radio'
+      },
+      initialValue: '_self',
+      hidden: ({parent}) => parent?.linkType !== 'url',
     }),
     defineField({
       name: 'accessibility',
@@ -132,7 +140,7 @@ export const linkComponent = defineType({
     select: {
       title: 'text',
       linkType: 'linkType',
-      openInNewTab: 'openInNewTab',
+      linkTarget: 'linkTarget',
       url: 'url',
       email: 'email',
       phone: 'phone',
@@ -145,7 +153,7 @@ export const linkComponent = defineType({
     prepare({
       title,
       linkType,
-      openInNewTab,
+      linkTarget,
       url,
       email,
       phone,
@@ -186,7 +194,7 @@ export const linkComponent = defineType({
 
       return {
         title: 'Lenke',
-        subtitle: `${title || 'Uten tekst'} • ${linkDisplay}${openInNewTab ? ' (ny fane)' : ''}`,
+        subtitle: `${title || 'Uten tekst'} • ${linkDisplay}${linkTarget === '_blank' ? ' (ny fane)' : ''}`,
         media: DocumentIcon,
       }
     },
@@ -207,7 +215,7 @@ export interface LinkComponentData {
   url?: string
   email?: string
   phone?: string
-  openInNewTab: boolean
+  linkTarget?: '_self' | '_blank'
   accessibility?: {
     ariaLabel?: string
     ariaDescribedBy?: string
@@ -271,7 +279,7 @@ export const generateLinkHtml: ComponentHTMLGenerator<LinkComponentData> = (data
     case 'url':
       if (data.url) {
         href = data.url
-        if (data.openInNewTab) {
+        if (data.linkTarget === '_blank') {
           target = '_blank'
           rel = 'noopener noreferrer'
         }

@@ -53,7 +53,7 @@ export interface LinkComponentData extends GlobalComponentData {
   url?: string
   email?: string
   phone?: string
-  openInNewTab: boolean
+  linkTarget?: '_self' | '_blank'
   accessibility?: {
     ariaLabel?: string
     ariaDescribedBy?: string
@@ -421,7 +421,7 @@ export interface SeoFieldsData {
   description?: string
   keywords?: string[]
   image?: ImageData['image']
-  noIndex?: boolean
+  indexingStatus?: 'index' | 'noindex'
 }
 
 // Publishing status types

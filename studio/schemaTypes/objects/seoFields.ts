@@ -29,21 +29,28 @@ export const seoType = defineType({
       validation: seoValidation.metaDescription,
     }),
     defineField({
-      name: 'noIndex',
-      title: 'Skjul fra søkemotorer',
-      type: 'boolean',
-      description: 'Forhindre at denne siden indekseres av søkemotorer',
-      initialValue: false,
+      name: 'indexingStatus',
+      title: 'Søkemotor-indeksering',
+      type: 'string',
+      description: 'Kontroller om søkemotorer skal indeksere denne siden',
+      options: {
+        list: [
+          { title: 'Synlig for søkemotorer', value: 'index' },
+          { title: 'Skjul fra søkemotorer', value: 'noindex' }
+        ],
+        layout: 'radio'
+      },
+      initialValue: 'index',
     }),
   ],
   preview: {
     select: {
       title: 'title',
       description: 'description',
-      noIndex: 'noIndex',
+      indexingStatus: 'indexingStatus',
     },
-    prepare({title, description, noIndex}) {
-      const status = noIndex ? 'Skjult fra søkemotorer' : 'Synlig for søkemotorer'
+    prepare({title, description, indexingStatus}) {
+      const status = indexingStatus === 'noindex' ? 'Skjult fra søkemotorer' : 'Synlig for søkemotorer'
       const content = title || description ? `${title || 'Ingen tittel'} • ${description || 'Ingen beskrivelse'}` : 'Bruker fallback fra sideinnhold'
 
       return {
@@ -116,6 +123,6 @@ export function generateFallbackSeoData(pageData: {
     title: pageData.title,
     description: pageData.excerpt,
     image: pageData.image,
-    noIndex: false,
+    indexingStatus: 'index',
   }
 }

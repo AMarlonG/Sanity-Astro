@@ -67,12 +67,19 @@ export const venue = defineType({
       }),
     }),
     defineField({
-      name: 'openInNewTab',
-      title: 'Åpne i ny fane',
-      type: 'boolean',
-      description: 'Åpner lenken i en ny fane (anbefalt for eksterne lenker)',
+      name: 'linkTarget',
+      title: 'Lenke-mål',
+      type: 'string',
+      description: 'Hvordan lenken skal åpnes',
       fieldset: 'link',
-      initialValue: true,
+      options: {
+        list: [
+          { title: 'Samme fane', value: '_self' },
+          { title: 'Ny fane (anbefalt)', value: '_blank' }
+        ],
+        layout: 'radio'
+      },
+      initialValue: '_blank',
     }),
   ],
   preview: {
