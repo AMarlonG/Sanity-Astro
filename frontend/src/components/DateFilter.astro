@@ -22,11 +22,10 @@ const currentDate = Astro.url.searchParams.get('date') || '';
     <div class="date-filter-buttons">
       <button
         class:list={['date-button', { active: !currentDate }]}
-        hx-get={language === 'no' ? '/program' : '/en/program'}
-        hx-target="#program-content"
-        hx-swap="outerHTML swap:0.1s"
-        hx-push-url="true"
-        hx-select="#program-content"
+        hx-get={`/api/filter-program?lang=${language}`}
+        hx-target="#event-results"
+        hx-swap="innerHTML swap:0.1s"
+        hx-push-url={language === 'no' ? '/program' : '/en/program'}
         type="button"
       >
         {language === 'no' ? 'Alle datoer' : 'All dates'}
@@ -35,11 +34,10 @@ const currentDate = Astro.url.searchParams.get('date') || '';
       {uniqueDates.map(date => (
         <button
           class:list={['date-button', { active: currentDate === date }]}
-          hx-get={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
-          hx-target="#program-content"
-          hx-swap="outerHTML swap:0.1s"
-          hx-push-url="true"
-          hx-select="#program-content"
+          hx-get={`/api/filter-program?date=${date}&lang=${language}`}
+          hx-target="#event-results"
+          hx-swap="innerHTML swap:0.1s"
+          hx-push-url={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
           type="button"
         >
           {formatDateWithWeekday(date, language)}

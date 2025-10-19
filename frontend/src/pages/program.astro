@@ -69,13 +69,14 @@ const filteredDates = dateFilter
   excerpt={programPage?.excerpt}
   pageDocument={programPage}
 >
-  <div id="program-content">
-      <DateFilter
-        availableDates={availableDates}
-        language="no"
-      />
+  <div id="date-filter-container">
+    <DateFilter
+      availableDates={availableDates}
+      language="no"
+    />
+  </div>
 
-      <div id="event-results">
+  <div id="event-results">
       {filteredDates.length > 0 ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
@@ -135,7 +136,6 @@ const filteredDates = dateFilter
         </div>
       </section>
       )}
-      </div>
   </div>
 </ContentPageLayout>
 
