@@ -105,6 +105,19 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
           window.htmx.process(document.body);
         }
       });
+
+      // Simple safety net: Verify CSS loaded after htmx swap
+      // If something goes wrong, gracefully degrade to full page reload
+      document.body.addEventListener('htmx:afterSwap', function(evt) {
+        // Check if critical CSS classes exist (indicates CSS is loaded)
+        const testElement = document.querySelector('.event-card, .date-button');
+        const hasStyles = testElement && window.getComputedStyle(testElement).display !== '';
+
+        if (!hasStyles) {
+          // CSS missing - do full page reload to recover
+          window.location.reload();
+        }
+      });
     </script>
   </body>
 </html>

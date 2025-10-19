@@ -20,80 +20,23 @@ const currentDate = Astro.url.searchParams.get('date') || '';
 {uniqueDates.length > 0 && (
   <div class="date-filter">
     <div class="date-filter-buttons">
-      <button
+      <a
+        href={language === 'no' ? '/program' : '/en/program'}
         class:list={['date-button', { active: !currentDate }]}
-        hx-get={`/api/filter-program?lang=${language}`}
-        hx-target="#event-results"
-        hx-swap="innerHTML swap:0.1s"
-        hx-push-url={language === 'no' ? '/program' : '/en/program'}
-        type="button"
+        hx-boost="true"
       >
         {language === 'no' ? 'Alle datoer' : 'All dates'}
-      </button>
+      </a>
 
       {uniqueDates.map(date => (
-        <button
+        <a
+          href={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
           class:list={['date-button', { active: currentDate === date }]}
-          hx-get={`/api/filter-program?date=${date}&lang=${language}`}
-          hx-target="#event-results"
-          hx-swap="innerHTML swap:0.1s"
-          hx-push-url={`${language === 'no' ? '/program' : '/en/program'}?date=${date}`}
-          type="button"
+          hx-boost="true"
         >
           {formatDateWithWeekday(date, language)}
-        </button>
+        </a>
       ))}
     </div>
   </div>
 )}
-
-<style>
-  .date-filter {
-    margin-block-end: var(--space-6);
-    border-block-end: 1px solid var(--color-border-light);
-    padding-block-end: var(--space-4);
-  }
-
-  .date-filter-buttons {
-    display: flex;
-    gap: var(--space-2);
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .date-button {
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    background: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    cursor: pointer;
-    transition: all var(--transition-base);
-    white-space: nowrap;
-  }
-
-  .date-button:hover {
-    background: var(--color-bg-secondary);
-    border-color: var(--color-border-dark);
-  }
-
-  .date-button.active {
-    background: var(--color-bg-secondary);
-    color: var(--color-text-primary);
-    border-color: var(--color-text-primary);
-    font-weight: var(--font-weight-semibold);
-  }
-
-  .date-button:focus-visible {
-    outline: 2px solid var(--color-border-dark);
-    outline-offset: 2px;
-  }
-
-  /* htmx loading state */
-  .date-button.htmx-request {
-    opacity: 0.6;
-    cursor: wait;
-  }
-</style>

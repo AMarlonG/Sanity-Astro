@@ -116,46 +116,6 @@ function generateEventCard(event: EventResult): string {
   `;
 }
 
-function generateFilterButtons(availableDates: DateInfo[], currentDate: string, language: 'no' | 'en'): string {
-  const uniqueDates = Array.from(new Set(availableDates.map(d => d.date))).sort();
-  const allDatesLabel = language === 'no' ? 'Alle datoer' : 'All dates';
-  const programPath = language === 'no' ? '/program' : '/en/program';
-
-  const allDatesButton = `
-    <button
-      class="date-button ${!currentDate ? 'active' : ''}"
-      hx-get="/api/filter-program?lang=${language}"
-      hx-target="#event-results"
-      hx-push-url="${programPath}"
-      type="button"
-    >
-      ${allDatesLabel}
-    </button>
-  `;
-
-  const dateButtons = uniqueDates.map(date => `
-    <button
-      class="date-button ${currentDate === date ? 'active' : ''}"
-      hx-get="/api/filter-program?date=${date}&lang=${language}"
-      hx-target="#event-results"
-      hx-push-url="${programPath}?date=${date}"
-      type="button"
-    >
-      ${formatDateWithWeekday(date, language)}
-    </button>
-  `).join('');
-
-  return `
-    <div id="date-filter-container" hx-swap-oob="true">
-      <div class="date-filter">
-        <div class="date-filter-buttons">
-          ${allDatesButton}
-          ${dateButtons}
-        </div>
-      </div>
-    </div>
-  `;
-}
 
 export const GET: APIRoute = async ({ url }) => {
   try {
@@ -206,7 +166,7 @@ export const GET: APIRoute = async ({ url }) => {
       ? sortedDates.filter(d => d.date === dateParam)
       : sortedDates;
 
-    // Generate results HTML
+    // Generate results HTML (must match program.astro structure exactly!)
     let resultsHtml = '';
     if (filteredDates.length > 0) {
       resultsHtml = filteredDates.map(({ date, displayTitle, events: dateEvents }) => `
@@ -228,21 +188,12 @@ export const GET: APIRoute = async ({ url }) => {
       `;
     }
 
-    // Generate filter buttons (out-of-band)
-    const filterButtonsHtml = generateFilterButtons(availableDates, dateParam, language);
-
-    // Combine main target and out-of-band swap
-    const html = `
-      <div id="event-results">
-        ${resultsHtml}
-      </div>
-      ${filterButtonsHtml}
-    `;
-
-    return new Response(html, {
+    // Return only the filtered results HTML
+    // Filter buttons are updated via server-side URL state in DateFilter.astro
+    return new Response(resultsHtml, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'public, max-age=300, stale-while-revalidate=60',
+        'Cache-Control': 'no-store, max-age=0',
       },
     });
   } catch (error) {

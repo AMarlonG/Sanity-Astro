@@ -6,6 +6,7 @@ import { createDataService } from '../lib/sanity/dataService.js';
 import { formatDateWithWeekday } from '../lib/utils/dates';
 import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/imageHelpers';
 import { stegaClean } from '@sanity/client/stega';
+import '../styles/program.css';
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
@@ -76,6 +77,11 @@ const filteredDates = dateFilter
     />
   </div>
 
+  <!-- Loading indicator for htmx requests -->
+  <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
+    Laster arrangementer...
+  </div>
+
   <div id="event-results">
       {filteredDates.length > 0 ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
@@ -137,194 +143,4 @@ const filteredDates = dateFilter
       </section>
       )}
   </div>
-</ContentPageLayout>
-
-<style>
-    /* Section Layout */
-    .content-section {
-      margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
-    }
-
-    .date-section {
-      margin-block-end: var(--space-8);
-    }
-
-    .date-title {
-      margin: 0 0 var(--space-4) 0;
-      color: var(--color-text-primary);
-      font-size: var(--font-size-xl);
-      font-weight: var(--font-weight-semibold);
-    }
-
-    /* Intrinsic Grid System */
-    .grid {
-      container-type: inline-size;
-      display: grid;
-      gap: clamp(var(--space-4), 3vw, var(--space-6));
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
-    }
-
-    /* No Results State */
-    .no-results {
-      text-align: center;
-      padding: var(--space-8) var(--space-4);
-      color: var(--color-text-secondary);
-    }
-
-    .no-results-title {
-      margin: 0 0 var(--space-2) 0;
-      color: var(--color-text-primary);
-      font-size: var(--font-size-xl);
-    }
-
-    .no-results-text {
-      margin: 0;
-      font-size: var(--font-size-base);
-    }
-
-    /* Event Card */
-    .event-card {
-      container-type: inline-size;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transition: transform var(--transition-base), box-shadow var(--transition-base);
-    }
-
-    .event-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .event-card-link {
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-
-    /* Event Header (above image) */
-    .event-header {
-      padding: var(--space-4);
-      padding-block-end: var(--space-3);
-    }
-
-    .event-title {
-      margin: 0 0 var(--space-2) 0;
-      color: var(--color-text-primary);
-      font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
-      line-height: var(--line-height-tight);
-    }
-
-    .event-excerpt {
-      margin: 0 0 var(--space-3) 0;
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-sm);
-      line-height: var(--line-height-normal);
-    }
-
-    .event-meta {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-sm);
-    }
-
-    .event-detail {
-      display: flex;
-      gap: var(--space-2);
-    }
-
-    .event-label {
-      font-weight: var(--font-weight-medium);
-      flex-shrink: 0;
-    }
-
-    /* Event Image */
-    .event-image {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4/5;
-      overflow: hidden;
-    }
-
-    .event-image picture {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .event-card-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* Event Actions (below image) */
-    .event-actions {
-      padding: var(--space-4);
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-    }
-
-    .event-actions-row {
-      display: flex;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: var(--space-2) var(--space-4);
-      border-radius: var(--radius-sm);
-      font-size: var(--font-size-sm);
-      font-weight: var(--font-weight-medium);
-      text-decoration: none;
-      text-align: center;
-      transition: all var(--transition-base);
-      border: 1px solid;
-    }
-
-    .event-link {
-      color: var(--color-primary-500);
-      text-decoration: underline;
-      font-size: var(--font-size-sm);
-    }
-
-    .event-link:hover {
-      color: var(--color-primary-600);
-    }
-
-    .btn-primary {
-      color: white;
-      background: var(--color-primary-500);
-      border-color: var(--color-primary-500);
-    }
-
-    .btn-primary:hover {
-      background: var(--color-primary-600);
-      border-color: var(--color-primary-600);
-    }
-
-    .ticket-info {
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-sm);
-      font-style: italic;
-    }
-
-    /* Container Query Enhancements */
-    @container (min-width: 350px) {
-      .event-title {
-        font-size: var(--font-size-xl);
-      }
-
-      .event-excerpt {
-        font-size: var(--font-size-base);
-      }
-
-      .event-meta {
-        font-size: var(--font-size-base);
-      }
-    }
-  </style>
 </ContentPageLayout>

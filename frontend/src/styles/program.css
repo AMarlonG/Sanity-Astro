@@ -1,0 +1,264 @@
+/* Program Page Styles - Global CSS for htmx compatibility
+ *
+ * HVORFOR GLOBAL CSS I STEDET FOR SCOPED CSS?
+ * ============================================
+ *
+ * Astro bruker normalt "scoped CSS" som automatisk legger til unike attributter
+ * (data-astro-cid-xyz123) på HTML-elementer når siden bygges. Dette gjør at CSS
+ * kun påvirker komponenten den tilhører.
+ *
+ * PROBLEMET MED HTMX:
+ * - Når programsiden lastes første gang, genererer Astro HTML med scoped attributter:
+ *   <div class="grid" data-astro-cid-abc123>
+ *
+ * - Når htmx henter nytt innhold fra API-endepunktet (/api/filter-program.ts),
+ *   genererer APIen HTML uten disse compile-time attributtene:
+ *   <div class="grid">
+ *
+ * - Scoped CSS kompileres til:
+ *   .grid[data-astro-cid-abc123] { display: grid; }
+ *
+ * - Denne CSS-regelen matcher IKKE HTML fra API (mangler attributtet)
+ * - Resultat: All styling forsvinner etter htmx-swap
+ *
+ * LØSNINGEN MED GLOBAL CSS:
+ * - Global CSS matcher bare klassenavn, uten attributter:
+ *   .grid { display: grid; }
+ *
+ * - Dette fungerer både for:
+ *   1. Initial server-rendered HTML fra program.astro
+ *   2. Dynamisk HTML fra /api/filter-program.ts via htmx
+ *
+ * HVILKE FILER BRUKER DENNE CSS-FILEN:
+ * - /pages/program.astro (initial render)
+ * - /pages/api/filter-program.ts (htmx responses)
+ * - /components/DateFilter.astro (filter-knapper)
+ */
+
+/* Date Filter Styles */
+.date-filter {
+  margin-block-end: var(--space-6);
+  border-block-end: 1px solid var(--color-border-light);
+  padding-block-end: var(--space-4);
+}
+
+.date-filter-buttons {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.date-button {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.date-button:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-dark);
+}
+
+.date-button.active {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+.date-button:focus-visible {
+  outline: 2px solid var(--color-border-dark);
+  outline-offset: 2px;
+}
+
+/* htmx loading state */
+.date-button.htmx-request {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Loading indicator */
+.htmx-indicator {
+  display: none;
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+.htmx-indicator.htmx-request {
+  display: block;
+}
+
+/* Section Layout */
+.content-section {
+  margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+}
+
+.date-section {
+  margin-block-end: var(--space-8);
+}
+
+.date-title {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Intrinsic Grid System */
+.events-grid {
+  container-type: inline-size;
+  display: grid;
+  gap: clamp(var(--space-4), 3vw, var(--space-6));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
+}
+
+/* No Results State */
+.no-results {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.no-results-title {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+}
+
+.no-results-text {
+  margin: 0;
+  font-size: var(--font-size-base);
+}
+
+/* Event Card */
+.event-card {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* Event Header (above image) */
+.event-header {
+  padding: var(--space-4);
+  padding-block-end: var(--space-3);
+}
+
+.event-title {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text-primary);
+  font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
+  line-height: var(--line-height-tight);
+}
+
+.event-excerpt {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.event-detail {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.event-label {
+  font-weight: var(--font-weight-medium);
+  flex-shrink: 0;
+}
+
+/* Event Image */
+.event-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+}
+
+.event-image picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.event-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Event Actions (below image) */
+.event-actions {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.event-actions-row {
+  display: flex;
+}
+
+.event-link {
+  color: var(--color-primary-500);
+  text-decoration: underline;
+  font-size: var(--font-size-sm);
+}
+
+.event-link:hover {
+  color: var(--color-primary-600);
+}
+
+.ticket-info {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+}
+
+/* Container Query Enhancements */
+@container (min-width: 350px) {
+  .event-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .event-excerpt {
+    font-size: var(--font-size-base);
+  }
+
+  .event-meta {
+    font-size: var(--font-size-base);
+  }
+}
