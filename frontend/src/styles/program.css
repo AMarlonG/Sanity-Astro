@@ -85,20 +85,6 @@
   cursor: wait;
 }
 
-/* Loading indicator */
-.htmx-indicator {
-  display: none;
-  padding: var(--space-4);
-  text-align: center;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-  font-style: italic;
-}
-
-.htmx-indicator.htmx-request {
-  display: block;
-}
-
 /* Section Layout */
 .content-section {
   margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
