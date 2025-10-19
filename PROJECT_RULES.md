@@ -115,6 +115,11 @@ Dette hierarkiet gjelder for alle agenter og all interaksjon med eksterne system
 - Dokumentasjon: https://docs.astro.build/en/guides/build-with-ai/#astro-docs-mcp-server
 - Bruk til: Søke i Astro-dokumentasjon, hente informasjon om Astro-funksjoner og API-er, best practices og kodeeksempler
 
+**GitHub MCP Server**
+- Dokumentasjon: https://github.com/github/github-mcp-server
+- Bruk til: Søke i repositories, lese/opprette issues og pull requests, jobbe med GitHub Actions, administrere branches og commits
+- Foretrekk over `gh` CLI-kommandoer for GitHub-operasjoner
+
 **TypeScript MCP Server (kommende)**
 - Dokumentasjon: (TBD)
 
