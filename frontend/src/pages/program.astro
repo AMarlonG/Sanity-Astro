@@ -327,33 +327,4 @@ const filteredDates = dateFilter
       }
     }
   </style>
-
-  <script>
-    // Update active button state after htmx swap
-    document.body.addEventListener('htmx:afterSwap', (event) => {
-      // Get the clicked button from the event
-      const trigger = event.detail.target;
-      if (!trigger) return;
-
-      // Find all filter buttons
-      const buttons = document.querySelectorAll('.date-button');
-
-      // Remove active class from all buttons
-      buttons.forEach(btn => btn.classList.remove('active'));
-
-      // Find which button was clicked by checking the URL
-      const url = new URL(window.location.href);
-      const dateParam = url.searchParams.get('date');
-
-      // Add active class to the correct button
-      buttons.forEach(btn => {
-        const btnUrl = new URL(btn.getAttribute('hx-get'), window.location.origin);
-        const btnDate = btnUrl.searchParams.get('date');
-
-        if ((!dateParam && !btnDate) || (dateParam && btnDate === dateParam)) {
-          btn.classList.add('active');
-        }
-      });
-    });
-  </script>
 </ContentPageLayout>
