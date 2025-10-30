@@ -168,7 +168,7 @@ const content = getMultilingualContent(event, 'en') || event.content_en;
 
         {event.ticketType === 'free' ? (
           <div class="ticket-section">
-            <span class="ticket-info-text">Free</span>
+            <p class="ticket-info-text">Free</p>
           </div>
         ) : event.ticketUrl ? (
           <div class="ticket-section">
@@ -183,7 +183,7 @@ const content = getMultilingualContent(event, 'en') || event.content_en;
           </div>
         ) : (
           <div class="ticket-section">
-            <span class="ticket-info-text">Sales starting soon</span>
+            <p class="ticket-info-text">Sales starting soon</p>
           </div>
         )}
       </header>

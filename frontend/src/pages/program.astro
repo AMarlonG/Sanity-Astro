@@ -151,7 +151,7 @@ const filteredDates = dateFilter
 
                 <div class="event-actions">
                   {stegaClean(event.ticketType) === 'info' ? (
-                    <span class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</span>
+                    <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
                   ) : (
                     <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
                       Kjøp billetter her

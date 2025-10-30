@@ -188,6 +188,7 @@
 /* Event Actions - Visible on cards */
 .event-actions {
   display: block;
+  width: fit-content;
 }
 
 .event-actions-row {

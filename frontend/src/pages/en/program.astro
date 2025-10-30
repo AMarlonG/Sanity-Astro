@@ -131,11 +131,11 @@ const filteredDates = dateFilter
 
                 <div class="event-actions">
                   {event.ticketType === 'free' ? (
-                    <span class="ticket-info">Free</span>
+                    <p class="ticket-info">Free</p>
                   ) : event.ticketUrl ? (
                     <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Buy tickets</a>
                   ) : (
-                    <span class="ticket-info">Tickets available soon</span>
+                    <p class="ticket-info">Tickets available soon</p>
                   )}
                 </div>
             </article>
