@@ -35,7 +35,7 @@ const slugEn = pageDocument?.slug_en;
 ---
 
 <Layout title={`${title} - Sanity + Astro`} slugNo={slugNo} slugEn={slugEn}>
-  <main class="container">
+  <main class="container page-layout">
     <header class="page-header">
       <h1 class="page-title">
         {title}
@@ -66,9 +66,16 @@ const slugEn = pageDocument?.slug_en;
 </Layout>
 
 <style>
-  /* Page Layout */
+  /* Page Layout - Stack Pattern with Flexbox Gap */
+  .page-layout {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(var(--space-4), 4vw, var(--space-6));
+    padding-block-start: clamp(calc(var(--space-6) * 2.5), 15vw, calc(var(--space-9) * 2.5));
+  }
+
   .page-header {
-    margin-block-end: clamp(var(--space-5), 5vw, var(--space-8));
+    margin: 0;
   }
 
   .page-title {
@@ -82,11 +89,11 @@ const slugEn = pageDocument?.slug_en;
   }
 
   .page-content {
-    margin-block-end: clamp(var(--space-6), 6vw, var(--space-9));
+    margin: 0;
   }
 
   .page-footer {
-    margin-block-start: clamp(var(--space-6), 6vw, var(--space-9));
+    margin: 0;
     padding-block-start: var(--space-6);
     border-block-start: 1px solid var(--color-border);
   }

@@ -74,11 +74,10 @@ const filteredDates = dateFilter
       availableDates={availableDates}
       language="en"
     />
-  </div>
-
-  <!-- Loading indicator for htmx requests -->
-  <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
-    Loading events...
+    <!-- Loading indicator for htmx requests -->
+    <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
+      Loading events...
+    </div>
   </div>
 
   <div id="event-results">
@@ -89,45 +88,50 @@ const filteredDates = dateFilter
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <a href={`/en/program/${stegaClean(event.slug_en?.current || event.slug_no?.current)}`} class="event-card-link">
-                  <div class="event-header">
-                    <h4 class="event-title">{stegaClean(event.title)}</h4>
-                    <div class="event-meta">
-                      {event.venue?.title && event.eventTime ? (
-                        <div class="event-detail">
-                          {stegaClean(event.venue.title)}, at {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
-                        </div>
-                      ) : event.venue?.title ? (
-                        <div class="event-detail">
-                          {stegaClean(event.venue.title)}
-                        </div>
-                      ) : event.eventTime ? (
-                        <div class="event-detail">
-                          at {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
+                <h4 class="event-title">
+                  <a href={`/en/program/${stegaClean(event.slug_en?.current || event.slug_no?.current)}`} class="event-title-link">
+                    {stegaClean(event.title)}
+                  </a>
+                </h4>
 
-                  {event.image?.image && (
-                    <div class="event-image">
-                      <picture>
-                        <source
-                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                          type="image/webp"
-                          sizes="(max-width: 768px) 100vw, 400px"
-                        />
-                        <img
-                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                          alt={event.image.alt || event.title}
-                          loading="lazy"
-                          decoding="async"
-                          class="event-card-image"
-                        />
-                      </picture>
+                {event.excerpt && (
+                  <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
+                )}
+
+                {event.image?.image && (
+                  <div class="event-image">
+                    <picture>
+                      <source
+                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                        type="image/webp"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
+                      <img
+                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                        alt={event.image.alt || event.title}
+                        loading="lazy"
+                        decoding="async"
+                        class="event-card-image"
+                      />
+                    </picture>
+                  </div>
+                )}
+
+                <div class="event-meta">
+                  {event.eventDate?.date && (
+                    <div class="event-detail event-datetime">
+                      {formatDateWithWeekday(event.eventDate.date, 'en')}
+                      {event.eventTime && (
+                        <>, at {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</>
+                      )}
                     </div>
                   )}
-                </a>
+                  {event.venue?.title && (
+                    <div class="event-detail event-venue">
+                      {stegaClean(event.venue.title)}
+                    </div>
+                  )}
+                </div>
 
                 <div class="event-actions">
                   {event.ticketType === 'free' ? (

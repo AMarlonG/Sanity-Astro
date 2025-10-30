@@ -89,11 +89,10 @@ const filteredDates = dateFilter
       availableDates={availableDates}
       language="no"
     />
-  </div>
-
-  <!-- Loading indicator for htmx requests -->
-  <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
-    Laster arrangementer...
+    <!-- Loading indicator for htmx requests -->
+    <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
+      Laster arrangementer...
+    </div>
   </div>
 
   <div id="event-results">
@@ -134,19 +133,19 @@ const filteredDates = dateFilter
                 )}
 
                 <div class="event-meta">
-                  {event.venue?.title && event.eventTime ? (
-                    <div class="event-detail">
-                      {stegaClean(event.venue.title)}, kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
+                  {event.eventDate?.date && (
+                    <div class="event-detail event-datetime">
+                      {formatDateWithWeekday(event.eventDate.date, 'no')}
+                      {event.eventTime && (
+                        <>, kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</>
+                      )}
                     </div>
-                  ) : event.venue?.title ? (
-                    <div class="event-detail">
+                  )}
+                  {event.venue?.title && (
+                    <div class="event-detail event-venue">
                       {stegaClean(event.venue.title)}
                     </div>
-                  ) : event.eventTime ? (
-                    <div class="event-detail">
-                      kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
-                    </div>
-                  ) : null}
+                  )}
                 </div>
 
                 <div class="event-actions">
