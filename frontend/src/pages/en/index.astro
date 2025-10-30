@@ -1,8 +1,6 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import DynamicComponent from '../../components/DynamicComponent.astro';
+import ContentPageLayout from '../../layouts/ContentPageLayout.astro';
 import { createDataService } from '../../lib/sanity/dataService.js';
-import { getMultilingualContent } from "../../lib/utils/language.js";
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
@@ -11,9 +9,6 @@ const dataService = createDataService(Astro.request);
 const homepage = await dataService.getHomepage();
 
 const homepageTitle = homepage?.title || 'Home';
-
-// Get appropriate content array
-const content = getMultilingualContent(homepage, 'en') || homepage?.content_en || homepage?.content;
 
 // Smart caching based on content type
 if (homepage?.scheduledPeriod) {
@@ -26,26 +21,17 @@ if (homepage?.scheduledPeriod) {
 }
 ---
 
-<Layout title={homepageTitle}>
-  <main class="container">
-    {homepage ? (
-      <div>
-        <h1>{homepageTitle}</h1>
+<ContentPageLayout title={homepageTitle} pageDocument={homepage}>
+  {!homepage && (
+    <div class="no-content">
+      <h1>Welcome to the homepage</h1>
+      <p>No homepage is configured yet. Go to Sanity Studio to create a homepage.</p>
+    </div>
+  )}
+</ContentPageLayout>
 
-
-        {content && Array.isArray(content) && (
-          <div>
-            {content.map((block) => (
-              <DynamicComponent key={block._key || block._id} block={block} />
-            ))}
-          </div>
-        )}
-      </div>
-    ) : (
-      <div>
-        <h1>Welcome to the homepage</h1>
-        <p>No homepage is configured yet. Go to Sanity Studio to create a homepage.</p>
-      </div>
-    )}
-  </main>
-</Layout>
+<style>
+  .no-content {
+    margin: 0;
+  }
+</style>

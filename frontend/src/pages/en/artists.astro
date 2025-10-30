@@ -76,11 +76,14 @@ const pageTitle = artistsPage?.title || 'Artists';
       container-type: inline-size;
       overflow: hidden;
       transition: box-shadow var(--transition-base);
+      display: grid;
+      gap: var(--space-3);
     }
 
     .artist-link {
       text-decoration: none;
-      display: block;
+      display: grid;
+      gap: var(--space-3);
     }
 
     .artist-image {
@@ -105,16 +108,18 @@ const pageTitle = artistsPage?.title || 'Artists';
 
     .artist-content {
       padding: 0;
+      display: grid;
+      gap: var(--space-2);
     }
 
     .artist-name {
-      margin: 0 0 var(--space-2) 0;
+      margin: 0;
       font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
       line-height: var(--line-height-tight);
     }
 
     .artist-bio {
-      margin: 0 0 var(--space-3) 0;
+      margin: 0;
       font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
       line-height: var(--line-height-normal);
     }

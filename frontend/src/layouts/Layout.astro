@@ -1,6 +1,6 @@
 ---
 import { VisualEditing } from "@sanity/astro/visual-editing";
-import LanguageSwitcher from '../components/LanguageSwitcher.astro';
+import Header from '../components/Header.astro';
 import HreflangTags from '../components/HreflangTags.astro';
 import { detectLanguage, type Language } from '../lib/utils/language.js';
 
@@ -60,37 +60,54 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 
     <!-- Minimal critical styles -->
     <style>
-      /* Prevent layout shift during data loading */
-      .page-content {
-        min-height: 50vh;
-        contain: layout style paint;
+      /* Sticky Footer Layout - Document Structure */
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
       }
 
-      /* Language switcher positioning */
-      .language-switcher-container {
-        position: fixed;
-        top: var(--space-4, 1rem);
-        right: var(--space-4, 1rem);
-        z-index: 100;
+      /* Main content - Stretches to fill available space */
+      .main-content {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Footer - Occupies third grid row and centers */
+      .page-footer {
+        margin-inline: auto;
+        width: var(--space-11);
+        height: var(--space-11);
+        aspect-ratio: 1 / 1;
+        background-color: var(--color-green-100);
+      }
+
+      .page-footer .container {
+        display: flex;
       }
     </style>
 
   </head>
   <body>
-    <!-- Language switcher -->
-    <div class="language-switcher-container">
-      <LanguageSwitcher
-        currentLang={currentLang}
-        currentPath={currentPath}
-        slugNo={slugNo}
-        slugEn={slugEn}
-      />
-    </div>
+    <!-- Header with navigation and language switcher -->
+    <Header
+      currentLang={currentLang}
+      currentPath={currentPath}
+      slugNo={slugNo}
+      slugEn={slugEn}
+    />
 
-    <div id="app" class="page-content">
+    <div class="main-content">
       <slot />
     </div>
-    
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <div class="container">
+        <!-- Footer content can be added here or via slot -->
+      </div>
+    </footer>
+
     <!-- Visual Editing Component -->
     {enableVisualEditing && <VisualEditing enabled={true} zIndex={1000} />}
 

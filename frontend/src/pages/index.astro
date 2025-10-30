@@ -1,8 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import DynamicComponent from '../components/DynamicComponent.astro';
+import ContentPageLayout from '../layouts/ContentPageLayout.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
-import { getMultilingualContent } from "../lib/utils/language.js";
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
@@ -12,14 +10,11 @@ const homepage = await dataService.getHomepage();
 
 const homepageTitle = homepage?.title || 'Forside';
 
-// Get appropriate content array
-const content = getMultilingualContent(homepage) || homepage?.content;
-
 // Smart caching basert på innholdstype
 if (homepage?.scheduledPeriod) {
   const timeUntilExpiry = new Date(homepage.scheduledPeriod.endDate).getTime() - Date.now();
   const cacheTime = Math.min(timeUntilExpiry / 1000, 300); // Maks 5 minutter
-  
+
   Astro.response.headers.set('Cache-Control', `public, max-age=${cacheTime}`);
 } else {
   Astro.response.headers.set('Cache-Control', 'public, max-age=3600'); // 1 time
@@ -28,26 +23,17 @@ if (homepage?.scheduledPeriod) {
 console.log('Aktiv forside:', homepage);
 ---
 
-<Layout title={homepageTitle}>
-  <main class="container">
-    {homepage ? (
-      <div>
-        <h1>{homepageTitle}</h1>
-        
-        
-        {content && Array.isArray(content) && (
-          <div>
-            {content.map((block) => (
-              <DynamicComponent key={block._key || block._id} block={block} />
-            ))}
-          </div>
-        )}
-      </div>
-    ) : (
-      <div>
-        <h1>Velkommen til forsiden</h1>
-        <p>Ingen forside er konfigurert ennå. Gå til Sanity Studio for å opprette en forside.</p>
-      </div>
-    )}
-  </main>
-</Layout>
+<ContentPageLayout title={homepageTitle} pageDocument={homepage}>
+  {!homepage && (
+    <div class="no-content">
+      <h1>Velkommen til forsiden</h1>
+      <p>Ingen forside er konfigurert ennå. Gå til Sanity Studio for å opprette en forside.</p>
+    </div>
+  )}
+</ContentPageLayout>
+
+<style>
+  .no-content {
+    margin: 0;
+  }
+</style>
