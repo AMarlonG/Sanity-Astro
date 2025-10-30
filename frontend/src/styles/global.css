@@ -9,6 +9,30 @@ body {
   background-color: var(--color-background);
 }
 
+/* ============================================
+   GLOBAL ACCESSIBILITY & UX PATTERNS
+   ============================================ */
+
+/* Note: prefers-reduced-motion is handled globally in reset.css */
+
+/* Keyboard navigation - consistent focus styles for interactive elements */
+a:focus-within,
+button:focus-within,
+.card:focus-within,
+[role="button"]:focus-within {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Hover interactions best practice:
+   Always wrap hover states with @media (hover: hover) to prevent
+   issues on touch devices. Example:
+
+   @media (hover: hover) {
+     .element:hover { ... }
+   }
+*/
+
 /* Headings */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-heading);
@@ -79,7 +103,6 @@ a:hover {
 a:focus-visible {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
 }
 
 /* Lists */
@@ -274,7 +297,6 @@ li {
   container-type: inline-size;
   background: var(--color-background);
   border: 1px solid var(--color-border);
-  border-radius: clamp(var(--radius-base), 1cqw, var(--radius-lg));
   padding: clamp(var(--space-3), 4cqw, var(--space-6));
   box-shadow: var(--shadow-sm);
   transition: box-shadow var(--transition-base);
@@ -293,7 +315,6 @@ li {
 @container (min-width: 500px) {
   .card {
     padding: var(--space-6);
-    border-radius: var(--radius-lg);
   }
 }
 
@@ -306,7 +327,6 @@ li {
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-medium);
   line-height: 1;
-  border-radius: var(--radius-base);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -358,7 +378,6 @@ li {
   padding: var(--space-1) var(--space-3);
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
-  border-radius: var(--radius-full);
   background-color: var(--color-neutral-100);
   color: var(--color-text-primary);
 }
@@ -387,7 +406,6 @@ select {
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-base);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-base);
   background-color: var(--color-background);
   transition: border-color var(--transition-fast);
 }

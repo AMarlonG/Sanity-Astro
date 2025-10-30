@@ -90,34 +90,42 @@ const filteredDates = dateFilter
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-card-link">
-                  <div class="event-header">
-                    <h4 class="event-title">{stegaClean(event.title)}</h4>
-                    <div class="event-meta">
-                      <div class="event-detail">
-                        {stegaClean(event.venue?.title)}{event.venue && event.eventTime && ', '}{event.eventTime && `${stegaClean(event.eventTime.startTime)} - ${stegaClean(event.eventTime.endTime)}`}
-                      </div>
-                    </div>
-                  </div>
+                <h4 class="event-title">{stegaClean(event.title)}</h4>
 
-                  {event.image?.image && (
-                    <div class="event-image">
-                      <picture>
-                        <source
-                          srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                          type="image/webp"
-                          sizes="(max-width: 768px) 100vw, 400px"
-                        />
-                        <img
-                          src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                          alt={event.image.alt || event.title}
-                          loading="lazy"
-                          decoding="async"
-                          class="event-card-image"
-                        />
-                      </picture>
-                    </div>
-                  )}
+                {event.excerpt && (
+                  <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
+                )}
+
+                {event.image?.image && (
+                  <div class="event-image">
+                    <picture>
+                      <source
+                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                        type="image/webp"
+                        sizes="(max-width: 768px) 100vw, 400px"
+                      />
+                      <img
+                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                        alt={event.image.alt || event.title}
+                        loading="lazy"
+                        decoding="async"
+                        class="event-card-image"
+                      />
+                    </picture>
+                  </div>
+                )}
+
+                <div class="event-meta">
+                  <div class="event-detail">
+                    {stegaClean(event.venue?.title)}
+                  </div>
+                  <div class="event-detail">
+                    {event.eventTime && `${stegaClean(event.eventTime.startTime)} - ${stegaClean(event.eventTime.endTime)}`}
+                  </div>
+                </div>
+
+                <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-read-more">
+                  Les mer her
                 </a>
 
                 <div class="event-actions">
@@ -129,8 +137,8 @@ const filteredDates = dateFilter
                     <span class="ticket-info">Salget starter snart</span>
                   )}
                 </div>
-            </article>
-          ))}
+              </article>
+            ))}
           </div>
         </section>
       ))
