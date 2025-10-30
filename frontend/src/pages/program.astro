@@ -136,10 +136,10 @@ const filteredDates = dateFilter
                 </div>
 
                 <div class="event-actions">
-                  {event.ticketType === 'free' ? (
+                  {stegaClean(event.ticketType) === 'free' ? (
                     <span class="ticket-info">Gratis</span>
-                  ) : event.ticketUrl ? (
-                    <a href={event.ticketUrl} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Kjøp billetter</a>
+                  ) : stegaClean(event.ticketUrl) ? (
+                    <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Kjøp billetter her</a>
                   ) : (
                     <span class="ticket-info">Salget starter snart</span>
                   )}
