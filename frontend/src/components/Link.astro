@@ -138,11 +138,13 @@ if (accessibility?.ariaDescribedBy) {
 
 <style>
   .link-component {
-    color: var(--color-blue-500);
+    color: var(--color-link);
     text-decoration: underline;
     text-underline-offset: 0.2em;
     text-decoration-thickness: 1px;
-    transition: all 0.2s ease;
+    transition:
+      color var(--transition-fast),
+      text-decoration-thickness var(--transition-fast);
     min-height: 44px;
     display: inline-block;
     padding: 0.25rem 0;
@@ -157,18 +159,21 @@ if (accessibility?.ariaDescribedBy) {
   }
 
   .link-component:focus {
-    outline: 2px solid var(--color-blue-500);
+    outline: 2px solid var(--color-link);
     outline-offset: 2px;
     background: var(--color-link-focus-bg);
-    border-radius: 2px;
   }
 
   /* Moderne focus-visible for bedre tastaturnavigasjon */
   .link-component:focus-visible {
-    outline: 2px solid var(--color-blue-500);
+    outline: 2px solid var(--color-link);
     outline-offset: 2px;
     background: var(--color-link-focus-bg);
-    border-radius: 2px;
+  }
+
+  /* Active state */
+  .link-component:active {
+    color: var(--color-link-active);
   }
 
   /* Forbedret kontrast for visited lenker */
@@ -179,15 +184,19 @@ if (accessibility?.ariaDescribedBy) {
   @media (hover: hover) {
     .link-component:visited:hover {
       color: var(--color-link-visited-hover);
+      text-decoration-thickness: 2px;
     }
   }
 
-  /* Eksterne lenker indikator */
+  /* Link arrow indicator */
+  .link-component::after {
+    content: ' →';
+    display: inline;
+  }
+
+  /* Eksterne lenker indikator (override for external links) */
   .link-component[target="_blank"]::after {
     content: ' ↗';
-    font-size: 0.8em;
-    opacity: 0.7;
-    margin-left: 0.2em;
   }
 
   /* Mobiloptimalisering */

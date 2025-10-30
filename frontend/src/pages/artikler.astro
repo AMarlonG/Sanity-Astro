@@ -75,7 +75,6 @@ const pageTitle = articlesPage?.title || 'Artikler';
 
     .article-link {
       text-decoration: none;
-      color: inherit;
       display: block;
     }
 
@@ -95,7 +94,6 @@ const pageTitle = articlesPage?.title || 'Artikler';
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 0;
     }
 
     .article-card-image .image-caption {
@@ -108,20 +106,17 @@ const pageTitle = articlesPage?.title || 'Artikler';
 
     .article-title {
       margin: 0 0 var(--space-2) 0;
-      color: var(--color-text-primary);
       font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
       line-height: var(--line-height-tight);
     }
 
     .article-subtitle {
       margin: 0 0 var(--space-3) 0;
-      color: var(--color-text-secondary);
       font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
       line-height: var(--line-height-normal);
     }
 
     .article-meta {
-      color: var(--color-text-secondary);
       font-size: var(--font-size-sm);
     }
 

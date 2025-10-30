@@ -5,8 +5,13 @@ body {
   font-family: var(--font-family-base);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
-  color: var(--color-text-primary);
+  color: var(--color-blue);
   background-color: var(--color-background);
+}
+
+/* Set default text color for all elements */
+* {
+  color: inherit;
 }
 
 /* ============================================
@@ -20,7 +25,7 @@ a:focus-visible,
 button:focus-visible,
 .card:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid var(--color-blue-500);
+  outline: 2px solid var(--color-blue);
   outline-offset: 2px;
 }
 
@@ -68,7 +73,6 @@ h1, h2, h3, h4, h5, h6 {
   line-height: var(--line-height-tight);
   margin-top: var(--space-6);
   margin-bottom: var(--space-3);
-  color: var(--color-text-primary);
 }
 
 h1 {
@@ -116,23 +120,75 @@ p:last-child {
   margin-bottom: 0;
 }
 
-/* Links */
+/* Links - Accessibility-first approach */
 a {
-  color: var(--color-blue-500);
-  text-decoration: none;
-  transition: color var(--transition-fast);
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition:
+    color var(--transition-fast),
+    text-decoration-thickness var(--transition-fast);
 }
 
+/* Arrow indicator */
+a::after {
+  content: ' →';
+  display: inline;
+  text-decoration: none;
+}
+
+/* Hover state - Multiple visual cues */
 @media (hover: hover) {
   a:hover {
-    color: var(--color-blue-600);
-    text-decoration: underline;
+    color: var(--color-link-hover);
+    text-decoration-thickness: 2px;
   }
 }
 
+/* Focus state - WCAG compliance */
 a:focus-visible {
-  outline: 2px solid var(--color-blue-500);
+  outline: 2px solid var(--color-link);
   outline-offset: 2px;
+  background-color: var(--color-link-focus-bg);
+}
+
+/* Active state - Immediate feedback */
+a:active {
+  color: var(--color-link-active);
+}
+
+/* Visited state - User orientation */
+a:visited {
+  color: var(--color-link-visited);
+}
+
+@media (hover: hover) {
+  a:visited:hover {
+    color: var(--color-link-visited-hover);
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* External links get special indicator */
+a[target="_blank"]::after,
+a[rel~="external"]::after {
+  content: ' ↗';
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  a {
+    text-decoration-thickness: 2px;
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  a {
+    transition: none;
+  }
 }
 
 /* Exception: Links styled as buttons (for CTAs and navigation that looks like actions) */
@@ -143,11 +199,47 @@ a.link-button {
   padding: var(--space-3) var(--space-5);
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-base);
-  color: var(--color-blue-500);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
   transition: all var(--transition-base);
+}
+
+/* Remove underlines and arrows from non-text links */
+a.link-button,
+a.btn,
+a.btn-primary,
+a.btn-secondary,
+a.btn-ghost,
+a.card,
+.event-card a,
+.artist-card a,
+.card-grid a,
+nav a,
+[role="navigation"] a {
+  text-decoration: none;
+}
+
+a.link-button::after,
+a.btn::after,
+a.btn-primary::after,
+a.btn-secondary::after,
+a.btn-ghost::after,
+a.card::after,
+.event-card a::after,
+.artist-card a::after,
+.card-grid a::after,
+nav a::after,
+[role="navigation"] a::after {
+  content: none;
+}
+
+/* Navigation hovers get underline */
+@media (hover: hover) {
+  nav a:hover,
+  [role="navigation"] a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
 }
 
 @media (hover: hover) {
@@ -159,14 +251,13 @@ a.link-button {
 }
 
 a.link-button:focus-visible {
-  outline: 2px solid var(--color-blue-500);
+  outline: 2px solid var(--color-blue);
   outline-offset: 2px;
 }
 
 a.link-button.active {
-  background-color: var(--color-blue-500);
-  color: white;
-  border-color: var(--color-blue-500);
+  background-color: var(--color-blue);
+  border-color: var(--color-blue);
 }
 
 /* Lists */
@@ -211,15 +302,15 @@ li {
 .text-success { color: var(--color-success); }
 
 /* Brand color utilities */
-.text-blue { color: var(--color-blue-500); }
-.text-red { color: var(--color-red-500); }
-.text-yellow { color: var(--color-yellow-500); }
-.text-green { color: var(--color-green-500); }
+.text-blue { color: var(--color-blue); }
+.text-red { color: var(--color-red); }
+.text-yellow { color: var(--color-yellow); }
+.text-green { color: var(--color-green); }
 
-.bg-blue { background-color: var(--color-blue-500); }
-.bg-red { background-color: var(--color-red-500); }
-.bg-yellow { background-color: var(--color-yellow-500); }
-.bg-green { background-color: var(--color-green-500); }
+.bg-blue { background-color: var(--color-blue); }
+.bg-red { background-color: var(--color-red); }
+.bg-yellow { background-color: var(--color-yellow); }
+.bg-green { background-color: var(--color-green); }
 
 /* Light background variants (for subtle accents) */
 .bg-blue-light { background-color: var(--color-blue-50); }
@@ -411,7 +502,6 @@ li {
   font-weight: var(--font-weight-medium);
   line-height: 1;
   border: 1px solid transparent;
-  color: var(--color-blue-500);
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
@@ -424,14 +514,13 @@ li {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-blue-500);
+  outline: 2px solid var(--color-blue);
   outline-offset: 2px;
 }
 
 /* Button variants */
 .btn-primary {
-  background-color: var(--color-blue-500);
-  color: white;
+  background-color: var(--color-blue);
 }
 
 @media (hover: hover) {
@@ -442,7 +531,6 @@ li {
 
 .btn-secondary {
   background-color: var(--color-surface);
-  color: var(--color-blue-500);
   border-color: var(--color-border);
 }
 
@@ -454,7 +542,6 @@ li {
 
 .btn-ghost {
   background-color: transparent;
-  color: var(--color-blue-500);
 }
 
 @media (hover: hover) {
@@ -471,38 +558,31 @@ li {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   background-color: var(--color-neutral-100);
-  color: var(--color-blue-500);
 }
 
 .badge-primary {
   background-color: var(--color-blue-100);
-  color: var(--color-blue-500);
 }
 
 .badge-success {
   background-color: #d4edda;
-  color: #155724;
 }
 
 /* Brand color badge variants */
 .badge-blue {
   background-color: var(--color-blue-100);
-  color: var(--color-blue-700);
 }
 
 .badge-red {
   background-color: var(--color-red-100);
-  color: var(--color-red-700);
 }
 
 .badge-yellow {
   background-color: var(--color-yellow-100);
-  color: var(--color-yellow-700);
 }
 
 .badge-green {
   background-color: var(--color-green-100);
-  color: var(--color-green-700);
 }
 
 /* Form elements */
@@ -527,7 +607,7 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--color-blue-500);
+  border-color: var(--color-blue);
   box-shadow: 0 0 0 3px rgba(27, 25, 143, 0.1);
 }
 

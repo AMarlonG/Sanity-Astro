@@ -69,7 +69,6 @@
 
 .date-title {
   margin: 0 0 var(--space-4) 0;
-  color: var(--color-text-primary);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
 }
@@ -88,12 +87,10 @@
 .no-results {
   text-align: center;
   padding: var(--space-8) var(--space-4);
-  color: var(--color-text-secondary);
 }
 
 .no-results-title {
   margin: 0 0 var(--space-2) 0;
-  color: var(--color-text-primary);
   font-size: var(--font-size-xl);
 }
 
@@ -104,12 +101,13 @@
 
 /* Event Card - CSS Grid Layout */
 .event-card {
+  position: relative; /* Required for stretched link pattern */
   container-type: inline-size;
   display: grid;
   grid-template-rows: auto auto 1fr auto auto;
   overflow: hidden;
   border: none;
-  background-color: var(--color-event-card-bg);
+  background-color: rgba(27, 25, 143, 0.08);
   box-shadow: none;
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -123,13 +121,17 @@
   .event-card:hover {
     transform: translateY(-4px);
     box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    background-color: rgba(0, 179, 154, 0.08);
+  }
+
+  .event-card:hover .event-title-link {
+    color: var(--color-blue);
   }
 }
 
 /* Event Title - Grid Row 1 (auto) */
 .event-title {
   margin: 0;
-  color: var(--color-event-card-text);
   font-size: clamp(2rem, 6cqw, 2.75rem);
   line-height: 1.1;
   font-weight: 400;
@@ -141,7 +143,6 @@
 /* Event Excerpt - Grid Row 2 (auto) */
 .event-excerpt {
   margin: 0;
-  color: var(--color-event-card-text);
   font-size: clamp(1.125rem, 3.5cqw, 1.375rem);
   line-height: 1.5;
   opacity: 0.85;
@@ -149,7 +150,6 @@
 
 /* Event Meta - Grid Row 4 (auto) */
 .event-meta {
-  color: var(--color-event-card-text);
   font-size: clamp(1rem, 3cqw, 1.125rem);
   line-height: 1.4;
 }
@@ -194,34 +194,56 @@
   display: flex;
 }
 
-/* Event Read More Link - Grid Row 5 (auto) */
-.event-read-more {
-  color: var(--color-event-card-text);
-  text-decoration: underline;
-  font-size: var(--font-size-sm);
-  align-self: start;
+/* Stretched link pattern - makes entire card clickable */
+.event-card .event-title-link {
+  color: var(--color-blue);
+  text-decoration: none;
+  transition: color var(--transition-base);
 }
 
+/* Pseudo-element stretches to cover entire card */
+.event-title-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* No arrow indicator on card title links */
+.event-title-link::after {
+  content: none;
+}
+
+/* Hover state - no underline, color change handled above */
 @media (hover: hover) {
-  .event-read-more:hover {
-    color: var(--color-event-card-text-hover);
+  .event-card .event-title-link:hover {
+    text-decoration: none;
   }
 }
 
-.event-link {
-  color: var(--color-primary-500);
+/* Focus state - highly visible for keyboard users */
+.event-card .event-title-link:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
   text-decoration: underline;
-  font-size: var(--font-size-sm);
 }
 
-@media (hover: hover) {
-  .event-link:hover {
-    color: var(--color-primary-600);
-  }
+/* Elevate buttons above stretched link */
+.event-card .btn,
+.event-card .btn-primary,
+.event-card .event-actions {
+  position: relative;
+  z-index: 2;
+}
+
+/* Elevate other interactive elements */
+.event-card .event-meta,
+.event-card .event-excerpt {
+  position: relative;
+  z-index: 0;
 }
 
 .ticket-info {
-  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
   font-style: italic;
 }

@@ -100,7 +100,6 @@ function generateEventHtml(event: EventResult): string {
           <img 
             src="${imageUrl}" 
             alt="${escapeHtml(alt)}" 
-            style="width: 100%; height: 100%; object-fit: cover; border-radius: 0;"
             loading="lazy"
           />
         </div>
@@ -109,7 +108,6 @@ function generateEventHtml(event: EventResult): string {
   }
 
   return `
-    <div style="border: 1px solid #e9ecef; border-radius: 12px; background: white; overflow: hidden; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
       <a href="/program/${escapeHtml(event.slug)}" style="text-decoration: none; color: inherit; display: block;">
         ${imageHtml}
         <div style="padding: 1.25rem;">
@@ -266,7 +264,6 @@ export const POST: APIRoute = async ({ request }) => {
         ${
           events.length > 0
             ? `<div>
-                <div style="margin-bottom: 1rem; padding: 0.5rem; background: #e8f5e8; border-radius: 4px; color: #2d5a2d;">
                   ${resultsCountText}
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">

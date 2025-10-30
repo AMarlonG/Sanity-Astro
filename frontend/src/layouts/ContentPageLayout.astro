@@ -73,12 +73,10 @@ const slugEn = pageDocument?.slug_en;
 
   .page-title {
     margin: 0 0 var(--space-2) 0;
-    color: var(--color-text-primary);
   }
 
   .page-excerpt {
     margin: var(--space-3) 0 0 0;
-    color: var(--color-text-secondary);
     font-size: var(--font-size-lg);
     line-height: var(--line-height-relaxed);
   }
@@ -94,13 +92,16 @@ const slugEn = pageDocument?.slug_en;
   }
 
   .back-link {
-    color: var(--color-blue-500);
     text-decoration: none;
     font-weight: var(--font-weight-medium);
   }
 
+  /* Remove arrow since back link already has ← at the start */
+  .back-link::after {
+    content: none;
+  }
+
   .back-link:hover {
-    color: var(--color-blue-600);
     text-decoration: underline;
   }
 </style>

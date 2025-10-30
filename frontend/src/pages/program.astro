@@ -90,7 +90,11 @@ const filteredDates = dateFilter
           <div class="grid events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <h4 class="event-title">{stegaClean(event.title)}</h4>
+                <h4 class="event-title">
+                  <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-title-link">
+                    {stegaClean(event.title)}
+                  </a>
+                </h4>
 
                 {event.excerpt && (
                   <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
@@ -130,10 +134,6 @@ const filteredDates = dateFilter
                     </div>
                   ) : null}
                 </div>
-
-                <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-read-more">
-                  Les mer her →
-                </a>
 
                 <div class="event-actions">
                   {event.ticketType === 'free' ? (
