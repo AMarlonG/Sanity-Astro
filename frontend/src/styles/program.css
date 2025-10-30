@@ -185,9 +185,9 @@
   display: block;
 }
 
-/* Event Actions - Hidden (moved to event page) */
+/* Event Actions - Visible on cards */
 .event-actions {
-  display: none;
+  display: block;
 }
 
 .event-actions-row {

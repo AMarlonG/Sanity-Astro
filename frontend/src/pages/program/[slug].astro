@@ -67,6 +67,7 @@ const { data: event } = await loadQuery({
     },
     ticketType,
     ticketUrl,
+    ticketInfoText,
     content_no,
     seo
   }`,
@@ -174,11 +175,11 @@ const content = getMultilingualContent(event) || event.content_no;
           )}
         </div>
 
-        {event.ticketType === 'free' ? (
+        {event.ticketType === 'info' ? (
           <div class="ticket-section">
-            <span class="ticket-info-text">Gratis inngang</span>
+            <span class="ticket-info-text">{event.ticketInfoText || 'Gratis inngang'}</span>
           </div>
-        ) : event.ticketUrl ? (
+        ) : (
           <div class="ticket-section">
             <a
               href={event.ticketUrl}
@@ -186,12 +187,8 @@ const content = getMultilingualContent(event) || event.content_no;
               rel="noopener noreferrer"
               class="ticket-button"
             >
-              Kjøp billetter
+              Kjøp billetter her
             </a>
-          </div>
-        ) : (
-          <div class="ticket-section">
-            <span class="ticket-info-text">Salget starter snart</span>
           </div>
         )}
       </header>

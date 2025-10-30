@@ -127,6 +127,7 @@ const EVENT_BASE_FIELDS = `
   },
   ticketType,
   ticketUrl,
+  ticketInfoText,
   publishingStatus,
   scheduledPeriod,
   content_no[]{

@@ -11,11 +11,25 @@ import '../styles/program.css';
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
+// Clear cache in development to ensure fresh data
+if (import.meta.env.DEV) {
+  dataService.clearCache();
+}
+
 // Hent program-siden innhold for metadata
 const programPage = await dataService.getProgramPage();
 
 // Get events from programPage.selectedEvents and filter out null/undefined
 const events = (programPage?.selectedEvents || []).filter(event => event != null);
+
+// Debug: Log ticket info for all events
+if (import.meta.env.DEV) {
+  console.log('[Program Page] Events ticket data:', events.map(e => ({
+    title: e.title,
+    ticketType: e.ticketType,
+    ticketUrl: e.ticketUrl
+  })));
+}
 
 // Fallback values
 const pageTitle = programPage?.title || 'Program';
@@ -136,12 +150,12 @@ const filteredDates = dateFilter
                 </div>
 
                 <div class="event-actions">
-                  {stegaClean(event.ticketType) === 'free' ? (
-                    <span class="ticket-info">Gratis</span>
-                  ) : stegaClean(event.ticketUrl) ? (
-                    <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">Kjøp billetter her</a>
+                  {stegaClean(event.ticketType) === 'info' ? (
+                    <span class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</span>
                   ) : (
-                    <span class="ticket-info">Salget starter snart</span>
+                    <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                      Kjøp billetter her
+                    </a>
                   )}
                 </div>
               </article>

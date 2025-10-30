@@ -90,38 +90,56 @@ export const event = defineType({
     }),
     defineField({
       name: 'ticketType',
-      title: 'Type billett',
+      title: 'Type billettvisning',
       type: 'string',
-      description: 'Velg om det er billettsalg eller gratis arrangement',
+      description: 'Velg om du vil vise kjøpsknapp eller kun tekst-informasjon',
       group: 'ticketing',
       options: {
         list: [
-          { title: 'Billettsalg', value: 'ticketed' },
-          { title: 'Gratis', value: 'free' },
+          { title: 'Legg til kjøpsknapp', value: 'button' },
+          { title: 'Legg til billettinfo', value: 'info' },
         ],
         layout: 'radio',
       },
-      validation: (Rule) => Rule.required().error('Velg type billett'),
-      initialValue: 'ticketed',
+      validation: (Rule) => Rule.required().error('Velg type billettvisning'),
+      initialValue: 'button',
     }),
     defineField({
       name: 'ticketUrl',
       title: 'Billett-URL',
       type: 'url',
-      description: 'Link til billettsystem (kreves kun for billettsalg)',
+      description: 'Link til billettsystem (påkrevd for kjøpsknapp)',
       group: 'ticketing',
       validation: (Rule) =>
         Rule.custom((value, context) => {
           const ticketType = (context.document as any)?.ticketType
-          if (ticketType === 'ticketed' && !value) {
-            return 'Billett-URL er påkrevd når det er billettsalg'
+          if (ticketType === 'button' && !value) {
+            return 'Billett-URL er påkrevd når du velger kjøpsknapp'
           }
           if (value) {
             return componentValidation.url(Rule).validate(value, context)
           }
           return true
-        }),
-      hidden: ({ document }) => document?.ticketType !== 'ticketed',
+        }).error('Billett-URL er påkrevd når du velger kjøpsknapp'),
+      hidden: ({ document }) => document?.ticketType !== 'button',
+    }),
+    defineField({
+      name: 'ticketInfoText',
+      title: 'Billett-informasjon',
+      type: 'string',
+      description: 'Tekst som vises istedenfor knapp, f.eks. "Gratis" eller "Salget starter snart"',
+      group: 'ticketing',
+      placeholder: 'Gratis',
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const ticketType = (context.document as any)?.ticketType
+          if (ticketType === 'info' && !value) {
+            return 'Billett-informasjon er påkrevd når du velger billettinfo'
+          }
+          return true
+        }).error('Billett-informasjon er påkrevd når du velger billettinfo')
+        .max(50).warning('Teksten bør være maksimum 50 tegn'),
+      hidden: ({ document }) => document?.ticketType !== 'info',
     }),
     defineField({
       name: 'venue',
