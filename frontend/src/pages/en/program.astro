@@ -93,9 +93,19 @@ const filteredDates = dateFilter
                   <div class="event-header">
                     <h4 class="event-title">{stegaClean(event.title)}</h4>
                     <div class="event-meta">
-                      <div class="event-detail">
-                        {stegaClean(event.venue?.title)}{event.venue && event.eventTime && ', '}{event.eventTime && `${stegaClean(event.eventTime.startTime)} - ${stegaClean(event.eventTime.endTime)}`}
-                      </div>
+                      {event.venue?.title && event.eventTime ? (
+                        <div class="event-detail">
+                          {stegaClean(event.venue.title)}, at {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
+                        </div>
+                      ) : event.venue?.title ? (
+                        <div class="event-detail">
+                          {stegaClean(event.venue.title)}
+                        </div>
+                      ) : event.eventTime ? (
+                        <div class="event-detail">
+                          at {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 

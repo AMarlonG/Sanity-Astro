@@ -116,16 +116,23 @@ const filteredDates = dateFilter
                 )}
 
                 <div class="event-meta">
-                  <div class="event-detail">
-                    {stegaClean(event.venue?.title)}
-                  </div>
-                  <div class="event-detail">
-                    {event.eventTime && `${stegaClean(event.eventTime.startTime)} - ${stegaClean(event.eventTime.endTime)}`}
-                  </div>
+                  {event.venue?.title && event.eventTime ? (
+                    <div class="event-detail">
+                      {stegaClean(event.venue.title)}, kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
+                    </div>
+                  ) : event.venue?.title ? (
+                    <div class="event-detail">
+                      {stegaClean(event.venue.title)}
+                    </div>
+                  ) : event.eventTime ? (
+                    <div class="event-detail">
+                      kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}
+                    </div>
+                  ) : null}
                 </div>
 
                 <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-read-more">
-                  Les mer her
+                  Les mer her →
                 </a>
 
                 <div class="event-actions">

@@ -47,7 +47,30 @@
   --color-text-disabled: #9e9e9e;
   --color-border: #e9ecef;
   --color-border-light: #f1f3f5;
-  
+
+  /* Background variants for interactive elements */
+  --color-bg-primary: var(--color-background);
+  --color-bg-secondary: var(--color-surface);
+  --color-bg-hover: var(--color-neutral-100);
+
+  /* Border variants */
+  --color-border-dark: var(--color-neutral-300);
+  --color-border-hover: var(--color-neutral-400);
+
+  /* Surface variants (for button-styled links) */
+  --color-surface-hover: var(--color-neutral-100);
+
+  /* Event card specific colors (lavender theme) */
+  --color-event-card-bg: #e8e6f2;
+  --color-event-card-text: #1a237e;
+  --color-event-card-text-hover: #0d47a1;
+
+  /* Link component specific colors */
+  --color-link-hover: #004499;
+  --color-link-focus-bg: rgba(0, 102, 204, 0.1);
+  --color-link-visited: #663399;
+  --color-link-visited-hover: #442266;
+
   /* Success/Info/Warning/Error */
   --color-success: #28a745;
   --color-info: #17a2b8;

@@ -138,7 +138,7 @@ if (accessibility?.ariaDescribedBy) {
 
 <style>
   .link-component {
-    color: #0066cc;
+    color: var(--color-primary-500);
     text-decoration: underline;
     text-underline-offset: 0.2em;
     text-decoration-thickness: 1px;
@@ -149,33 +149,37 @@ if (accessibility?.ariaDescribedBy) {
     word-break: break-word;
   }
 
-  .link-component:hover {
-    color: #004499;
-    text-decoration-thickness: 2px;
+  @media (hover: hover) {
+    .link-component:hover {
+      color: var(--color-link-hover);
+      text-decoration-thickness: 2px;
+    }
   }
 
   .link-component:focus {
-    outline: 2px solid #0066cc;
+    outline: 2px solid var(--color-primary-500);
     outline-offset: 2px;
-    background: rgba(0, 102, 204, 0.1);
+    background: var(--color-link-focus-bg);
     border-radius: 2px;
   }
 
   /* Moderne focus-visible for bedre tastaturnavigasjon */
   .link-component:focus-visible {
-    outline: 2px solid #0066cc;
+    outline: 2px solid var(--color-primary-500);
     outline-offset: 2px;
-    background: rgba(0, 102, 204, 0.1);
+    background: var(--color-link-focus-bg);
     border-radius: 2px;
   }
 
   /* Forbedret kontrast for visited lenker */
   .link-component:visited {
-    color: #663399;
+    color: var(--color-link-visited);
   }
 
-  .link-component:visited:hover {
-    color: #442266;
+  @media (hover: hover) {
+    .link-component:visited:hover {
+      color: var(--color-link-visited-hover);
+    }
   }
 
   /* Eksterne lenker indikator */

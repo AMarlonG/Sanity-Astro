@@ -16,18 +16,46 @@ body {
 /* Note: prefers-reduced-motion is handled globally in reset.css */
 
 /* Keyboard navigation - consistent focus styles for interactive elements */
-a:focus-within,
-button:focus-within,
-.card:focus-within,
-[role="button"]:focus-within {
+a:focus-visible,
+button:focus-visible,
+.card:focus-visible,
+[role="button"]:focus-visible {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
-/* Hover interactions best practice:
-   Always wrap hover states with @media (hover: hover) to prevent
-   issues on touch devices. Example:
+/* ============================================
+   HOVER PATTERN SYSTEM
+   ============================================
 
+   Three distinct hover patterns based on semantic HTML:
+
+   CATEGORY 1: TEXT LINKS (Navigation)
+   - Semantic: <a> elements that navigate to pages
+   - Default: Primary color, no underline
+   - Hover: Darker color + underline appears
+   - Examples: Navigation menu, "Les mer her", content links
+   - Rule: a:hover { color: darker; text-decoration: underline; }
+
+   CATEGORY 2: BUTTONS (Actions)
+   - Semantic: <button> elements or button-styled links
+   - Default: Background + border + padding
+   - Hover: Background darkens/lightens, NO underline ever
+   - Examples: Date filters, language switcher, submit buttons
+   - Rule: button:hover { background: darker; }
+   - Special class: .link-button for <a> that look like buttons
+
+   CATEGORY 3: CARDS (Containers)
+   - Semantic: Clickable containers
+   - Default: Shadow + border
+   - Hover: Increased shadow ± lift effect
+   - Examples: Event cards, artist cards
+   - Rule: .card:hover { box-shadow: larger; transform: translateY(); }
+
+   BEST PRACTICE: Always wrap hover states in @media (hover: hover)
+   to prevent sticky hover states on touch devices.
+
+   Example:
    @media (hover: hover) {
      .element:hover { ... }
    }
@@ -95,14 +123,49 @@ a {
   transition: color var(--transition-fast);
 }
 
-a:hover {
-  color: var(--color-primary-600);
-  text-decoration: underline;
+@media (hover: hover) {
+  a:hover {
+    color: var(--color-primary-600);
+    text-decoration: underline;
+  }
 }
 
 a:focus-visible {
   outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
+}
+
+/* Exception: Links styled as buttons (for CTAs and navigation that looks like actions) */
+a.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+}
+
+@media (hover: hover) {
+  a.link-button:hover {
+    background-color: var(--color-bg-secondary);
+    border-color: var(--color-border-dark);
+    text-decoration: none;
+  }
+}
+
+a.link-button:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+a.link-button.active {
+  background-color: var(--color-primary-500);
+  color: white;
+  border-color: var(--color-primary-500);
 }
 
 /* Lists */
@@ -302,8 +365,10 @@ li {
   transition: box-shadow var(--transition-base);
 }
 
-.card:hover {
-  box-shadow: var(--shadow-md);
+@media (hover: hover) {
+  .card:hover {
+    box-shadow: var(--shadow-md);
+  }
 }
 
 @container (min-width: 300px) {
@@ -333,8 +398,10 @@ li {
   text-decoration: none;
 }
 
-.btn:hover {
-  text-decoration: none;
+@media (hover: hover) {
+  .btn:hover {
+    text-decoration: none;
+  }
 }
 
 .btn:focus-visible {
@@ -348,8 +415,10 @@ li {
   color: white;
 }
 
-.btn-primary:hover {
-  background-color: var(--color-primary-600);
+@media (hover: hover) {
+  .btn-primary:hover {
+    background-color: var(--color-primary-600);
+  }
 }
 
 .btn-secondary {
@@ -358,8 +427,10 @@ li {
   border-color: var(--color-border);
 }
 
-.btn-secondary:hover {
-  background-color: var(--color-neutral-100);
+@media (hover: hover) {
+  .btn-secondary:hover {
+    background-color: var(--color-neutral-100);
+  }
 }
 
 .btn-ghost {
@@ -367,8 +438,10 @@ li {
   color: var(--color-text-primary);
 }
 
-.btn-ghost:hover {
-  background-color: var(--color-neutral-100);
+@media (hover: hover) {
+  .btn-ghost:hover {
+    background-color: var(--color-neutral-100);
+  }
 }
 
 /* Badge/Tag styles */

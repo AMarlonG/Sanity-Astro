@@ -49,37 +49,11 @@
   align-items: center;
 }
 
-.date-button {
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  white-space: nowrap;
-}
+/* Date filter buttons now use global .link-button class from global.css
+   This ensures consistency across the site */
 
-.date-button:hover {
-  background: var(--color-bg-secondary);
-  border-color: var(--color-border-dark);
-}
-
-.date-button.active {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
-}
-
-.date-button:focus-visible {
-  outline: 2px solid var(--color-border-dark);
-  outline-offset: 2px;
-}
-
-/* htmx loading state */
-.date-button.htmx-request {
+/* htmx loading state for date filters */
+.link-button.htmx-request {
   opacity: 0.6;
   cursor: wait;
 }
@@ -135,7 +109,7 @@
   grid-template-rows: auto auto 1fr auto auto;
   overflow: hidden;
   border: none;
-  background-color: #e8e6f2;
+  background-color: var(--color-event-card-bg);
   box-shadow: none;
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -155,7 +129,7 @@
 /* Event Title - Grid Row 1 (auto) */
 .event-title {
   margin: 0;
-  color: #1a237e;
+  color: var(--color-event-card-text);
   font-size: clamp(2rem, 6cqw, 2.75rem);
   line-height: 1.1;
   font-weight: 400;
@@ -167,7 +141,7 @@
 /* Event Excerpt - Grid Row 2 (auto) */
 .event-excerpt {
   margin: 0;
-  color: #1a237e;
+  color: var(--color-event-card-text);
   font-size: clamp(1.125rem, 3.5cqw, 1.375rem);
   line-height: 1.5;
   opacity: 0.85;
@@ -175,17 +149,13 @@
 
 /* Event Meta - Grid Row 4 (auto) */
 .event-meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  color: #1a237e;
+  color: var(--color-event-card-text);
   font-size: clamp(1rem, 3cqw, 1.125rem);
   line-height: 1.4;
 }
 
 .event-detail {
-  display: flex;
-  gap: var(--space-2);
+  display: block;
 }
 
 .event-label {
@@ -226,14 +196,16 @@
 
 /* Event Read More Link - Grid Row 5 (auto) */
 .event-read-more {
-  color: #1a237e;
+  color: var(--color-event-card-text);
   text-decoration: underline;
   font-size: var(--font-size-sm);
   align-self: start;
 }
 
-.event-read-more:hover {
-  color: #0d47a1;
+@media (hover: hover) {
+  .event-read-more:hover {
+    color: var(--color-event-card-text-hover);
+  }
 }
 
 .event-link {
@@ -242,8 +214,10 @@
   font-size: var(--font-size-sm);
 }
 
-.event-link:hover {
-  color: var(--color-primary-600);
+@media (hover: hover) {
+  .event-link:hover {
+    color: var(--color-primary-600);
+  }
 }
 
 .ticket-info {
