@@ -20,7 +20,7 @@ a:focus-visible,
 button:focus-visible,
 .card:focus-visible,
 [role="button"]:focus-visible {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid var(--color-blue-500);
   outline-offset: 2px;
 }
 
@@ -118,20 +118,20 @@ p:last-child {
 
 /* Links */
 a {
-  color: var(--color-primary-500);
+  color: var(--color-blue-500);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 @media (hover: hover) {
   a:hover {
-    color: var(--color-primary-600);
+    color: var(--color-blue-600);
     text-decoration: underline;
   }
 }
 
 a:focus-visible {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid var(--color-blue-500);
   outline-offset: 2px;
 }
 
@@ -144,6 +144,7 @@ a.link-button {
   background-color: var(--color-bg-primary);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-base);
+  color: var(--color-blue-500);
   text-decoration: none;
   font-weight: var(--font-weight-medium);
   transition: all var(--transition-base);
@@ -158,14 +159,14 @@ a.link-button {
 }
 
 a.link-button:focus-visible {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid var(--color-blue-500);
   outline-offset: 2px;
 }
 
 a.link-button.active {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-blue-500);
   color: white;
-  border-color: var(--color-primary-500);
+  border-color: var(--color-blue-500);
 }
 
 /* Lists */
@@ -208,6 +209,23 @@ li {
 .text-disabled { color: var(--color-text-disabled); }
 .text-error { color: var(--color-error); }
 .text-success { color: var(--color-success); }
+
+/* Brand color utilities */
+.text-blue { color: var(--color-blue-500); }
+.text-red { color: var(--color-red-500); }
+.text-yellow { color: var(--color-yellow-500); }
+.text-green { color: var(--color-green-500); }
+
+.bg-blue { background-color: var(--color-blue-500); }
+.bg-red { background-color: var(--color-red-500); }
+.bg-yellow { background-color: var(--color-yellow-500); }
+.bg-green { background-color: var(--color-green-500); }
+
+/* Light background variants (for subtle accents) */
+.bg-blue-light { background-color: var(--color-blue-50); }
+.bg-red-light { background-color: var(--color-red-50); }
+.bg-yellow-light { background-color: var(--color-yellow-50); }
+.bg-green-light { background-color: var(--color-green-50); }
 
 /* Font weights */
 .font-light { font-weight: var(--font-weight-light); }
@@ -393,6 +411,7 @@ li {
   font-weight: var(--font-weight-medium);
   line-height: 1;
   border: 1px solid transparent;
+  color: var(--color-blue-500);
   cursor: pointer;
   transition: all var(--transition-fast);
   text-decoration: none;
@@ -405,25 +424,25 @@ li {
 }
 
 .btn:focus-visible {
-  outline: 2px solid var(--color-primary-500);
+  outline: 2px solid var(--color-blue-500);
   outline-offset: 2px;
 }
 
 /* Button variants */
 .btn-primary {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-blue-500);
   color: white;
 }
 
 @media (hover: hover) {
   .btn-primary:hover {
-    background-color: var(--color-primary-600);
+    background-color: var(--color-blue-600);
   }
 }
 
 .btn-secondary {
   background-color: var(--color-surface);
-  color: var(--color-text-primary);
+  color: var(--color-blue-500);
   border-color: var(--color-border);
 }
 
@@ -435,7 +454,7 @@ li {
 
 .btn-ghost {
   background-color: transparent;
-  color: var(--color-text-primary);
+  color: var(--color-blue-500);
 }
 
 @media (hover: hover) {
@@ -452,17 +471,38 @@ li {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   background-color: var(--color-neutral-100);
-  color: var(--color-text-primary);
+  color: var(--color-blue-500);
 }
 
 .badge-primary {
-  background-color: var(--color-primary-100);
-  color: var(--color-primary-700);
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-500);
 }
 
 .badge-success {
   background-color: #d4edda;
   color: #155724;
+}
+
+/* Brand color badge variants */
+.badge-blue {
+  background-color: var(--color-blue-100);
+  color: var(--color-blue-700);
+}
+
+.badge-red {
+  background-color: var(--color-red-100);
+  color: var(--color-red-700);
+}
+
+.badge-yellow {
+  background-color: var(--color-yellow-100);
+  color: var(--color-yellow-700);
+}
+
+.badge-green {
+  background-color: var(--color-green-100);
+  color: var(--color-green-700);
 }
 
 /* Form elements */
@@ -487,8 +527,8 @@ input:focus,
 textarea:focus,
 select:focus {
   outline: none;
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+  border-color: var(--color-blue-500);
+  box-shadow: 0 0 0 3px rgba(27, 25, 143, 0.1);
 }
 
 /* Container Queries - Modern responsive design */
