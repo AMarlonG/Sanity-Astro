@@ -35,16 +35,145 @@
  * - /components/DateFilter.astro (filter-knapper)
  */
 
-/* Date Filter Styles */
+/* ============================================
+   DATE FILTER - CONDITIONAL HORIZONTAL SCROLL
+   ============================================
+
+   Robust solution for 5-8 date buttons.
+   Uses container queries to switch between:
+   - Wide containers (>1100px): Allow wrapping
+   - Narrow containers (<1100px): Horizontal scroll
+
+   Intrinsic approach - adapts based on available space.
+*/
+
 .date-filter {
-  /* Margin removed - parent container gap controls spacing between major sections */
+  /* Enable container queries for responsive behavior */
+  container-type: inline-size;
+  container-name: date-filter;
 }
 
+/* Base styles - works for both wrap and scroll modes */
 .date-filter-buttons {
   display: flex;
   gap: var(--space-2);
-  flex-wrap: wrap;
   align-items: center;
+
+  /* Default: Allow wrapping for wide containers */
+  flex-wrap: wrap;
+
+  /* Performance optimization */
+  contain: layout style inline-size;
+}
+
+/* Ensure buttons size naturally */
+.date-filter-buttons .link-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ============================================
+   HORIZONTAL SCROLL MODE
+   ============================================
+
+   Activate when container is too narrow for all buttons.
+   Breakpoint: 1100px (safe for up to 8 buttons)
+*/
+
+@container date-filter (max-width: 1100px) {
+  .date-filter-buttons {
+    /* Disable wrapping - enable horizontal scroll */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    /* Smooth scrolling behavior */
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+
+    /* Prevent vertical scroll on horizontal swipe */
+    touch-action: pan-x;
+
+    /* Scroll padding for better UX */
+    scroll-padding-inline: clamp(1rem, 3vw, 2rem);
+
+    /* Visual fade indicators at edges */
+    --fade-size: clamp(1rem, 4vw, 2rem);
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--fade-size),
+      black calc(100% - var(--fade-size)),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--fade-size),
+      black calc(100% - var(--fade-size)),
+      transparent
+    );
+
+    /* Scroll snap for better UX */
+    scroll-snap-type: x proximity;
+  }
+
+  .date-filter-buttons .link-button {
+    /* Snap to start of each button */
+    scroll-snap-align: start;
+    scroll-margin-inline-start: 0.5rem;
+  }
+
+  /* Subtle scrollbar styling - visible but not obtrusive */
+  .date-filter-buttons {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+
+  .date-filter-buttons::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .date-filter-buttons::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .date-filter-buttons::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 3px;
+  }
+
+  .date-filter-buttons::-webkit-scrollbar-thumb:hover {
+    background: var(--color-border-dark);
+  }
+
+  /* Keyboard focus indicator */
+  .date-filter-buttons:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================ */
+
+@media (pointer: coarse) {
+  /* Larger touch targets regardless of scroll mode */
+  .date-filter-buttons .link-button {
+    min-block-size: 48px;
+    padding-inline: clamp(1.25rem, 4vw, 2rem);
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .date-filter-buttons {
+    scroll-behavior: auto;
+  }
 }
 
 /* Loading indicator - shown inline with filter buttons */
