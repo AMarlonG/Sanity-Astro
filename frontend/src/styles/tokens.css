@@ -207,6 +207,33 @@
   /* Grid */
   --grid-columns: 12;
   --grid-gap: var(--space-5);
+
+  /* Navigation */
+  --nav-height-mobile: clamp(3.5rem, 15vw, 4.5rem);
+  --nav-height-desktop: clamp(4rem, 8vw, 5rem);
+  --nav-z-index: var(--z-sticky);
+  --nav-gap: clamp(0.5rem, 2vw, 1.5rem);
+  --nav-padding-inline: clamp(1rem, 4vw, 2rem);
+  --nav-padding-block: clamp(0.75rem, 2vw, 1.25rem);
+
+  /* Fluid spacing variants for intrinsic layouts */
+  --space-fluid-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+  --space-fluid-sm: clamp(0.5rem, 1vw, 1rem);
+  --space-fluid-md: clamp(1rem, 2vw + 0.5rem, 2rem);
+  --space-fluid-lg: clamp(1.5rem, 3vw + 0.5rem, 3rem);
+  --space-fluid-xl: clamp(2rem, 4vw + 1rem, 4rem);
+  --space-fluid-2xl: clamp(3rem, 6vw + 1.5rem, 6rem);
+
+  /* Container query breakpoints (as tokens for consistency) */
+  --cq-breakpoint-sm: 400px;
+  --cq-breakpoint-md: 600px;
+  --cq-breakpoint-lg: 800px;
+  --cq-breakpoint-xl: 1000px;
+
+  /* Media query breakpoints (for page-level layout decisions only) */
+  --mq-mobile: 767px;  /* Mobile-first breakpoint */
+  --mq-tablet: 768px;  /* Tablet and above */
+  --mq-desktop: 1024px; /* Desktop and above */
 }
 
 /* Dark mode tokens (for future use) */

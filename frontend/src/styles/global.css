@@ -626,14 +626,9 @@ select:focus {
   }
 }
 
-/* Legacy responsive utilities (kept for compatibility) */
+/* Utility classes for layout decisions only (not component styling) */
 @media (max-width: 768px) {
   .md\:hidden { display: none; }
-  
-  /* Legacy grid fallbacks still work with intrinsic grids */
-  .legacy-grid-2 { grid-template-columns: 1fr; }
-  .legacy-grid-3 { grid-template-columns: 1fr; }
-  .legacy-grid-4 { grid-template-columns: 1fr; }
 }
 
 @media (min-width: 769px) {
@@ -651,4 +646,71 @@ select:focus {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* ============================================
+   BROWSER FALLBACKS FOR CONTAINER QUERIES
+   ============================================
+
+   Container queries have 93%+ browser support (2024).
+   These fallbacks provide graceful degradation for the ~7%
+   of users on older browsers.
+
+   Strategy: Provide traditional responsive patterns as fallback,
+   then enhance with container queries when supported.
+*/
+
+/* Fallback for browsers without container query support */
+@supports not (container-type: inline-size) {
+  /* Card component fallback - use traditional padding */
+  .card {
+    padding: var(--space-4);
+  }
+
+  @media (min-width: 600px) {
+    .card {
+      padding: var(--space-5);
+    }
+  }
+
+  @media (min-width: 900px) {
+    .card {
+      padding: var(--space-6);
+    }
+  }
+
+  /* Card grid fallback - ensure minimum usable width */
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  @media (max-width: 600px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Responsive columns fallback */
+  .responsive-columns {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  @media (max-width: 650px) {
+    .responsive-columns {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+/* Container query support is available - use modern patterns */
+@supports (container-type: inline-size) {
+  /* This is the default path for 93%+ of users */
+  /* All container query rules in the file above will work */
+
+  /* Add explicit container-type to ensure components can use container queries */
+  .card-grid,
+  .auto-grid,
+  .responsive-columns {
+    container-type: inline-size;
+  }
 }

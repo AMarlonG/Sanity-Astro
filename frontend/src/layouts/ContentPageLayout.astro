@@ -53,12 +53,39 @@ const slugEn = pageDocument?.slug_en;
 </Layout>
 
 <style>
-  /* Page Layout - Stack Pattern with Flexbox Gap */
+  /* ============================================
+     INTRINSIC CONTENT PAGE LAYOUT
+     ============================================
+
+     Container-based layout that allows child components
+     to use container queries for responsive styling.
+
+     Key features:
+     - Container query support for children
+     - Fluid spacing that scales naturally
+     - Stack pattern with intrinsic gap
+     - No media queries needed
+  */
+
   .page-layout {
+    /* Enable container queries for child components */
+    container-type: inline-size;
+    container-name: page-layout;
+
+    /* Stack pattern with flexible gap */
     display: flex;
     flex-direction: column;
-    gap: clamp(var(--space-4), 4vw, var(--space-6));
-    padding-block-start: clamp(calc(var(--space-6) * 2.5), 15vw, calc(var(--space-9) * 2.5));
+    gap: var(--space-fluid-md); /* Uses new fluid spacing tokens */
+
+    /* Intrinsic top spacing that scales with viewport */
+    padding-block-start: clamp(
+      calc(var(--space-6) * 2.5),
+      15vw,
+      calc(var(--space-9) * 2.5)
+    );
+
+    /* Ensure content doesn't get too narrow on small screens */
+    min-inline-size: min(100%, 280px);
   }
 
   .page-header {
@@ -67,15 +94,34 @@ const slugEn = pageDocument?.slug_en;
 
   .page-title {
     margin: 0 0 var(--space-2) 0;
+    /* Ensure title wraps gracefully with Norwegian/English text */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   .page-excerpt {
     margin: var(--space-3) 0 0 0;
     font-size: var(--font-size-lg);
     line-height: var(--line-height-relaxed);
+    /* Better text balance for excerpts */
+    text-wrap: balance;
+    max-inline-size: 65ch; /* Optimal reading width */
   }
 
   .page-content {
     margin: 0;
+    /* Stack children with consistent gap */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-fluid-lg);
+  }
+
+  /* Fallback for browsers without container query support */
+  @supports not (container-type: inline-size) {
+    .page-layout {
+      /* Traditional max-width pattern */
+      max-inline-size: var(--container-max-width);
+    }
   }
 </style>
