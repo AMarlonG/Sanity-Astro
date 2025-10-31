@@ -135,8 +135,7 @@ const filteredDates = dateFilter
                 <div class="event-meta">
                   {event.eventDate?.date && (
                     <div class="event-detail event-datetime">
-                      {formatDateWithWeekday(event.eventDate.date, 'no')}
-                      {event.eventTime && (
+                      {formatDateWithWeekday(event.eventDate.date, 'no')}{event.eventTime && (
                         <>, kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</>
                       )}
                     </div>
