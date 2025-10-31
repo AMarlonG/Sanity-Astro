@@ -55,3 +55,10 @@ coverage/
 # Personal documentation
 PROJECT_RULES.md
 SANITY_RULES.md
+
+# Personal tooling configs
+.prettierignore
+.prettierrc.json
+.npmrc
+eslint.config.mjs
+.changeset/
