@@ -175,29 +175,59 @@ This project uses a simple two-branch strategy for deployment:
 - `fix/*` - Bug fixes (e.g., `fix/date-formatting`)
 - `chore/*` - Maintenance tasks (e.g., `chore/update-deps`)
 
-**Workflow:**
+**Daily Workflow:**
+
+One feature branch = one logical piece of work (can span hours or days)
+
+```
+Morning (or when starting new work):
+   git checkout staging
+   git pull origin staging
+   git checkout -b feature/improve-artist-pages
+
+Throughout the day - commit as often as you want:
+   git add .
+   git commit -m "Add artist bio section"
+   # Keep working...
+   git add .
+   git commit -m "Fix image layout"
+   # Keep working...
+   git commit -m "Add social links"
+   # Multiple commits are fine!
+
+End of day (or when feature is done):
+   git push origin feature/improve-artist-pages
+   # Create ONE PR with all your commits
+   # Merge to staging
+   # Delete feature branch
+```
+
+**Full Workflow:**
 ```
 1. Create feature branch FROM staging:
    git checkout staging
    git pull origin staging
    git checkout -b feature/new-feature
 
-2. Develop and commit:
+2. Develop and commit (as many times as needed):
    git add .
    git commit -m "Add new feature"
+   # Work more, commit more...
+
+3. Push when ready:
    git push origin feature/new-feature
 
-3. Open PR: feature/new-feature → staging
+4. Open PR: feature/new-feature → staging
    - Test on staging URL
    - Review changes
    - Merge to staging
 
-4. When ready for production:
+5. When ready for production:
    Open PR: staging → main
    - Final review
    - Merge to main (deploys to production)
 
-5. Delete feature branch:
+6. Delete feature branch:
    git branch -d feature/new-feature
    git push origin --delete feature/new-feature
 ```
@@ -209,15 +239,37 @@ This project uses a simple two-branch strategy for deployment:
 - **Keep staging in sync with main** when starting new work
 - **Update your feature branch from staging** if it gets behind during development
 
-**Commit & Push Guidelines:**
-- **Suggest pushing changes proactively** after completing logical milestones:
-  - ✅ After adding new features or functionality
-  - ✅ After completing implementation phases
-  - ✅ After significant bug fixes or updates
-  - ✅ After schema changes or major refactoring
-- **Don't wait for explicit push requests** - suggest it when it makes sense
-- **Make meaningful commit messages** that explain what was accomplished
-- **Push frequently** rather than accumulating large changesets
+**How Often to Commit/Push/PR:**
+
+**Commit (Very Often - Local Only):**
+- After completing each small piece of work
+- After fixing a bug
+- Before trying something risky (easy to undo)
+- Frequency: 5-20+ times per day is normal
+- Command: `git add . && git commit -m "Description"`
+
+**Push (When Ready for Backup):**
+- End of work session (end of day, lunch break)
+- When you've hit a milestone
+- When you want work backed up to GitHub
+- Frequency: 1-3 times per day
+- Command: `git push origin feature/branch-name`
+
+**PR + Merge (When Feature Complete):**
+- End of day if feature is done
+- When ready for staging/production
+- Frequency: 1-2 times per day, or every few days
+
+**Starting Work Prompt:**
+When you say "Start work on: [description]" to Claude:
+- Claude will ask what specific feature/task you're working on
+- Claude will checkout staging, pull latest, create feature branch
+- You're ready to work!
+
+**Commit & Push Guidelines (for Claude):**
+- Suggest pushing changes proactively after completing logical milestones
+- Make meaningful commit messages that explain what was accomplished
+- Push when it makes sense based on user's workflow
 
 ## File Organization
 
