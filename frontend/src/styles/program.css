@@ -211,14 +211,17 @@
   font-weight: var(--font-weight-semibold);
 }
 
-/* Intrinsic Grid System */
+/* Fixed-Size Grid System - NRK-inspired approach */
 .events-grid {
   container-type: inline-size;
   display: grid;
   gap: clamp(var(--space-4), 3vw, var(--space-6));
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 350px), 1fr));
+  /* Fixed 320px cards - fits as many as possible */
+  grid-template-columns: repeat(auto-fill, 320px);
   padding: 0;
   contain: layout style;
+  /* Center cards when there's extra space */
+  justify-content: center;
 }
 
 /* ============================================
@@ -227,15 +230,16 @@
 
    Below 800px container width, switch from wrapping grid
    to horizontal scrolling grid. Each date section scrolls
-   independently while maintaining card 4:5 aspect ratio.
+   independently. Cards remain fixed at 320px width.
 */
 
 @container (max-width: 800px) {
   .events-grid {
-    /* Transform grid to horizontal flow with intrinsic sizing */
+    /* Transform grid to horizontal flow with fixed 320px cards */
     grid-template-columns: none;
     grid-auto-flow: column;
-    grid-auto-columns: clamp(16rem, 40cqw, 24rem);
+    grid-auto-columns: 320px;
+    justify-content: start;
 
     /* Enable horizontal scroll */
     overflow-x: scroll;
@@ -261,7 +265,7 @@
     scroll-snap-type: x mandatory;
   }
 
-  /* Maintain 7:11 aspect ratio and add snap points */
+  /* Fixed cards with snap points */
   .events-grid .event-card {
     scroll-snap-align: start;
     scroll-margin-inline-start: 0.5rem;
@@ -297,6 +301,16 @@
     outline: 2px solid var(--color-blue);
     outline-offset: 2px;
   }
+
+  /* Override hover effect for horizontal scroll mode */
+  @media (hover: hover) {
+    .event-card:hover {
+      /* Use scale instead of translateY to avoid clipping in scroll container */
+      transform: scale(1.02);
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+      background-color: rgba(0, 179, 154, 0.08);
+    }
+  }
 }
 
 /* No Results State */
@@ -315,13 +329,13 @@
   font-size: var(--font-size-base);
 }
 
-/* Event Card - Utopia-Inspired Intrinsic Design */
+/* Event Card - Fixed-Size Design (NRK-inspired) */
 .event-card {
   position: relative; /* Required for stretched link pattern */
   container-type: inline-size;
   display: grid;
-  /* Text always wins: Image constrained to min 80px, text gets priority */
-  grid-template-rows: auto auto minmax(80px, 1fr) auto auto;
+  /* Fixed grid rows for consistent layout */
+  grid-template-rows: auto auto minmax(120px, 1fr) auto auto;
   overflow: hidden;
   border: none;
   background-color: rgba(27, 25, 143, 0.08);
@@ -329,16 +343,17 @@
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Fixed spacing for predictable layout */
-  padding: var(--space-4); /* 1rem */
-  gap: var(--space-2); /* 0.5rem */
+  /* Fixed spacing - never changes */
+  padding: 1rem;
+  gap: 0.75rem;
 
-  /* Consistent 7:11 aspect ratio across all screen sizes */
+  /* Fixed aspect ratio */
   aspect-ratio: 7 / 11;
 
-  /* Prevent overflow - guard against pathologically narrow cards */
-  min-width: 220px;
-  min-height: unset;
+  /* Fixed width - cards always 320px */
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
 }
 
 /* Hover effect only for devices with hover capability */
@@ -354,11 +369,11 @@
   }
 }
 
-/* Event Title - Utopia-style fluid typography */
+/* Event Title - Fixed typography */
 .event-title {
   margin: 0;
-  /* Conservative range: 1.25rem @ 200px → 2rem @ 400px */
-  font-size: clamp(1.25rem, 0.875rem + 4.5cqi, 2rem);
+  /* Fixed size - 24px always */
+  font-size: 1.5rem;
   line-height: 1.15;
   font-weight: 400;
   font-family: Georgia, 'Times New Roman', serif;
@@ -371,11 +386,11 @@
   hyphens: auto;
 }
 
-/* Event Excerpt - Proportional scaling */
+/* Event Excerpt - Fixed typography */
 .event-excerpt {
   margin: 0;
-  /* Conservative range: 0.9375rem @ 200px → 1.125rem @ 400px */
-  font-size: clamp(0.9375rem, 0.75rem + 2.5cqi, 1.125rem);
+  /* Fixed size - 16px always */
+  font-size: 1rem;
   line-height: 1.45;
   opacity: 0.85;
 
@@ -385,10 +400,10 @@
   hyphens: auto;
 }
 
-/* Event Meta - Smallest in hierarchy */
+/* Event Meta - Fixed typography */
 .event-meta {
-  /* Conservative range: 0.8125rem @ 200px → 1rem @ 400px */
-  font-size: clamp(0.8125rem, 0.7rem + 2cqi, 1rem);
+  /* Fixed size - 14px always */
+  font-size: 0.875rem;
   line-height: 1.35;
 
   /* Overflow protection */
@@ -491,23 +506,8 @@
 }
 
 .ticket-info {
-  font-size: var(--font-size-sm);
+  font-size: 0.875rem;
   font-style: italic;
-}
-
-/* Container Query Enhancements */
-@container (min-width: 350px) {
-  .event-title {
-    font-size: var(--font-size-xl);
-  }
-
-  .event-excerpt {
-    font-size: var(--font-size-base);
-  }
-
-  .event-meta {
-    font-size: var(--font-size-base);
-  }
 }
 
 /* ============================================
