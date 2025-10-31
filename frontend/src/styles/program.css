@@ -64,6 +64,9 @@
 
   /* Performance optimization */
   contain: layout style inline-size;
+
+  /* Position for pseudo-element scrollbar indicator */
+  position: relative;
 }
 
 /* Ensure buttons size naturally */
@@ -84,7 +87,7 @@
   .date-filter-buttons {
     /* Disable wrapping - enable horizontal scroll */
     flex-wrap: nowrap;
-    overflow-x: auto;
+    overflow-x: scroll;
     overflow-y: hidden;
 
     /* Smooth scrolling behavior */
@@ -100,22 +103,8 @@
     /* Scroll padding for better UX */
     scroll-padding-inline: clamp(1rem, 3vw, 2rem);
 
-    /* Visual fade indicators at edges */
-    --fade-size: clamp(1rem, 4vw, 2rem);
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      black var(--fade-size),
-      black calc(100% - var(--fade-size)),
-      transparent
-    );
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent,
-      black var(--fade-size),
-      black calc(100% - var(--fade-size)),
-      transparent
-    );
+    /* Space for scrollbar underneath buttons */
+    padding-block-end: 12px;
 
     /* Scroll snap for better UX */
     scroll-snap-type: x proximity;
@@ -127,27 +116,29 @@
     scroll-margin-inline-start: 0.5rem;
   }
 
-  /* Subtle scrollbar styling - visible but not obtrusive */
+  /* Styled native scrollbar - always visible and functional */
   .date-filter-buttons {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+    scrollbar-color: var(--color-blue) var(--color-neutral-100);
   }
 
   .date-filter-buttons::-webkit-scrollbar {
-    height: 6px;
+    height: 8px;
+    -webkit-appearance: none;
   }
 
   .date-filter-buttons::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--color-neutral-100);
+    border-radius: 0;
   }
 
   .date-filter-buttons::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 3px;
+    background: var(--color-blue);
+    border-radius: 0;
   }
 
   .date-filter-buttons::-webkit-scrollbar-thumb:hover {
-    background: var(--color-border-dark);
+    background: var(--color-green);
   }
 
   /* Keyboard focus indicator */
