@@ -175,3 +175,20 @@ const filteredDates = dateFilter
       )}
   </div>
 </ContentPageLayout>
+
+<script>
+  // Handle active state for date filter buttons when using htmx
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.date-filter-buttons .link-button');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        // Remove active class from all buttons
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+
+        // Add active class to clicked button
+        e.currentTarget.classList.add('active');
+      });
+    });
+  });
+</script>
