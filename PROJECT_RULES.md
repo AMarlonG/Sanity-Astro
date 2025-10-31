@@ -161,11 +161,16 @@ Dette hierarkiet gjelder for alle agenter og all interaksjon med eksterne system
 
 This project uses a simple two-branch strategy for deployment:
 
+**⚠️ IMPORTANT: Where You Work**
+- ❌ **NEVER work directly in `main`** - Production only, merge via PR
+- ❌ **NEVER work directly in `staging`** - Testing only, merge via PR
+- ✅ **ALWAYS work in feature branches** - Create from staging, merge back to staging
+
 **Permanent Branches:**
 - `main` - Production branch (will deploy to live URL)
 - `staging` - Testing/preview branch (will deploy to test URL)
 
-**Temporary Branches:**
+**Temporary Branches (Your Workspace):**
 - `feature/*` - New features (e.g., `feature/ticket-sales`)
 - `fix/*` - Bug fixes (e.g., `fix/date-formatting`)
 - `chore/*` - Maintenance tasks (e.g., `chore/update-deps`)
