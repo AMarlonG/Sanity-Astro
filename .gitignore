@@ -16,6 +16,7 @@ dist/
 build/
 .next/
 out/
+.vercel/
 
 # IDE files
 .vscode/
@@ -26,6 +27,11 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Development tools
+.claude/
+.config/
+.turbo/
 
 # Logs
 logs
@@ -44,4 +50,8 @@ coverage/
 .sanity/
 
 # Astro specific
-.astro/ 
+.astro/
+
+# Personal documentation
+PROJECT_RULES.md
+SANITY_RULES.md
