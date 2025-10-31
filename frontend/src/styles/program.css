@@ -196,8 +196,8 @@
 }
 
 .date-section {
-  /* Smaller margin for visual grouping between date sections */
-  margin-block-end: var(--space-5);
+  /* Spacing between date sections - 64px for clear visual separation */
+  margin-block-end: var(--space-9);
 }
 
 .date-section:last-child {
@@ -266,7 +266,7 @@
   }
 
   /* Fixed cards with snap points */
-  .events-grid .event-card {
+  .event-card {
     scroll-snap-align: start;
     scroll-margin-inline-start: 0.5rem;
   }
@@ -401,16 +401,28 @@
 }
 
 /* Event Meta - Fixed typography */
-.event-meta {
+dl.event-meta {
   /* Fixed size - 14px always */
   font-size: 0.875rem;
   line-height: 1.35;
+  margin: 0;
 
   /* Overflow protection */
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
 
+dl.event-meta dt {
+  /* Screen reader only labels */
+  font-weight: var(--font-weight-medium);
+}
+
+dl.event-meta dd {
+  display: block;
+  margin: 0;
+}
+
+/* Keep .event-detail for backwards compatibility */
 .event-detail {
   display: block;
 }
@@ -421,7 +433,7 @@
 }
 
 /* Event Image - Grid Row 3 (constrained by minmax) */
-.event-image {
+figure.event-image {
   position: relative;
   width: 100%;
   /* Let grid row control height, maintain 4:3 within available space */
@@ -430,9 +442,10 @@
   overflow: hidden;
   align-self: center;
   justify-self: center;
+  margin: 0;
 }
 
-.event-image picture {
+figure.event-image picture {
   display: block;
   width: 100%;
   height: 100%;
@@ -446,12 +459,8 @@
 }
 
 /* Event Actions - Visible on cards */
-.event-actions {
-  display: block;
-  width: fit-content;
-  margin-inline-start: auto;
-}
-
+/* Note: .event-actions wrapper removed for semantic HTML */
+/* Ticket info and buttons now stand alone at end of card */
 .event-actions-row {
   display: flex;
 }
@@ -492,10 +501,13 @@
 
 /* Elevate buttons above stretched link */
 .event-card .btn,
-.event-card .btn-primary,
-.event-card .event-actions {
+.event-card .btn-primary {
   position: relative;
   z-index: 2;
+  /* Align button to right */
+  margin-inline-start: auto;
+  width: fit-content;
+  display: block;
 }
 
 /* Elevate other interactive elements */
@@ -508,6 +520,12 @@
 .ticket-info {
   font-size: 0.875rem;
   font-style: italic;
+  /* Align to right like buttons */
+  margin-inline-start: auto;
+  width: fit-content;
+  text-align: end;
+  position: relative;
+  z-index: 2;
 }
 
 /* ============================================
