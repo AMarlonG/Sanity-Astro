@@ -6,7 +6,7 @@
     "node": ">=18.20.8"
   },
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --port 4321",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
