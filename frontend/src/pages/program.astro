@@ -84,7 +84,7 @@ const filteredDates = dateFilter
   excerpt={programPage?.excerpt}
   pageDocument={programPage}
 >
-  <div id="date-filter-container">
+  <section id="date-filter-container" role="search" aria-label="Filter events by date">
     <DateFilter
       availableDates={availableDates}
       language="no"
@@ -93,14 +93,14 @@ const filteredDates = dateFilter
     <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
       Laster arrangementer...
     </div>
-  </div>
+  </section>
 
   <div id="event-results">
       {filteredDates.length > 0 ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
           <h3 class="date-title">{stegaClean(displayTitle)}</h3>
-          <div class="grid events-grid">
+          <div class="events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
                 <h4 class="event-title">
@@ -114,7 +114,7 @@ const filteredDates = dateFilter
                 )}
 
                 {event.image?.image && (
-                  <div class="event-image">
+                  <figure class="event-image">
                     <picture>
                       <source
                         srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
@@ -129,34 +129,37 @@ const filteredDates = dateFilter
                         class="event-card-image"
                       />
                     </picture>
-                  </div>
+                  </figure>
                 )}
 
-                <div class="event-meta">
+                <dl class="event-meta">
                   {event.eventDate?.date && (
-                    <div class="event-detail event-datetime">
-                      {formatDateWithWeekday(event.eventDate.date, 'no')}
-                      {event.eventTime && (
-                        <>, kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</>
-                      )}
-                    </div>
+                    <>
+                      <dt class="visually-hidden">Dato og tid</dt>
+                      <dd class="event-datetime">
+                        {formatDateWithWeekday(event.eventDate.date, 'no')}{event.eventTime && (
+                          <>, kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</>
+                        )}
+                      </dd>
+                    </>
                   )}
                   {event.venue?.title && (
-                    <div class="event-detail event-venue">
-                      {stegaClean(event.venue.title)}
-                    </div>
+                    <>
+                      <dt class="visually-hidden">Sted</dt>
+                      <dd class="event-venue">
+                        {stegaClean(event.venue.title)}
+                      </dd>
+                    </>
                   )}
-                </div>
+                </dl>
 
-                <div class="event-actions">
-                  {stegaClean(event.ticketType) === 'info' ? (
-                    <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
-                  ) : (
-                    <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-                      Kjøp billetter her
-                    </a>
-                  )}
-                </div>
+                {stegaClean(event.ticketType) === 'info' ? (
+                  <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
+                ) : (
+                  <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                    Kjøp billetter her
+                  </a>
+                )}
               </article>
             ))}
           </div>
@@ -172,3 +175,20 @@ const filteredDates = dateFilter
       )}
   </div>
 </ContentPageLayout>
+
+<script>
+  // Handle active state for date filter buttons when using htmx
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('.date-filter-buttons .link-button');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        // Remove active class from all buttons
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+
+        // Add active class to clicked button
+        e.currentTarget.classList.add('active');
+      });
+    });
+  });
+</script>

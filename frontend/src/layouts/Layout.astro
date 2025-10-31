@@ -60,30 +60,164 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 
     <!-- Minimal critical styles -->
     <style>
-      /* Sticky Footer Layout - Document Structure */
+      /* ============================================
+         INTRINSIC PAGE LAYOUT
+         ============================================
+
+         Modern sticky footer pattern using CSS Grid.
+         - Header: Natural height
+         - Main: Fills available space
+         - Footer: Natural height
+
+         No media queries needed - fully intrinsic.
+      */
+
       body {
         display: grid;
         grid-template-rows: auto 1fr auto;
-        min-height: 100vh;
+        grid-template-columns: 100%;
+        min-block-size: 100vh; /* Logical property for height */
       }
 
-      /* Main content - Stretches to fill available space */
+      /* Main content - Flexible, fills available space */
       .main-content {
         display: flex;
         flex-direction: column;
+        /* Intrinsic padding using fluid values */
+        padding-block-start: clamp(var(--space-4), 4vw, var(--space-8));
+        padding-block-end: clamp(var(--space-6), 6vw, var(--space-10));
       }
 
-      /* Footer - Occupies third grid row and centers */
+      /* Footer - Intrinsic size with centered content */
       .page-footer {
         margin-inline: auto;
-        width: var(--space-11);
-        height: var(--space-11);
+        /* Fluid sizing instead of fixed */
+        width: clamp(var(--space-10), 12vw, var(--space-12));
         aspect-ratio: 1 / 1;
         background-color: var(--color-green-100);
       }
 
       .page-footer .container {
         display: flex;
+        align-items: center;
+        justify-content: center;
+        block-size: 100%; /* Logical property for height */
+      }
+
+      /* ============================================
+         PRINT STYLES
+         ============================================
+
+         Optimize for printed pages:
+         - Remove navigation and non-essential elements
+         - Adjust spacing for print media
+         - Ensure content is readable
+      */
+
+      @media print {
+        /* Hide non-essential elements */
+        header,
+        .page-footer,
+        nav,
+        [role="navigation"],
+        .no-print {
+          display: none !important;
+        }
+
+        /* Reset page structure for print */
+        body {
+          display: block;
+          min-block-size: auto;
+        }
+
+        .main-content {
+          padding: 0;
+        }
+
+        /* Ensure good contrast for printing */
+        * {
+          color: #000 !important;
+          background: #fff !important;
+        }
+
+        /* Prevent page breaks inside important elements */
+        article,
+        section,
+        .event-card,
+        .card {
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        /* Add page breaks before major sections */
+        h1, h2 {
+          page-break-after: avoid;
+          break-after: avoid;
+        }
+
+        /* Adjust typography for print */
+        body {
+          font-size: 12pt;
+          line-height: 1.5;
+        }
+
+        /* Show link URLs in print */
+        a[href]::after {
+          content: " (" attr(href) ")";
+          font-size: 0.8em;
+        }
+
+        /* Don't show URLs for internal links */
+        a[href^="#"]::after,
+        a[href^="/"]::after {
+          content: "";
+        }
+      }
+
+      /* ============================================
+         USER PREFERENCE QUERIES
+         ============================================
+
+         Respect user accessibility preferences:
+         - Reduced motion
+         - High contrast
+         - Dark mode (future)
+      */
+
+      /* Reduced motion - disable animations/transitions */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* High contrast mode - enhance visibility */
+      @media (prefers-contrast: high) {
+        body {
+          font-weight: var(--font-weight-medium);
+        }
+
+        a,
+        button {
+          font-weight: var(--font-weight-bold);
+        }
+
+        /* Stronger borders and outlines */
+        *:focus-visible {
+          outline-width: 3px !important;
+          outline-offset: 3px !important;
+        }
+      }
+
+      /* Dark mode support (future implementation) */
+      @media (prefers-color-scheme: dark) {
+        /* Dark mode tokens would go here */
+        /* Currently not implemented to keep it simple */
       }
     </style>
 
