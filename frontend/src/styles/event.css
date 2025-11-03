@@ -1,0 +1,319 @@
+/* Event Page Styles - Global CSS for consistency
+ *
+ * Design principles:
+ * - Title and excerpt trump images (text-first hierarchy)
+ * - Intrinsic CSS with minimal media queries
+ * - Fixed spacing values (not fluid)
+ * - Consistent with program page design language
+ */
+
+/* ============================================
+   EVENT PAGE BACKGROUND - ACTIVE STATE
+   ============================================
+
+   Full page green tint to indicate active/selected event.
+   Matches hover state on program page event cards.
+
+   Uses :has() selector to target the main tag only on event pages.
+   Browser support: 90%+ (Chrome 105+, Firefox 121+, Safari 15.4+)
+*/
+
+main:has(.event-page) {
+  background-color: rgba(0, 179, 154, 0.08);
+}
+
+/* ============================================
+   EVENT INFO GRID - TWO COLUMN LAYOUT
+   ============================================
+
+   Title and excerpt handled by ContentPageLayout.
+   Two-column grid: Info (left) + Image (right)
+   Container queries handle responsive stacking.
+*/
+
+/* Back navigation button */
+.back-nav {
+  margin-block-end: var(--space-5);
+}
+
+.back-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--color-blue);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: color var(--transition-fast);
+}
+
+.back-button::before {
+  content: '←';
+  font-size: var(--font-size-lg);
+}
+
+.back-button::after {
+  content: none;
+}
+
+@media (hover: hover) {
+  .back-button:hover {
+    color: var(--color-green);
+    text-decoration: underline;
+  }
+}
+
+.back-button:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* Two-column grid container */
+.event-info-grid {
+  container-type: inline-size;
+  container-name: event-info-grid;
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--space-6);
+  align-items: start;
+  margin-block-end: var(--space-8);
+}
+
+/* Right column - metadata + ticket button */
+.event-info-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  order: 2;
+}
+
+/* Event metadata (date, time, venue) - vertical stack */
+.event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+}
+
+.event-meta-item {
+  display: block;
+}
+
+/* Ticket section */
+.ticket-section {
+  margin-block-start: var(--space-2);
+}
+
+.ticket-info {
+  font-size: var(--font-size-base);
+  font-style: italic;
+  color: var(--color-blue);
+  opacity: 0.85;
+}
+
+/* Left column - event image */
+.event-image-column {
+  display: flex;
+  align-items: start;
+  order: 1;
+}
+
+.event-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-neutral-100);
+  margin: 0;
+}
+
+.event-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Container query - stack on narrow viewports */
+@container event-info-grid (max-width: 700px) {
+  .event-info-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  /* Reorder: image first, then info on mobile */
+  .event-image-column {
+    order: -1;
+  }
+
+  .event-info-column {
+    order: 1;
+  }
+}
+
+/* ============================================
+   ARTIST SCROLLBAR SECTION
+   ============================================
+
+   Horizontal scroll container for artist names.
+   Simple, text-focused design to avoid competing
+   with main content. Similar to program page filters.
+*/
+
+.artists-section {
+  container-type: inline-size;
+  container-name: artists-section;
+  margin-block-end: var(--space-8);
+  padding-block: var(--space-5);
+}
+
+.artists-title {
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-blue);
+}
+
+.artists-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scroll-padding-inline: var(--space-3);
+  padding-block-end: 12px;
+  scroll-snap-type: x proximity;
+}
+
+.artists-list {
+  display: flex;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.artist-item {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  scroll-margin-inline-start: var(--space-2);
+}
+
+/* Artist card - simple text-only design */
+.artist-card {
+  position: relative;
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-blue);
+  transition: background-color var(--transition-base),
+              border-color var(--transition-base),
+              transform var(--transition-base);
+  white-space: nowrap;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Remove default link arrow */
+.artist-card::after {
+  content: none;
+}
+
+@media (hover: hover) {
+  .artist-card:hover {
+    background-color: color-mix(in srgb, var(--color-blue) 8%, transparent);
+    border-color: var(--color-blue);
+    transform: translateY(-2px);
+  }
+}
+
+.artist-card:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* Styled scrollbar - always visible for discoverability */
+.artists-scroll-wrapper {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-blue) var(--color-neutral-100);
+}
+
+.artists-scroll-wrapper::-webkit-scrollbar {
+  height: 4px;
+  -webkit-appearance: none;
+}
+
+.artists-scroll-wrapper::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+  border-radius: 0;
+}
+
+.artists-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: var(--color-blue);
+  border-radius: 0;
+}
+
+.artists-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--color-green);
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================
+
+   Standard content layout for PageBuilder content.
+   Full-width, readable typography.
+*/
+
+.event-content {
+  max-width: 65ch;
+  margin-block-start: var(--space-6);
+}
+
+/* ============================================
+   ACCESSIBILITY & MOTION PREFERENCES
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .artists-scroll-wrapper {
+    scroll-behavior: auto;
+  }
+
+  .artist-card,
+  .back-button {
+    transition: none;
+  }
+
+  .artist-card:hover {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .artist-card {
+    border-width: 2px;
+  }
+
+  .artist-card:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* Touch device optimizations */
+@media (pointer: coarse) {
+  .artist-card {
+    min-block-size: 44px;
+    padding-inline: var(--space-5);
+  }
+
+  .artists-scroll-wrapper::-webkit-scrollbar {
+    height: 8px;
+  }
+}

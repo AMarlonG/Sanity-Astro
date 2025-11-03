@@ -93,7 +93,8 @@ const slugEn = pageDocument?.slug_en;
   }
 
   .page-title {
-    margin: 0 0 var(--space-2) 0;
+    margin: 0 0 var(--space-4) 0;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
     /* Ensure title wraps gracefully with Norwegian/English text */
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -101,8 +102,8 @@ const slugEn = pageDocument?.slug_en;
   }
 
   .page-excerpt {
-    margin: var(--space-3) 0 0 0;
-    font-size: var(--font-size-lg);
+    margin: 0 0 var(--space-3) 0;
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
     line-height: var(--line-height-relaxed);
     /* Better text balance for excerpts */
     text-wrap: balance;
