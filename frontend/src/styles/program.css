@@ -505,12 +505,14 @@
 
 .no-results-title {
   margin: 0 0 var(--space-2) 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
 }
 
 .no-results-text {
   margin: 0 0 var(--space-5) 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
 }
 
 /* Reset button matches filter button size */
