@@ -14,31 +14,12 @@ const uniqueDates = Array.from(
   new Set(availableDates.map(d => d.date))
 ).sort();
 
-// SHARED STATE: Get both date and venue from URL
+// Get current filter state from URL for active state detection
 const currentDate = Astro.url.searchParams.get('date') || '';
 const currentVenue = Astro.url.searchParams.get('venue') || '';
 
-// SHARED HELPERS: Build URLs that preserve both filter parameters
-const buildUrl = (date?: string, venue?: string) => {
-  const basePath = language === 'no' ? '/program' : '/en/program';
-  const params = new URLSearchParams();
-
-  if (date) params.set('date', date);
-  if (venue) params.set('venue', venue);
-
-  const queryString = params.toString();
-  return queryString ? `${basePath}?${queryString}` : basePath;
-};
-
-const buildApiUrl = (date?: string, venue?: string) => {
-  const params = new URLSearchParams();
-
-  params.set('lang', language);
-  if (date) params.set('date', date);
-  if (venue) params.set('venue', venue);
-
-  return `/api/filter-program?${params.toString()}`;
-};
+// Base paths for href fallbacks
+const basePath = language === 'no' ? '/program' : '/en/program';
 ---
 
 <section id="filter-container" role="search" aria-label={language === 'no' ? 'Filter arrangementer' : 'Filter events'}>
@@ -52,9 +33,11 @@ const buildApiUrl = (date?: string, venue?: string) => {
         tabindex="0"
       >
         <a
-          href={buildUrl(undefined, currentVenue || undefined)}
+          href={basePath}
           class:list={['link-button', { active: !currentDate }]}
-          hx-get={buildApiUrl(undefined, currentVenue || undefined)}
+          data-filter-date=""
+          hx-get="/api/filter-program"
+          hx-vals={`js:{lang: '${language}', venue: new URLSearchParams(window.location.search).get('venue') || ''}`}
           hx-target="#event-results"
           hx-swap="innerHTML show:none"
           hx-indicator="#filter-loading"
@@ -64,9 +47,11 @@ const buildApiUrl = (date?: string, venue?: string) => {
 
         {uniqueDates.map(date => (
           <a
-            href={buildUrl(date, currentVenue || undefined)}
+            href={basePath}
             class:list={['link-button', { active: currentDate === date }]}
-            hx-get={buildApiUrl(date, currentVenue || undefined)}
+            data-filter-date={date}
+            hx-get="/api/filter-program"
+            hx-vals={`js:{lang: '${language}', date: '${date}', venue: new URLSearchParams(window.location.search).get('venue') || ''}`}
             hx-target="#event-results"
             hx-swap="innerHTML show:none"
             hx-indicator="#filter-loading"
@@ -88,9 +73,11 @@ const buildApiUrl = (date?: string, venue?: string) => {
         tabindex="0"
       >
         <a
-          href={buildUrl(currentDate || undefined, undefined)}
+          href={basePath}
           class:list={['link-button', { active: !currentVenue }]}
-          hx-get={buildApiUrl(currentDate || undefined, undefined)}
+          data-filter-venue=""
+          hx-get="/api/filter-program"
+          hx-vals={`js:{lang: '${language}', date: new URLSearchParams(window.location.search).get('date') || ''}`}
           hx-target="#event-results"
           hx-swap="innerHTML show:none"
           hx-indicator="#filter-loading"
@@ -100,9 +87,11 @@ const buildApiUrl = (date?: string, venue?: string) => {
 
         {availableVenues.map(venue => (
           <a
-            href={buildUrl(currentDate || undefined, venue.slug)}
+            href={basePath}
             class:list={['link-button', { active: currentVenue === venue.slug }]}
-            hx-get={buildApiUrl(currentDate || undefined, venue.slug)}
+            data-filter-venue={venue.slug}
+            hx-get="/api/filter-program"
+            hx-vals={`js:{lang: '${language}', date: new URLSearchParams(window.location.search).get('date') || '', venue: '${venue.slug}'}`}
             hx-target="#event-results"
             hx-swap="innerHTML show:none"
             hx-indicator="#filter-loading"

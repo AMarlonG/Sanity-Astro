@@ -191,16 +191,11 @@ const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.l
     const currentDate = url.searchParams.get('date') || '';
     const currentVenue = url.searchParams.get('venue') || '';
 
-    // Update date filter buttons
-    const dateFilterButtons = document.querySelectorAll('.date-filter-buttons .link-button');
+    // Update date filter buttons using data attributes
+    const dateFilterButtons = document.querySelectorAll('.date-filter-buttons .link-button[data-filter-date]');
     dateFilterButtons.forEach(button => {
-      const buttonHref = button.getAttribute('href');
-      if (!buttonHref) return;
+      const buttonDate = button.getAttribute('data-filter-date') || '';
 
-      const buttonUrl = new URL(buttonHref, window.location.origin);
-      const buttonDate = buttonUrl.searchParams.get('date') || '';
-
-      // Button is active if its date matches the current URL date
       if (buttonDate === currentDate) {
         button.classList.add('active');
       } else {
@@ -208,16 +203,11 @@ const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.l
       }
     });
 
-    // Update venue filter buttons
-    const venueFilterButtons = document.querySelectorAll('.venue-filter-buttons .link-button');
+    // Update venue filter buttons using data attributes
+    const venueFilterButtons = document.querySelectorAll('.venue-filter-buttons .link-button[data-filter-venue]');
     venueFilterButtons.forEach(button => {
-      const buttonHref = button.getAttribute('href');
-      if (!buttonHref) return;
+      const buttonVenue = button.getAttribute('data-filter-venue') || '';
 
-      const buttonUrl = new URL(buttonHref, window.location.origin);
-      const buttonVenue = buttonUrl.searchParams.get('venue') || '';
-
-      // Button is active if its venue matches the current URL venue
       if (buttonVenue === currentVenue) {
         button.classList.add('active');
       } else {
