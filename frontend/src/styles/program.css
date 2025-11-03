@@ -183,7 +183,7 @@
   container-type: inline-size;
   container-name: venue-filter;
 
-  /* Smaller spacing above venue filter to separate from date filter */
+  /* Spacing above venue filter to separate from date filter */
   margin-block-start: var(--space-4);
 }
 
@@ -300,17 +300,66 @@
   }
 }
 
-/* Loading indicator - shown inline with filter buttons */
+/* Loading indicator - Delayed appearance for perceived performance
+ *
+ * UX Pattern: "Optimistic UI" - used by Google, Facebook, GitHub, Stripe
+ * Based on Doherty Threshold research (400ms perceived instantaneousness)
+ *
+ * Behavior:
+ * - Requests under 250ms: No loading indicator (feels instant)
+ * - 250-400ms: Gradually fades in
+ * - 400ms+: Fully visible
+ *
+ * Accessibility: Respects prefers-reduced-motion
+ */
 #filter-loading {
+  --loading-delay: 250ms;
+  --loading-fade-in: 150ms;
+  --loading-fade-out: 100ms;
+
   margin-block-start: var(--space-3);
   font-size: var(--font-size-sm);
   font-style: italic;
+
+  /* Hidden state - prevents interaction and screen reader announcement */
   opacity: 0;
-  transition: opacity 200ms ease-in-out;
+  visibility: hidden;
+  pointer-events: none;
+
+  /* Delayed fade-in: starts at 250ms, completes at 400ms */
+  transition:
+    opacity var(--loading-fade-in) ease-in-out var(--loading-delay),
+    visibility 0ms linear var(--loading-delay);
+
+  /* Performance: Force hardware acceleration */
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 #filter-loading.htmx-request {
+  /* Visible state - allows interaction and screen reader announcement */
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+
+  /* Apply delay to both properties */
+  transition-delay: var(--loading-delay), 0ms;
+}
+
+/* Faster fade-out when request completes */
+#filter-loading:not(.htmx-request) {
+  transition:
+    opacity var(--loading-fade-out) ease-out,
+    visibility 0ms linear var(--loading-fade-out);
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  #filter-loading {
+    --loading-delay: 0ms;
+    --loading-fade-in: 50ms;
+    --loading-fade-out: 50ms;
+  }
 }
 
 /* Date filter buttons now use global .link-button class from global.css
@@ -324,8 +373,10 @@
 
 /* Section Layout */
 .content-section {
-  /* Margin removed - parent container gap controls spacing between major sections */
-  margin: 0;
+  /* Top margin to separate from filtering section */
+  margin-block-start: var(--space-5);
+  margin-block-end: 0;
+  margin-inline: 0;
 }
 
 .date-section {
@@ -505,8 +556,8 @@
 /* Event Title - Fixed typography */
 .event-title {
   margin: 0;
-  /* Fixed size - 24px always */
-  font-size: 1.5rem;
+  /* Fixed size - 28px always */
+  font-size: 1.75rem;
   line-height: 1.15;
   font-weight: 400;
   font-family: Georgia, 'Times New Roman', serif;
@@ -535,9 +586,9 @@
 
 /* Event Meta - Fixed typography */
 dl.event-meta {
-  /* Fixed size - 14px always */
-  font-size: 0.875rem;
-  line-height: 1.35;
+  /* Fixed size - 16px to match excerpt */
+  font-size: 1rem;
+  line-height: 1.45;
   margin: 0;
 
   /* Overflow protection */
