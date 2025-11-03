@@ -204,21 +204,32 @@ main:has(.event-page) {
   scroll-margin-inline-start: var(--space-2);
 }
 
-/* Artist card - simple text-only design */
+/* Artist card - matches filter button styling */
 .artist-card {
   position: relative;
-  display: block;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
-  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-2) var(--space-4);
+  background-color: rgba(27, 25, 143, 0.08);
   color: var(--color-blue);
-  transition: background-color var(--transition-base),
-              border-color var(--transition-base),
-              transform var(--transition-base);
-  white-space: nowrap;
+  border: 1px solid var(--color-blue);
+  text-decoration: none;
+  font-weight: var(--font-weight-normal);
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  transition: background-color var(--transition-base),
+              color var(--transition-base);
+}
+
+.artist-name {
+  display: block;
+  line-height: 1.2;
+}
+
+.artist-instrument {
+  display: block;
+  font-size: var(--font-size-sm);
+  opacity: 0.85;
 }
 
 /* Remove default link arrow */
@@ -228,9 +239,9 @@ main:has(.event-page) {
 
 @media (hover: hover) {
   .artist-card:hover {
-    background-color: color-mix(in srgb, var(--color-blue) 8%, transparent);
-    border-color: var(--color-blue);
-    transform: translateY(-2px);
+    background-color: rgba(0, 179, 154, 0.08);
+    color: var(--color-blue);
+    text-decoration: none;
   }
 }
 

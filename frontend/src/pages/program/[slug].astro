@@ -64,7 +64,9 @@ const { data: event } = await loadQuery({
     "artists": artist[]-> {
       _id,
       name,
-      "slug": slug.current
+      "slug": slug.current,
+      instrument_no,
+      "instrument": instrument_no
     },
     ticketType,
     ticketUrl,
@@ -136,7 +138,10 @@ const content = getMultilingualContent(event) || event.content_no;
             {event.artists.map((artist) => (
               <li class="artist-item">
                 <a href={`/artister/${stegaClean(artist.slug)}`} class="artist-card">
-                  {stegaClean(artist.name)}
+                  <span class="artist-name">{stegaClean(artist.name)}</span>
+                  {artist.instrument && (
+                    <span class="artist-instrument">{stegaClean(artist.instrument)}</span>
+                  )}
                 </a>
               </li>
             ))}
