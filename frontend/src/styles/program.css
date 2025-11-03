@@ -73,6 +73,17 @@
 .date-filter-buttons .link-button {
   flex: 0 0 auto;
   white-space: nowrap;
+  /* Smaller button size */
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+/* Event count indicator - subtle styling */
+.event-count {
+  font-size: var(--font-size-sm);
+  opacity: 0.75;
+  font-weight: var(--font-weight-normal);
+  margin: 0 0 var(--space-4) 0;
 }
 
 /* ============================================
@@ -123,7 +134,7 @@
   }
 
   .date-filter-buttons::-webkit-scrollbar {
-    height: 8px;
+    height: 4px;
     -webkit-appearance: none;
   }
 
@@ -155,8 +166,8 @@
 @media (pointer: coarse) {
   /* Larger touch targets regardless of scroll mode */
   .date-filter-buttons .link-button {
-    min-block-size: 48px;
-    padding-inline: clamp(1.25rem, 4vw, 2rem);
+    min-block-size: 44px;
+    padding-inline: clamp(1rem, 3vw, 1.5rem);
   }
 }
 
@@ -167,17 +178,199 @@
   }
 }
 
-/* Loading indicator - shown inline with filter buttons */
+/* ============================================
+   VENUE FILTER - SAME BEHAVIOR AS DATE FILTER
+   ============================================
+
+   Identical structure and behavior to date filter.
+   Uses container queries to switch between wrapping and scrolling.
+*/
+
+.venue-filter {
+  /* Enable container queries for responsive behavior */
+  container-type: inline-size;
+  container-name: venue-filter;
+
+  /* Spacing above venue filter to separate from date filter */
+  margin-block-start: var(--space-4);
+}
+
+/* Base styles - works for both wrap and scroll modes */
+.venue-filter-buttons {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+
+  /* Default: Allow wrapping for wide containers */
+  flex-wrap: wrap;
+
+  /* Performance optimization */
+  contain: layout style inline-size;
+
+  /* Position for pseudo-element scrollbar indicator */
+  position: relative;
+}
+
+/* Ensure buttons size naturally */
+.venue-filter-buttons .link-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  /* Smaller button size */
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   HORIZONTAL SCROLL MODE FOR VENUE FILTER
+   ============================================
+
+   Activate when container is too narrow for all buttons.
+   Breakpoint: 1100px (same as date filter)
+*/
+
+@container venue-filter (max-width: 1100px) {
+  .venue-filter-buttons {
+    /* Disable wrapping - enable horizontal scroll */
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+
+    /* Smooth scrolling behavior */
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+
+    /* Prevent vertical scroll on horizontal swipe */
+    touch-action: pan-x;
+
+    /* Scroll padding for better UX */
+    scroll-padding-inline: clamp(1rem, 3vw, 2rem);
+
+    /* Space for scrollbar underneath buttons */
+    padding-block-end: 12px;
+
+    /* Pull up to compensate for date-filter's scrollbar padding */
+    margin-block-start: -12px;
+
+    /* Scroll snap for better UX */
+    scroll-snap-type: x proximity;
+  }
+
+  .venue-filter-buttons .link-button {
+    /* Snap to start of each button */
+    scroll-snap-align: start;
+    scroll-margin-inline-start: 0.5rem;
+  }
+
+  /* Styled native scrollbar - always visible and functional */
+  .venue-filter-buttons {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-blue) var(--color-neutral-100);
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar {
+    height: 4px;
+    -webkit-appearance: none;
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar-track {
+    background: var(--color-neutral-100);
+    border-radius: 0;
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar-thumb {
+    background: var(--color-blue);
+    border-radius: 0;
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar-thumb:hover {
+    background: var(--color-green);
+  }
+
+  /* Keyboard focus indicator */
+  .venue-filter-buttons:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+}
+
+/* Touch device optimizations for venue filter */
+@media (pointer: coarse) {
+  .venue-filter-buttons .link-button {
+    min-block-size: 44px;
+    padding-inline: clamp(1rem, 3vw, 1.5rem);
+  }
+}
+
+/* Respect reduced motion preferences for venue filter */
+@media (prefers-reduced-motion: reduce) {
+  .venue-filter-buttons {
+    scroll-behavior: auto;
+  }
+}
+
+/* Loading indicator - Delayed appearance for perceived performance
+ *
+ * UX Pattern: "Optimistic UI" - used by Google, Facebook, GitHub, Stripe
+ * Based on Doherty Threshold research (400ms perceived instantaneousness)
+ *
+ * Behavior:
+ * - Requests under 250ms: No loading indicator (feels instant)
+ * - 250-400ms: Gradually fades in
+ * - 400ms+: Fully visible
+ *
+ * Accessibility: Respects prefers-reduced-motion
+ */
 #filter-loading {
+  --loading-delay: 250ms;
+  --loading-fade-in: 150ms;
+  --loading-fade-out: 100ms;
+
   margin-block-start: var(--space-3);
   font-size: var(--font-size-sm);
   font-style: italic;
+
+  /* Hidden state - prevents interaction and screen reader announcement */
   opacity: 0;
-  transition: opacity 200ms ease-in-out;
+  visibility: hidden;
+  pointer-events: none;
+
+  /* Delayed fade-in: starts at 250ms, completes at 400ms */
+  transition:
+    opacity var(--loading-fade-in) ease-in-out var(--loading-delay),
+    visibility 0ms linear var(--loading-delay);
+
+  /* Performance: Force hardware acceleration */
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 #filter-loading.htmx-request {
+  /* Visible state - allows interaction and screen reader announcement */
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+
+  /* Apply delay to both properties */
+  transition-delay: var(--loading-delay), 0ms;
+}
+
+/* Faster fade-out when request completes */
+#filter-loading:not(.htmx-request) {
+  transition:
+    opacity var(--loading-fade-out) ease-out,
+    visibility 0ms linear var(--loading-fade-out);
+}
+
+/* Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  #filter-loading {
+    --loading-delay: 0ms;
+    --loading-fade-in: 50ms;
+    --loading-fade-out: 50ms;
+  }
 }
 
 /* Date filter buttons now use global .link-button class from global.css
@@ -191,8 +384,10 @@
 
 /* Section Layout */
 .content-section {
-  /* Margin removed - parent container gap controls spacing between major sections */
-  margin: 0;
+  /* Top margin to separate from filtering section */
+  margin-block-start: var(--space-3);
+  margin-block-end: 0;
+  margin-inline: 0;
 }
 
 .date-section {
@@ -206,9 +401,47 @@
 }
 
 .date-title {
-  margin: 0 0 var(--space-4) 0;
+  /* ============================================
+     FULL VIEWPORT-WIDTH BACKGROUND FOR DATE TITLES
+     ============================================
+
+     Creates a full-width colored band that extends to viewport
+     edges while keeping text content aligned with the container.
+
+     Safe to use viewport units here because it's just a thin
+     horizontal band with no height constraints that could cause
+     horizontal scroll issues.
+  */
+
+  /* Position relative for pseudo-element */
+  position: relative;
+
+  /* Typography styling */
+  margin-block-start: 0;
+  margin-block-end: var(--space-5);
+  padding-block: var(--space-4);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
+  color: var(--color-blue);
+  letter-spacing: -0.01em;
+}
+
+/* Full viewport-width background band */
+.date-title::before {
+  content: '';
+  position: absolute;
+  /* Extend to full viewport width */
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  /* Cover title height */
+  top: 0;
+  bottom: 0;
+  /* Green tint background */
+  background-color: color-mix(in srgb, var(--color-green) 6%, transparent);
+  /* Behind the text */
+  z-index: -1;
 }
 
 /* Fixed-Size Grid System - NRK-inspired approach */
@@ -278,7 +511,7 @@
   }
 
   .events-grid::-webkit-scrollbar {
-    height: 8px;
+    height: 6px;
     -webkit-appearance: none;
   }
 
@@ -321,12 +554,20 @@
 
 .no-results-title {
   margin: 0 0 var(--space-2) 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
 }
 
 .no-results-text {
-  margin: 0;
-  font-size: var(--font-size-base);
+  margin: 0 0 var(--space-5) 0;
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Reset button matches filter button size */
+.no-results .link-button {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
 }
 
 /* Event Card - Fixed-Size Design (NRK-inspired) */
@@ -372,8 +613,8 @@
 /* Event Title - Fixed typography */
 .event-title {
   margin: 0;
-  /* Fixed size - 24px always */
-  font-size: 1.5rem;
+  /* Fixed size - 28px always */
+  font-size: 1.75rem;
   line-height: 1.15;
   font-weight: 400;
   font-family: Georgia, 'Times New Roman', serif;
@@ -402,9 +643,9 @@
 
 /* Event Meta - Fixed typography */
 dl.event-meta {
-  /* Fixed size - 14px always */
-  font-size: 0.875rem;
-  line-height: 1.35;
+  /* Fixed size - 16px to match excerpt */
+  font-size: 1rem;
+  line-height: 1.45;
   margin: 0;
 
   /* Overflow protection */

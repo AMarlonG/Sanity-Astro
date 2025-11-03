@@ -50,9 +50,11 @@ export const GET: APIRoute = async ({ request, url }) => {
       );
     }
 
-    // Get and validate date filter from URL
+    // Get and validate filters from URL
     const dateParam = url.searchParams.get('date');
     const dateFilter = dateParam ? InputValidator.validateDate(dateParam) : null;
+    const venueParam = url.searchParams.get('venue');
+    const venueFilter = venueParam ? InputValidator.validateSlug(venueParam) : null;
     const language = url.searchParams.get('lang') || 'no';
 
     // Create data service
@@ -95,15 +97,48 @@ export const GET: APIRoute = async ({ request, url }) => {
         })
       }));
 
-    // Filter dates if date parameter is present
-    const filteredDates = dateFilter
-      ? sortedDates.filter(d => d.date === dateFilter)
-      : sortedDates;
+    // Apply filters
+    let filteredDates = sortedDates;
+
+    // Apply date filter
+    if (dateFilter) {
+      filteredDates = filteredDates.filter(d => d.date === dateFilter);
+    }
+
+    // Apply venue filter
+    if (venueFilter) {
+      filteredDates = filteredDates
+        .map(dateGroup => ({
+          ...dateGroup,
+          events: dateGroup.events.filter(e => e.venue?.slug === venueFilter)
+        }))
+        .filter(dateGroup => dateGroup.events.length > 0);
+    }
+
+    // Check if we have any events after filtering
+    const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.length > 0);
+
+    // Build contextual message for empty state
+    let emptyStateMessage = 'Ingen arrangementer funnet';
+    if (dateFilter && venueFilter) {
+      // Get display names from the events data
+      const dateDisplay = sortedDates.find(d => d.date === dateFilter)?.displayTitle || formatDateWithWeekday(dateFilter, language as 'no' | 'en');
+      const venueEvent = events.find(e => e.venue?.slug === venueFilter);
+      const venueDisplay = venueEvent?.venue?.title || venueFilter;
+      emptyStateMessage = `Ingen arrangementer på ${dateDisplay} og ${venueDisplay}`;
+    } else if (dateFilter) {
+      const dateDisplay = sortedDates.find(d => d.date === dateFilter)?.displayTitle || formatDateWithWeekday(dateFilter, language as 'no' | 'en');
+      emptyStateMessage = `Ingen arrangementer på ${dateDisplay}`;
+    } else if (venueFilter) {
+      const venueEvent = events.find(e => e.venue?.slug === venueFilter);
+      const venueDisplay = venueEvent?.venue?.title || venueFilter;
+      emptyStateMessage = `Ingen arrangementer på ${venueDisplay}`;
+    }
 
     // Generate HTML using the same structure as program.astro
     let html = '';
 
-    if (filteredDates.length > 0) {
+    if (hasEvents) {
       html = filteredDates.map(({ date, displayTitle, events: dateEvents }) => `
         <section class="content-section date-section" data-date="${date}">
           <h3 class="date-title">${stegaClean(displayTitle)}</h3>
@@ -194,18 +229,33 @@ export const GET: APIRoute = async ({ request, url }) => {
       html = `
         <section class="content-section">
           <div class="no-results">
-            <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-            <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
+            <h3 class="no-results-title">${emptyStateMessage}</h3>
+            <p class="no-results-text">Prøv en annen kombinasjon, eller:</p>
+            <a
+              href="/program"
+              class="link-button"
+              hx-get="/api/filter-program"
+              hx-vals='{"lang": "no", "date": "", "venue": ""}'
+              hx-target="#event-results"
+              hx-swap="innerHTML show:none"
+              hx-indicator="#filter-loading"
+            >
+              Nullstill filtre
+            </a>
           </div>
         </section>
       `;
     }
 
     // Determine the URL to push to browser history
-    let pushUrl = language === 'no' ? '/program' : '/en/program';
-    if (dateFilter) {
-      pushUrl += `?date=${dateFilter}`;
-    }
+    const basePath = language === 'no' ? '/program' : '/en/program';
+    const params = new URLSearchParams();
+
+    if (dateFilter) params.set('date', dateFilter);
+    if (venueFilter) params.set('venue', venueFilter);
+
+    const queryString = params.toString();
+    const pushUrl = queryString ? `${basePath}?${queryString}` : basePath;
 
     const origin = request.headers.get('origin');
 

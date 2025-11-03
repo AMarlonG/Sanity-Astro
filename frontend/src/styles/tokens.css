@@ -137,17 +137,50 @@
   --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
   --font-family-heading: var(--font-family-base);
   --font-family-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  
-  /* Font sizes - Using fluid typography */
-  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-  --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
-  --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-  --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
-  --font-size-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
-  --font-size-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 2rem);
-  --font-size-3xl: clamp(1.875rem, 1.65rem + 1.125vw, 2.5rem);
-  --font-size-4xl: clamp(2.25rem, 1.95rem + 1.5vw, 3rem);
-  --font-size-5xl: clamp(3rem, 2.5rem + 2.5vw, 4rem);
+
+  /* Font sizes - Fluid typography with Major Third (1.250) modular scale
+   *
+   * DESIGN PHILOSOPHY:
+   * This type scale uses a consistent mathematical ratio (1.250) to create
+   * visual harmony and clear hierarchy. Each size is 1.25× the previous size.
+   *
+   * USAGE GUIDELINES:
+   * --fs-sm:   Small text, captions, labels, metadata
+   * --fs-base: Body text, paragraphs (default for most content)
+   * --fs-lg:   H4, emphasized text, large buttons
+   * --fs-xl:   H3, section headings, card titles
+   * --fs-2xl:  H2, major sections, page subtitles
+   * --fs-3xl:  H1, page titles, hero headlines
+   *
+   * WHY FLUID TYPOGRAPHY:
+   * Using clamp() allows text to scale smoothly across all viewport sizes
+   * without media queries, creating a more intrinsic and responsive design.
+   * The middle value (with vw) ensures text grows proportionally with viewport.
+   *
+   * ACCESSIBILITY:
+   * All sizes use rem units to respect user browser font-size preferences.
+   * The base size ensures minimum 16px for readability and WCAG compliance.
+   */
+  --fs-sm: clamp(0.8rem, 0.77rem + 0.15vw, 0.875rem);        /* ~13-14px */
+  --fs-base: clamp(1rem, 0.95rem + 0.24vw, 1.125rem);        /* 16-18px */
+  --fs-lg: clamp(1.25rem, 1.18rem + 0.33vw, 1.41rem);        /* 20-23px */
+  --fs-xl: clamp(1.563rem, 1.47rem + 0.43vw, 1.76rem);       /* 25-28px */
+  --fs-2xl: clamp(1.953rem, 1.84rem + 0.55vw, 2.2rem);       /* 31-35px */
+  --fs-3xl: clamp(2.441rem, 2.29rem + 0.73vw, 2.75rem);      /* 39-44px */
+
+  /* Legacy aliases - Kept for backward compatibility with existing code
+   * These map to the new scale to prevent breaking changes.
+   * Gradually migrate to the new --fs-* naming convention.
+   */
+  --font-size-xs: var(--fs-sm);
+  --font-size-sm: var(--fs-sm);
+  --font-size-base: var(--fs-base);
+  --font-size-lg: var(--fs-lg);
+  --font-size-xl: var(--fs-xl);
+  --font-size-2xl: var(--fs-2xl);
+  --font-size-3xl: var(--fs-3xl);
+  --font-size-4xl: var(--fs-3xl);  /* Maps to largest size */
+  --font-size-5xl: var(--fs-3xl);  /* Maps to largest size */
   
   /* Font weights */
   --font-weight-light: 300;

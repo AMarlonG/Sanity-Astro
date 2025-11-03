@@ -18,50 +18,41 @@ const { level, text, id, className = '', _key, _type } = Astro.props;
 {level === 'h6' && <h6 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h6>}
 
 <style>
+  /* Heading component - Uses global design tokens for consistency
+   *
+   * This component now uses the refined modular scale from tokens.css.
+   * Font sizes automatically scale fluidly across all viewport sizes
+   * without needing media queries.
+   *
+   * The global heading styles from global.css already define the sizes,
+   * so we only need to override margin and ensure proper spacing here.
+   */
   .heading-component {
     margin: 2rem 0 1rem 0;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
   }
 
   h2.heading-component {
-    font-size: 2rem;
+    font-size: var(--fs-2xl);  /* 31-35px - Scales fluidly */
   }
 
   h3.heading-component {
-    font-size: 1.75rem;
+    font-size: var(--fs-xl);  /* 25-28px - Scales fluidly */
   }
 
   h4.heading-component {
-    font-size: 1.5rem;
+    font-size: var(--fs-lg);  /* 20-23px - Scales fluidly */
   }
 
   h5.heading-component {
-    font-size: 1.25rem;
+    font-size: var(--fs-base);  /* 16-18px - Scales fluidly */
+    font-weight: var(--font-weight-semibold);
   }
 
   h6.heading-component {
-    font-size: 1.125rem;
+    font-size: var(--fs-base);  /* 16-18px - Scales fluidly */
+    font-weight: var(--font-weight-medium);
   }
-  
-  @media (max-width: 768px) {
-    h2.heading-component {
-      font-size: 1.75rem;
-    }
 
-    h3.heading-component {
-      font-size: 1.5rem;
-    }
-
-    h4.heading-component {
-      font-size: 1.25rem;
-    }
-
-    h5.heading-component {
-      font-size: 1.125rem;
-    }
-
-    h6.heading-component {
-      font-size: 1rem;
-    }
-  }
+  /* No media queries needed! Fluid typography handles all viewport sizes. */
 </style> 

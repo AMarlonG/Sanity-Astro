@@ -1,7 +1,7 @@
 ---
 import ContentPageLayout from '../layouts/ContentPageLayout.astro';
 import CardGrid from '../components/CardGrid.astro';
-import DateFilter from '../components/DateFilter.astro';
+import ProgramFilters from '../components/ProgramFilters.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
 import { formatDateWithWeekday } from '../lib/utils/dates';
 import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/imageHelpers';
@@ -42,6 +42,20 @@ const availableDates = events
     title: event.eventDate!.title
   }));
 
+// Extract unique venues for filter (preserve Sanity order)
+const availableVenues = events
+  .filter(event => event.venue?.slug)
+  .reduce((acc, event) => {
+    const venueSlug = event.venue!.slug;
+    if (!acc.find(v => v.slug === venueSlug)) {
+      acc.push({
+        slug: venueSlug,
+        title: event.venue!.title
+      });
+    }
+    return acc;
+  }, [] as Array<{ slug: string; title: string }>);
+
 // Group events by date
 const eventsByDate = events.reduce((acc, event) => {
   if (!event?.eventDate?.date) return acc;
@@ -70,13 +84,44 @@ const sortedDates = Object.values(eventsByDate)
     })
   }));
 
-// Get date filter from URL
+// Get filters from URL
 const dateFilter = Astro.url.searchParams.get('date') || undefined;
+const venueFilter = Astro.url.searchParams.get('venue') || undefined;
 
-// Filter dates if date parameter is present
-const filteredDates = dateFilter
-  ? sortedDates.filter(d => d.date === dateFilter)
-  : sortedDates;
+// Apply filters
+let filteredDates = sortedDates;
+
+// Apply date filter
+if (dateFilter) {
+  filteredDates = filteredDates.filter(d => d.date === dateFilter);
+}
+
+// Apply venue filter
+if (venueFilter) {
+  filteredDates = filteredDates
+    .map(dateGroup => ({
+      ...dateGroup,
+      events: dateGroup.events.filter(e => e.venue?.slug === venueFilter)
+    }))
+    .filter(dateGroup => dateGroup.events.length > 0);
+}
+
+// Check if we have any events after filtering
+const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.length > 0);
+
+// Build contextual message for empty state
+let emptyStateMessage = 'Ingen arrangementer funnet';
+if (dateFilter && venueFilter) {
+  const dateDisplay = availableDates.find(d => d.date === dateFilter)?.title || formatDateWithWeekday(dateFilter, 'no');
+  const venueDisplay = availableVenues.find(v => v.slug === venueFilter)?.title || venueFilter;
+  emptyStateMessage = `Ingen arrangementer på ${dateDisplay} og ${venueDisplay}`;
+} else if (dateFilter) {
+  const dateDisplay = availableDates.find(d => d.date === dateFilter)?.title || formatDateWithWeekday(dateFilter, 'no');
+  emptyStateMessage = `Ingen arrangementer på ${dateDisplay}`;
+} else if (venueFilter) {
+  const venueDisplay = availableVenues.find(v => v.slug === venueFilter)?.title || venueFilter;
+  emptyStateMessage = `Ingen arrangementer på ${venueDisplay}`;
+}
 ---
 
 <ContentPageLayout
@@ -84,19 +129,15 @@ const filteredDates = dateFilter
   excerpt={programPage?.excerpt}
   pageDocument={programPage}
 >
-  <section id="date-filter-container" role="search" aria-label="Filter events by date">
-    <DateFilter
+  <div id="program-content">
+    <ProgramFilters
       availableDates={availableDates}
+      availableVenues={availableVenues}
       language="no"
     />
-    <!-- Loading indicator for htmx requests -->
-    <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
-      Laster arrangementer...
-    </div>
-  </section>
 
-  <div id="event-results">
-      {filteredDates.length > 0 ? (
+    <div id="event-results">
+      {hasEvents ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
           <h3 class="date-title">{stegaClean(displayTitle)}</h3>
@@ -168,27 +209,30 @@ const filteredDates = dateFilter
     ) : (
       <section class="content-section">
         <div class="no-results">
-          <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-          <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
+          <h3 class="no-results-title">{emptyStateMessage}</h3>
+          <p class="no-results-text">Prøv en annen kombinasjon, eller:</p>
+          <a
+            href="/program"
+            class="link-button"
+            hx-get="/api/filter-program"
+            hx-vals='{"lang": "no", "date": "", "venue": ""}'
+            hx-target="#event-results"
+            hx-swap="innerHTML show:none"
+            hx-push-url="true"
+            hx-indicator="#filter-loading"
+          >
+            Nullstill filtre
+          </a>
         </div>
       </section>
       )}
+    </div>
   </div>
 </ContentPageLayout>
 
 <script>
-  // Handle active state for date filter buttons when using htmx
-  document.addEventListener('DOMContentLoaded', () => {
-    const filterButtons = document.querySelectorAll('.date-filter-buttons .link-button');
+  import { initializeFilterButtonStateSynchronization } from '../scripts/syncFilterButtonStatesWithUrl.js';
 
-    filterButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
-        // Remove active class from all buttons
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-
-        // Add active class to clicked button
-        e.currentTarget.classList.add('active');
-      });
-    });
-  });
+  // Initialize filter button state sync on page load
+  initializeFilterButtonStateSynchronization();
 </script>
