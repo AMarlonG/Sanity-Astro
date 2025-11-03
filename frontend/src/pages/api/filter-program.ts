@@ -118,6 +118,23 @@ export const GET: APIRoute = async ({ request, url }) => {
     // Check if we have any events after filtering
     const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.length > 0);
 
+    // Build contextual message for empty state
+    let emptyStateMessage = 'Ingen arrangementer funnet';
+    if (dateFilter && venueFilter) {
+      // Get display names from the events data
+      const dateDisplay = sortedDates.find(d => d.date === dateFilter)?.displayTitle || formatDateWithWeekday(dateFilter, language as 'no' | 'en');
+      const venueEvent = events.find(e => e.venue?.slug === venueFilter);
+      const venueDisplay = venueEvent?.venue?.title || venueFilter;
+      emptyStateMessage = `Ingen arrangementer på ${dateDisplay} og ${venueDisplay}`;
+    } else if (dateFilter) {
+      const dateDisplay = sortedDates.find(d => d.date === dateFilter)?.displayTitle || formatDateWithWeekday(dateFilter, language as 'no' | 'en');
+      emptyStateMessage = `Ingen arrangementer på ${dateDisplay}`;
+    } else if (venueFilter) {
+      const venueEvent = events.find(e => e.venue?.slug === venueFilter);
+      const venueDisplay = venueEvent?.venue?.title || venueFilter;
+      emptyStateMessage = `Ingen arrangementer på ${venueDisplay}`;
+    }
+
     // Generate HTML using the same structure as program.astro
     let html = '';
 
@@ -212,18 +229,18 @@ export const GET: APIRoute = async ({ request, url }) => {
       html = `
         <section class="content-section">
           <div class="no-results">
-            <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-            <p class="no-results-text">Velg en annen dato eller spillested, eller:</p>
+            <h3 class="no-results-title">${emptyStateMessage}</h3>
+            <p class="no-results-text">Prøv en annen kombinasjon, eller:</p>
             <a
               href="/program"
-              class="btn-primary"
+              class="link-button"
               hx-get="/api/filter-program"
               hx-vals='{"lang": "no", "date": "", "venue": ""}'
               hx-target="#event-results"
               hx-swap="innerHTML show:none"
               hx-indicator="#filter-loading"
             >
-              Trykk her for å nullstille alle filter
+              Nullstill filtre
             </a>
           </div>
         </section>
