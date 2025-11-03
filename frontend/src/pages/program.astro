@@ -203,28 +203,51 @@ const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.l
 </ContentPageLayout>
 
 <script>
-  // Handle active state for filter buttons when using htmx
-  document.addEventListener('DOMContentLoaded', () => {
-    // Handle date filter buttons
+  // Sync filter button active states with URL after htmx navigation
+  function syncFilterActiveStates() {
+    const url = new URL(window.location.href);
+    const currentDate = url.searchParams.get('date') || '';
+    const currentVenue = url.searchParams.get('venue') || '';
+
+    // Update date filter buttons
     const dateFilterButtons = document.querySelectorAll('.date-filter-buttons .link-button');
     dateFilterButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
-        // Remove active class from all date filter buttons
-        dateFilterButtons.forEach(btn => btn.classList.remove('active'));
-        // Add active class to clicked button
-        e.currentTarget.classList.add('active');
-      });
+      const buttonHref = button.getAttribute('href');
+      if (!buttonHref) return;
+
+      const buttonUrl = new URL(buttonHref, window.location.origin);
+      const buttonDate = buttonUrl.searchParams.get('date') || '';
+
+      // Button is active if its date matches the current URL date
+      if (buttonDate === currentDate) {
+        button.classList.add('active');
+      } else {
+        button.classList.remove('active');
+      }
     });
 
-    // Handle venue filter buttons
+    // Update venue filter buttons
     const venueFilterButtons = document.querySelectorAll('.venue-filter-buttons .link-button');
     venueFilterButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
-        // Remove active class from all venue filter buttons
-        venueFilterButtons.forEach(btn => btn.classList.remove('active'));
-        // Add active class to clicked button
-        e.currentTarget.classList.add('active');
-      });
+      const buttonHref = button.getAttribute('href');
+      if (!buttonHref) return;
+
+      const buttonUrl = new URL(buttonHref, window.location.origin);
+      const buttonVenue = buttonUrl.searchParams.get('venue') || '';
+
+      // Button is active if its venue matches the current URL venue
+      if (buttonVenue === currentVenue) {
+        button.classList.add('active');
+      } else {
+        button.classList.remove('active');
+      }
     });
-  });
+  }
+
+  // Sync active states on page load
+  document.addEventListener('DOMContentLoaded', syncFilterActiveStates);
+
+  // Sync active states after htmx updates the URL
+  document.body.addEventListener('htmx:pushedIntoHistory', syncFilterActiveStates);
+  document.body.addEventListener('htmx:afterSwap', syncFilterActiveStates);
 </script>
