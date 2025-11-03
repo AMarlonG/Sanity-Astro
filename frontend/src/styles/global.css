@@ -66,7 +66,14 @@ button:focus-visible,
    }
 */
 
-/* Headings */
+/* Headings - Using refined modular scale
+ *
+ * Font sizes follow Major Third (1.250) ratio for visual harmony.
+ * Sizes are appropriate for a festival website - not too large, clear hierarchy.
+ *
+ * Line height is tighter (1.2) for headings to maintain visual cohesion.
+ * Font weight differentiates H5/H6 from body text at the same size.
+ */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-family-heading);
   font-weight: var(--font-weight-bold);
@@ -76,28 +83,30 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: var(--font-size-5xl);
+  font-size: var(--fs-3xl);  /* 39-44px - Page titles, hero headlines */
   font-weight: var(--font-weight-bold);
 }
 
 h2 {
-  font-size: var(--font-size-3xl);
+  font-size: var(--fs-2xl);  /* 31-35px - Major sections, page subtitles */
 }
 
 h3 {
-  font-size: var(--font-size-2xl);
+  font-size: var(--fs-xl);  /* 25-28px - Section headings, card titles */
 }
 
 h4 {
-  font-size: var(--font-size-xl);
+  font-size: var(--fs-lg);  /* 20-23px - Subsection headings */
 }
 
 h5 {
-  font-size: var(--font-size-lg);
+  font-size: var(--fs-base);  /* 16-18px - Minor headings */
+  font-weight: var(--font-weight-semibold);  /* Differentiate from body */
 }
 
 h6 {
-  font-size: var(--font-size-base);
+  font-size: var(--fs-base);  /* 16-18px - Smallest headings */
+  font-weight: var(--font-weight-medium);  /* Slightly lighter than H5 */
 }
 
 /* Reset heading margins when first child */

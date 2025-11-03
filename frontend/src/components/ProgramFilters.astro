@@ -48,8 +48,7 @@ const apiPath = '/api/filter-program';
           {language === 'no' ? 'Alle datoer' : 'All dates'}
         </a>
 
-        {uniqueDates.map(date => {
-          return (
+        {uniqueDates.map(date => (
             <a
               href={`${basePath}?date=${date}&venue=${currentVenue}`}
               class:list={['link-button', { active: currentDate === date }]}
@@ -64,8 +63,7 @@ const apiPath = '/api/filter-program';
             >
               {formatDateWithWeekday(date, language)}
             </a>
-          );
-        })}
+        ))}
       </div>
     </div>
   )}
