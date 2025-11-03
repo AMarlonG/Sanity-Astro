@@ -167,6 +167,133 @@
   }
 }
 
+/* ============================================
+   VENUE FILTER - SAME BEHAVIOR AS DATE FILTER
+   ============================================
+
+   Identical structure and behavior to date filter.
+   Uses container queries to switch between wrapping and scrolling.
+*/
+
+.venue-filter {
+  /* Enable container queries for responsive behavior */
+  container-type: inline-size;
+  container-name: venue-filter;
+
+  /* 24px spacing above venue filter to separate from date filter */
+  margin-block-start: var(--space-6);
+}
+
+/* Base styles - works for both wrap and scroll modes */
+.venue-filter-buttons {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+
+  /* Default: Allow wrapping for wide containers */
+  flex-wrap: wrap;
+
+  /* Performance optimization */
+  contain: layout style inline-size;
+
+  /* Position for pseudo-element scrollbar indicator */
+  position: relative;
+}
+
+/* Ensure buttons size naturally */
+.venue-filter-buttons .link-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* ============================================
+   HORIZONTAL SCROLL MODE FOR VENUE FILTER
+   ============================================
+
+   Activate when container is too narrow for all buttons.
+   Breakpoint: 1100px (same as date filter)
+*/
+
+@container venue-filter (max-width: 1100px) {
+  .venue-filter-buttons {
+    /* Disable wrapping - enable horizontal scroll */
+    flex-wrap: nowrap;
+    overflow-x: scroll;
+    overflow-y: hidden;
+
+    /* Smooth scrolling behavior */
+    scroll-behavior: smooth;
+    overscroll-behavior-x: contain;
+
+    /* iOS momentum scrolling */
+    -webkit-overflow-scrolling: touch;
+
+    /* Prevent vertical scroll on horizontal swipe */
+    touch-action: pan-x;
+
+    /* Scroll padding for better UX */
+    scroll-padding-inline: clamp(1rem, 3vw, 2rem);
+
+    /* Space for scrollbar underneath buttons */
+    padding-block-end: 12px;
+
+    /* Scroll snap for better UX */
+    scroll-snap-type: x proximity;
+  }
+
+  .venue-filter-buttons .link-button {
+    /* Snap to start of each button */
+    scroll-snap-align: start;
+    scroll-margin-inline-start: 0.5rem;
+  }
+
+  /* Styled native scrollbar - always visible and functional */
+  .venue-filter-buttons {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-blue) var(--color-neutral-100);
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar {
+    height: 8px;
+    -webkit-appearance: none;
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar-track {
+    background: var(--color-neutral-100);
+    border-radius: 0;
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar-thumb {
+    background: var(--color-blue);
+    border-radius: 0;
+  }
+
+  .venue-filter-buttons::-webkit-scrollbar-thumb:hover {
+    background: var(--color-green);
+  }
+
+  /* Keyboard focus indicator */
+  .venue-filter-buttons:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+}
+
+/* Touch device optimizations for venue filter */
+@media (pointer: coarse) {
+  .venue-filter-buttons .link-button {
+    min-block-size: 48px;
+    padding-inline: clamp(1.25rem, 4vw, 2rem);
+  }
+}
+
+/* Respect reduced motion preferences for venue filter */
+@media (prefers-reduced-motion: reduce) {
+  .venue-filter-buttons {
+    scroll-behavior: auto;
+  }
+}
+
 /* Loading indicator - shown inline with filter buttons */
 #filter-loading {
   margin-block-start: var(--space-3);
