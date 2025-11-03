@@ -283,6 +283,9 @@ li {
   width: min(100% - var(--space-4), var(--container-max-width));
   margin-inline: auto;
   padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
+
+  /* Make padding available to children for breakout patterns */
+  --container-padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
 }
 
 /* Utility classes */

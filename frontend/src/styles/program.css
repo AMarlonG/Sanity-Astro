@@ -78,6 +78,14 @@
   font-size: var(--font-size-sm);
 }
 
+/* Event count indicator - subtle styling */
+.event-count {
+  font-size: var(--font-size-sm);
+  opacity: 0.75;
+  font-weight: var(--font-weight-normal);
+  margin: 0 0 var(--space-4) 0;
+}
+
 /* ============================================
    HORIZONTAL SCROLL MODE
    ============================================
@@ -126,7 +134,7 @@
   }
 
   .date-filter-buttons::-webkit-scrollbar {
-    height: 8px;
+    height: 4px;
     -webkit-appearance: none;
   }
 
@@ -243,6 +251,9 @@
     /* Space for scrollbar underneath buttons */
     padding-block-end: 12px;
 
+    /* Pull up to compensate for date-filter's scrollbar padding */
+    margin-block-start: -12px;
+
     /* Scroll snap for better UX */
     scroll-snap-type: x proximity;
   }
@@ -260,7 +271,7 @@
   }
 
   .venue-filter-buttons::-webkit-scrollbar {
-    height: 8px;
+    height: 4px;
     -webkit-appearance: none;
   }
 
@@ -374,7 +385,7 @@
 /* Section Layout */
 .content-section {
   /* Top margin to separate from filtering section */
-  margin-block-start: var(--space-5);
+  margin-block-start: var(--space-3);
   margin-block-end: 0;
   margin-inline: 0;
 }
@@ -390,9 +401,47 @@
 }
 
 .date-title {
-  margin: 0 0 var(--space-4) 0;
+  /* ============================================
+     FULL VIEWPORT-WIDTH BACKGROUND FOR DATE TITLES
+     ============================================
+
+     Creates a full-width colored band that extends to viewport
+     edges while keeping text content aligned with the container.
+
+     Safe to use viewport units here because it's just a thin
+     horizontal band with no height constraints that could cause
+     horizontal scroll issues.
+  */
+
+  /* Position relative for pseudo-element */
+  position: relative;
+
+  /* Typography styling */
+  margin-block-start: 0;
+  margin-block-end: var(--space-5);
+  padding-block: var(--space-4);
   font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
+  color: var(--color-blue);
+  letter-spacing: -0.01em;
+}
+
+/* Full viewport-width background band */
+.date-title::before {
+  content: '';
+  position: absolute;
+  /* Extend to full viewport width */
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  /* Cover title height */
+  top: 0;
+  bottom: 0;
+  /* Green tint background */
+  background-color: color-mix(in srgb, var(--color-green) 6%, transparent);
+  /* Behind the text */
+  z-index: -1;
 }
 
 /* Fixed-Size Grid System - NRK-inspired approach */
@@ -462,7 +511,7 @@
   }
 
   .events-grid::-webkit-scrollbar {
-    height: 8px;
+    height: 6px;
     -webkit-appearance: none;
   }
 
