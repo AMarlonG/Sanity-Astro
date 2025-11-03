@@ -1,0 +1,121 @@
+---
+import { formatDateWithWeekday } from '../lib/utils/dates';
+
+interface Props {
+  availableDates: Array<{ date: string; title?: string }>;
+  availableVenues: Array<{ slug: string; title: string }>;
+  language: 'no' | 'en';
+}
+
+const { availableDates, availableVenues, language } = Astro.props;
+
+// Extract unique dates from events and sort
+const uniqueDates = Array.from(
+  new Set(availableDates.map(d => d.date))
+).sort();
+
+// SHARED STATE: Get both date and venue from URL
+const currentDate = Astro.url.searchParams.get('date') || '';
+const currentVenue = Astro.url.searchParams.get('venue') || '';
+
+// SHARED HELPERS: Build URLs that preserve both filter parameters
+const buildUrl = (date?: string, venue?: string) => {
+  const basePath = language === 'no' ? '/program' : '/en/program';
+  const params = new URLSearchParams();
+
+  if (date) params.set('date', date);
+  if (venue) params.set('venue', venue);
+
+  const queryString = params.toString();
+  return queryString ? `${basePath}?${queryString}` : basePath;
+};
+
+const buildApiUrl = (date?: string, venue?: string) => {
+  const params = new URLSearchParams();
+
+  params.set('lang', language);
+  if (date) params.set('date', date);
+  if (venue) params.set('venue', venue);
+
+  return `/api/filter-program?${params.toString()}`;
+};
+---
+
+<section id="filter-container" role="search" aria-label={language === 'no' ? 'Filter arrangementer' : 'Filter events'}>
+  <!-- DATE FILTER SECTION -->
+  {uniqueDates.length > 0 && (
+    <div class="date-filter">
+      <div
+        class="date-filter-buttons"
+        role="region"
+        aria-label={language === 'no' ? 'Filtrer etter dato' : 'Filter by date'}
+        tabindex="0"
+      >
+        <a
+          href={buildUrl(undefined, currentVenue || undefined)}
+          class:list={['link-button', { active: !currentDate }]}
+          hx-get={buildApiUrl(undefined, currentVenue || undefined)}
+          hx-target="#event-results"
+          hx-swap="innerHTML show:none"
+          hx-indicator="#filter-loading"
+        >
+          {language === 'no' ? 'Alle datoer' : 'All dates'}
+        </a>
+
+        {uniqueDates.map(date => (
+          <a
+            href={buildUrl(date, currentVenue || undefined)}
+            class:list={['link-button', { active: currentDate === date }]}
+            hx-get={buildApiUrl(date, currentVenue || undefined)}
+            hx-target="#event-results"
+            hx-swap="innerHTML show:none"
+            hx-indicator="#filter-loading"
+          >
+            {formatDateWithWeekday(date, language)}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- VENUE FILTER SECTION -->
+  {availableVenues.length > 0 && (
+    <div class="venue-filter">
+      <div
+        class="venue-filter-buttons"
+        role="region"
+        aria-label={language === 'no' ? 'Filtrer etter sted' : 'Filter by venue'}
+        tabindex="0"
+      >
+        <a
+          href={buildUrl(currentDate || undefined, undefined)}
+          class:list={['link-button', { active: !currentVenue }]}
+          hx-get={buildApiUrl(currentDate || undefined, undefined)}
+          hx-target="#event-results"
+          hx-swap="innerHTML show:none"
+          hx-indicator="#filter-loading"
+        >
+          {language === 'no' ? 'Alle steder' : 'All venues'}
+        </a>
+
+        {availableVenues.map(venue => (
+          <a
+            href={buildUrl(currentDate || undefined, venue.slug)}
+            class:list={['link-button', { active: currentVenue === venue.slug }]}
+            hx-get={buildApiUrl(currentDate || undefined, venue.slug)}
+            hx-target="#event-results"
+            hx-swap="innerHTML show:none"
+            hx-indicator="#filter-loading"
+          >
+            {venue.title}
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- Loading indicator for htmx requests -->
+  <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
+    {language === 'no' ? 'Laster arrangementer...' : 'Loading events...'}
+  </div>
+</section>
