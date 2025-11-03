@@ -213,7 +213,18 @@ export const GET: APIRoute = async ({ request, url }) => {
         <section class="content-section">
           <div class="no-results">
             <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-            <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
+            <p class="no-results-text">Velg en annen dato eller spillested, eller:</p>
+            <a
+              href="/program"
+              class="btn-primary"
+              hx-get="/api/filter-program"
+              hx-vals='{"lang": "no", "date": "", "venue": ""}'
+              hx-target="#event-results"
+              hx-swap="innerHTML show:none"
+              hx-indicator="#filter-loading"
+            >
+              Trykk her for å nullstille alle filter
+            </a>
           </div>
         </section>
       `;

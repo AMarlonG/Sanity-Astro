@@ -73,6 +73,9 @@
 .date-filter-buttons .link-button {
   flex: 0 0 auto;
   white-space: nowrap;
+  /* Smaller button size */
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================
@@ -155,8 +158,8 @@
 @media (pointer: coarse) {
   /* Larger touch targets regardless of scroll mode */
   .date-filter-buttons .link-button {
-    min-block-size: 48px;
-    padding-inline: clamp(1.25rem, 4vw, 2rem);
+    min-block-size: 44px;
+    padding-inline: clamp(1rem, 3vw, 1.5rem);
   }
 }
 
@@ -180,8 +183,8 @@
   container-type: inline-size;
   container-name: venue-filter;
 
-  /* 24px spacing above venue filter to separate from date filter */
-  margin-block-start: var(--space-6);
+  /* Smaller spacing above venue filter to separate from date filter */
+  margin-block-start: var(--space-4);
 }
 
 /* Base styles - works for both wrap and scroll modes */
@@ -204,6 +207,9 @@
 .venue-filter-buttons .link-button {
   flex: 0 0 auto;
   white-space: nowrap;
+  /* Smaller button size */
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
 }
 
 /* ============================================
@@ -282,8 +288,8 @@
 /* Touch device optimizations for venue filter */
 @media (pointer: coarse) {
   .venue-filter-buttons .link-button {
-    min-block-size: 48px;
-    padding-inline: clamp(1.25rem, 4vw, 2rem);
+    min-block-size: 44px;
+    padding-inline: clamp(1rem, 3vw, 1.5rem);
   }
 }
 

@@ -115,13 +115,14 @@ const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.l
   excerpt={programPage?.excerpt}
   pageDocument={programPage}
 >
-  <ProgramFilters
-    availableDates={availableDates}
-    availableVenues={availableVenues}
-    language="no"
-  />
+  <div id="program-content">
+    <ProgramFilters
+      availableDates={availableDates}
+      availableVenues={availableVenues}
+      language="no"
+    />
 
-  <div id="event-results">
+    <div id="event-results">
       {hasEvents ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
@@ -195,49 +196,29 @@ const hasEvents = filteredDates.length > 0 && filteredDates.some(d => d.events.l
       <section class="content-section">
         <div class="no-results">
           <h3 class="no-results-title">Ingen arrangementer funnet</h3>
-          <p class="no-results-text">Ingen arrangementer er lagt til ennå</p>
+          <p class="no-results-text">Velg en annen dato eller spillested, eller:</p>
+          <a
+            href="/program"
+            class="btn-primary"
+            hx-get="/api/filter-program"
+            hx-vals='{"lang": "no", "date": "", "venue": ""}'
+            hx-target="#event-results"
+            hx-swap="innerHTML show:none"
+            hx-push-url="true"
+            hx-indicator="#filter-loading"
+          >
+            Trykk her for å nullstille alle filter
+          </a>
         </div>
       </section>
       )}
+    </div>
   </div>
 </ContentPageLayout>
 
 <script>
-  // Sync filter button active states with URL after htmx navigation
-  function syncFilterActiveStates() {
-    const url = new URL(window.location.href);
-    const currentDate = url.searchParams.get('date') || '';
-    const currentVenue = url.searchParams.get('venue') || '';
+  import { initializeFilterButtonStateSynchronization } from '../scripts/syncFilterButtonStatesWithUrl.js';
 
-    // Update date filter buttons using data attributes
-    const dateFilterButtons = document.querySelectorAll('.date-filter-buttons .link-button[data-filter-date]');
-    dateFilterButtons.forEach(button => {
-      const buttonDate = button.getAttribute('data-filter-date') || '';
-
-      if (buttonDate === currentDate) {
-        button.classList.add('active');
-      } else {
-        button.classList.remove('active');
-      }
-    });
-
-    // Update venue filter buttons using data attributes
-    const venueFilterButtons = document.querySelectorAll('.venue-filter-buttons .link-button[data-filter-venue]');
-    venueFilterButtons.forEach(button => {
-      const buttonVenue = button.getAttribute('data-filter-venue') || '';
-
-      if (buttonVenue === currentVenue) {
-        button.classList.add('active');
-      } else {
-        button.classList.remove('active');
-      }
-    });
-  }
-
-  // Sync active states on page load
-  document.addEventListener('DOMContentLoaded', syncFilterActiveStates);
-
-  // Sync active states after htmx updates the URL
-  document.body.addEventListener('htmx:pushedIntoHistory', syncFilterActiveStates);
-  document.body.addEventListener('htmx:afterSwap', syncFilterActiveStates);
+  // Initialize filter button state sync on page load
+  initializeFilterButtonStateSynchronization();
 </script>
