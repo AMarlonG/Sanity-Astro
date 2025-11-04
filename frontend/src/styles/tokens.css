@@ -257,6 +257,13 @@
   --space-fluid-xl: clamp(2rem, 4vw + 1rem, 4rem);
   --space-fluid-2xl: clamp(3rem, 6vw + 1.5rem, 6rem);
 
+  /* Page layout spacing - Controls top spacing for all pages */
+  --page-top-spacing: clamp(
+    calc(var(--space-6) * 2.5),
+    15vw,
+    calc(var(--space-9) * 2.5)
+  );
+
   /* Container query breakpoints (as tokens for consistency) */
   --cq-breakpoint-sm: 400px;
   --cq-breakpoint-md: 600px;

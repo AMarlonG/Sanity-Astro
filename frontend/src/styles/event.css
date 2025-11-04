@@ -14,11 +14,12 @@
    Full page green tint to indicate active/selected event.
    Matches hover state on program page event cards.
 
-   Uses :has() selector to target the main tag only on event pages.
+   Uses :has() selector to target .main-content only on event pages.
+   This ensures the green tint extends into the top padding area.
    Browser support: 90%+ (Chrome 105+, Firefox 121+, Safari 15.4+)
 */
 
-main:has(.event-page) {
+.main-content:has(.event-page) {
   background-color: rgba(0, 179, 154, 0.08);
 }
 
