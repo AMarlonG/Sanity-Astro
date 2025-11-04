@@ -30,12 +30,6 @@ const hasArtists = artists.length > 0;
     <div class="artists-grid">
       {artists.map((artist) => (
         <article class="artist-card">
-          <h3 class="artist-title">
-            <a href={`/en/artists/${stegaClean(artist.slug)}`} class="artist-title-link">
-              {stegaClean(artist.name)}
-            </a>
-          </h3>
-
           {artist.image?.image && (
             <div class="artist-image">
               <picture>
@@ -55,7 +49,12 @@ const hasArtists = artists.length > 0;
             </div>
           )}
 
-          <div class="artist-content">
+          <div class="artist-info-box">
+            <h3 class="artist-title">
+              <a href={`/en/artists/${stegaClean(artist.slug)}`} class="artist-title-link">
+                {stegaClean(artist.name)}
+              </a>
+            </h3>
             {artist.instrument && (
               <p class="artist-instrument">{stegaClean(artist.instrument)}</p>
             )}

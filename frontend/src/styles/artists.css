@@ -112,26 +112,35 @@
     .artist-card:hover {
       /* Use scale instead of translateY to avoid clipping in scroll container */
       transform: scale(1.02);
-      box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+      box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px;
       background-color: rgba(0, 179, 154, 0.08);
+    }
+
+    .artist-card:hover .artist-info-box {
+      background-color: rgba(0, 179, 154, 0.6);
+    }
+
+    .artist-card:hover .artist-title-link {
+      color: var(--color-blue);
+    }
+
+    .artist-card:hover .artist-instrument {
+      color: var(--color-blue);
     }
   }
 }
 
 /* ============================================
-   ARTIST CARD - FIXED-SIZE DESIGN
+   ARTIST CARD - IMAGE WITH OVERLAY DESIGN
    ============================================
 
-   320px fixed width cards with consistent layout.
-   Matches program page aesthetic.
+   320px fixed width cards with 4:5 image anchored top left
+   and info box overlaid in bottom right corner.
 */
 
 .artist-card {
-  position: relative; /* Required for stretched link pattern */
+  position: relative; /* Required for stretched link pattern and overlay */
   container-type: inline-size;
-  display: grid;
-  /* Fixed grid rows for consistent layout */
-  grid-template-rows: auto minmax(180px, 1fr) auto auto;
   overflow: hidden;
   border: none;
   background-color: rgba(27, 25, 143, 0.08);
@@ -139,12 +148,8 @@
   transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
               box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Fixed spacing - never changes */
-  padding: 1rem;
-  gap: 0.75rem;
-
-  /* Fixed aspect ratio */
-  aspect-ratio: 7 / 11;
+  /* Fixed aspect ratio - same as image */
+  aspect-ratio: 4 / 5;
 
   /* Fixed width - cards always 320px */
   width: 320px;
@@ -156,42 +161,55 @@
 @media (hover: hover) {
   .artist-card:hover {
     transform: translateY(-4px);
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px;
     background-color: rgba(0, 179, 154, 0.08);
+  }
+
+  .artist-card:hover .artist-info-box {
+    background-color: rgb(235, 249, 247);
   }
 
   .artist-card:hover .artist-title-link {
     color: var(--color-blue);
   }
+
+  .artist-card:hover .artist-instrument {
+    color: var(--color-blue);
+  }
 }
 
-/* Artist Name - Fixed typography */
+/* Artist Name - White text for dark blue box */
 .artist-title {
   margin: 0;
-  /* Fixed size - 28px always */
-  font-size: 1.75rem;
-  line-height: 1.15;
-  font-weight: 400;
+  font-size: 1.25rem;
+  line-height: 1.2;
+  font-weight: 600;
   font-family: Georgia, 'Times New Roman', serif;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  color: white;
 
-  /* Overflow protection for long names */
+  /* Natural wrapping for long names */
   overflow-wrap: break-word;
   word-wrap: break-word;
-  hyphens: auto;
+  hyphens: manual;
+  text-wrap: balance;
+
+  /* Maximum 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-/* Artist Image - Grid Row 2 (constrained by minmax) */
+/* Artist Image - 4:5 aspect ratio floating below top and inset from left */
 .artist-image {
-  position: relative;
-  width: 100%;
-  /* Let grid row control height, maintain 4:5 within available space */
-  max-height: 100%;
+  position: absolute;
+  top: 1rem; /* Float below the top */
+  left: 1rem; /* Inset from the left edge */
+  width: 85%; /* Narrower than full width */
   aspect-ratio: 4/5;
   overflow: hidden;
-  align-self: center;
-  justify-self: center;
 }
 
 .artist-image picture {
@@ -207,41 +225,43 @@
   display: block;
 }
 
-/* Artist Content - Fixed typography */
-.artist-content {
+/* Artist Info Box - Overlay in bottom right, inset from bottom and right */
+.artist-info-box {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: var(--color-blue);
+  color: white;
+  padding: 1rem;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.25rem;
+  z-index: 2;
+  transition: background-color var(--transition-base);
+
+  /* Width tight to content with wrapping constraint */
+  width: fit-content;
+  max-width: 20ch; /* Wraps at ~20 characters */
 }
 
 .artist-instrument {
   margin: 0;
-  /* Fixed size - 14px */
-  font-size: 0.875rem;
-  line-height: 1.35;
+  font-size: 0.75rem;
+  line-height: 1.3;
   font-weight: var(--font-weight-medium);
-  opacity: 0.85;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-}
-
-.artist-bio {
-  margin: 0;
-  /* Fixed size - 16px */
-  font-size: 1rem;
-  line-height: 1.45;
-  opacity: 0.85;
-
-  /* Overflow protection */
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  hyphens: auto;
+  color: white;
+  opacity: 0.9;
+  transition: color var(--transition-base);
 }
 
 /* Stretched link pattern - makes entire card clickable */
 .artist-card .artist-title-link {
-  color: var(--color-blue);
+  color: white;
   text-decoration: none;
   transition: color var(--transition-base);
+  position: relative;
+  z-index: 3;
 }
 
 /* Pseudo-element stretches to cover entire card */
@@ -257,7 +277,7 @@
   content: none;
 }
 
-/* Hover state - no underline, color change handled above */
+/* Hover state - change to green */
 @media (hover: hover) {
   .artist-card .artist-title-link:hover {
     text-decoration: none;
@@ -266,16 +286,9 @@
 
 /* Focus state - highly visible for keyboard users */
 .artist-card .artist-title-link:focus-visible {
-  outline: 2px solid var(--color-blue);
+  outline: 2px solid white;
   outline-offset: 2px;
   text-decoration: underline;
-}
-
-/* Elevate content above stretched link */
-.artist-card .artist-content,
-.artist-card .artist-bio {
-  position: relative;
-  z-index: 0;
 }
 
 /* No Results State */
