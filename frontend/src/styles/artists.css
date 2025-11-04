@@ -117,10 +117,10 @@
     }
 
     .artist-card:hover .artist-info-box {
-      background-color: rgba(0, 179, 154, 0.6);
+      background-color: rgb(235, 249, 247);
     }
 
-    .artist-card:hover .artist-title-link {
+    .artist-card:hover .artist-name {
       color: var(--color-blue);
     }
 
@@ -169,7 +169,7 @@
     background-color: rgb(235, 249, 247);
   }
 
-  .artist-card:hover .artist-title-link {
+  .artist-card:hover .artist-name {
     color: var(--color-blue);
   }
 
@@ -178,8 +178,19 @@
   }
 }
 
-/* Artist Name - White text for dark blue box */
+/* Artist Title - Hidden but contains the stretched link */
 .artist-title {
+  /* Keep in document flow but hide visually behind other elements */
+  /* NO position property - must stay static for ::before to work */
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Artist Name - Visible name in info box */
+.artist-name {
   margin: 0;
   font-size: 1.25rem;
   line-height: 1.2;
@@ -188,6 +199,7 @@
   text-transform: uppercase;
   letter-spacing: 0.02em;
   color: white;
+  transition: color var(--transition-base);
 
   /* Natural wrapping for long names */
   overflow-wrap: break-word;
@@ -267,7 +279,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3; /* Above info box (z-index: 2) to make entire card clickable */
+  cursor: pointer;
 }
 
 /* No arrow indicator on card title links */
@@ -275,7 +288,7 @@
   content: none;
 }
 
-/* Hover state - change to green */
+/* Hover state - no underline on stretched link */
 @media (hover: hover) {
   .artist-card .artist-title-link:hover {
     text-decoration: none;
