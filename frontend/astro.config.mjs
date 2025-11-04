@@ -24,6 +24,12 @@ export default defineConfig({
     // csp: true,
   },
 
+  // Dev server configuration
+  server: {
+    host: true,  // Allow connections from other devices (like your iPhone)
+    port: 4321   // Your desired port
+  },
+
   // Output configuration for server rendering
   output: 'server', // Server-rendered for API routes and dynamic content
   adapter: node({

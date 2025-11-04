@@ -2,9 +2,11 @@
 import Layout from "../../../layouts/Layout.astro";
 import DynamicComponent from "../../../components/DynamicComponent.astro";
 import { getMultilingualContent } from "../../../lib/utils/language.js";
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../../lib/imageHelpers';
+import { getOptimizedImageUrl, IMAGE_QUALITY } from '../../../lib/imageHelpers';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../../lib/sanity/loadQuery.js';
+import { stegaClean } from '@sanity/client/stega';
+import '../../../styles/event.css';
 
 // Generate static paths for all artists
 export async function getStaticPaths() {
@@ -68,51 +70,36 @@ const content = getMultilingualContent(artist, 'en') || artist.content_en;
 ---
 
 <Layout title={`${artist.name} - Artist`}>
-  <main>
-    <nav class="breadcrumb">
-      <a href="/en/artists">← Back to artists</a>
-    </nav>
-
-    <article>
-      <header>
-        <h1>{artist.name}</h1>
-
+  <div class="container">
+    <div class="artist-detail-page">
+      <!-- Artist Card - Centered, same design as list cards -->
+      <div class="artist-detail-card">
         {artist.image?.image && (
-          <figure class="artist-image">
+          <figure class="artist-detail-image">
             <picture>
-              <source
-                srcset={getResponsiveSrcSet(artist.image.image, RESPONSIVE_WIDTHS.HERO, IMAGE_QUALITY.HERO)}
-                type="image/webp"
-                sizes="(max-width: 768px) 100vw, 800px"
-              />
               <img
-                src={getOptimizedImageUrl(artist.image.image, 800, null, IMAGE_QUALITY.HERO)}
-                alt={artist.image.alt || artist.name}
+                src={getOptimizedImageUrl(artist.image.image, 640, 800, IMAGE_QUALITY.CARD)}
+                alt={stegaClean(artist.image.alt || artist.name)}
                 loading="eager"
                 decoding="async"
+                class="artist-detail-card-image"
               />
             </picture>
           </figure>
         )}
 
-        <div class="artist-info">
+        <div class="artist-detail-info-box">
+          <h1 class="artist-name">{stegaClean(artist.name)}</h1>
           {artist.instrument && (
-            <div class="artist-detail">
-              <strong>🎵 Instrument:</strong>
-              <span>{artist.instrument}</span>
-            </div>
+            <p class="artist-instrument">{stegaClean(artist.instrument)}</p>
           )}
-
           {artist.country && (
-            <div class="artist-detail">
-              <strong>🌍 Country:</strong>
-              <span>{artist.country}</span>
-            </div>
+            <p class="artist-country"><strong>Country:</strong> {stegaClean(artist.country)}</p>
           )}
         </div>
-      </header>
+      </div>
 
-      {/* PageBuilder content from CMS */}
+      <!-- Content below card -->
       {content && Array.isArray(content) && content.length > 0 && (
         <div class="artist-content">
           {content.map((block) => (
@@ -120,89 +107,120 @@ const content = getMultilingualContent(artist, 'en') || artist.content_en;
           ))}
         </div>
       )}
-    </article>
-  </main>
+    </div>
+  </div>
 </Layout>
 
 <style>
-  main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
+  /* Green tint page background (like event pages) */
+  :global(.main-content:has(.artist-detail-page)) {
+    background-color: rgba(0, 179, 154, 0.08);
   }
 
-  .breadcrumb {
-    margin-bottom: 2rem;
-  }
-
-  .breadcrumb a {
-    text-decoration: none;
-  }
-
-  article header {
-    margin-bottom: 3rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    line-height: 1.2;
-    margin-bottom: 2rem;
-  }
-
-  .artist-image {
-    margin-bottom: 2rem;
-  }
-
-  .artist-image img {
-    width: 100%;
-    height: auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  .artist-info {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid #dee2e6;
-  }
-
-  .artist-detail {
+  /* Artist Detail Page - Centered card design */
+  .artist-detail-page {
     display: flex;
-    margin-bottom: 1rem;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    padding-block: var(--space-8);
   }
 
-  .artist-detail:last-child {
-    margin-bottom: 0;
+  /* Artist Detail Card - Medium centered card (480px) */
+  .artist-detail-card {
+    position: relative;
+    overflow: visible;
+    aspect-ratio: 4 / 5;
+    width: 480px;
+    min-width: 480px;
+    max-width: 480px;
   }
 
-  .artist-detail strong {
-    min-width: 140px;
-    margin-right: 1rem;
+  /* Artist Image - Inset from top and left (like list cards) */
+  .artist-detail-image {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    width: 85%;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    margin: 0;
   }
 
-  @media (max-width: 768px) {
-    main {
+  .artist-detail-image picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .artist-detail-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Artist Info Box - Blue overlay in bottom right (same as list cards) */
+  .artist-detail-info-box {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background-color: var(--color-blue);
+    color: white;
+    padding: 1.5rem;
+    display: grid;
+    gap: 0.5rem;
+    z-index: 2;
+    width: fit-content;
+    max-width: 25ch;
+  }
+
+  .artist-detail-info-box .artist-name {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .artist-detail-info-box .artist-instrument,
+  .artist-detail-info-box .artist-country {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: white;
+    opacity: 0.9;
+  }
+
+  /* Content area below card - centered, max-width for readability */
+  .artist-content {
+    max-width: 65ch;
+    width: 100%;
+  }
+
+  /* Responsive: Allow smaller on narrow screens */
+  @media (max-width: 520px) {
+    .artist-detail-card {
+      width: 90vw;
+      min-width: auto;
+    }
+
+    .artist-detail-image {
+      top: 1rem;
+      left: 1rem;
+    }
+
+    .artist-detail-info-box {
+      bottom: 1rem;
+      right: 1rem;
       padding: 1rem;
-    }
-
-    h1 {
-      font-size: 2rem;
-    }
-
-    .artist-info {
-      padding: 1.5rem;
-    }
-
-    .artist-detail {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .artist-detail strong {
-      margin-bottom: 0.25rem;
-      margin-right: 0;
+      gap: 0.25rem;
+      max-width: 20ch;
     }
   }
 </style>

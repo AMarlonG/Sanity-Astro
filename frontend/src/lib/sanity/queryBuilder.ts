@@ -120,11 +120,6 @@ const EVENT_BASE_FIELDS = `
     image,
     "imageAlt": coalesce(imageAlt_no, imageAlt_en)
   },
-  "genre": genre->{
-    _id,
-    title,
-    slug
-  },
   ticketType,
   ticketUrl,
   ticketInfoText,
@@ -313,9 +308,9 @@ const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
 const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   _id,
   _type,
-  title,
+  ${createMultilingualField('title')},
   "slug": slug.current,
-  excerpt,
+  ${createMultilingualField('excerpt')},
   content_no[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
@@ -324,12 +319,7 @@ const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   },
   seo,
   selectedArtists[]->{
-    ${ARTIST_BASE_FIELDS},
-    genres[]->{
-      _id,
-      title,
-      slug
-    }
+    ${ARTIST_BASE_FIELDS}
   }
 }`)
 

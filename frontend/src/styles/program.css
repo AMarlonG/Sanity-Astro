@@ -108,8 +108,8 @@
     /* iOS momentum scrolling */
     -webkit-overflow-scrolling: touch;
 
-    /* Prevent vertical scroll on horizontal swipe */
-    touch-action: pan-x;
+    /* Allow both horizontal and vertical scrolling, remove double-tap delay */
+    touch-action: manipulation;
 
     /* Scroll padding for better UX */
     scroll-padding-inline: clamp(1rem, 3vw, 2rem);
@@ -242,8 +242,8 @@
     /* iOS momentum scrolling */
     -webkit-overflow-scrolling: touch;
 
-    /* Prevent vertical scroll on horizontal swipe */
-    touch-action: pan-x;
+    /* Allow both horizontal and vertical scrolling, remove double-tap delay */
+    touch-action: manipulation;
 
     /* Scroll padding for better UX */
     scroll-padding-inline: clamp(1rem, 3vw, 2rem);
@@ -485,8 +485,8 @@
     /* iOS momentum scrolling */
     -webkit-overflow-scrolling: touch;
 
-    /* Prevent vertical scroll on horizontal swipe */
-    touch-action: pan-x;
+    /* Allow both horizontal and vertical scrolling, remove double-tap delay */
+    touch-action: manipulation;
 
     /* Scroll padding for better UX */
     scroll-padding-inline: clamp(1rem, 3vw, 2rem);

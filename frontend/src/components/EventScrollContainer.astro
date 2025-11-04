@@ -204,8 +204,11 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
   /* Fluid scroll wrapper */
   .event-scroll-wrapper {
     overflow-x: auto;
+    overflow-y: hidden;
     padding-block: var(--space-2);
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation; /* Allow both horizontal and vertical scrolling, remove double-tap delay */
   }
 
   .event-list {
