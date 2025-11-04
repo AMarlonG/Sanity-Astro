@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {TextIcon} from '@sanity/icons'
+import {LoremIpsumInput} from './LoremIpsumButton'
 
 export const portableTextBlock = defineType({
   name: 'portableTextBlock',
@@ -13,6 +14,9 @@ export const portableTextBlock = defineType({
       title: 'Innhold',
       type: 'portableText',
       description: 'Rik tekst med formatering, overskrifter, lister og mer',
+      components: {
+        input: LoremIpsumInput,
+      },
     }),
   ],
   preview: {

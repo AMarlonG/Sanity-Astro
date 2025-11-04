@@ -3,9 +3,12 @@ import Layout from '../../../layouts/Layout.astro';
 import DynamicComponent from '../../../components/DynamicComponent.astro';
 import { formatDateForLanguage } from '../../../lib/utils/dates';
 import { getMultilingualContent } from "../../../lib/utils/language.js";
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../../lib/imageHelpers';
+import { getOptimizedImageUrl } from '../../../lib/imageHelpers';
+import { IMAGE_QUALITY } from '../../../lib/imageHelpers';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../../lib/sanity/loadQuery.js';
+import { stegaClean } from '@sanity/client/stega';
+import '../../../styles/event.css';
 
 // Generate static paths for all events with English slugs
 export async function getStaticPaths() {
@@ -32,7 +35,9 @@ const { data: event } = await loadQuery({
     title_en,
     "title": title_en,
     slug_en,
+    slug_no,
     excerpt_en,
+    "excerpt": excerpt_en,
     "image": {
       "image": image{
         asset->,
@@ -61,11 +66,12 @@ const { data: event } = await loadQuery({
       _id,
       name,
       "slug": slug.current,
-      image,
-      "imageAlt": coalesce(imageAlt_en, imageAlt_no)
+      instrument_en,
+      "instrument": instrument_en
     },
     ticketType,
     ticketUrl,
+    ticketInfoText,
     content_en,
     seo
   }`,
@@ -80,115 +86,79 @@ if (!event) {
 const content = getMultilingualContent(event, 'en') || event.content_en;
 ---
 
-<Layout title={`${event.title} - Event`}>
-  <main>
-    <nav class="breadcrumb">
-      <button type="button" onclick="history.back()" class="back-button">← Back to program</button>
-      <noscript>
-        <a href="/en/program">← Back to program</a>
-      </noscript>
-    </nav>
+<Layout
+  title={`${stegaClean(event.title || '')} - Sanity + Astro`}
+  slugNo={event.slug_no}
+  slugEn={event.slug_en}
+>
+  <div class="container">
+    <div class="event-page">
+      <div class="event-info-grid">
+        <div class="event-info-column">
+          <header class="event-header">
+            <h1 class="event-title">{stegaClean(event.title || '')}</h1>
+            {event.excerpt && (
+              <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
+            )}
+          </header>
 
-    <article>
-      <header>
-        <h1>{event.title}</h1>
+          <div class="event-meta">
+            {event.eventDate?.date && (
+              <div class="event-meta-item">{stegaClean(formatDateForLanguage(event.eventDate.date, 'en'))}</div>
+            )}
+            {event.eventTime && (
+              <div class="event-meta-item">{stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</div>
+            )}
+            {event.venue?.title && (
+              <div class="event-meta-item">{stegaClean(event.venue.title)}</div>
+            )}
+          </div>
+
+          <div class="ticket-section">
+            {stegaClean(event.ticketType) === 'info' ? (
+              <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Free'}</p>
+            ) : (
+              <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                Buy tickets
+              </a>
+            )}
+          </div>
+        </div>
 
         {event.image?.image && (
-          <figure class="event-image">
-            <picture>
-              <source
-                srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.HERO, IMAGE_QUALITY.HERO)}
-                type="image/webp"
-                sizes="(max-width: 768px) 100vw, 800px"
-              />
+          <div class="event-image-column">
+            <figure class="event-image">
               <img
-                src={getOptimizedImageUrl(event.image.image, 800, null, IMAGE_QUALITY.HERO)}
-                alt={event.image.alt || event.title}
+                src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                alt={stegaClean(event.image.alt || event.title || '')}
                 loading="eager"
                 decoding="async"
               />
-            </picture>
-          </figure>
+            </figure>
+          </div>
         )}
+      </div>
 
-        <div class="event-info">
-          {event.eventDate && (
-            <div class="event-detail">
-              <strong>📅 Date:</strong>
-              <span>{formatDateForLanguage(event.eventDate.date, 'en')}</span>
-            </div>
-          )}
-
-          {event.eventTime && (
-            <div class="event-detail">
-              <strong>🕰️ Time:</strong>
-              <span>{event.eventTime.startTime} - {event.eventTime.endTime}</span>
-            </div>
-          )}
-
-          {event.venue && (
-            <div class="event-detail">
-              <strong>🎭 Venue:</strong>
-              <span>
-                {event.venue.name}
-                {event.venue.address && (
-                  <span class="address">, {event.venue.address}</span>
-                )}
-                {event.venue.city && (
-                  <span class="city">, {event.venue.city}</span>
-                )}
-              </span>
-            </div>
-          )}
-
-          {event.artists && event.artists.length > 0 && (
-            <div class="event-detail artists">
-              <strong>🎤 Artists:</strong>
-              <ul>
-                {event.artists.map((artist) => (
-                  <li>
-                    <span class="artist-name">{artist.name}</span>
-                    {artist.image && (
-                      <picture>
-                        <img
-                          src={getOptimizedImageUrl(artist.image, 64, 64, IMAGE_QUALITY.THUMBNAIL)}
-                          alt={artist.imageAlt || artist.name}
-                          class="artist-avatar"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </picture>
+      {event.artists && event.artists.length > 0 && (
+        <section class="artists-section">
+          <h2 class="artists-title">Artists</h2>
+          <div class="artists-scroll-wrapper">
+            <ul class="artists-list">
+              {event.artists.map((artist) => (
+                <li class="artist-item">
+                  <a href={`/en/artists/${stegaClean(artist.slug)}`} class="artist-card">
+                    <span class="artist-name">{stegaClean(artist.name)}</span>
+                    {artist.instrument && (
+                      <span class="artist-instrument">{stegaClean(artist.instrument)}</span>
                     )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
-        {event.ticketType === 'free' ? (
-          <div class="ticket-section">
-            <p class="ticket-info-text">Free</p>
-          </div>
-        ) : event.ticketUrl ? (
-          <div class="ticket-section">
-            <a
-              href={event.ticketUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="ticket-button"
-            >
-              Buy tickets
-            </a>
-          </div>
-        ) : (
-          <div class="ticket-section">
-            <p class="ticket-info-text">Sales starting soon</p>
-          </div>
-        )}
-      </header>
-
-      {/* PageBuilder content from CMS */}
       {content && Array.isArray(content) && content.length > 0 && (
         <div class="event-content">
           {content.map((block) => (
@@ -196,163 +166,6 @@ const content = getMultilingualContent(event, 'en') || event.content_en;
           ))}
         </div>
       )}
-    </article>
-  </main>
+    </div>
+  </div>
 </Layout>
-
-<style>
-  main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .breadcrumb {
-    margin-bottom: 2rem;
-  }
-
-  .breadcrumb a,
-  .breadcrumb .back-button {
-    text-decoration: none;
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    display: inline;
-  }
-
-  .breadcrumb .back-button:hover {
-    text-decoration: underline;
-  }
-
-  article header {
-    margin-bottom: 3rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    line-height: 1.2;
-    margin-bottom: 2rem;
-  }
-
-  .event-image {
-    margin-bottom: 2rem;
-  }
-
-  .event-image img {
-    width: 100%;
-    height: auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  .event-info {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid #dee2e6;
-  }
-
-  .event-detail {
-    display: flex;
-    margin-bottom: 1rem;
-    align-items: flex-start;
-  }
-
-  .event-detail:last-child {
-    margin-bottom: 0;
-  }
-
-  .event-detail strong {
-    min-width: 140px;
-    margin-right: 1rem;
-  }
-
-  .address,
-  .city {
-  }
-
-  .artists ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .artists li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.5);
-  }
-
-  .artist-name {
-    font-weight: 500;
-  }
-
-  .artist-avatar {
-    width: 32px;
-    height: 32px;
-    margin-left: auto;
-    object-fit: cover;
-  }
-
-  .ticket-section {
-    text-align: center;
-    margin: 2rem 0;
-  }
-
-  .ticket-button {
-    display: inline-block;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-    padding: 1rem 2rem;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1.1rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  }
-
-  .ticket-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-  }
-
-  .ticket-info-text {
-    display: inline-block;
-    padding: 1rem 2rem;
-    font-weight: 500;
-    font-size: 1.1rem;
-    font-style: italic;
-  }
-
-  @media (max-width: 768px) {
-    main {
-      padding: 1rem;
-    }
-
-    h1 {
-      font-size: 2rem;
-    }
-
-    .event-info {
-      padding: 1.5rem;
-    }
-
-    .event-detail {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .event-detail strong {
-      margin-bottom: 0.25rem;
-      margin-right: 0;
-    }
-
-    .ticket-button {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-    }
-  }
-</style>
