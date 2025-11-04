@@ -167,9 +167,12 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
     display: flex;
     gap: 0.5rem;
     overflow-x: auto;
+    overflow-y: hidden;
     padding-bottom: 0.5rem;
     scrollbar-width: thin;
     scrollbar-color: #ced4da #f8f9fa;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation; /* Allow both horizontal and vertical scrolling, remove double-tap delay */
   }
 
   .tabs-scroll::-webkit-scrollbar {
