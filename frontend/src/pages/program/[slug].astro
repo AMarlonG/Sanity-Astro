@@ -1,5 +1,5 @@
 ---
-import ContentPageLayout from '../../layouts/ContentPageLayout.astro';
+import Layout from '../../layouts/Layout.astro';
 import DynamicComponent from '../../components/DynamicComponent.astro';
 import { formatDateWithWeekday } from '../../lib/utils/dates';
 import { getMultilingualContent } from "../../lib/utils/language.js";
@@ -85,83 +85,87 @@ if (!event) {
 const content = getMultilingualContent(event) || event.content_no;
 ---
 
-<ContentPageLayout
-  pageDocument={event}
+<Layout
+  title={`${stegaClean(event.title || '')} - Sanity + Astro`}
+  slugNo={event.slug_no}
+  slugEn={event.slug_en}
 >
-  <div class="event-page">
-    <div class="event-info-grid">
-      <div class="event-info-column">
-        <header class="event-header">
-          <h1 class="event-title">{stegaClean(event.title || '')}</h1>
-          {event.excerpt && (
-            <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
-          )}
-        </header>
+  <main class="container">
+    <div class="event-page">
+      <div class="event-info-grid">
+        <div class="event-info-column">
+          <header class="event-header">
+            <h1 class="event-title">{stegaClean(event.title || '')}</h1>
+            {event.excerpt && (
+              <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
+            )}
+          </header>
 
-        <div class="event-meta">
-          {event.eventDate?.date && (
-            <div class="event-meta-item">{stegaClean(formatDateWithWeekday(event.eventDate.date, 'no'))}</div>
-          )}
-          {event.eventTime && (
-            <div class="event-meta-item">kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</div>
-          )}
-          {event.venue?.title && (
-            <div class="event-meta-item">{stegaClean(event.venue.title)}</div>
-          )}
+          <div class="event-meta">
+            {event.eventDate?.date && (
+              <div class="event-meta-item">{stegaClean(formatDateWithWeekday(event.eventDate.date, 'no'))}</div>
+            )}
+            {event.eventTime && (
+              <div class="event-meta-item">kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</div>
+            )}
+            {event.venue?.title && (
+              <div class="event-meta-item">{stegaClean(event.venue.title)}</div>
+            )}
+          </div>
+
+          <div class="ticket-section">
+            {stegaClean(event.ticketType) === 'info' ? (
+              <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
+            ) : (
+              <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                Kjøp billetter her
+              </a>
+            )}
+          </div>
         </div>
 
-        <div class="ticket-section">
-          {stegaClean(event.ticketType) === 'info' ? (
-            <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
-          ) : (
-            <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-              Kjøp billetter her
-            </a>
-          )}
-        </div>
+        {event.image?.image && (
+          <div class="event-image-column">
+            <figure class="event-image">
+              <img
+                src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+                alt={stegaClean(event.image.alt || event.title || '')}
+                loading="eager"
+                decoding="async"
+              />
+            </figure>
+          </div>
+        )}
       </div>
 
-      {event.image?.image && (
-        <div class="event-image-column">
-          <figure class="event-image">
-            <img
-              src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-              alt={stegaClean(event.image.alt || event.title || '')}
-              loading="eager"
-              decoding="async"
-            />
-          </figure>
+      {event.artists && event.artists.length > 0 && (
+        <section class="artists-section">
+          <h2 class="artists-title">Artister</h2>
+          <div class="artists-scroll-wrapper">
+            <ul class="artists-list">
+              {event.artists.map((artist) => (
+                <li class="artist-item">
+                  <a href={`/artister/${stegaClean(artist.slug)}`} class="artist-card">
+                    <span class="artist-name">{stegaClean(artist.name)}</span>
+                    {artist.instrument && (
+                      <span class="artist-instrument">{stegaClean(artist.instrument)}</span>
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {content && Array.isArray(content) && content.length > 0 && (
+        <div class="event-content">
+          {content.map((block) => (
+            <DynamicComponent key={block._key || block._id} block={block} />
+          ))}
         </div>
       )}
     </div>
-
-    {event.artists && event.artists.length > 0 && (
-      <section class="artists-section">
-        <h2 class="artists-title">Artister</h2>
-        <div class="artists-scroll-wrapper">
-          <ul class="artists-list">
-            {event.artists.map((artist) => (
-              <li class="artist-item">
-                <a href={`/artister/${stegaClean(artist.slug)}`} class="artist-card">
-                  <span class="artist-name">{stegaClean(artist.name)}</span>
-                  {artist.instrument && (
-                    <span class="artist-instrument">{stegaClean(artist.instrument)}</span>
-                  )}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-    )}
-
-    {content && Array.isArray(content) && content.length > 0 && (
-      <div class="event-content">
-        {content.map((block) => (
-          <DynamicComponent key={block._key || block._id} block={block} />
-        ))}
-      </div>
-    )}
-  </div>
-</ContentPageLayout>
+  </main>
+</Layout>
 
