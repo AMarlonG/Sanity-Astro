@@ -1,6 +1,5 @@
 ---
 import ContentPageLayout from '../layouts/ContentPageLayout.astro';
-import CardGrid from '../components/CardGrid.astro';
 import Image from '../components/Image.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
 import { formatDateForLanguage } from '../../../shared/utils/dates';
@@ -8,64 +7,90 @@ import { formatDateForLanguage } from '../../../shared/utils/dates';
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Hent artikler-siden innhold fra "Faste sider"
-const articlesPage = await dataService.getPageBySlug('artikler');
+// Hent artikkelside-siden innhold
+const articlePage = await dataService.getArticlePage();
 
-// Hent alle publiserte artikler
-const articles = await dataService.getPublishedArticles();
+// Get articles from articlePage and filter out null/undefined
+const articles = (articlePage?.articles || []).filter(article => article != null);
 
 // Fallback values
-const pageTitle = articlesPage?.title || 'Artikler';
+const pageTitle = articlePage?.title || 'Artikler';
+
+// Check if we have any articles
+const hasArticles = articles.length > 0;
 ---
 
 <ContentPageLayout
   title={pageTitle}
-  pageContent={articlesPage?.content}
+  excerpt={articlePage?.excerpt}
+  pageDocument={articlePage}
 >
-  <CardGrid
-    title="Alle artikler"
-    items={articles}
-    gridType="articles"
-    noResultsTitle="Ingen artikler publisert"
-  >
-    {articles.map((article) => (
-      <article class="article-card card">
-        <a href={`/artikler/${article.slug}`} class="article-link">
-          {article.image && (
-            <div class="article-image">
-              <Image
-                image={article.image.image}
-                alt={article.image.alt || article.title}
-                caption=""
-                credit=""
-                size="full"
-                aspectRatio="16:9"
-                alignment="center"
-                className="article-card-image"
-              />
-            </div>
-          )}
-          <div class="article-content">
-            <h3 class="article-title">{article.title}</h3>
-
-            {article.subtitle && (
-              <p class="article-subtitle">{article.subtitle}</p>
-            )}
-
-            {article.publishedAt && (
-              <div class="article-meta">
-                <span class="article-date">
-                  {formatDateForLanguage(article.publishedAt, 'no')}
-                </span>
+  {hasArticles ? (
+    <div class="articles-grid">
+      {articles.map((article) => (
+        <article class="article-card card">
+          <a href={`/artikler/${article.slug}`} class="article-link">
+            {article.image && (
+              <div class="article-image">
+                <Image
+                  image={article.image.image}
+                  alt={article.image.alt || article.title}
+                  caption=""
+                  credit=""
+                  size="full"
+                  aspectRatio="16:9"
+                  alignment="center"
+                  className="article-card-image"
+                />
               </div>
             )}
-          </div>
-        </a>
-      </article>
-    ))}
-  </CardGrid>
+            <div class="article-content">
+              <h3 class="article-title">{article.title}</h3>
+
+              {article.subtitle && (
+                <p class="article-subtitle">{article.subtitle}</p>
+              )}
+
+              {article.publishedAt && (
+                <div class="article-meta">
+                  <span class="article-date">
+                    {formatDateForLanguage(article.publishedAt, 'no')}
+                  </span>
+                </div>
+              )}
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="no-articles">
+      <h3 class="no-articles-title">Ingen artikler publisert</h3>
+      <p class="no-articles-text">Kom tilbake senere for å se våre artikler.</p>
+    </div>
+  )}
 
   <style>
+    /* Articles Grid - Intrinsic responsive layout */
+    .articles-grid {
+      container-type: inline-size;
+      display: grid;
+      gap: clamp(var(--space-4), 3vw, var(--space-6));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, max(350px, 30ch)), 1fr));
+    }
+
+    @container (min-width: 700px) {
+      .articles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
+      }
+    }
+
+    @container (min-width: 1000px) {
+      .articles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 45ch), 1fr));
+      }
+    }
+
     /* Article Card Specific Styles */
     .article-card {
       container-type: inline-size;
@@ -141,6 +166,21 @@ const pageTitle = articlesPage?.title || 'Artikler';
       .article-image {
         height: 200px;
       }
+    }
+
+    /* No Articles Empty State */
+    .no-articles {
+      text-align: center;
+      padding: clamp(var(--space-6), 8vw, var(--space-9));
+    }
+
+    .no-articles-title {
+      margin: 0 0 var(--space-4) 0;
+    }
+
+    .no-articles-text {
+      margin: 0;
+      font-size: var(--font-size-lg);
     }
   </style>
 
