@@ -86,26 +86,18 @@ const content = getMultilingualContent(event) || event.content_no;
 ---
 
 <ContentPageLayout
-  title={stegaClean(event.title || '')}
-  excerpt={stegaClean(event.excerpt || '')}
   pageDocument={event}
 >
   <div class="event-page">
     <div class="event-info-grid">
-      {event.image?.image && (
-        <div class="event-image-column">
-          <figure class="event-image">
-            <img
-              src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-              alt={stegaClean(event.image.alt || event.title || '')}
-              loading="eager"
-              decoding="async"
-            />
-          </figure>
-        </div>
-      )}
-
       <div class="event-info-column">
+        <header class="event-header">
+          <h1 class="event-title">{stegaClean(event.title || '')}</h1>
+          {event.excerpt && (
+            <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
+          )}
+        </header>
+
         <div class="event-meta">
           {event.eventDate?.date && (
             <div class="event-meta-item">{stegaClean(formatDateWithWeekday(event.eventDate.date, 'no'))}</div>
@@ -128,6 +120,19 @@ const content = getMultilingualContent(event) || event.content_no;
           )}
         </div>
       </div>
+
+      {event.image?.image && (
+        <div class="event-image-column">
+          <figure class="event-image">
+            <img
+              src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+              alt={stegaClean(event.image.alt || event.title || '')}
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+        </div>
+      )}
     </div>
 
     {event.artists && event.artists.length > 0 && (

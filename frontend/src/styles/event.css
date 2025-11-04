@@ -76,18 +76,39 @@ main:has(.event-page) {
   container-type: inline-size;
   container-name: event-info-grid;
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-6);
   align-items: start;
   margin-block-end: var(--space-8);
 }
 
-/* Right column - metadata + ticket button */
+/* Left column - title, excerpt, metadata + ticket button */
 .event-info-column {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  order: 2;
+  order: 1;
+}
+
+/* Event header - title and excerpt */
+.event-header {
+  margin: 0;
+}
+
+.event-title {
+  margin: 0 0 var(--space-4) 0;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.event-excerpt {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  line-height: var(--line-height-normal);
+  text-wrap: balance;
+  max-inline-size: 65ch;
 }
 
 /* Event metadata (date, time, venue) - vertical stack */
@@ -97,7 +118,7 @@ main:has(.event-page) {
   gap: var(--space-1);
   margin: 0;
   font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
+  line-height: var(--line-height-tight);
 }
 
 .event-meta-item {
@@ -116,11 +137,11 @@ main:has(.event-page) {
   opacity: 0.85;
 }
 
-/* Left column - event image */
+/* Right column - event image */
 .event-image-column {
   display: flex;
   align-items: start;
-  order: 1;
+  order: 2;
 }
 
 .event-image {
@@ -145,13 +166,13 @@ main:has(.event-page) {
     gap: var(--space-5);
   }
 
-  /* Reorder: image first, then info on mobile */
-  .event-image-column {
-    order: -1;
-  }
-
+  /* Keep order: text first, then image on mobile */
   .event-info-column {
     order: 1;
+  }
+
+  .event-image-column {
+    order: 2;
   }
 }
 
