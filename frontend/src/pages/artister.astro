@@ -59,20 +59,6 @@ const hasArtists = artists.length > 0;
             {artist.instrument && (
               <p class="artist-instrument">{stegaClean(artist.instrument)}</p>
             )}
-
-            {artist.bio && (
-              <p class="artist-bio">
-                {stegaClean(artist.bio).length > 150 ? `${stegaClean(artist.bio).substring(0, 150)}...` : stegaClean(artist.bio)}
-              </p>
-            )}
-
-            {artist.genres && artist.genres.length > 0 && (
-              <div class="artist-genres">
-                {artist.genres.map((genre: any) => (
-                  <span class="genre-tag">{stegaClean(genre.title)}</span>
-                ))}
-              </div>
-            )}
           </div>
         </article>
       ))}
