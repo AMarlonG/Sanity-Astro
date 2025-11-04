@@ -260,8 +260,6 @@
   color: white;
   text-decoration: none;
   transition: color var(--transition-base);
-  position: relative;
-  z-index: 3;
 }
 
 /* Pseudo-element stretches to cover entire card */
