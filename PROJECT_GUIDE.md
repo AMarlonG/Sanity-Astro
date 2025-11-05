@@ -306,8 +306,8 @@ export function initializeSomeFeature(param) {
 #### Type Patterns
 - Prefer `interface` for object shapes
 - Use `type` for unions, intersections, and mapped types
-- Generate Sanity types automatically rather than writing manually
-- Share types between studio and frontend via `../studio/schemaTypes/shared/types.ts`
+- Generate Sanity types automatically using TypeGen (see section 2.1)
+- Types are generated in `frontend/sanity/sanity.types.ts` from schema extraction
 
 #### Philosophy
 - Type safety WITHOUT over-engineering
@@ -549,13 +549,12 @@ git push origin --delete feature/new-feature
 npm run dev
 
 # Start individual servers
-npm run dev:shared
 npm run dev:frontend
 npm run dev:studio
 
-# Sanity operations
-npx sanity@latest schema extract
-npx sanity@latest typegen generate
+# Sanity TypeGen operations (run from studio folder)
+npm run extract-schema  # Extract schema to frontend
+cd ../frontend && npm run typegen  # Generate types from schema
 ```
 
 **Documentation:**
