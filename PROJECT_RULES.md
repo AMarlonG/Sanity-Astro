@@ -111,6 +111,17 @@ Dette hierarkiet gjelder for alle agenter og all interaksjon med eksterne system
 - Bruk til: Hente innhold/data (GROQ queries), oppdatere/opprette dokumenter, sjekke schemas og content types, administrere releases og versjoner
 - Foretrekk over `npx sanity` CLI-kommandoer for queries og datahenting
 
+**VIKTIG - Sanity MCP Server Oppsett:**
+- **ANBEFALT**: Bruk hosted server på `https://mcp.sanity.io` (offisielt anbefalt)
+  - Enklere oppsett, ingen dependency-problemer
+  - OAuth autentisering (mer sikker)
+  - Alltid oppdatert med siste features
+  - GitHub repository for lokal server er ARKIVERT
+- **Alternativ**: Hvis lokal server er nødvendig, bruk `@sanity/mcp-server@0.9.4`
+  - Nyere versjoner (0.10.0+) krever `@modelcontextprotocol/sdk@^1.12.0` som ikke eksisterer
+  - v0.9.4 er siste versjon som fungerer med tilgjengelig SDK (v1.11.3)
+- **Konfigurasjon**: Se PROJECT_RULES.md for detaljert oppsettguide
+
 **Astro Docs MCP Server**
 - Dokumentasjon: https://docs.astro.build/en/guides/build-with-ai/#astro-docs-mcp-server
 - Bruk til: Søke i Astro-dokumentasjon, hente informasjon om Astro-funksjoner og API-er, best practices og kodeeksempler
@@ -125,6 +136,65 @@ Dette hierarkiet gjelder for alle agenter og all interaksjon med eksterne system
 
 **HTMX MCP Server (kommende)**
 - Dokumentasjon: (TBD)
+
+#### Detaljert Sanity MCP Server Konfigurasjon
+
+**Problem med Lokal Server:**
+Den lokale `@sanity/mcp-server` pakken har en kjent dependency-konflikt:
+- Versjoner 0.10.0 og nyere krever `@modelcontextprotocol/sdk@^1.12.0`
+- Denne SDK-versjonen eksisterer ikke (siste er v1.11.3)
+- GitHub repository er ARKIVERT - Sanity anbefaler hosted løsning
+
+**Løsning 1: Hosted Server (ANBEFALT)**
+
+Konfigurer i Claude Code config fil (`~/.config/claude-code/config.json` på macOS):
+```json
+{
+  "mcpServers": {
+    "Sanity": {
+      "url": "https://mcp.sanity.io",
+      "type": "http"
+    }
+  }
+}
+```
+
+Fordeler:
+- Ingen dependency-problemer
+- OAuth autentisering (automatisk, mer sikker)
+- Alltid oppdatert
+- Bedre ytelse med streamable HTTP
+- Ingen Node.js installasjon nødvendig
+
+**Løsning 2: Lokal Server (kun hvis nødvendig)**
+
+Bruk `@sanity/mcp-server@0.9.4` (siste fungerende versjon):
+```json
+{
+  "mcpServers": {
+    "sanity": {
+      "command": "npx",
+      "args": ["-y", "@sanity/mcp-server@0.9.4"],
+      "env": {
+        "SANITY_PROJECT_ID": "i952bgb1",
+        "SANITY_DATASET": "production",
+        "SANITY_API_TOKEN": "your-sanity-api-token",
+        "MCP_USER_ROLE": "developer"
+      }
+    }
+  }
+}
+```
+
+Krav for lokal server:
+- Node.js installert
+- Gyldig Sanity API token med nødvendige tillatelser
+- Project ID og dataset navn
+
+**Etter Konfigurasjon:**
+1. Restart Claude Code helt
+2. For hosted: Autorisér tilgang til Sanity prosjekter når du får prompt
+3. Test tilkobling ved å kjøre en enkel GROQ query
 
 ### File Editing Workflow
 - **Always read a file before editing it** to understand the current code and how the changes will alter the code
