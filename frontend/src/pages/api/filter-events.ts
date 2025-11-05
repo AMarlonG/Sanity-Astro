@@ -153,7 +153,7 @@ const rateLimiter = rateLimit({
 
 // OPTIONS handler for CORS preflight
 export const OPTIONS: APIRoute = async ({ request }) => {
-  const origin = request.headers.get('origin');
+  const origin = request.headers.get('origin') ?? undefined;
   return new Response(null, {
     status: 204,
     headers: {
@@ -289,13 +289,13 @@ export const POST: APIRoute = async ({ request }) => {
       pushUrl = '/program#tab-all-days';
     }
 
-    const origin = request.headers.get('origin');
-    
+    const origin = request.headers.get('origin') ?? undefined;
+
     return new Response(resultsHtml, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=300, stale-while-revalidate=60', // Enhanced caching
-        'HX-Push-Url': pushUrl, // HTMX vil oppdatere URL-en med denne
+        'HX-Push-Url': pushUrl, // HTMX vil oppdatere URL-en med denna
         ...getCORSHeaders(origin),
         ...getSecurityHeaders(),
       },
@@ -303,9 +303,9 @@ export const POST: APIRoute = async ({ request }) => {
   } catch (error) {
     // Enhanced error handling with logging (don't expose internal errors)
     console.error('Filter events API error:', error);
-    
-    const origin = request.headers.get('origin');
-    
+
+    const origin = request.headers.get('origin') ?? undefined;
+
     return new Response(
       `<div style="text-align: center; padding: 2rem; color: #dc3545;">
         <div style="font-size: 2rem; margin-bottom: 1rem; color: #dc3545;">Feil</div>

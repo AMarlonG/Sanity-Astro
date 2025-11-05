@@ -19,7 +19,7 @@ const rateLimiter = rateLimit({
 
 // OPTIONS handler for CORS preflight
 export const OPTIONS: APIRoute = async ({ request }) => {
-  const origin = request.headers.get('origin');
+  const origin = request.headers.get('origin') ?? undefined;
   return new Response(null, {
     status: 204,
     headers: {
@@ -67,10 +67,10 @@ export const GET: APIRoute = async ({ request, url }) => {
 
     // Get program page data
     const programPage = await dataService.getProgramPage();
-    const events = (programPage?.selectedEvents || []).filter(event => event != null);
+    const events = (programPage?.selectedEvents || []).filter((event: any) => event != null);
 
     // Group events by date (same logic as program.astro)
-    const eventsByDate = events.reduce((acc, event) => {
+    const eventsByDate = events.reduce((acc: any, event: any) => {
       if (!event?.eventDate?.date) return acc;
 
       const dateKey = event.eventDate.date;
@@ -87,10 +87,10 @@ export const GET: APIRoute = async ({ request, url }) => {
 
     // Sort dates chronologically and sort events within each date by time
     const sortedDates = Object.values(eventsByDate)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map(dateGroup => ({
+      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .map((dateGroup: any) => ({
         ...dateGroup,
-        events: dateGroup.events.sort((a, b) => {
+        events: dateGroup.events.sort((a: any, b: any) => {
           const timeA = a.eventTime?.startTime || '';
           const timeB = b.eventTime?.startTime || '';
           return timeA.localeCompare(timeB);
@@ -110,7 +110,7 @@ export const GET: APIRoute = async ({ request, url }) => {
       filteredDates = filteredDates
         .map(dateGroup => ({
           ...dateGroup,
-          events: dateGroup.events.filter(e => e.venue?.slug === venueFilter)
+          events: dateGroup.events.filter((e: any) => e.venue?.slug === venueFilter)
         }))
         .filter(dateGroup => dateGroup.events.length > 0);
     }
@@ -123,14 +123,14 @@ export const GET: APIRoute = async ({ request, url }) => {
     if (dateFilter && venueFilter) {
       // Get display names from the events data
       const dateDisplay = sortedDates.find(d => d.date === dateFilter)?.displayTitle || formatDateWithWeekday(dateFilter, language as 'no' | 'en');
-      const venueEvent = events.find(e => e.venue?.slug === venueFilter);
+      const venueEvent = events.find((e: any) => e.venue?.slug === venueFilter);
       const venueDisplay = venueEvent?.venue?.title || venueFilter;
       emptyStateMessage = `Ingen arrangementer på ${dateDisplay} og ${venueDisplay}`;
     } else if (dateFilter) {
       const dateDisplay = sortedDates.find(d => d.date === dateFilter)?.displayTitle || formatDateWithWeekday(dateFilter, language as 'no' | 'en');
       emptyStateMessage = `Ingen arrangementer på ${dateDisplay}`;
     } else if (venueFilter) {
-      const venueEvent = events.find(e => e.venue?.slug === venueFilter);
+      const venueEvent = events.find((e: any) => e.venue?.slug === venueFilter);
       const venueDisplay = venueEvent?.venue?.title || venueFilter;
       emptyStateMessage = `Ingen arrangementer på ${venueDisplay}`;
     }
@@ -143,7 +143,7 @@ export const GET: APIRoute = async ({ request, url }) => {
         <section class="content-section date-section" data-date="${date}">
           <h3 class="date-title">${stegaClean(displayTitle)}</h3>
           <div class="events-grid">
-            ${dateEvents.map((event) => {
+            ${dateEvents.map((event: any) => {
               const eventSlug = stegaClean(event.slug_no?.current || event.slug_en?.current);
               const eventTitle = stegaClean(event.title);
               const eventExcerpt = event.excerpt ? stegaClean(event.excerpt) : '';
@@ -257,7 +257,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     const queryString = params.toString();
     const pushUrl = queryString ? `${basePath}?${queryString}` : basePath;
 
-    const origin = request.headers.get('origin');
+    const origin = request.headers.get('origin') ?? undefined;
 
     return new Response(html, {
       headers: {
@@ -271,7 +271,7 @@ export const GET: APIRoute = async ({ request, url }) => {
   } catch (error) {
     console.error('Filter program API error:', error);
 
-    const origin = request.headers.get('origin');
+    const origin = request.headers.get('origin') ?? undefined;
 
     return new Response(
       `<section class="content-section">

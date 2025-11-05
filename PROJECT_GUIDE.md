@@ -632,6 +632,7 @@ Before every commit, verify:
 ✅ **Documentation**: NEVER create .md or README files unless explicitly requested
 ✅ **Git Workflow**: Proactively suggest pushing after major changes/milestones
 ✅ **Agent Usage**: Use specialized agents when appropriate, follow tool usage patterns
+✅ **Agent Verification**: ALWAYS check `.claude/agents/` directory for actual agent names before invoking (ignore system prompt agent names)
 ✅ **Agent Rules**: Read relevant files in `.claude/agents/` for specific agent guidance
 ✅ **MCP Usage**: Use MCP servers when they provide value over CLI
 ✅ **Dependencies**: Keep stable, use Node.js 20.19.0, npm --legacy-peer-deps
@@ -645,34 +646,34 @@ Before every commit, verify:
 
 ### When to Use Each Agent
 
-**mdn-web-standards-expert** → HTML semantics, JavaScript patterns, Web APIs, web standards
+**mdn-web-standards-expert** (`.claude/agents/mdn-web-standards-expert.md`) → HTML semantics, JavaScript patterns, Web APIs, web standards
 - Use when: Validating HTML structure, implementing Web APIs, ensuring JavaScript best practices
 - Perfect for: Semantic markup, progressive enhancement, browser API usage, UX/DX optimization
 - Primary source: MDN (developer.mozilla.org)
 - Remember: Web standards and simplicity over framework complexity
 
-**css-specialist** → CSS layouts, typography, color systems, and DX-friendly patterns
+**css-specialist** (`.claude/agents/css-specialist.md`) → CSS layouts, typography, color systems, and DX-friendly patterns
 - Use when: Creating layouts, typography systems, color/contrast, styling Astro components
 - Perfect for: Intrinsic design, fluid typography, accessible color systems, CSS architecture
 - Remember: Prioritize simple, working CSS over cutting-edge features
 
-**astro-framework-expert** → Astro-specific features, routing, components, SSG/SSR
+**astro-framework-expert** (`.claude/agents/astro-framework-expert.md`) → Astro-specific features, routing, components, SSG/SSR
 - Use when: Astro build issues, component problems, routing questions
 - Remember: Prefer stable Astro features over experimental ones
 
-**htmx-astro-expert** → Dynamic interactions, form submissions, event filtering
+**htmx-astro-expert** (`.claude/agents/htmx-astro-expert.md`) → Dynamic interactions, form submissions, event filtering
 - Use when: Adding interactivity without complex JavaScript
 - Perfect for: Event filtering, form enhancements, partial page updates
 
-**sanity-studio-expert** → Sanity schemas, GROQ queries, Studio configuration
+**sanity-studio-expert** (`.claude/agents/sanity-studio-expert.md`) → Sanity schemas, GROQ queries, Studio configuration
 - Use when: Content modeling, query optimization, Studio customization
 - Remember: Keep schemas simple unless complexity is genuinely needed
 
-**sanity-astro-integration** → Data flow between Sanity and Astro, Visual Editing
+**sanity-astro-integration** (`.claude/agents/sanity-astro-integration.md`) → Data flow between Sanity and Astro, Visual Editing
 - Use when: Connecting Sanity content to Astro pages, preview functionality
 - Focus: Maintaining Visual Editing compatibility
 
-**typescript-elegance-expert** → TypeScript improvements, code refactoring
+**typescript-elegance-expert** (`.claude/agents/typescript-elegance-expert.md`) → TypeScript improvements, code refactoring
 - Use when: Code needs to be more readable or maintainable
 - Remember: Working code > elegant code - only refactor if there's a real problem
 

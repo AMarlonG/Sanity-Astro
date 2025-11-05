@@ -242,7 +242,8 @@
   position: absolute;
   bottom: 1rem;
   right: 1rem;
-  background-color: var(--color-blue);
+  /* Using --color-blue-600 for WCAG AA compliance (4.5:1 contrast with white) */
+  background-color: var(--color-blue-600);
   color: white;
   padding: 1rem;
   display: grid;

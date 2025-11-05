@@ -74,7 +74,7 @@ export function getOptimizedImageUrl(
  */
 export function getResponsiveSrcSet(
   source: SanityImageSource,
-  widths: number[] = RESPONSIVE_WIDTHS.MEDIUM,
+  widths: readonly number[] = RESPONSIVE_WIDTHS.MEDIUM,
   quality: number = IMAGE_QUALITY.CARD
 ): string {
   const builder = getImageBuilder(source)
@@ -130,7 +130,7 @@ export interface PictureData {
 
 export function getPictureData(
   source: SanityImageSource,
-  widths: number[] = RESPONSIVE_WIDTHS.MEDIUM,
+  widths: readonly number[] = RESPONSIVE_WIDTHS.MEDIUM,
   quality: number = IMAGE_QUALITY.CARD
 ): PictureData | null {
   const builder = getImageBuilder(source)
@@ -139,7 +139,8 @@ export function getPictureData(
   const createSrcSet = (format: string) => {
     return widths
       .map(w => {
-        const url = builder.width(w).format(format).quality(quality).url()
+        // Type assertion needed as Sanity's ImageFormat type may not include all formats
+        const url = builder.width(w).format(format as any).quality(quality).url()
         return `${url} ${w}w`
       })
       .join(', ')
