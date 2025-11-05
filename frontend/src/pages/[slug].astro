@@ -27,13 +27,16 @@ const dataService = createDataService(Astro.request);
 let page = null;
 
 try {
+  console.log(`[slug].astro: Fetching page with slug: "${slug}"`);
   page = await dataService.getPageBySlug(slug);
+  console.log(`[slug].astro: Query returned:`, page ? `Found page "${page.title}"` : 'NULL');
 
   if (!page) {
+    console.log(`[slug].astro: Page is null, redirecting to 404`);
     return Astro.redirect('/404');
   }
 } catch (error) {
-  console.error('Error loading page:', error);
+  console.error(`[slug].astro: Error loading page "${slug}":`, error);
   return Astro.redirect('/404');
 }
 
