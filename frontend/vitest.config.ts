@@ -8,8 +8,7 @@ export default defineConfig(
         globals: true,
         environment: 'happy-dom',
         include: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.js', '**/*.test.jsx'],
-        exclude: ['node_modules', 'dist', '.astro'],
-        setupFiles: ['./test-setup.ts']
+        exclude: ['node_modules', 'dist', '.astro']
       }
     })
   )
