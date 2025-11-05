@@ -1,8 +1,11 @@
 ---
 import { VisualEditing } from "@sanity/astro/visual-editing";
-import Header from '../components/Header.astro';
+import { sanityClient } from "sanity:client";
+import Menu from '../components/Menu.astro';
+import type { MenuItem } from '../components/Menu.astro';
 import HreflangTags from '../components/HreflangTags.astro';
 import { detectLanguage, type Language } from '../lib/utils/language.js';
+import { QueryBuilder } from '../lib/sanity/queryBuilder.js';
 
 // Import CSS files in order
 import '../styles/reset.css';
@@ -26,6 +29,11 @@ const {
 // Detect current language from URL
 const currentLang: Language = detectLanguage(Astro.request);
 const currentPath = new URL(Astro.request.url).pathname;
+
+// Fetch menu items from Sanity
+const { query: menuQuery, params: menuParams } = QueryBuilder.siteSettingsMenu();
+const menuData = await sanityClient.fetch<{ menuItems: MenuItem[] }>(menuQuery, menuParams);
+const menuItems = menuData?.menuItems || [];
 
 // Check if Visual Editing should be enabled
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
@@ -223,12 +231,13 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
 
   </head>
   <body>
-    <!-- Header with navigation and language switcher -->
-    <Header
+    <!-- Menu with navigation and language switcher -->
+    <Menu
       currentLang={currentLang}
       currentPath={currentPath}
       slugNo={slugNo}
       slugEn={slugEn}
+      menuItems={menuItems}
     />
 
     <main class="main-content">

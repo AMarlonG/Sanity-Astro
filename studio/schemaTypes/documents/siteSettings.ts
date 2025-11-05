@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {CogIcon, ComposeIcon, ImageIcon, UsersIcon, HeartIcon} from '@sanity/icons'
+import {CogIcon, ComposeIcon, ImageIcon, UsersIcon, HeartIcon, MenuIcon} from '@sanity/icons'
 import {multilingualImageFields, imageFieldsets} from '../shared/imageFields'
 import {seoGroup} from '../objects/seoFields'
 import {componentValidation, crossFieldValidation} from '../shared/validation'
@@ -25,6 +25,11 @@ export const siteSettings = defineType({
       name: 'general',
       title: 'Felles innhold',
       icon: CogIcon,
+    },
+    {
+      name: 'navigation',
+      title: 'Navigasjon',
+      icon: MenuIcon,
     },
     {
       name: 'identity',
@@ -127,6 +132,28 @@ export const siteSettings = defineType({
       group: 'general',
       fieldset: 'festivalDates',
       validation: componentValidation.title,
+    }),
+
+    // NAVIGASJON
+    defineField({
+      name: 'menuItems',
+      title: 'Menyelementer',
+      type: 'array',
+      group: 'navigation',
+      description: 'Velg sider som skal vises i menyen. Dra for å endre rekkefølge.',
+      of: [
+        {
+          type: 'reference',
+          to: [
+            {type: 'homepage'},
+            {type: 'programPage'},
+            {type: 'artistPage'},
+            {type: 'articlePage'},
+            {type: 'page'},
+          ],
+        }
+      ],
+      validation: (Rule) => Rule.min(1).warning('Minst ett menyelement anbefales'),
     }),
 
     defineField({

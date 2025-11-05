@@ -407,6 +407,17 @@ const SEARCH_CONTENT_QUERY = defineQuery(`*[_type in $types && (
   "slug": coalesce(slug_no.current, slug_en.current, slug.current)
 }`)
 
+const SITE_SETTINGS_MENU_QUERY = defineQuery(`*[_type == "siteSettings"][0]{
+  menuItems[]->{
+    _id,
+    _type,
+    "title_no": coalesce(title_no, "Home"),
+    "title_en": coalesce(title_en, "Home"),
+    "slug_no": coalesce(slug_no.current, slug.current, "/"),
+    "slug_en": coalesce(slug_en.current, slug.current, "/")
+  }
+}`)
+
 export const QueryBuilder = {
   homepage(): QueryDefinition {
     return {query: HOMEPAGE_QUERY, params: {}}
@@ -452,6 +463,9 @@ export const QueryBuilder = {
   },
   searchContent(searchTerm: string, types: string[]): QueryDefinition<{search: string; types: string[]}> {
     return {query: SEARCH_CONTENT_QUERY, params: {search: `*${searchTerm}*`, types}}
+  },
+  siteSettingsMenu(): QueryDefinition {
+    return {query: SITE_SETTINGS_MENU_QUERY, params: {}}
   }
 } as const
 
