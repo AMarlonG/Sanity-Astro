@@ -17,13 +17,9 @@
     "test:watch": "npm run test:watch --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "clean": "npm run clean --workspaces --if-present",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "npm run build && changeset publish"
+    "clean": "npm run clean --workspaces --if-present"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.6",
     "concurrently": "^9.1.2"
   }
 }
