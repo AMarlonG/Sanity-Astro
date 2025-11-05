@@ -1,10 +1,10 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import DynamicComponent from "../../components/DynamicComponent.astro";
-import { loadQuery } from "../../lib/sanity/loadQuery.js";
-import { getMultilingualContent } from "../../lib/utils/language.js";
-import { getOptimizedImageUrl } from '../../lib/imageHelpers';
-import { IMAGE_QUALITY } from '../../lib/imageHelpers';
+import Layout from "../../../layouts/Layout.astro";
+import DynamicComponent from "../../../components/DynamicComponent.astro";
+import { loadQuery } from "../../../lib/sanity/loadQuery.js";
+import { getMultilingualContent } from "../../../lib/utils/language.js";
+import { getOptimizedImageUrl } from '../../../lib/imageHelpers';
+import { IMAGE_QUALITY } from '../../../lib/imageHelpers';
 import { stegaClean } from '@sanity/client/stega';
 import type { SanityDocument } from '@sanity/client';
 
@@ -15,8 +15,8 @@ export async function getStaticPaths() {
   });
 
   return articles.map((article) => {
-    // Use Norwegian slug, fallback to English slug
-    const slug = article.slug_no?.current || article.slug_en?.current;
+    // Use English slug, fallback to Norwegian slug
+    const slug = article.slug_en?.current || article.slug_no?.current;
     return {
       params: { slug },
     };
@@ -25,16 +25,16 @@ export async function getStaticPaths() {
 
 const { params } = Astro;
 
-// Fetch the specific article based on the slug parameter (Norwegian priority)
+// Fetch the specific article based on the slug parameter (English priority)
 const { data: article } = await loadQuery({
-  query: `*[_type == "article" && $slug in [slug_no.current, slug_en.current, slug.current]][0]{
+  query: `*[_type == "article" && $slug in [slug_en.current, slug_no.current, slug.current]][0]{
     _id,
     _type,
-    title_no,
-    "title": title_no,
-    slug_no,
-    excerpt_no,
-    "excerpt": excerpt_no,
+    title_en,
+    "title": title_en,
+    slug_en,
+    excerpt_en,
+    "excerpt": excerpt_en,
     "image": {
       "image": image{
         asset->{
@@ -52,11 +52,11 @@ const { data: article } = await loadQuery({
         hotspot,
         crop
       },
-      "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
-      "credit": coalesce(imageCredit_no, imageCredit_en)
+      "alt": coalesce(imageAlt_en, imageAlt_no, image.alt),
+      "credit": coalesce(imageCredit_en, imageCredit_no)
     },
-    content_no,
     content_en,
+    content_no,
     publishedAt,
     author->{
       _id,
@@ -72,7 +72,7 @@ if (!article) {
 }
 
 // Get appropriate content array
-const content = getMultilingualContent(article, 'no') || article.content_no;
+const content = getMultilingualContent(article, 'en') || article.content_en;
 ---
 
 <Layout title={stegaClean(article.title || '')}>
@@ -83,7 +83,7 @@ const content = getMultilingualContent(article, 'no') || article.content_no;
         {article.excerpt && <p class="excerpt">{stegaClean(article.excerpt)}</p>}
         {article.publishedAt && (
           <time datetime={new Date(article.publishedAt).toISOString()}>
-            {new Intl.DateTimeFormat('no-NO', {
+            {new Intl.DateTimeFormat('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric'
@@ -91,7 +91,7 @@ const content = getMultilingualContent(article, 'no') || article.content_no;
           </time>
         )}
         {article.author && (
-          <p class="author">Av {stegaClean(article.author.name)}</p>
+          <p class="author">By {stegaClean(article.author.name)}</p>
         )}
       </header>
 

@@ -1,6 +1,7 @@
 import {homepage} from './documents/homepage'
 import {programPage} from './documents/programPage'
 import {artistPage} from './documents/artistPage'
+import {articlePage} from './documents/articlePage'
 import {artist} from './documents/artist'
 import {composer} from './documents/composer'
 import {siteSettings} from './documents/siteSettings'
@@ -19,6 +20,7 @@ export const schemaTypes = [
   homepage,
   programPage,
   artistPage,
+  articlePage,
   artist,
   composer,
   siteSettings,

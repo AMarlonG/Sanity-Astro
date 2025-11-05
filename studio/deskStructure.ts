@@ -35,6 +35,10 @@ export const structure = (S: StructureBuilder) =>
         .title('Artistside')
         .icon(UsersIcon)
         .child(S.document().schemaType('artistPage').documentId('artistPage')),
+      S.listItem()
+        .title('Artikkelside')
+        .icon(DocumentTextIcon)
+        .child(S.document().schemaType('articlePage').documentId('articlePage')),
       S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('page')),
 
       // Festivalinnhold
