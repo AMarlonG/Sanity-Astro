@@ -121,17 +121,6 @@ See `frontend/.env.example` for all available options.
 - Studio URL: `http://localhost:3333`
 - Frontend URL: `http://localhost:4321`
 
-## Recent Improvements
-
-### Studio Schema Refactoring (Latest)
-- **Eliminated 310+ lines of duplicate code** across document schemas
-- **Created shared utilities**: `previewHelpers.ts` and `publishingFields.ts`
-- **Standardized naming**: All schemas now use consistent 'publishing' group
-- **Improved maintainability**: Single source of truth for preview and publishing logic
-- **Zero breaking changes**: Pure refactoring with full bilingual support preserved
-
-All schemas (artist, article, page, event, homepage) now follow DRY principles with consolidated preview logic and reusable publishing fields.
-
 ## Testing
 
 ```bash
@@ -190,12 +179,14 @@ cd studio && npx sanity deploy
 
 ## Philosophy
 
-This is a **simple festival website**, not an enterprise application. Core principles:
+This is a **professional festival website** following production-ready standards:
 
-- Keep it simple - avoid over-engineering
-- Working code > "perfect" code
-- Stability > theoretical improvements
-- User needs > developer preferences
+- **Security & Quality First** - Never compromise on security, testing, or code quality
+- **Then Simplicity** - Avoid over-engineering and unnecessary complexity
+- **Focused Architecture** - Build what's needed for a festival website, nothing more
+- **Professional Standards** - Follow web best practices, even in a simple project
+
+Simple means **focused and maintainable**, not amateur or shortcuts.
 
 See PROJECT_GUIDE.md section 1 for the complete philosophy and decision framework.
 

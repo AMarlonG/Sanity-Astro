@@ -1,61 +1,99 @@
-# Project Guide: Keep It Simple
+# Project Guide: Production-Ready & Simple
 
-This is a small festival website with bilingual support (Norwegian/English). These guidelines prevent over-engineering.
+This is a **professional festival website in production**. Security, quality, and maintainability are non-negotiable. Simplicity means **focused and maintainable**, not amateur or shortcuts.
 
 ## 1. Philosophy & Identity
 
+### Core Principle: Production-Ready Simplicity
+
+**Non-negotiable professional standards:**
+- ✅ **Security best practices** - XSS prevention, input validation, sanitization, HTTPS
+- ✅ **Code quality** - DRY principles, type safety, clear naming, proper error handling
+- ✅ **Testing critical paths** - Security boundaries, user flows, integrations
+- ✅ **Dependency security** - Keep packages updated for security patches
+- ✅ **Professional error handling** - Graceful failures, proper logging, user-friendly messages
+- ✅ **Accessibility** - Semantic HTML, ARIA labels, keyboard navigation
+- ✅ **Performance** - Optimized assets, efficient queries, fast page loads
+
+**What "Simple" means in this context:**
+- ❌ **NOT**: Skip tests, ignore security, take shortcuts, write amateur code, skip documentation
+- ✅ **YES**: Avoid over-engineering, stay focused on festival website needs, don't add unnecessary complexity, use straightforward solutions
+
 ### What This Project IS
-- Simple Astro frontend displaying events, artists, venues
-- Sanity CMS for content management
-- Basic event filtering with HTMX
-- Visual Editing for content preview
-- Bilingual support (Norwegian/English)
+- A **production-grade** festival website serving real users
+- Professional code following industry web security standards
+- Tested, maintainable, and secure architecture
+- Simple, focused design addressing actual requirements
+- Bilingual support (Norwegian/English) with proper i18n practices
+- Visual Editing workflow for content management
 
 ### What This Project IS NOT
-- An enterprise application
-- A high-traffic platform
-- A complex system requiring extensive tooling
-
-### Rules for Changes
-
-#### ✅ DO
-- Fix actual bugs that affect users
-- Add features specifically requested for this use case
-- Keep dependencies stable and compatible
-- Maintain simplicity
-
-#### ❌ DON'T
-- Add "best practices" from enterprise projects
-- Upgrade to major new versions without clear benefit or security need
-- Add testing infrastructure unless genuinely needed
-- Add monitoring/analytics unless specifically required
-- Apply TypeScript strict settings that break existing code
-- Change Node.js versions if current one works
-- Use emojis in code, UI, or content (only use when explicitly requested by user)
+- An excuse to skip best practices or cut corners
+- A place for untested, vulnerable, or amateur code
+- Over-engineered with microservices or complex architectures
+- Built with technical debt or known security issues
 
 ### Decision Framework
 
-Before making ANY change, ask:
-1. **Is this solving an actual problem users are experiencing?**
-2. **Is this specifically needed for this festival website?**
-3. **Will this add unnecessary complexity?**
-4. **Is the current solution already working fine?**
+Before making **ANY** change, evaluate in this order:
 
-If the answer to #4 is "yes", then probably don't change it.
+**1. Security & Quality Check** (Non-negotiable)
+- Does this maintain security standards? (If no, STOP)
+- Does this follow code quality best practices?
+- Is this properly tested or testable?
+- Will this introduce vulnerabilities or technical debt?
 
-### Remember
-- Working code > "better" code
-- Simple solutions > complex solutions
-- Stability > theoretical improvements
-- User needs > developer preferences
+**2. User Value Check**
+- Is this solving a real user problem or security issue?
+- Is this specifically needed for a festival website?
+- Does this improve user experience or site reliability?
+
+**3. Simplicity Check**
+- Is this the simplest **professional** solution?
+- Does this add unnecessary complexity?
+- Are we over-engineering for hypothetical future needs?
+
+### Rules for Changes
+
+#### ✅ ALWAYS DO (Non-negotiable)
+- Fix security vulnerabilities immediately
+- Write tests for critical functionality (auth, payments, data validation)
+- Follow TypeScript best practices and maintain type safety
+- Keep dependencies updated for security (use `npm audit`)
+- Use proper error handling and logging
+- Validate and sanitize all user input
+- Follow WCAG accessibility standards
+- Document complex logic and architectural decisions
+- Use environment variables for secrets (never commit tokens/keys)
+- Implement proper CORS and CSP headers
+
+#### ❌ NEVER DO
+- Skip security measures to "keep it simple"
+- Ignore test coverage for critical user paths
+- Leave known vulnerabilities unfixed
+- Use deprecated or insecure packages
+- Skip input validation or sanitization
+- Commit secrets or API keys to git
+- Ignore accessibility requirements
+- Add microservices architecture (not needed for this scale)
+- Over-abstract for hypothetical future requirements
+- Use emojis in code, UI, or content (only when explicitly requested)
+
+#### 🤔 EVALUATE CASE-BY-CASE
+- **New features** - Must solve real user needs, not hypothetical
+- **Major version upgrades** - Balance security benefits vs. breaking changes
+- **Refactoring working code** - Improve if clear maintainability/security gain
+- **Changing Node.js version** - Only for security or required features (currently 20.19.0)
+- **Adding monitoring/analytics** - Only when specifically required for business needs
 
 ### Common Pitfalls to Avoid
 
-1. **Changing working Node.js versions** → Use 20.19.0
-2. **Removing Norwegian locale** without replacement → Keep `nbNOLocale()`
-3. **Breaking Visual Editing** by changing stega config → Test preview after changes
-4. **Over-optimizing dependencies** → Keep what works
-5. **Adding enterprise tooling** → This is a small festival website
+1. **Confusing "simple" with "amateur"** → Simple means focused, not shortcuts
+2. **Skipping tests for "speed"** → Always test critical paths and security
+3. **Ignoring security updates** → Run `npm audit fix` regularly
+4. **Breaking Visual Editing** → Test preview after any Sanity config changes
+5. **Removing bilingual support** → Keep `nbNOLocale()` and proper i18n structure
+6. **Over-engineering** → Don't add enterprise patterns not needed at this scale
 
 ---
 
@@ -110,6 +148,48 @@ export const lessonType = defineType({
   ],
 })
 ```
+
+**Shared Utilities Pattern:**
+
+To maintain DRY (Don't Repeat Yourself) principles across schemas, use shared utilities from `schemaTypes/shared/`:
+
+- **`previewHelpers.ts`** - Reusable preview logic functions:
+  - `getPublishingStatusText()` - Consistent status display (Draft/Published/Live/Scheduled)
+  - `getLanguageStatus()` - Bilingual content detection (NO/EN flags)
+
+- **`publishingFields.ts`** - Reusable field definitions:
+  - `publishingFields()` - Standard publishing status and scheduling fields
+  - `publishingGroup` - Consistent group configuration
+  - Eliminates duplicate field definitions across document types
+
+**Example:**
+```ts
+// ./studio/schemaTypes/documents/article.ts
+import {getPublishingStatusText, getLanguageStatus} from '../shared/previewHelpers'
+import {publishingFields, publishingGroup} from '../shared/publishingFields'
+
+export const article = defineType({
+  name: 'article',
+  groups: [publishingGroup, /* other groups */],
+  fields: [
+    /* content fields */,
+    ...publishingFields('publishing', 'artikkelen'),
+  ],
+  preview: {
+    prepare({title_no, title_en, publishingStatus, scheduledStart, scheduledEnd, _id}) {
+      const statusText = getPublishingStatusText(_id, publishingStatus, scheduledStart, scheduledEnd)
+      const langStatus = getLanguageStatus({title_no, title_en})
+
+      return {
+        title: title_no || title_en || 'Uten tittel',
+        subtitle: `${statusText} • ${langStatus}`,
+      }
+    },
+  },
+})
+```
+
+This pattern ensures consistency across all document schemas (artist, article, page, event, homepage) while reducing code duplication.
 
 #### Content Modeling
 
@@ -310,10 +390,11 @@ export function initializeSomeFeature(param) {
 - Types are generated in `frontend/sanity/sanity.types.ts` from schema extraction
 
 #### Philosophy
-- Type safety WITHOUT over-engineering
-- Working code > perfect types
-- Add types when they prevent bugs, not just for purity
-- If strict typing breaks working code, adjust strictness rather than code
+- **Type safety is a professional standard** - Use TypeScript properly, not as an afterthought
+- **Strict enough to catch bugs** - Enable strict mode flags that prevent common errors
+- **Fix type errors, don't ignore them** - Type errors usually indicate real problems
+- **Pragmatic, not dogmatic** - Use `any` sparingly when dealing with truly dynamic data (e.g., CMS content), but document why
+- **Incremental improvement** - Improve types when touching code, don't let technical debt grow
 
 ---
 
