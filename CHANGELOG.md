@@ -19,6 +19,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Created shared `getPublishingStatusText()` and `getLanguageStatus()` helper functions
   - Unified publishing field definitions across all document types (artist, article, page, event, homepage)
   - Improved maintainability with single source of truth for preview and publishing logic
+- **Git tracking cleanup**: Stopped tracking generated Sanity types (extract.json, sanity.types.ts)
+  - Follows industry best practice of not tracking generated files
+  - Reduces repo size by 220KB, prevents merge conflicts
+  - Run `npm run typegen` after pulling schema changes or cloning
+  - Added .editorconfig for cross-editor formatting standards (2-space indent, LF line endings, UTF-8)
+  - Cleaned up .gitignore: removed unused patterns (Turbo, Next.js), added TypeScript build info
+  - Documented git tracking best practices in PROJECT_GUIDE.md (what/why we track files)
+  - Updated README with first-time setup instructions for regenerating types
+- **Documentation philosophy overhaul**: Rewrote project philosophy to prioritize professionalism
+  - Lead with "Production-Ready & Simple" instead of just "Keep It Simple"
+  - Established security, quality, and testing as non-negotiable standards
+  - Clarified that "simple" means focused/maintainable, NOT amateur/shortcuts
+  - Updated TypeScript philosophy to require fixing type errors properly
 - Optimized HTMX setup and cleaned up redundant frontend files
 - Moved shared date utility into frontend workspace
 - Updated favicon to match menu colors

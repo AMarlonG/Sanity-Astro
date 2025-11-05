@@ -14,7 +14,6 @@ yarn-error.log*
 # Build outputs
 dist/
 build/
-.next/
 out/
 .vercel/
 
@@ -27,10 +26,6 @@ out/
 # OS files
 .DS_Store
 Thumbs.db
-
-# Development tools
-.config/
-.turbo/
 
 # Logs
 logs
@@ -50,3 +45,20 @@ coverage/
 
 # Astro specific
 .astro/
+
+# TypeScript
+*.tsbuildinfo
+
+# Generated Sanity types (regenerate with: npm run typegen)
+frontend/sanity/extract.json
+frontend/sanity/sanity.types.ts
+
+# Temporary files
+*.tmp
+tmp/
+temp/
+.cache/
+
+# Test artifacts
+*.test.js.snap
+test-results/

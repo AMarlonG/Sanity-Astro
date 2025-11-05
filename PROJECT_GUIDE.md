@@ -534,6 +534,91 @@ git push origin --delete feature/new-feature
 - Make meaningful commit messages that explain what was accomplished
 - Push when it makes sense based on user's workflow
 
+### Git Tracking Best Practices
+
+Understanding **what files we track** and **why** is crucial for security, collaboration, and repository cleanliness.
+
+**What We Track (and Why):**
+
+✅ **Source Code**
+- All `.ts`, `.astro`, `.tsx`, `.css` files
+- **Why**: The actual code we write - the source of truth
+
+✅ **Configuration Files**
+- `package.json`, `tsconfig.json`, `astro.config.mjs`, `sanity.config.ts`, etc.
+- `.env.example` (template without secrets)
+- `.editorconfig` (cross-editor formatting standards)
+- **Why**: Required to run the project and maintain consistency
+
+✅ **Lock Files**
+- `package-lock.json`
+- **Why**: Ensures reproducible builds - everyone gets same dependency versions
+
+✅ **Documentation**
+- `README.md`, `PROJECT_GUIDE.md`, `CHANGELOG.md`
+- **Why**: Project knowledge, onboarding, and history
+
+**What We DON'T Track (and Why):**
+
+❌ **Generated Files**
+- `frontend/sanity/extract.json` (188KB)
+- `frontend/sanity/sanity.types.ts` (32KB)
+- `*.tsbuildinfo` (TypeScript incremental build cache)
+- **Why**: Generated from source schemas, creates merge conflicts, bloats repository
+- **How to regenerate**: Run `npm run typegen` (see Sanity TypeGen Workflow in Section 2.1)
+
+❌ **Dependencies**
+- `node_modules/`
+- **Why**: Installed from package.json + lock file, massive size (100MB+)
+
+❌ **Build Outputs**
+- `dist/`, `.astro/`, `.vercel/`, `build/`
+- **Why**: Generated during build process, can be recreated
+
+❌ **Secrets & Environment Variables**
+- `.env`, `.env.local` (anything with actual secrets)
+- **Why**: SECURITY - never commit API keys, tokens, passwords
+- **Safe to commit**: `.env.example` (template with placeholder values only)
+
+❌ **OS & Editor Files**
+- `.DS_Store` (macOS), `Thumbs.db` (Windows)
+- `.vscode/` workspace cache files
+- **Why**: Personal machine artifacts, pollute repository
+
+❌ **Logs & Temporary Files**
+- `*.log`, `*.tmp`, `.cache/`, `temp/`
+- **Why**: Runtime artifacts, no value in version control
+
+**Regenerating After Clone:**
+
+When you clone this repo fresh, or after pulling schema changes, regenerate generated files:
+
+```bash
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Generate Sanity types
+cd studio && npm run extract-schema
+cd ../frontend && npm run typegen
+```
+
+**Security Checklist:**
+
+Before every commit, verify:
+- ✅ Check what you're committing: `git status`, `git diff`
+- ✅ `.env` and `.env.local` are NOT in the list
+- ✅ No API keys, tokens, or passwords in code
+- ✅ Secrets use environment variables
+- ❌ Never use `git add .` blindly - review what you're adding
+- ❌ Never use `git add -A` without checking first
+
+**Why This Matters:**
+
+🔒 **Security**: Prevents accidental secret commits (leading cause of security breaches)
+🚀 **Performance**: Smaller repo = faster clones, pushes, pulls
+🤝 **Collaboration**: No merge conflicts on generated files
+🧹 **Cleanliness**: Professional repositories only track what matters
+
 ---
 
 ## 6. AI Assistant Guidelines

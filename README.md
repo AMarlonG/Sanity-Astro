@@ -15,6 +15,20 @@ A simple, bilingual (Norwegian/English) festival website built with Astro and Sa
 npm install --legacy-peer-deps
 ```
 
+### First-Time Setup
+
+After cloning, generate Sanity types:
+
+```bash
+# Extract schema from Studio
+cd studio && npm run extract-schema
+
+# Generate TypeScript types for frontend
+cd ../frontend && npm run typegen
+```
+
+**Note**: Generated files (`extract.json`, `sanity.types.ts`) are not tracked in git. Regenerate after pulling schema changes.
+
 ### Development
 
 ```bash
