@@ -83,11 +83,14 @@ export class SanityDataService {
     // Check cache first
     const cached = getFromCache(finalCacheKey);
     if (cached) {
+      console.log('[DataService] Returning cached result for:', finalCacheKey);
       return cached;
     }
 
     // Fetch from Sanity
+    console.log('[DataService] Executing GROQ query:', { query, params, queryParams });
     const data = await this.client.fetch(query, params, queryParams);
+    console.log('[DataService] Query returned:', data ? 'data' : 'null');
 
     // Transform multilingual data if requested
     const transformedData = transformMultilingual
@@ -147,14 +150,26 @@ export class SanityDataService {
     );
   }
 
+  async getArticlePage(options: QueryOptions = {}) {
+    return this.fetch(
+      QueryBuilder.articlePage(),
+      options,
+      'articlePage',
+      CACHE_DURATION.page
+    );
+  }
+
   // Article methods
   async getArticleBySlug(slug: string, options: QueryOptions = {}) {
-    return this.fetch(
+    console.log('[DataService] Getting article by slug:', slug, 'language:', this.language);
+    const result = await this.fetch(
       QueryBuilder.articleBySlug(slug, this.language),
       options,
       `article:${slug}:${this.language}`,
       CACHE_DURATION.articles
     );
+    console.log('[DataService] Article query result:', result ? 'Found' : 'Not found');
+    return result;
   }
 
   async getPublishedArticles(options: QueryOptions = {}) {

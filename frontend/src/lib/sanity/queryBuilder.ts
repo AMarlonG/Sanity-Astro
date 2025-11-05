@@ -323,6 +323,25 @@ const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   }
 }`)
 
+const ARTICLE_PAGE_QUERY = defineQuery(`*[_type == "articlePage"][0]{
+  _id,
+  _type,
+  ${createMultilingualField('title')},
+  "slug": slug.current,
+  ${createMultilingualField('excerpt')},
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  seo,
+  "articles": select(
+    count(selectedArticles) > 0 => selectedArticles[]->{${ARTICLE_BASE_FIELDS}},
+    *[_type == "article" && publishingStatus != "draft"] | order(publishedAt desc){${ARTICLE_BASE_FIELDS}}
+  )
+}`)
+
 const buildEventBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "event" && ${buildSlugMatch(language)}][0]{
   ${EVENT_BASE_FIELDS}
 }`)
@@ -400,6 +419,9 @@ export const QueryBuilder = {
   },
   artistPage(): QueryDefinition {
     return {query: ARTIST_PAGE_QUERY, params: {}}
+  },
+  articlePage(): QueryDefinition {
+    return {query: ARTICLE_PAGE_QUERY, params: {}}
   },
   eventBySlug(slug: string, language: Language = 'no'): QueryDefinition<{slug: string}> {
     return {query: buildEventBySlugQuery(language), params: {slug}}

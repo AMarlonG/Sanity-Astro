@@ -72,6 +72,7 @@ const { data: event } = await loadQuery({
     ticketUrl,
     ticketInfoText,
     content_no,
+    content_en,
     seo
   }`,
   params,
@@ -82,7 +83,7 @@ if (!event) {
 }
 
 // Get appropriate content array
-const content = getMultilingualContent(event) || event.content_no;
+const content = getMultilingualContent(event, 'no') || event.content_no;
 ---
 
 <Layout

@@ -1,21 +1,21 @@
 ---
-import ContentPageLayout from '../layouts/ContentPageLayout.astro';
-import { createDataService } from '../lib/sanity/dataService.js';
-import { formatDateForLanguage } from '../../../shared/utils/dates';
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/imageHelpers';
+import ContentPageLayout from '../../layouts/ContentPageLayout.astro';
+import { createDataService } from '../../lib/sanity/dataService.js';
+import { formatDateForLanguage } from '../../../../shared/utils/dates';
+import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
 import { stegaClean } from '@sanity/client/stega';
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Hent artikkelside-siden innhold
+// Fetch article page content
 const articlePage = await dataService.getArticlePage();
 
 // Get articles from articlePage and filter out null/undefined
 const articles = (articlePage?.articles || []).filter(article => article != null);
 
 // Fallback values
-const pageTitle = articlePage?.title || 'Artikler';
+const pageTitle = articlePage?.title || 'Articles';
 
 // Check if we have any articles
 const hasArticles = articles.length > 0;
@@ -31,7 +31,7 @@ const hasArticles = articles.length > 0;
       {articles.map((article) => (
         <article class="article-card card">
           <h3 class="article-title">
-            <a href={`/artikler/${stegaClean(article.slug_no?.current || article.slug_en?.current)}`} class="article-title-link">
+            <a href={`/en/articles/${stegaClean(article.slug_en?.current || article.slug_no?.current)}`} class="article-title-link">
               {stegaClean(article.title)}
             </a>
           </h3>
@@ -62,7 +62,7 @@ const hasArticles = articles.length > 0;
           {article.publishedAt && (
             <div class="article-meta">
               <span class="article-date">
-                {formatDateForLanguage(article.publishedAt, 'no')}
+                {formatDateForLanguage(article.publishedAt, 'en')}
               </span>
             </div>
           )}
@@ -71,8 +71,8 @@ const hasArticles = articles.length > 0;
     </div>
   ) : (
     <div class="no-articles">
-      <h3 class="no-articles-title">Ingen artikler publisert</h3>
-      <p class="no-articles-text">Kom tilbake senere for å se våre artikler.</p>
+      <h3 class="no-articles-title">No articles published</h3>
+      <p class="no-articles-text">Check back later for our articles.</p>
     </div>
   )}
 
