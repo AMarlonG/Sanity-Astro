@@ -11,7 +11,7 @@ import {
   getCORSHeaders,
   getSecurityHeaders
 } from '../../lib/security';
-import { formatDateForLanguage } from '../../../../shared/utils/dates';
+import { formatDateForLanguage } from '../../lib/utils/dates';
 
 interface EventFilterFormData {
   eventDate?: string;
