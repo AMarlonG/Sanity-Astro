@@ -234,10 +234,10 @@ const ARTICLE_BASE_FIELDS = `
 const buildSlugMatch = (language: Language = 'no'): string => {
   if (language === 'en') {
     // For English: prioritize slug_en, fallback to slug_no and legacy slug
-    return `[$slug in [slug_en.current, slug_no.current, slug.current]]`
+    return `$slug in [slug_en.current, slug_no.current, slug.current]`
   }
   // For Norwegian (default): prioritize slug_no, fallback to slug_en and legacy slug
-  return `[$slug in [slug_no.current, slug_en.current, slug.current]]`
+  return `$slug in [slug_no.current, slug_en.current, slug.current]`
 }
 
 // Helper to get correct slug projection based on language
@@ -278,6 +278,7 @@ const buildPageBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type
   ${buildSlugProjection(language)},
   "slug_no": slug_no.current,
   "slug_en": slug_en.current,
+  publishingStatus,
   content_no[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
@@ -287,7 +288,7 @@ const buildPageBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type
   seo
 }`)
 
-const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
+const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage" && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   _id,
   _type,
   ${createMultilingualField('title')},
@@ -305,7 +306,7 @@ const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
   }
 }`)
 
-const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
+const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage" && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   _id,
   _type,
   ${createMultilingualField('title')},
@@ -323,7 +324,7 @@ const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   }
 }`)
 
-const ARTICLE_PAGE_QUERY = defineQuery(`*[_type == "articlePage"][0]{
+const ARTICLE_PAGE_QUERY = defineQuery(`*[_type == "articlePage" && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   _id,
   _type,
   ${createMultilingualField('title')},
@@ -346,7 +347,7 @@ const buildEventBySlugQuery = (language: Language = 'no') => defineQuery(`*[_typ
   ${EVENT_BASE_FIELDS}
 }`)
 
-const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && slug.current == $slug][0]{
+const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && slug.current == $slug && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   ${ARTIST_BASE_FIELDS},
   instagram,
   facebook,
@@ -407,6 +408,37 @@ const SEARCH_CONTENT_QUERY = defineQuery(`*[_type in $types && (
   "slug": coalesce(slug_no.current, slug_en.current, slug.current)
 }`)
 
+const SITE_SETTINGS_MENU_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
+  menuItems[]->{
+    _id,
+    _type,
+    "title_no": select(
+      _type == "homepage" => coalesce(title_no, "Hjem"),
+      _type in ["programPage", "artistPage", "articlePage"] => coalesce(title_no, title),
+      _type == "page" => coalesce(title_no, title_en, "Page")
+    ),
+    "title_en": select(
+      _type == "homepage" => coalesce(title_en, "Home"),
+      _type in ["programPage", "artistPage", "articlePage"] => coalesce(title_en, title),
+      _type == "page" => coalesce(title_en, title_no, "Page")
+    ),
+    "slug_no": select(
+      _type == "homepage" => "/",
+      _type == "programPage" => "/program",
+      _type == "artistPage" => "/artister",
+      _type == "articlePage" => "/artikler",
+      _type == "page" => "/" + coalesce(slug_no.current, slug_en.current, "")
+    ),
+    "slug_en": select(
+      _type == "homepage" => "/en",
+      _type == "programPage" => "/en/program",
+      _type == "artistPage" => "/en/artists",
+      _type == "articlePage" => "/en/articles",
+      _type == "page" => "/en/" + coalesce(slug_en.current, slug_no.current, "")
+    )
+  }
+}`)
+
 export const QueryBuilder = {
   homepage(): QueryDefinition {
     return {query: HOMEPAGE_QUERY, params: {}}
@@ -452,6 +484,9 @@ export const QueryBuilder = {
   },
   searchContent(searchTerm: string, types: string[]): QueryDefinition<{search: string; types: string[]}> {
     return {query: SEARCH_CONTENT_QUERY, params: {search: `*${searchTerm}*`, types}}
+  },
+  siteSettingsMenu(): QueryDefinition {
+    return {query: SITE_SETTINGS_MENU_QUERY, params: {}}
   }
 } as const
 

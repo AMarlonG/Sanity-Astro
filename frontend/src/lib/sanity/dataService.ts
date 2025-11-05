@@ -124,12 +124,15 @@ export class SanityDataService {
 
   // Page methods
   async getPageBySlug(slug: string, options: QueryOptions = {}) {
-    return this.fetch(
+    console.log('[DataService.getPageBySlug] Called with:', { slug, language: this.language });
+    const result = await this.fetch(
       QueryBuilder.pageBySlug(slug, this.language),
       options,
       `page:${slug}:${this.language}`,
       CACHE_DURATION.page
     );
+    console.log('[DataService.getPageBySlug] Result:', result ? 'Found' : 'NULL');
+    return result;
   }
 
   async getProgramPage(options: QueryOptions = {}) {
