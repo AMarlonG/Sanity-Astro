@@ -1,22 +1,9 @@
 /**
- * Format date for specific language
- */
-export function formatDateForLanguage(date: string | Date, language: 'no' | 'en' = 'no'): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-
-  const locale = language === 'en' ? 'en-US' : 'nb-NO';
-
-  return dateObj.toLocaleDateString(locale, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-}
-
-/**
  * Format date with full weekday for filter display
  * Norwegian: "Tirsdag 23. juni"
  * English: "Tuesday 30 December"
+ *
+ * Note: For basic date formatting, use formatDateForLanguage from @sanity-astro/shared
  */
 export function formatDateWithWeekday(date: string | Date, language: 'no' | 'en' = 'no'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;

@@ -25,7 +25,7 @@ export function createURLValidation(options: URLValidationOptions = {}) {
     allowedDomains = [],
     blockedDomains = ['localhost', '127.0.0.1', '0.0.0.0'],
     allowRelative = false,
-    errorMessage = 'Vennligst skriv inn en gyldig URL'
+    errorMessage = 'Please enter a valid URL'
   } = options
 
   return (url: string | undefined) => {
@@ -41,12 +41,12 @@ export function createURLValidation(options: URLValidationOptions = {}) {
       
       // Check scheme
       if (!schemes.includes(urlObj.protocol.slice(0, -1))) {
-        return `URL må starte med: ${schemes.join(', ')}`
+        return `URL must start with: ${schemes.join(', ')}`
       }
 
       // Check blocked domains
       if (blockedDomains.includes(urlObj.hostname.toLowerCase())) {
-        return `Domenet "${urlObj.hostname}" er ikke tillatt`
+        return `Domain "${urlObj.hostname}" is not allowed`
       }
 
       // Check allowed domains (if specified) - only for http/https URLs
@@ -63,18 +63,18 @@ export function createURLValidation(options: URLValidationOptions = {}) {
         })
 
         if (!isAllowed) {
-          return `Bare disse domenene er tillatt: ${allowedDomains.join(', ')}`
+          return `Only these domains are allowed: ${allowedDomains.join(', ')}`
         }
       }
 
       // Additional security checks
       if (urlObj.username || urlObj.password) {
-        return 'URLer med påloggingsopplysninger er ikke tillatt'
+        return 'URLs with credentials are not allowed'
       }
 
       // Check for suspicious protocols
       if (urlObj.protocol === 'javascript:' || urlObj.protocol === 'data:') {
-        return 'JavaScript- og data-URLer er ikke tillatt'
+        return 'JavaScript and data URLs are not allowed'
       }
 
       return true
@@ -95,7 +95,7 @@ export const basicURLValidation = createURLValidation()
 export const externalURLValidation = createURLValidation({
   schemes: ['https'],
   blockedDomains: ['localhost', '127.0.0.1', '0.0.0.0', '*.local'],
-  errorMessage: 'Vennligst skriv inn en gyldig HTTPS URL'
+  errorMessage: 'Please enter a valid HTTPS URL'
 })
 
 /** Email validation for mailto links */
@@ -103,7 +103,7 @@ export const emailURLValidation = createURLValidation({
   schemes: ['mailto'],
   allowedDomains: [],
   blockedDomains: [],
-  errorMessage: 'Vennligst skriv inn en gyldig e-postadresse (mailto:eksempel@domene.no)'
+  errorMessage: 'Please enter a valid email address (mailto:example@domain.com)'
 })
 
 /** Phone validation for tel links */
@@ -111,14 +111,14 @@ export const phoneURLValidation = createURLValidation({
   schemes: ['tel'],
   allowedDomains: [],
   blockedDomains: [],
-  errorMessage: 'Vennligst skriv inn et gyldig telefonnummer (tel:+4712345678)'
+  errorMessage: 'Please enter a valid phone number (tel:+1234567890)'
 })
 
 /** Validation for button URLs (allows mailto and tel) */
 export const buttonURLValidation = createURLValidation({
   schemes: ['http', 'https', 'mailto', 'tel'],
   blockedDomains: ['localhost', '127.0.0.1', '0.0.0.0'],
-  errorMessage: 'Vennligst skriv inn en gyldig URL (http://, https://, mailto:, eller tel:)'
+  errorMessage: 'Please enter a valid URL (http://, https://, mailto:, or tel:)'
 })
 
 /**

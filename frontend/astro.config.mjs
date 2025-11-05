@@ -4,7 +4,6 @@ import node from '@astrojs/node';
 import react from '@astrojs/react';
 
 import sanity from '@sanity/astro';
-import htmx from 'astro-htmx';
 
 // https://astro.build/config
 export default defineConfig({
@@ -111,6 +110,5 @@ export default defineConfig({
         studioUrl: 'http://localhost:3333'
       },
     }),
-    htmx(),
   ],
 });

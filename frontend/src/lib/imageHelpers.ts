@@ -30,7 +30,6 @@ export const RESPONSIVE_WIDTHS = {
  */
 export function getImageBuilder(source: SanityImageSource) {
   if (!projectId || !dataset) {
-    console.warn('Sanity project ID or dataset not configured')
     return null
   }
   return imageUrlBuilder({ projectId, dataset }).image(source)
