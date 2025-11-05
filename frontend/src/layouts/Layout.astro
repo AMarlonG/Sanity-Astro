@@ -35,6 +35,12 @@ const { query: menuQuery, params: menuParams } = QueryBuilder.siteSettingsMenu()
 const menuData = await sanityClient.fetch<{ menuItems: MenuItem[] }>(menuQuery, menuParams);
 const menuItems = menuData?.menuItems || [];
 
+// DEBUG: Log menu data
+console.log('=== MENU DEBUG ===');
+console.log('Full menuData:', JSON.stringify(menuData, null, 2));
+console.log('menuItems array:', JSON.stringify(menuItems, null, 2));
+console.log('menuItems length:', menuItems.length);
+
 // Check if Visual Editing should be enabled
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
 const hasPreviewMode = Astro.cookies.get('sanity-preview-mode')?.value === 'true';

@@ -33,10 +33,18 @@ const navItems = menuItems.map((item) => {
 
 // Helper to check if link is active
 const isActive = (href: string) => {
-  if (href === '/') {
-    return currentPath === '/' || currentPath === '';
+  // Remove trailing slashes for comparison
+  const cleanPath = currentPath.replace(/\/$/, '') || '/';
+  const cleanHref = href.replace(/\/$/, '') || '/';
+
+  // Exact match for homepage - must be exactly '/'
+  if (cleanHref === '/') {
+    return cleanPath === '/';
   }
-  return currentPath.startsWith(href);
+
+  // For other pages, match exact path or if current path is a sub-path
+  // e.g., /program matches /program and /program/some-event
+  return cleanPath === cleanHref || cleanPath.startsWith(cleanHref + '/');
 };
 ---
 
@@ -82,6 +90,16 @@ const isActive = (href: string) => {
           </a>
         </li>
       ))}
+      <!-- Homepage link at the bottom -->
+      <li class="nav-item">
+        <a
+          href="/"
+          class:list={['nav-link', { 'active': isActive('/') }]}
+          aria-current={isActive('/') ? 'page' : undefined}
+        >
+          {currentLang === 'no' ? 'Hjem' : 'Home'}
+        </a>
+      </li>
     </ul>
 
     <!-- Language Switcher -->
@@ -105,13 +123,15 @@ const isActive = (href: string) => {
     /* Fixed positioning in top-left */
     position: fixed;
     top: var(--space-3);
-    left: var(--space-3);
+    /* Position with extra spacing to avoid interfering with text when scrolling */
+    /* Container left edge + container padding - button width - extra gap */
+    left: calc((100% - min(100% - var(--space-4), var(--container-max-width))) / 2 + clamp(var(--space-3), 4vw, var(--space-6)) - 60px - var(--space-3));
     z-index: var(--z-modal);
 
     /* Size and appearance */
-    width: 56px;
-    height: 56px;
-    padding: var(--space-2);
+    width: 60px;
+    height: 60px;
+    padding: var(--space-half);
     background-color: var(--color-blue);
     border: none;
     cursor: pointer;
@@ -179,29 +199,48 @@ const isActive = (href: string) => {
      ============================================ */
 
   .navigation-menu {
-    /* Fixed positioning - slide from left */
+    /* Fixed positioning - positioned relative to button */
     position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: min(320px, 85vw);
+    /* Position below and aligned with the button */
+    top: calc(var(--space-3) + 60px + var(--space-2));
+    left: calc((100% - min(100% - var(--space-4), var(--container-max-width))) / 2 + clamp(var(--space-3), 4vw, var(--space-6)) - 60px - var(--space-3));
     z-index: var(--z-modal);
+
+    /* Size determined by content */
+    width: max-content;
+    min-width: 200px;
+    max-width: min(320px, 85vw);
 
     /* Appearance */
     background-color: var(--color-background);
     box-shadow: var(--shadow-xl);
 
-    /* Hidden by default - translate off-screen */
-    transform: translateX(-100%);
-    transition: transform var(--transition-base);
+    /* Hidden by default - completely removed from layout */
+    display: none;
+    transform-origin: top left;
 
     /* Ensure content doesn't overflow */
     overflow-y: auto;
     overflow-x: hidden;
+    max-height: calc(100vh - var(--space-3) - 60px - var(--space-4));
   }
 
   .navigation-menu.active {
-    transform: translateX(0);
+    /* Show and animate in */
+    display: block;
+    animation: menuAppear var(--transition-base) ease-out;
+  }
+
+  /* Menu appear animation */
+  @keyframes menuAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 
   /* ============================================
@@ -211,8 +250,7 @@ const isActive = (href: string) => {
   .menu-content {
     display: flex;
     flex-direction: column;
-    min-height: 100%;
-    padding: var(--space-8) var(--space-5) var(--space-5);
+    padding: var(--space-3);
   }
 
   /* ============================================
@@ -235,8 +273,8 @@ const isActive = (href: string) => {
 
   .nav-link {
     display: block;
-    padding: var(--space-3) var(--space-4);
-    font-size: var(--fs-lg);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--fs-base);
     font-weight: var(--font-weight-medium);
     color: var(--color-blue);
     text-decoration: none;
@@ -252,8 +290,8 @@ const isActive = (href: string) => {
 
   @media (hover: hover) {
     .nav-link:hover {
-      background-color: var(--color-blue-50);
-      color: var(--color-green);
+      background-color: rgba(0, 179, 154, 0.08);
+      color: var(--color-blue);
     }
   }
 
@@ -302,14 +340,23 @@ const isActive = (href: string) => {
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .menu-toggle,
-    .menu-backdrop,
-    .navigation-menu,
     .nav-link {
       transition: none;
     }
 
     .menu-toggle:hover {
       transform: none;
+    }
+
+    .navigation-menu.active {
+      animation: none;
+    }
+
+    @keyframes menuAppear {
+      from, to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
   }
 

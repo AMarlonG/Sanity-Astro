@@ -121,7 +121,7 @@ export const siteSettings = defineType({
       description: 'Velg første dag av festivalen',
       group: 'general',
       fieldset: 'festivalDates',
-      validation: componentValidation.title,
+      validation: (Rule) => Rule.required().error('Startdato er påkrevd'),
     }),
     defineField({
       name: 'endDate',
@@ -131,7 +131,7 @@ export const siteSettings = defineType({
       description: 'Velg siste dag av festivalen',
       group: 'general',
       fieldset: 'festivalDates',
-      validation: componentValidation.title,
+      validation: (Rule) => Rule.required().error('Sluttdato er påkrevd'),
     }),
 
     // NAVIGASJON
@@ -153,7 +153,6 @@ export const siteSettings = defineType({
           ],
         }
       ],
-      validation: (Rule) => Rule.min(1).warning('Minst ett menyelement anbefales'),
     }),
 
     defineField({
