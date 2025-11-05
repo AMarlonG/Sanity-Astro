@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
+    "typegen": "sanity typegen generate",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
