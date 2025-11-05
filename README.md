@@ -22,7 +22,6 @@ npm install --legacy-peer-deps
 npm run dev
 
 # Or start individually:
-npm run dev:shared    # Build shared types in watch mode
 npm run dev:frontend  # Astro frontend
 npm run dev:studio    # Sanity Studio
 ```
@@ -34,10 +33,23 @@ npm run dev:studio    # Sanity Studio
 npm run build
 
 # Or build individually:
-npm run build --workspace=@sanity-astro/shared
 npm run build --workspace=frontend
 npm run build --workspace=studio
 ```
+
+### Sanity TypeGen Workflow
+
+After modifying Sanity schemas, regenerate TypeScript types:
+
+```bash
+# Extract schema from Studio
+cd studio && npm run extract-schema
+
+# Generate TypeScript types for frontend
+cd ../frontend && npm run typegen
+```
+
+This ensures type safety across the entire stack when working with Sanity content.
 
 ## Project Structure
 
@@ -49,14 +61,20 @@ npm run build --workspace=studio
 │   │   ├── pages/        # Routes and pages
 │   │   ├── scripts/      # Client-side JavaScript
 │   │   └── styles/       # CSS files
+│   ├── sanity/         # Generated Sanity types
+│   │   ├── extract.json    # Extracted schema
+│   │   └── sanity.types.ts # Generated TypeScript types
 │   └── package.json
 ├── studio/            # Sanity Studio v3
-│   ├── schemaTypes/   # Content schemas
+│   ├── schemaTypes/
+│   │   ├── documents/    # Document schemas (artist, article, event, etc.)
+│   │   ├── components/   # Component schemas (page builder blocks)
+│   │   ├── objects/      # Object schemas (SEO fields, etc.)
+│   │   └── shared/       # Shared utilities (validation, fields, helpers)
+│   ├── lib/            # Utility functions
+│   ├── actions/        # Custom Studio actions
+│   ├── components/     # Custom UI components
 │   └── package.json
-├── shared/            # Shared types and utilities
-│   ├── types/         # TypeScript types
-│   ├── constants/     # Shared constants
-│   └── utils/         # Utility functions
 └── PROJECT_GUIDE.md   # Comprehensive documentation
 ```
 
@@ -102,6 +120,17 @@ See `frontend/.env.example` for all available options.
 - Dataset: `production`
 - Studio URL: `http://localhost:3333`
 - Frontend URL: `http://localhost:4321`
+
+## Recent Improvements
+
+### Studio Schema Refactoring (Latest)
+- **Eliminated 310+ lines of duplicate code** across document schemas
+- **Created shared utilities**: `previewHelpers.ts` and `publishingFields.ts`
+- **Standardized naming**: All schemas now use consistent 'publishing' group
+- **Improved maintainability**: Single source of truth for preview and publishing logic
+- **Zero breaking changes**: Pure refactoring with full bilingual support preserved
+
+All schemas (artist, article, page, event, homepage) now follow DRY principles with consolidated preview logic and reusable publishing fields.
 
 ## Testing
 
