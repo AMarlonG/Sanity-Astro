@@ -35,12 +35,6 @@ const { query: menuQuery, params: menuParams } = QueryBuilder.siteSettingsMenu()
 const menuData = await sanityClient.fetch<{ menuItems: MenuItem[] }>(menuQuery, menuParams);
 const menuItems = menuData?.menuItems || [];
 
-// DEBUG: Log menu data
-console.log('=== MENU DEBUG ===');
-console.log('Full menuData:', JSON.stringify(menuData, null, 2));
-console.log('menuItems array:', JSON.stringify(menuItems, null, 2));
-console.log('menuItems length:', menuItems.length);
-
 // Check if Visual Editing should be enabled
 const visualEditingEnabled = import.meta.env.PUBLIC_SANITY_VISUAL_EDITING_ENABLED === 'true';
 const hasPreviewMode = Astro.cookies.get('sanity-preview-mode')?.value === 'true';
@@ -64,9 +58,6 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
       slugNo={slugNo}
       slugEn={slugEn}
     />
-
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/htmx.min.js" as="script" />
 
     <!-- Optimize resource hints -->
     <link rel="dns-prefetch" href="//cdn.sanity.io" />
@@ -233,10 +224,44 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
         /* Dark mode tokens would go here */
         /* Currently not implemented to keep it simple */
       }
+
+      /* ============================================
+         SKIP NAVIGATION LINK
+         ============================================
+
+         Accessibility feature for keyboard/screen reader users
+         to bypass navigation and jump directly to main content.
+
+         Hidden by default, visible only when focused.
+      */
+      .skip-link {
+        position: absolute;
+        top: -100%;
+        left: 0;
+        background: var(--color-blue);
+        color: white;
+        padding: var(--space-2) var(--space-4);
+        text-decoration: none;
+        font-weight: var(--font-weight-bold);
+        z-index: 9999;
+        border-radius: 0 0 var(--radius-sm) 0;
+        opacity: 0;
+        transition: top 0.2s ease, opacity 0.2s ease;
+      }
+
+      .skip-link:focus {
+        top: 0;
+        opacity: 1;
+      }
     </style>
 
   </head>
   <body>
+    <!-- Skip navigation link for keyboard accessibility -->
+    <a href="#main-content" class="skip-link">
+      {currentLang === 'no' ? 'Hopp til hovedinnhold' : 'Skip to main content'}
+    </a>
+
     <!-- Menu with navigation and language switcher -->
     <Menu
       currentLang={currentLang}
@@ -246,7 +271,7 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
       menuItems={menuItems}
     />
 
-    <main class="main-content">
+    <main id="main-content" class="main-content" tabindex="-1">
       <slot />
     </main>
 
@@ -260,30 +285,11 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     <!-- Visual Editing Component -->
     {enableVisualEditing && <VisualEditing enabled={true} zIndex={1000} />}
 
-    <!-- HTMX library -->
-    <script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
-
-    <!-- HTMX initialization -->
-    <script is:inline>
-      // Initialize HTMX when page loads
-      document.addEventListener('DOMContentLoaded', function() {
-        if (window.htmx) {
-          window.htmx.process(document.body);
-        }
-      });
-
-      // Simple safety net: Verify CSS loaded after htmx swap
-      // If something goes wrong, gracefully degrade to full page reload
-      document.body.addEventListener('htmx:afterSwap', function(evt) {
-        // Check if critical CSS classes exist (indicates CSS is loaded)
-        const testElement = document.querySelector('.event-card, .date-button');
-        const hasStyles = testElement && window.getComputedStyle(testElement).display !== '';
-
-        if (!hasStyles) {
-          // CSS missing - do full page reload to recover
-          window.location.reload();
-        }
-      });
+    <!-- HTMX - Load from npm package and make globally available -->
+    <script>
+      import * as htmx from 'htmx.org';
+      // Make htmx available globally for all pages
+      window.htmx = htmx;
     </script>
   </body>
 </html>

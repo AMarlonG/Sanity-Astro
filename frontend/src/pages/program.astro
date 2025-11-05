@@ -22,15 +22,6 @@ const programPage = await dataService.getProgramPage();
 // Get events from programPage.selectedEvents and filter out null/undefined
 const events = (programPage?.selectedEvents || []).filter(event => event != null);
 
-// Debug: Log ticket info for all events
-if (import.meta.env.DEV) {
-  console.log('[Program Page] Events ticket data:', events.map(e => ({
-    title: e.title,
-    ticketType: e.ticketType,
-    ticketUrl: e.ticketUrl
-  })));
-}
-
 // Fallback values
 const pageTitle = programPage?.title || 'Program';
 

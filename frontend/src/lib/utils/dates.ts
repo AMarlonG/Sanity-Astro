@@ -1,16 +1,25 @@
+export type Language = 'no' | 'en';
+
 /**
- * Format date for specific language
+ * Format date with standard format (no weekday)
+ * Norwegian: "23. juni 2024"
+ * English: "June 23, 2024"
  */
-export function formatDateForLanguage(date: string | Date, language: 'no' | 'en' = 'no'): string {
+function formatDate(date: string | Date, locale = 'nb-NO'): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
-
-  const locale = language === 'en' ? 'en-US' : 'nb-NO';
-
   return dateObj.toLocaleDateString(locale, {
-    year: 'numeric',
+    day: 'numeric',
     month: 'long',
-    day: 'numeric'
+    year: 'numeric'
   });
+}
+
+/**
+ * Format date for specific language (standard format)
+ */
+export function formatDateForLanguage(date: string | Date, language: Language): string {
+  const locale = language === 'en' ? 'en-US' : 'nb-NO';
+  return formatDate(date, locale);
 }
 
 /**

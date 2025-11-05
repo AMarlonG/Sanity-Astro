@@ -4,6 +4,8 @@ import {createMirrorPortableTextInput} from '../../components/inputs/MirrorPorta
 import {seoFields, seoGroup} from '../objects/seoFields'
 import {componentValidation} from '../shared/validation'
 import type {HomepageData} from '../shared/types'
+import {getLanguageStatus} from '../shared/previewHelpers'
+import {publishingGroup} from '../shared/publishingFields'
 
 export const homepage = defineType({
   name: 'homepage',
@@ -27,11 +29,7 @@ export const homepage = defineType({
       title: 'English (EN)',
       icon: ComposeIcon,
     },
-    {
-      name: 'settings',
-      title: 'Publisering',
-      icon: CogIcon,
-    },
+    publishingGroup,
     seoGroup,
   ],
   fields: [
@@ -72,7 +70,7 @@ export const homepage = defineType({
       title: 'Forsidetype',
       type: 'string',
       description: 'Velg forsidetype',
-      group: 'settings',
+      group: 'publishing',
       options: {
         list: [
           {title: 'Standard forside', value: 'default'},
@@ -86,7 +84,7 @@ export const homepage = defineType({
       name: 'scheduledPeriod',
       title: 'Planlagt periode',
       type: 'object',
-      group: 'settings',
+      group: 'publishing',
       hidden: ({document}) => document?.homePageType === 'default',
       fieldsets: [
         {
@@ -123,22 +121,20 @@ export const homepage = defineType({
       hasEnglish: 'content_en',
     },
     prepare({adminTitle, homePageType, startDate, endDate, hasNorwegian, hasEnglish}) {
-      // Language status
-      const languages: string[] = [];
-      if (hasNorwegian) languages.push('NO');
-      if (hasEnglish) languages.push('EN');
-      const langStatus = languages.length > 0 ? ` • ${languages.join(' ')}` : '';
+      // Use shared helper for language status
+      const langStatus = getLanguageStatus({hasNorwegian, hasEnglish})
+      const langText = langStatus !== 'Ingen språk valgt' ? ` • ${langStatus}` : ''
 
       // Period status
       const periodStatus = homePageType === 'default'
         ? 'Standard forside'
         : startDate && endDate
           ? `${new Date(startDate).toLocaleDateString('nb-NO')} ${new Date(startDate).toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'})} → ${new Date(endDate).toLocaleDateString('nb-NO')} ${new Date(endDate).toLocaleTimeString('nb-NO', {hour: '2-digit', minute: '2-digit'})}`
-          : 'Ingen periode satt';
+          : 'Ingen periode satt'
 
       return {
         title: adminTitle || 'Uten tittel',
-        subtitle: `${periodStatus}${langStatus}`,
+        subtitle: `${periodStatus}${langText}`,
         media: DocumentIcon,
       }
     },

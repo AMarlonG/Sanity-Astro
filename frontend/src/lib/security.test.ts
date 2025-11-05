@@ -176,17 +176,17 @@ describe('Security Utilities', () => {
     })
 
     it('sets allowed origin for valid origins', () => {
-      const headers = getCORSHeaders('https://example.com')
+      const headers = getCORSHeaders('https://example.com') as Record<string, string>
       expect(headers['Access-Control-Allow-Origin']).toBe('https://example.com')
     })
 
     it('uses default origin for invalid origins', () => {
-      const headers = getCORSHeaders('https://malicious.com')
+      const headers = getCORSHeaders('https://malicious.com') as Record<string, string>
       expect(headers['Access-Control-Allow-Origin']).toBe('https://example.com')
     })
 
     it('includes standard CORS headers', () => {
-      const headers = getCORSHeaders()
+      const headers = getCORSHeaders() as Record<string, string>
       expect(headers['Access-Control-Allow-Methods']).toBe('POST, OPTIONS')
       expect(headers['Access-Control-Allow-Headers']).toBe('Content-Type')
       expect(headers['Access-Control-Max-Age']).toBe('86400')
@@ -195,8 +195,8 @@ describe('Security Utilities', () => {
 
   describe('getSecurityHeaders', () => {
     it('includes all security headers', () => {
-      const headers = getSecurityHeaders()
-      
+      const headers = getSecurityHeaders() as Record<string, string>
+
       expect(headers['X-Content-Type-Options']).toBe('nosniff')
       expect(headers['X-Frame-Options']).toBe('DENY')
       expect(headers['X-XSS-Protection']).toBe('1; mode=block')

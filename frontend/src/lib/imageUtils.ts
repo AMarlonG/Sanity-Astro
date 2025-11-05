@@ -62,7 +62,8 @@ export function createOptimizedImageUrl(
   if (options.height) urlBuilder = urlBuilder.height(options.height);
   if (options.quality) urlBuilder = urlBuilder.quality(options.quality);
   if (options.format && options.format !== 'auto') {
-    urlBuilder = urlBuilder.format(options.format);
+    // Type assertion needed as Sanity's ImageFormat type may not include all formats
+    urlBuilder = urlBuilder.format(options.format as any);
   }
   if (options.fit) urlBuilder = urlBuilder.fit(options.fit);
   if (options.dpr) urlBuilder = urlBuilder.dpr(options.dpr);

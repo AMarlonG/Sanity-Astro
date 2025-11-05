@@ -8,6 +8,8 @@ import {seoFields, seoGroup} from '../objects/seoFields'
 import {componentValidation, crossFieldValidation} from '../shared/validation'
 import {eventSlugValidation} from '../../lib/slugValidation'
 import type {EventData, ValidationRule, MultilingualDocument} from '../shared/types'
+import {getLanguageStatus} from '../shared/previewHelpers'
+import {publishingFields, publishingGroup} from '../shared/publishingFields'
 
 export const event = defineType({
   name: 'event',
@@ -50,11 +52,7 @@ export const event = defineType({
       title: 'Billett-info',
       icon: CreditCardIcon,
     },
-    {
-      name: 'scheduling',
-      title: 'Publisering',
-      icon: CogIcon,
-    },
+    publishingGroup,
     seoGroup,
   ],
   fieldsets: [
@@ -330,53 +328,7 @@ export const event = defineType({
         input: createMirrorPortableTextInput('content_no')
       },
     }),
-    defineField({
-      name: 'publishingStatus',
-      title: 'Publiseringsstatus',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Synlig på nett umiddelbart', value: 'published' },
-          { title: 'Lagre uten å bli synlig på nett', value: 'draft' },
-          { title: 'Planlegg periode', value: 'scheduled' }
-        ],
-        layout: 'radio'
-      },
-      initialValue: 'published',
-      validation: componentValidation.title,
-      group: 'scheduling',
-    }),
-    defineField({
-      name: 'scheduledPeriod',
-      title: 'Planlagt periode',
-      type: 'object',
-      hidden: ({document}) => document?.publishingStatus !== 'scheduled',
-      group: 'scheduling',
-      fieldsets: [
-        {
-          name: 'timing',
-          options: {columns: 2},
-        },
-      ],
-      fields: [
-        {
-          name: 'startDate',
-          title: 'Startdato',
-          type: 'datetime',
-          description: 'Når dette arrangementet blir synlig på nettsiden',
-          fieldset: 'timing',
-          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
-        },
-        {
-          name: 'endDate',
-          title: 'Sluttdato',
-          type: 'datetime',
-          description: 'Når dette arrangementet slutter å være synlig på nettsiden',
-          fieldset: 'timing',
-          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
-        },
-      ],
-    }),
+    ...publishingFields('publishing', 'arrangementet'),
     ...seoFields,
   ],
   preview: {
@@ -405,10 +357,8 @@ export const event = defineType({
       const dateTimeText = `${dateLabel}${timeText}`
 
       // Language flags based on which languages have content
-      const languageFlags = []
-      if (title_no) languageFlags.push('NO')
-      if (title_en) languageFlags.push('EN')
-      const flagsText = languageFlags.length > 0 ? languageFlags.join(' ') + ' • ' : ''
+      const langStatus = getLanguageStatus({title_no, title_en})
+      const flagsText = langStatus !== 'Ingen språk valgt' ? langStatus + ' • ' : ''
 
       return {
         title: title,

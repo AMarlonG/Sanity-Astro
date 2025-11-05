@@ -35,13 +35,6 @@ function getTimeRemaining(targetDate: Date) {
 const eventDate = targetEvent?.eventDate?.date;
 const eventTime = targetEvent?.eventTime?.startTime || '00:00';
 
-// Debug logging
-console.log('Countdown Debug:', {
-  targetEvent,
-  eventDate,
-  eventTime,
-});
-
 // Default time remaining
 let timeRemaining = { expired: true, days: 0, hours: 0, minutes: 0 };
 let targetDate = null;
@@ -51,8 +44,7 @@ let updateInterval = '60s';
 if (eventDate) {
   // Clean eventTime of any Unicode characters and whitespace
   const cleanTime = eventTime.replace(/[^\d:]/g, '').trim();
-  console.log('Cleaning time:', { original: eventTime, cleaned: cleanTime, charCodes: [...eventTime].map(c => c.charCodeAt(0)) });
-  
+
   // Parse cleaned time
   const timeParts = cleanTime.split(':');
   const hours = parseInt(timeParts[0] || '0', 10);

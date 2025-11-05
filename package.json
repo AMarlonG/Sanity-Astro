@@ -4,26 +4,20 @@
   "packageManager": "npm@10.8.2",
   "workspaces": [
     "studio",
-    "frontend",
-    "shared"
+    "frontend"
   ],
   "scripts": {
-    "dev": "concurrently -c \"blue,green,magenta\" -n \"shared,frontend,studio\" \"npm run dev --workspace=@sanity-astro/shared\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=studio\"",
-    "dev:shared": "npm run dev --workspace=@sanity-astro/shared",
+    "dev": "concurrently -c \"blue,green\" -n \"frontend,studio\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=studio\"",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:studio": "npm run dev --workspace=studio",
-    "build": "npm run build --workspace=shared && npm run build --workspace=frontend && npm run build --workspace=studio",
+    "build": "npm run build --workspace=frontend && npm run build --workspace=studio",
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "clean": "npm run clean --workspaces --if-present",
-    "changeset": "changeset",
-    "version": "changeset version",
-    "release": "npm run build && changeset publish"
+    "clean": "npm run clean --workspaces --if-present"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.6",
     "concurrently": "^9.1.2"
   }
 }
