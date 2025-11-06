@@ -25,58 +25,57 @@ const {
 } = Astro.props
 ---
 
-<div class={`accordion ${className}`}>
+<div class={`accordion content-media-narrow ${className}`}>
   {title && <h2 class="accordion-title">{title}</h2>}
   {description && <p class="accordion-description">{description}</p>}
 
   <div class="accordion-panels">
-    {panels && panels.length > 0 ? (
-      panels.map((panel) => (
-        <details class="accordion-panel">
-          <summary class="accordion-summary">
-            {panel.title}
-          </summary>
-          <div class="accordion-content">
-            {panel.content && panel.content.length > 0 ? (
-              panel.content.map((item) => {
-                switch (item._type) {
-                  case 'block':
-                    return <PortableText value={[item]} semantic="div" />
-                  case 'imageComponent':
-                    return <Image {...item} />
-                  case 'videoComponent':
-                    return <Video {...item} />
-                  case 'buttonComponent':
-                    return <Button {...item} />
-                  case 'title':
-                    return <Title {...item} />
-                  case 'quoteComponent':
-                    return <Quote {...item} />
-                  case 'heading':
-                    return <Heading {...item} />
-                  default:
-                    return <div>Ukjent komponent: {item._type}</div>
-                }
-              })
-            ) : (
-              <div>Ingen innhold</div>
-            )}
-          </div>
-        </details>
-      ))
-    ) : (
-      <div class="no-panels">
-        <p>Ingen paneler tilgjengelig</p>
-      </div>
-    )}
-  </div>
+  {panels && panels.length > 0 ? (
+    panels.map((panel) => (
+      <details class="accordion-panel">
+        <summary class="accordion-summary">
+          {panel.title}
+        </summary>
+        <div class="accordion-content">
+          {panel.content && panel.content.length > 0 ? (
+            panel.content.map((item) => {
+              switch (item._type) {
+                case 'block':
+                  return <PortableText value={[item]} semantic="div" />
+                case 'imageComponent':
+                  return <Image {...item} />
+                case 'videoComponent':
+                  return <Video {...item} />
+                case 'buttonComponent':
+                  return <Button {...item} />
+                case 'title':
+                  return <Title {...item} />
+                case 'quoteComponent':
+                  return <Quote {...item} />
+                case 'heading':
+                  return <Heading {...item} />
+                default:
+                  return <div>Ukjent komponent: {item._type}</div>
+              }
+            })
+          ) : (
+            <div>Ingen innhold</div>
+          )}
+        </div>
+      </details>
+    ))
+  ) : (
+    <div class="no-panels">
+      <p>Ingen paneler tilgjengelig</p>
+    </div>
+  )}
+</div>
 </div>
 
 
 <style>
   .accordion {
-    max-width: 800px;
-    margin: 2rem auto;
+    margin: 2rem 0;
   }
 
   .accordion-title {

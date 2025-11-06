@@ -276,7 +276,9 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     />
 
     <main id="main-content" class="main-content" tabindex="-1">
-      <slot />
+      <div class="content-wrapper">
+        <slot />
+      </div>
     </main>
 
     <!-- Footer -->

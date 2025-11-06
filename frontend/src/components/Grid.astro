@@ -34,7 +34,7 @@ const gapValue = gapMap[gap] || gapMap.medium
 const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
-<section class={`grid-component ${className}`} {...sanityAttributes}>
+<section class={`grid-component content-wide ${className}`} {...sanityAttributes}>
   {title && <h2 class="grid-title">{title}</h2>}
 
   <div
@@ -67,6 +67,10 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     display: grid;
     gap: var(--grid-gap, 2rem);
     width: 100%;
+
+    /* Container query context - allows children to adapt to available space */
+    container-type: inline-size;
+    container-name: grid-layout;
   }
 
   /* Desktop: 2 or 3 columns based on data attribute */

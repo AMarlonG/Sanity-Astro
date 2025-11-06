@@ -269,6 +269,29 @@
    Full-width, readable typography.
 */
 
+/* Event description section (Om konserten) */
+.event-description {
+  margin-block: var(--space-6);
+}
+
+.section-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-blue);
+}
+
+.description-text {
+  margin: 0;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+}
+
+/* Extra content from PageBuilder (for blocks below description) */
+.event-extra-content {
+  margin-block-start: var(--space-8);
+}
+
 .event-content {
   max-width: 65ch;
   margin-block-start: var(--space-6);

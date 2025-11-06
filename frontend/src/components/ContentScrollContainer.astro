@@ -29,25 +29,24 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 <section class={`content-scroll-container ${scrollbarClass} ${className}`} {...sanityAttributes}>
   {title && <h2 class="scroll-container-title">{title}</h2>}
 
-  <div class="scroll-wrapper">
-    <ul class="scroll-list">
-      {items.map((item) => {
-        if (!item) return null
+  <ul class="scroll-list">
+    {items.map((item) => {
+      if (!item) return null
 
-        return (
-          <li class="scroll-item">
-            <DynamicComponent block={item} />
-          </li>
-        )
-      })}
-    </ul>
-  </div>
+      return (
+        <li class="scroll-item">
+          <DynamicComponent block={item} />
+        </li>
+      )
+    })}
+  </ul>
 </section>
 
 <style>
   .content-scroll-container {
-    width: 100%;
-    margin: 3rem 0;
+    width: min(100ch, 100% - 4rem);
+    margin-inline: auto;
+    margin-block: 3rem;
   }
 
   .scroll-container-title {
@@ -57,19 +56,15 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     text-align: center;
   }
 
-  .scroll-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0.5rem 0 1rem 0;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  }
-
   .scroll-list {
     display: flex;
     gap: 1.5rem;
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding: 0.5rem 0 1rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
 
   .scroll-item {
@@ -89,12 +84,12 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   }
 
   /* Hide scrollbar */
-  .hide-scrollbar .scroll-wrapper {
+  .hide-scrollbar .scroll-list {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
   }
 
-  .hide-scrollbar .scroll-wrapper::-webkit-scrollbar {
+  .hide-scrollbar .scroll-list::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
   }
 
@@ -137,7 +132,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .scroll-wrapper {
+    .scroll-list {
       scroll-behavior: auto;
     }
   }
