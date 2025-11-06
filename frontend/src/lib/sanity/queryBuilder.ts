@@ -51,6 +51,21 @@ const buildContentProjection = (depth = 0): string => {
         ...,
         content[]{${nested}}
       }
+    },
+    _type == "gridComponent" => {
+      ...,
+      items[]{${nested}}
+    },
+    _type == "twoColumnLayout" => {
+      ...,
+      leftColumn[]{${nested}},
+      rightColumn[]{${nested}}
+    },
+    _type == "threeColumnLayout" => {
+      ...,
+      column1[]{${nested}},
+      column2[]{${nested}},
+      column3[]{${nested}}
     }
   `
 }
@@ -69,7 +84,14 @@ const EVENT_IMAGE_SELECTION = `
             height,
             aspectRatio
           },
-          lqip
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
         }
       },
       hotspot,
@@ -146,7 +168,14 @@ const ARTIST_IMAGE_SELECTION = `
             height,
             aspectRatio
           },
-          lqip
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
         }
       },
       hotspot,
@@ -191,7 +220,14 @@ const ARTICLE_IMAGE_SELECTION = `
             height,
             aspectRatio
           },
-          lqip
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
         }
       },
       hotspot,

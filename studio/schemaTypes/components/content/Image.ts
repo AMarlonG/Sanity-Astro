@@ -23,21 +23,6 @@ export const imageComponent = defineType({
       },
     }),
     defineField({
-      name: 'aspectRatio',
-      title: 'Bildeformat',
-      type: 'string',
-      description: 'Velg format for bildet (bredde:høyde)',
-      options: {
-        list: [
-          {title: 'Portrett (4:5)', value: '4:5'},
-          {title: 'Kvadrat (1:1)', value: '1:1'},
-          {title: 'Landskap (16:9)', value: '16:9'},
-          {title: 'Stående (9:16)', value: '9:16'},
-        ],
-      },
-      initialValue: '16:9',
-    }),
-    defineField({
       name: 'credit',
       title: 'Kreditering',
       type: 'string',
@@ -59,20 +44,33 @@ export const imageComponent = defineType({
       type: 'string',
       description: 'Valgfri tekst som vises under bildet',
     }),
+    defineField({
+      name: 'aspectRatio',
+      title: 'Bildeformat',
+      type: 'string',
+      description: 'Velg format for bildet når det vises alene (ikke i scroll-containere)',
+      options: {
+        list: [
+          {title: 'Kvadrat (1:1)', value: '1:1'},
+          {title: 'Portrett (4:5)', value: '4:5'},
+          {title: 'Stående (9:16)', value: '9:16'},
+          {title: 'Landskap (16:9)', value: '16:9'},
+        ],
+        layout: 'radio',
+      },
+      initialValue: '4:5',
+    }),
   ],
   preview: {
     select: {
       title: 'alt',
       subtitle: 'caption',
       media: 'image',
-      aspectRatio: 'aspectRatio',
     },
-    prepare({title, subtitle, media, aspectRatio}) {
-      const formatText = aspectRatio ? ` • Format: ${aspectRatio}` : ''
-
+    prepare({title, subtitle, media}) {
       return {
         title: 'Bilde',
-        subtitle: `${title || 'Uten alt-tekst'} • ${(subtitle || 'Ingen bildetekst')}${formatText}`,
+        subtitle: `${title || 'Uten alt-tekst'} • ${subtitle || 'Ingen bildetekst'}`,
         media: media || DocumentIcon,
       }
     },

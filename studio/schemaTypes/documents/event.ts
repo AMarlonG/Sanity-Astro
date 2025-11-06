@@ -31,10 +31,15 @@ export const event = defineType({
   ],
   groups: [
     {
+      name: 'basic',
+      title: 'Felles innhold',
+      icon: CogIcon,
+      default: true,
+    },
+    {
       name: 'no',
       title: 'Norsk (NO)',
       icon: ComposeIcon,
-      default: true,
     },
     {
       name: 'en',
@@ -42,11 +47,6 @@ export const event = defineType({
       icon: ComposeIcon,
     },
     imageGroup,
-    {
-      name: 'basic',
-      title: 'Felles innhold',
-      icon: CogIcon,
-    },
     {
       name: 'ticketing',
       title: 'Billett-info',
@@ -59,100 +59,7 @@ export const event = defineType({
     ...imageFieldsets,
   ],
   fields: [
-    // BASE (shared content)
-    defineField({
-      name: 'artist',
-      title: 'Artister',
-      type: 'array',
-      of: [
-        {
-          type: 'reference',
-          to: [{type: 'artist'}],
-        }
-      ],
-      description: 'Velg artister som opptrer på arrangementet',
-      group: 'basic',
-    }),
-    defineField({
-      name: 'composers',
-      title: 'Komponister',
-      type: 'array',
-      of: [
-        {
-          type: 'reference',
-          to: [{type: 'composer'}],
-        }
-      ],
-      description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
-      group: 'basic',
-    }),
-    defineField({
-      name: 'ticketType',
-      title: 'Type billettvisning',
-      type: 'string',
-      description: 'Velg om du vil vise kjøpsknapp eller kun tekst-informasjon',
-      group: 'ticketing',
-      options: {
-        list: [
-          { title: 'Legg til kjøpsknapp', value: 'button' },
-          { title: 'Legg til billettinfo', value: 'info' },
-        ],
-        layout: 'radio',
-      },
-      validation: (Rule) => Rule.required().error('Velg type billettvisning'),
-      initialValue: 'button',
-    }),
-    defineField({
-      name: 'ticketUrl',
-      title: 'Billett-URL',
-      type: 'url',
-      description: 'Link til billettsystem (påkrevd for kjøpsknapp)',
-      group: 'ticketing',
-      validation: (Rule) =>
-        Rule.custom((value, context) => {
-          const ticketType = (context.document as any)?.ticketType
-          if (ticketType === 'button' && !value) {
-            return 'Billett-URL er påkrevd når du velger kjøpsknapp'
-          }
-          if (value) {
-            return componentValidation.url(Rule).validate(value, context)
-          }
-          return true
-        }).error('Billett-URL er påkrevd når du velger kjøpsknapp'),
-      hidden: ({ document }) => document?.ticketType !== 'button',
-    }),
-    defineField({
-      name: 'ticketInfoText',
-      title: 'Billett-informasjon',
-      type: 'string',
-      description: 'Tekst som vises istedenfor knapp, f.eks. "Gratis" eller "Salget starter snart"',
-      group: 'ticketing',
-      placeholder: 'Gratis',
-      validation: (Rule) =>
-        Rule.custom((value, context) => {
-          const ticketType = (context.document as any)?.ticketType
-          if (ticketType === 'info' && !value) {
-            return 'Billett-informasjon er påkrevd når du velger billettinfo'
-          }
-          return true
-        }).error('Billett-informasjon er påkrevd når du velger billettinfo')
-        .max(50).warning('Teksten bør være maksimum 50 tegn'),
-      hidden: ({ document }) => document?.ticketType !== 'info',
-    }),
-    defineField({
-      name: 'venue',
-      title: 'Spillested',
-      type: 'reference',
-      to: [{type: 'venue'}],
-      description: 'Velg spillestedet for arrangementet',
-      group: 'basic',
-      validation: (Rule) => Rule.warning().custom((value) => {
-        if (!value) {
-          return 'Spillested må velges'
-        }
-        return true
-      }),
-    }),
+    // FELLES INNHOLD (shared content)
     defineField({
       name: 'eventDate',
       title: 'Dato',
@@ -220,6 +127,99 @@ export const event = defineType({
         return true
       }),
     }),
+    defineField({
+      name: 'venue',
+      title: 'Spillested',
+      type: 'reference',
+      to: [{type: 'venue'}],
+      description: 'Velg spillestedet for arrangementet',
+      group: 'basic',
+      validation: (Rule) => Rule.warning().custom((value) => {
+        if (!value) {
+          return 'Spillested må velges'
+        }
+        return true
+      }),
+    }),
+    defineField({
+      name: 'artist',
+      title: 'Artister',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'artist'}],
+        }
+      ],
+      description: 'Velg artister som opptrer på arrangementet',
+      group: 'basic',
+    }),
+    defineField({
+      name: 'composers',
+      title: 'Komponister',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{type: 'composer'}],
+        }
+      ],
+      description: 'Velg komponister som har skrevet musikken som spilles på arrangementet',
+      group: 'basic',
+    }),
+    defineField({
+      name: 'ticketType',
+      title: 'Type billettvisning',
+      type: 'string',
+      description: 'Velg om du vil vise kjøpsknapp eller kun tekst-informasjon',
+      group: 'ticketing',
+      options: {
+        list: [
+          { title: 'Legg til kjøpsknapp', value: 'button' },
+          { title: 'Legg til salgsinfo (gratis, salgstart, etc.)', value: 'info' },
+        ],
+        layout: 'radio',
+      },
+      validation: (Rule) => Rule.required().error('Velg type billettvisning'),
+      initialValue: 'button',
+    }),
+    defineField({
+      name: 'ticketUrl',
+      title: 'Billett-URL',
+      type: 'url',
+      description: 'Link til billettsystem (påkrevd for kjøpsknapp)',
+      group: 'ticketing',
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const ticketType = (context.document as any)?.ticketType
+          if (ticketType === 'button' && !value) {
+            return 'Billett-URL er påkrevd når du velger kjøpsknapp'
+          }
+          if (value) {
+            return componentValidation.url(Rule).validate(value, context)
+          }
+          return true
+        }).error('Billett-URL er påkrevd når du velger kjøpsknapp'),
+      hidden: ({ document }) => document?.ticketType !== 'button',
+    }),
+    defineField({
+      name: 'ticketInfoText',
+      title: 'Billett-informasjon',
+      type: 'string',
+      description: 'Tekst som vises istedenfor knapp, f.eks. "Gratis" eller "Salget starter snart"',
+      group: 'ticketing',
+      placeholder: 'Gratis',
+      validation: (Rule) =>
+        Rule.custom((value, context) => {
+          const ticketType = (context.document as any)?.ticketType
+          if (ticketType === 'info' && !value) {
+            return 'Billett-informasjon er påkrevd når du velger salgsinfo'
+          }
+          return true
+        }).error('Billett-informasjon er påkrevd når du velger salgsinfo')
+        .max(50).warning('Teksten bør være maksimum 50 tegn'),
+      hidden: ({ document }) => document?.ticketType !== 'info',
+    }),
     ...multilingualImageFields('image'),
     // NORSK INNHOLD
     defineField({
@@ -260,10 +260,19 @@ export const event = defineType({
       validation: (Rule) => Rule.max(60).warning('Ingressen bør være maksimum 60 tegn'),
     }),
     defineField({
-      name: 'content_no',
-      title: 'Arrangementsinnhold (norsk)',
-      type: 'pageBuilderWithoutTitle',
-      description: 'Bygg norsk arrangement-side med komponenter og innhold (arrangementsnavn er allerede H1)',
+      name: 'description_no',
+      title: 'Om konserten (norsk)',
+      type: 'text',
+      description: 'Hovedtekst om konserten på norsk (obligatorisk)',
+      group: 'no',
+      rows: 8,
+      validation: (Rule) => Rule.required().error('Beskrivelse av konserten må fylles ut'),
+    }),
+    defineField({
+      name: 'extraContent_no',
+      title: 'Ekstra innhold (norsk)',
+      type: 'pageBuilder',
+      description: 'Valgfritt ekstra innhold - video, sitater, etc.',
       group: 'no',
     }),
 
@@ -288,7 +297,7 @@ export const event = defineType({
       validation: (Rule) =>
         Rule.custom(async (value, context) => {
           const doc = context.document as any
-          const hasEnglishContent = doc?.title_en || doc?.excerpt_en || (doc?.content_en && doc.content_en.length > 0)
+          const hasEnglishContent = doc?.title_en || doc?.excerpt_en || doc?.description_en || (doc?.extraContent_en && doc.extraContent_en.length > 0)
 
           if (hasEnglishContent && !value?.current) {
             return 'URL (English) må settes når engelsk innhold er fylt ut'
@@ -319,13 +328,21 @@ export const event = defineType({
       validation: (Rule) => Rule.max(60).warning('Excerpt should be maximum 60 characters'),
     }),
     defineField({
-      name: 'content_en',
-      title: 'Event content (English)',
-      type: 'pageBuilderWithoutTitle',
-      description: 'Build English event page with components and content (event name is already H1)',
+      name: 'description_en',
+      title: 'About the concert (English)',
+      type: 'text',
+      description: 'Main text about the concert in English (optional)',
+      group: 'en',
+      rows: 8,
+    }),
+    defineField({
+      name: 'extraContent_en',
+      title: 'Extra content (English)',
+      type: 'pageBuilder',
+      description: 'Optional extra content - videos, quotes, etc.',
       group: 'en',
       components: {
-        input: createMirrorPortableTextInput('content_no')
+        input: createMirrorPortableTextInput('extraContent_no')
       },
     }),
     ...publishingFields('publishing', 'arrangementet'),

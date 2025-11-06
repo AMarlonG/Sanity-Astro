@@ -31,14 +31,17 @@ cd ../frontend && npm run typegen
 
 ### Development
 
-```bash
-# Start all servers (Studio on :3333, Frontend on :4321)
-npm run dev
+**Start servers in separate terminals:**
 
-# Or start individually:
-npm run dev:frontend  # Astro frontend
-npm run dev:studio    # Sanity Studio
+```bash
+# Terminal 1 - Studio
+npm run dev:studio    # http://localhost:3333
+
+# Terminal 2 - Frontend
+npm run dev:frontend  # http://localhost:4321
 ```
+
+**Note:** Due to Vite process management issues, servers must be started separately.
 
 ### Building
 
@@ -159,6 +162,16 @@ Currently 8 test files covering:
   - Git workflow (two-branch model)
   - AI assistant guidelines
   - Best practices and conventions
+
+- **MEDIA.md** - Media handling reference guide (images and videos):
+  - Architecture and core utilities
+  - Fetching images and videos from Sanity (GROQ patterns)
+  - Rendering with Image and Video components
+  - Optimization features (performance, privacy, security)
+  - Quality presets and aspect ratio handling
+  - Video support in all layout components (Grid, TwoColumn, ThreeColumn, etc.)
+  - Common patterns for artists, events, heroes, promotional videos
+  - Troubleshooting guide
 
 ## Git Workflow
 

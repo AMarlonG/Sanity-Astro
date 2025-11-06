@@ -1,0 +1,99 @@
+---
+import DynamicComponent from './DynamicComponent.astro'
+
+export interface Props {
+  leftColumn: any[]
+  rightColumn: any[]
+  reverseOnMobile?: boolean
+  className?: string
+  _key?: string
+  _type?: string
+}
+
+const {
+  leftColumn = [],
+  rightColumn = [],
+  reverseOnMobile = false,
+  className = '',
+  _key,
+  _type,
+} = Astro.props
+
+const leftItem = leftColumn[0]
+const rightItem = rightColumn[0]
+
+// Sanity Visual Editing attributes
+const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
+---
+
+<section
+  class={`two-column-layout ${reverseOnMobile ? 'reverse-mobile' : ''} ${className}`}
+  {...sanityAttributes}
+>
+  <div class="column column-left">
+    {leftItem && <DynamicComponent block={leftItem} />}
+  </div>
+
+  <div class="column column-right">
+    {rightItem && <DynamicComponent block={rightItem} />}
+  </div>
+</section>
+
+<style>
+  .two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin: 3rem 0;
+    align-items: start;
+  }
+
+  .column {
+    width: 100%;
+  }
+
+  /* Tablet: Reduce gap */
+  @media (max-width: 1024px) {
+    .two-column-layout {
+      gap: 2rem;
+    }
+  }
+
+  /* Mobile: Stack vertically */
+  @media (max-width: 768px) {
+    .two-column-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    /* Reverse column order on mobile if specified */
+    .two-column-layout.reverse-mobile {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+  }
+
+  /* Ensure child components don't overflow */
+  .column > :global(*) {
+    max-width: 100%;
+  }
+
+  /* Accessibility */
+  .column:focus-within {
+    outline: 2px solid #0066cc;
+    outline-offset: 4px;
+  }
+
+  /* Print styles */
+  @media print {
+    .two-column-layout {
+      display: block;
+    }
+
+    .column {
+      page-break-inside: avoid;
+      margin-bottom: 1rem;
+    }
+  }
+</style>

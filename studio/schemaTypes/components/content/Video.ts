@@ -28,10 +28,10 @@ export const videoComponent = defineType({
       group: 'content',
       options: {
         list: [
-          {title: 'Sanity Video', value: 'sanity'},
+          {title: 'Last opp fil', value: 'sanity'},
           {title: 'YouTube', value: 'youtube'},
           {title: 'Vimeo', value: 'vimeo'},
-          {title: 'Ekstern URL', value: 'external'},
+          {title: 'Annen video-URL', value: 'external'},
         ],
       },
       initialValue: 'sanity',
@@ -39,10 +39,10 @@ export const videoComponent = defineType({
     }),
     defineField({
       name: 'video',
-      title: 'Sanity Video',
+      title: 'Video-fil',
       type: 'file',
       group: 'content',
-      description: 'Last opp en video-fil',
+      description: 'Last opp en video-fil (MP4, WebM, etc.)',
       hidden: ({parent}) => parent?.videoType !== 'sanity',
       options: {
         accept: 'video/*',
@@ -82,10 +82,10 @@ export const videoComponent = defineType({
     }),
     defineField({
       name: 'externalUrl',
-      title: 'Ekstern Video URL',
+      title: 'Video-URL',
       type: 'url',
       group: 'content',
-      description: 'Lim inn URL til video-fil (MP4, WebM, etc.)',
+      description: 'Lim inn direkte lenke til video-fil (f.eks. https://eksempel.no/video.mp4)',
       hidden: ({parent}) => parent?.videoType !== 'external',
       validation: (Rule) =>
         Rule.uri({
@@ -100,11 +100,12 @@ export const videoComponent = defineType({
       description: 'Velg format for videoen (bredde:høyde)',
       options: {
         list: [
-          {title: 'Portrett (4:5)', value: '4:5'},
           {title: 'Kvadrat (1:1)', value: '1:1'},
+          {title: 'Portrett (4:5)', value: '4:5'},
+          {title: 'Stående (9:16)', value: '9:16'},
           {title: 'Landskap (16:9)', value: '16:9'},
-          {title: 'Portrett (9:16)', value: '9:16'},
         ],
+        layout: 'radio',
       },
       initialValue: '16:9',
     }),

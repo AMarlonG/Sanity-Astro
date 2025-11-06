@@ -7,6 +7,7 @@ import {unsplashImageAsset} from 'sanity-plugin-asset-source-unsplash'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './deskStructure'
 import {placeholderTextPlugin} from './plugins/placeholderTextPlugin'
+import {componentGuideTool} from './plugins/componentGuideTool'
 import {addEventToProgramPageAction} from './actions/addEventToProgramPageAction'
 
 // Custom Norwegian i18n resources to override publish button text
@@ -40,6 +41,7 @@ export default defineConfig({
     nbNOLocale(),
     unsplashImageAsset(),
     placeholderTextPlugin(),
+    componentGuideTool(),
     presentationTool({
       previewUrl: {
         origin: 'http://localhost:4321',

@@ -56,7 +56,8 @@ switch (videoType) {
   case 'youtube':
     if (youtubeUrl) {
       videoId = extractYouTubeId(youtubeUrl) || ''
-      videoSource = `https://www.youtube.com/embed/${videoId}`
+      // Use privacy-enhanced mode (youtube-nocookie.com)
+      videoSource = `https://www.youtube-nocookie.com/embed/${videoId}`
     }
     break
   case 'vimeo':
@@ -81,33 +82,36 @@ switch (videoType) {
       autoplay={autoplay}
       muted={muted}
       loop={loop}
-      preload="metadata"
+      preload="none"
       playsinline
       class="video-element"
       title={title}
       style={`aspect-ratio: ${aspectRatioValue};`}
     >
       <source src={videoSource} type="video/mp4" />
-      <track kind="captions" srclang="no" label="Norsk" />
       Din nettleser støtter ikke HTML5 video.
     </video>
   ) : videoType === 'youtube' && videoSource ? (
     <iframe
-      src={`${videoSource}?autoplay=${autoplay ? 1 : 0}&mute=${muted ? 1 : 0}&controls=${controls ? 1 : 0}&loop=${loop ? 1 : 0}`}
+      loading="lazy"
+      src={`${videoSource}?autoplay=${autoplay ? 1 : 0}&mute=${muted ? 1 : 0}&controls=${controls ? 1 : 0}&loop=${loop ? 1 : 0}&rel=0`}
       title={title || 'YouTube video'}
+      sandbox="allow-scripts allow-same-origin allow-presentation"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
       class="video-element"
       style={`aspect-ratio: ${aspectRatioValue};`}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowfullscreen
     ></iframe>
   ) : videoType === 'vimeo' && videoSource ? (
     <iframe
-      src={`${videoSource}?autoplay=${autoplay ? 1 : 0}&muted=${muted ? 1 : 0}&controls=${controls ? 1 : 0}&loop=${loop ? 1 : 0}`}
+      loading="lazy"
+      src={`${videoSource}?autoplay=${autoplay ? 1 : 0}&muted=${muted ? 1 : 0}&controls=${controls ? 1 : 0}&loop=${loop ? 1 : 0}&dnt=1`}
       title={title || 'Vimeo video'}
-      class="video-element"
-      style={`aspect-ratio: ${aspectRatioValue};`}
+      sandbox="allow-scripts allow-same-origin allow-presentation"
       allow="autoplay; fullscreen; picture-in-picture"
       allowfullscreen
+      class="video-element"
+      style={`aspect-ratio: ${aspectRatioValue};`}
     ></iframe>
   ) : videoType === 'external' && videoSource ? (
     <video
@@ -115,14 +119,13 @@ switch (videoType) {
       autoplay={autoplay}
       muted={muted}
       loop={loop}
-      preload="metadata"
+      preload="none"
       playsinline
       class="video-element"
       title={title}
       style={`aspect-ratio: ${aspectRatioValue};`}
     >
       <source src={videoSource} type="video/mp4" />
-      <track kind="captions" srclang="no" label="Norsk" />
       Din nettleser støtter ikke HTML5 video.
     </video>
   ) : (

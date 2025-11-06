@@ -1,0 +1,104 @@
+---
+import DynamicComponent from './DynamicComponent.astro'
+
+export interface Props {
+  column1: any[]
+  column2: any[]
+  column3: any[]
+  className?: string
+  _key?: string
+  _type?: string
+}
+
+const {
+  column1 = [],
+  column2 = [],
+  column3 = [],
+  className = '',
+  _key,
+  _type,
+} = Astro.props
+
+const item1 = column1[0]
+const item2 = column2[0]
+const item3 = column3[0]
+
+// Sanity Visual Editing attributes
+const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
+---
+
+<section class={`three-column-layout ${className}`} {...sanityAttributes}>
+  <div class="column column-1">
+    {item1 && <DynamicComponent block={item1} />}
+  </div>
+
+  <div class="column column-2">
+    {item2 && <DynamicComponent block={item2} />}
+  </div>
+
+  <div class="column column-3">
+    {item3 && <DynamicComponent block={item3} />}
+  </div>
+</section>
+
+<style>
+  .three-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin: 3rem 0;
+    align-items: start;
+  }
+
+  .column {
+    width: 100%;
+  }
+
+  /* Tablet: Reduce to 2 columns, stack third */
+  @media (max-width: 1024px) {
+    .three-column-layout {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .column-3 {
+      grid-column: 1 / -1; /* Span full width */
+    }
+  }
+
+  /* Mobile: Stack vertically */
+  @media (max-width: 768px) {
+    .three-column-layout {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .column-3 {
+      grid-column: auto; /* Reset span */
+    }
+  }
+
+  /* Ensure child components don't overflow */
+  .column > :global(*) {
+    max-width: 100%;
+  }
+
+  /* Accessibility */
+  .column:focus-within {
+    outline: 2px solid #0066cc;
+    outline-offset: 4px;
+  }
+
+  /* Print styles */
+  @media print {
+    .three-column-layout {
+      display: block;
+    }
+
+    .column {
+      page-break-inside: avoid;
+      margin-bottom: 1rem;
+    }
+  }
+</style>

@@ -94,7 +94,7 @@ export const artist = defineType({
     defineField({
       name: 'content_no',
       title: 'Artistinnhold (norsk)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Bygg norsk artist-side med komponenter og innhold',
       group: 'no',
     }),
@@ -119,7 +119,7 @@ export const artist = defineType({
     defineField({
       name: 'content_en',
       title: 'Artist content (English)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Build English artist page with components and content',
       group: 'en',
       components: {

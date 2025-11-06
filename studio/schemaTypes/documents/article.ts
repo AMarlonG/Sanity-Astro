@@ -79,7 +79,7 @@ export const article = defineType({
     defineField({
       name: 'content_no',
       title: 'Artikkelinnhold (norsk)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Bygg norsk artikkel med komponenter og innhold (artikkeltittel er allerede H1)',
       group: 'no',
     }),
@@ -138,7 +138,7 @@ export const article = defineType({
     defineField({
       name: 'content_en',
       title: 'Article content (English)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Build English article with components and content (article title is already H1)',
       group: 'en',
       components: {

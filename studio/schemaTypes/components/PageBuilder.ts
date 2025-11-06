@@ -21,35 +21,35 @@ export const pageBuilder = defineType({
   title: 'Sideinnhold',
   type: 'array',
   icon: DocumentIcon,
-  description: 'Bygg siden med komponenter og innhold',
+  description: 'Bygg innholdet med komponenter',
   options: {
     insertMenu: {
       filter: true,
       groups: [
         {
-          name: 'layout',
-          title: 'Layout & Struktur',
-          of: ['columnLayout', 'spacer'],
-        },
-        {
           name: 'content',
           title: 'Innhold',
-          of: ['title', 'headingComponent', 'portableTextBlock', 'quoteComponent'],
+          of: ['headingComponent', 'portableTextBlock', 'quoteComponent'],
         },
         {
           name: 'media',
           title: 'Media',
-          of: ['imageComponent', 'videoComponent'],
+          of: ['imageComponent', 'videoComponent', 'spotifyComponent'],
         },
         {
           name: 'interactive',
           title: 'Interaktiv',
-          of: ['buttonComponent', 'linkComponent', 'accordionComponent', 'countdownComponent'],
+          of: ['buttonComponent', 'accordionComponent', 'countdownComponent'],
+        },
+        {
+          name: 'layout',
+          title: 'Layout',
+          of: ['twoColumnLayout', 'threeColumnLayout', 'gridComponent'],
         },
         {
           name: 'sections',
           title: 'Seksjoner',
-          of: ['contentScrollContainer', 'artistScrollContainer', 'eventScrollContainer'],
+          of: ['artistScrollContainer', 'eventScrollContainer', 'contentScrollContainer'],
         },
       ],
       views: [
@@ -63,78 +63,7 @@ export const pageBuilder = defineType({
     },
   },
   of: [
-    // === LAYOUT COMPONENTS ===
-    {
-      type: 'columnLayout',
-      title: 'Responsiv Layout',
-      icon: EllipsisHorizontalIcon,
-      preview: {
-        select: {
-          layoutType: 'layoutType',
-          desktopColumns: 'desktopColumns',
-          count: 'items.length',
-          containerWidth: 'containerWidth',
-        },
-        prepare({layoutType, desktopColumns, count, containerWidth}) {
-          const layoutName = 
-            layoutType === 'columns' ? `${desktopColumns || '2'} kolonne(r)` :
-            layoutType === 'flexbox' ? 'Flexbox' :
-            'Stack'
-          
-          return {
-            title: `${layoutName} Layout`,
-            subtitle: `${count || 0} komponenter • ${containerWidth || 'full'} bredde`,
-            media: EllipsisHorizontalIcon,
-          }
-        },
-      },
-    },
-    {
-      type: 'spacer',
-      title: 'Spacing/Avstand',
-      icon: ExpandIcon,
-      preview: {
-        select: {
-          type: 'type',
-          desktopSize: 'size.desktop',
-          showDivider: 'showDivider',
-        },
-        prepare({type, desktopSize, showDivider}) {
-          const typeDisplay = 
-            type === 'vertical' ? 'Vertikal' :
-            type === 'horizontal' ? 'Horisontal' :
-            'Seksjon'
-          
-          const dividerDisplay = showDivider ? ' • med skillelinje' : ''
-          
-          return {
-            title: `${typeDisplay} Avstand`,
-            subtitle: `${desktopSize || 'medium'} størrelse${dividerDisplay}`,
-            media: ExpandIcon,
-          }
-        },
-      },
-    },
-
     // === CONTENT COMPONENTS ===
-    {
-      type: 'title',
-      title: 'Tittel (H1/H2)',
-      icon: DocumentTextIcon,
-      preview: {
-        select: {
-          title: 'mainTitle',
-          subtitle: 'subtitle',
-        },
-        prepare({title, subtitle}) {
-          return {
-            title: title || 'Untitled',
-            subtitle: subtitle ? `Subtitle: ${subtitle}` : 'No subtitle',
-            media: DocumentTextIcon,
-          }
-        },
-      },
-    },
     {
       type: 'headingComponent',
       title: 'Overskrift (H2-H6)',
@@ -238,6 +167,28 @@ export const pageBuilder = defineType({
         },
       },
     },
+    {
+      type: 'spotifyComponent',
+      title: 'Spotify',
+      icon: PlayIcon,
+    },
+
+    // === LAYOUT COMPONENTS ===
+    {
+      type: 'gridComponent',
+      title: 'Rutenett',
+      icon: TiersIcon,
+    },
+    {
+      type: 'twoColumnLayout',
+      title: 'To kolonner',
+      icon: TiersIcon,
+    },
+    {
+      type: 'threeColumnLayout',
+      title: 'Tre kolonner',
+      icon: TiersIcon,
+    },
 
     // === INTERACTIVE COMPONENTS ===
     {
@@ -248,32 +199,14 @@ export const pageBuilder = defineType({
         select: {
           title: 'text',
           style: 'style',
-          size: 'size',
-          action: 'action',
+          fullWidth: 'fullWidth',
         },
-        prepare({title, style, size, action}) {
+        prepare({title, style, fullWidth}) {
+          const widthText = fullWidth ? ' • Full bredde' : ''
           return {
             title: title || 'Knapp uten tekst',
-            subtitle: `${style} • ${size} • ${action || 'ingen handling'}`,
+            subtitle: `${style || 'primary'}${widthText}`,
             media: BoltIcon,
-          }
-        },
-      },
-    },
-    {
-      type: 'linkComponent',
-      title: 'Lenke',
-      icon: LinkIcon,
-      preview: {
-        select: {
-          title: 'text',
-          subtitle: 'url',
-        },
-        prepare({title, subtitle}) {
-          return {
-            title: title || 'Lenke uten tekst',
-            subtitle: subtitle || 'Ingen URL',
-            media: LinkIcon,
           }
         },
       },
@@ -345,13 +278,12 @@ export const pageBuilder = defineType({
         select: {
           title: 'title',
           items: 'items',
-          cardFormat: 'cardFormat',
         },
-        prepare({title, items, cardFormat}) {
+        prepare({title, items}) {
           const itemCount = items?.length || 0
           return {
             title: title || 'Artist Scroll Container',
-            subtitle: `${itemCount} artister • ${cardFormat}`,
+            subtitle: `${itemCount} artister (4:5 kort)`,
             media: DocumentIcon,
           }
         },
@@ -365,13 +297,12 @@ export const pageBuilder = defineType({
         select: {
           title: 'title',
           items: 'items',
-          cardFormat: 'cardFormat',
         },
-        prepare({title, items, cardFormat}) {
+        prepare({title, items}) {
           const eventCount = items?.length || 0
           return {
             title: title || 'Event Scroll Container',
-            subtitle: `${eventCount} arrangementer • ${cardFormat}`,
+            subtitle: `${eventCount} arrangementer (4:5 kort)`,
             media: CalendarIcon,
           }
         },

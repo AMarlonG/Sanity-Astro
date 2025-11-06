@@ -3,8 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import DynamicComponent from '../../components/DynamicComponent.astro';
 import { formatDateWithWeekday } from '../../lib/utils/dates';
 import { getMultilingualContent } from "../../lib/utils/language.js";
-import { getOptimizedImageUrl } from '../../lib/imageHelpers';
-import { IMAGE_QUALITY } from '../../lib/imageHelpers';
+import { getOptimizedImageUrl, IMAGE_QUALITY } from '../../lib/sanityImage';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../lib/sanity/loadQuery.js';
 import { stegaClean } from '@sanity/client/stega';
@@ -37,6 +36,8 @@ const { data: event } = await loadQuery({
     slug_no,
     excerpt_no,
     "excerpt": excerpt_no,
+    description_no,
+    "description": description_no,
     "image": {
       "image": image{
         asset->,
@@ -65,14 +66,34 @@ const { data: event } = await loadQuery({
       _id,
       name,
       "slug": slug.current,
+      "image": {
+        "image": image{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions {
+                width,
+                height,
+                aspectRatio
+              },
+              lqip
+            }
+          },
+          hotspot,
+          crop
+        },
+        "alt": coalesce(imageAlt_no, imageAlt_en, image.alt)
+      },
       instrument_no,
-      "instrument": instrument_no
+      "instrument": instrument_no,
+      country
     },
     ticketType,
     ticketUrl,
     ticketInfoText,
-    content_no,
-    content_en,
+    extraContent_no,
+    extraContent_en,
     seo
   }`,
   params,
@@ -82,8 +103,9 @@ if (!event) {
   return Astro.redirect('/404');
 }
 
-// Get appropriate content array
-const content = getMultilingualContent(event, 'no') || event.content_no;
+// Get appropriate content arrays
+const description = getMultilingualContent(event, 'no', 'description') || event.description_no;
+const extraContent = getMultilingualContent(event, 'no', 'extraContent') || event.extraContent_no;
 ---
 
 <Layout
@@ -93,51 +115,41 @@ const content = getMultilingualContent(event, 'no') || event.content_no;
 >
   <div class="container">
     <div class="event-page">
-      <div class="event-info-grid">
-        <div class="event-info-column">
-          <header class="event-header">
-            <h1 class="event-title">{stegaClean(event.title || '')}</h1>
-            {event.excerpt && (
-              <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
-            )}
-          </header>
+      <header class="event-header">
+        <h1 class="event-title">{stegaClean(event.title || '')}</h1>
+        {event.excerpt && (
+          <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
+        )}
+      </header>
 
-          <div class="event-meta">
-            {event.eventDate?.date && (
-              <div class="event-meta-item">{stegaClean(formatDateWithWeekday(event.eventDate.date, 'no'))}</div>
-            )}
-            {event.eventTime && (
-              <div class="event-meta-item">kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</div>
-            )}
-            {event.venue?.title && (
-              <div class="event-meta-item">{stegaClean(event.venue.title)}</div>
-            )}
-          </div>
-
-          <div class="ticket-section">
-            {stegaClean(event.ticketType) === 'info' ? (
-              <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
-            ) : (
-              <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
-                Kjøp billetter her
-              </a>
-            )}
-          </div>
-        </div>
-
-        {event.image?.image && (
-          <div class="event-image-column">
-            <figure class="event-image">
-              <img
-                src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                alt={stegaClean(event.image.alt || event.title || '')}
-                loading="eager"
-                decoding="async"
-              />
-            </figure>
-          </div>
+      <div class="event-meta">
+        {event.eventDate?.date && (
+          <div class="event-meta-item">{stegaClean(formatDateWithWeekday(event.eventDate.date, 'no'))}</div>
+        )}
+        {event.eventTime && (
+          <div class="event-meta-item">kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</div>
+        )}
+        {event.venue?.title && (
+          <div class="event-meta-item">{stegaClean(event.venue.title)}</div>
         )}
       </div>
+
+      <div class="ticket-section">
+        {stegaClean(event.ticketType) === 'info' ? (
+          <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
+        ) : (
+          <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+            Kjøp billetter her
+          </a>
+        )}
+      </div>
+
+      {description && (
+        <section class="event-description">
+          <h2 class="section-title">Om konserten</h2>
+          <p class="description-text">{stegaClean(description)}</p>
+        </section>
+      )}
 
       {event.artists && event.artists.length > 0 && (
         <section class="artists-section">
@@ -146,12 +158,34 @@ const content = getMultilingualContent(event, 'no') || event.content_no;
             <ul class="artists-list">
               {event.artists.map((artist) => (
                 <li class="artist-item">
-                  <a href={`/artister/${stegaClean(artist.slug)}`} class="artist-card">
-                    <span class="artist-name">{stegaClean(artist.name)}</span>
-                    {artist.instrument && (
-                      <span class="artist-instrument">{stegaClean(artist.instrument)}</span>
+                  <article class="artist-card">
+                    <h3 class="artist-title">
+                      <a href={`/artister/${stegaClean(artist.slug)}`} class="artist-title-link">
+                        {stegaClean(artist.name)}
+                      </a>
+                    </h3>
+
+                    {artist.image?.image?.asset && (
+                      <div class="artist-image">
+                        <picture>
+                          <img
+                            src={getOptimizedImageUrl(artist.image.image, 320, 400, IMAGE_QUALITY.CARD)}
+                            alt={stegaClean(artist.image.alt || artist.name || '')}
+                            loading="lazy"
+                            decoding="async"
+                            class="artist-card-image"
+                          />
+                        </picture>
+                      </div>
                     )}
-                  </a>
+
+                    <div class="artist-info-box">
+                      <p class="artist-name">{stegaClean(artist.name)}</p>
+                      {artist.instrument && (
+                        <p class="artist-instrument">{stegaClean(artist.instrument)}</p>
+                      )}
+                    </div>
+                  </article>
                 </li>
               ))}
             </ul>
@@ -159,12 +193,27 @@ const content = getMultilingualContent(event, 'no') || event.content_no;
         </section>
       )}
 
-      {content && Array.isArray(content) && content.length > 0 && (
-        <div class="event-content">
-          {content.map((block) => (
+      {extraContent && Array.isArray(extraContent) && extraContent.length > 0 && (
+        <div class="event-extra-content">
+          {extraContent.map((block) => (
             <DynamicComponent key={block._key || block._id} block={block} />
           ))}
         </div>
+      )}
+
+      {event.image?.image?.asset && (
+        <figure class="event-image-bottom">
+          <img
+            src={getOptimizedImageUrl(event.image.image, 800, 600, IMAGE_QUALITY.CARD)}
+            alt={stegaClean(event.image.alt || event.title || '')}
+            style="aspect-ratio: 4/3; width: 100%; object-fit: cover;"
+            loading="lazy"
+            decoding="async"
+          />
+          {event.image.credit && (
+            <figcaption class="image-credit">{stegaClean(event.image.credit)}</figcaption>
+          )}
+        </figure>
       )}
     </div>
   </div>

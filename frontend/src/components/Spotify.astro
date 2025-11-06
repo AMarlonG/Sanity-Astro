@@ -1,0 +1,190 @@
+---
+export interface Props {
+  spotifyUrl: string
+  title?: string
+  description?: string
+  height?: number
+  compact?: boolean
+  className?: string
+  _key?: string
+  _type?: string
+}
+
+const {
+  spotifyUrl,
+  title,
+  description,
+  height = 352,
+  compact = false,
+  className = '',
+  _key,
+  _type,
+} = Astro.props
+
+// Helper functions to extract Spotify data
+function extractSpotifyId(url: string): string | null {
+  if (!url) return null
+
+  // Handle spotify: URIs (e.g., spotify:track:xxxxx)
+  if (url.startsWith('spotify:')) {
+    const parts = url.split(':')
+    return parts.length >= 3 ? parts[2] : null
+  }
+
+  // Handle open.spotify.com URLs
+  const match = url.match(/open\.spotify\.com\/(track|album|playlist|artist)\/([a-zA-Z0-9]+)/)
+  return match ? match[2] : null
+}
+
+function getSpotifyEmbedType(url: string): 'track' | 'album' | 'playlist' | 'artist' | null {
+  if (!url) return null
+
+  if (url.includes('/track/') || url.includes('spotify:track:')) return 'track'
+  if (url.includes('/album/') || url.includes('spotify:album:')) return 'album'
+  if (url.includes('/playlist/') || url.includes('spotify:playlist:')) return 'playlist'
+  if (url.includes('/artist/') || url.includes('spotify:artist:')) return 'artist'
+
+  return null
+}
+
+function generateSpotifyEmbedUrl(url: string, isCompact: boolean = false): string | null {
+  const embedType = getSpotifyEmbedType(url)
+  const spotifyId = extractSpotifyId(url)
+
+  if (!embedType || !spotifyId) return null
+
+  return `https://open.spotify.com/embed/${embedType}/${spotifyId}?utm_source=generator${isCompact ? '&theme=0' : ''}`
+}
+
+// Generate embed URL
+const embedUrl = generateSpotifyEmbedUrl(spotifyUrl, compact)
+const actualHeight = compact ? 80 : height
+
+// Sanity Visual Editing attributes
+const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
+---
+
+<figure class={`spotify-component ${className}`} {...sanityAttributes}>
+  {embedUrl ? (
+    <div class="spotify-embed-container">
+      <iframe
+        src={embedUrl}
+        width="100%"
+        height={`${actualHeight}`}
+        frameborder="0"
+        allowfullscreen
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        title={title || 'Spotify Player'}
+        class="spotify-iframe"
+      ></iframe>
+    </div>
+  ) : (
+    <div class="spotify-error">
+      <p>Kunne ikke laste Spotify-innhold</p>
+      <p class="error-detail">Ugyldig Spotify URL</p>
+    </div>
+  )}
+
+  {(title || description) && (
+    <figcaption class="spotify-caption">
+      {title && <span class="spotify-caption-title">{title}</span>}
+      {description && <span class="spotify-caption-description">{description}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .spotify-component {
+    margin: 2rem 0;
+    max-width: 100%;
+  }
+
+  .spotify-embed-container {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .spotify-iframe {
+    display: block;
+    border: none;
+    border-radius: 12px;
+  }
+
+  .spotify-error {
+    padding: 2rem;
+    background: #f8f9fa;
+    border: 1px dashed #dee2e6;
+    border-radius: 8px;
+    text-align: center;
+    color: #6c757d;
+  }
+
+  .spotify-error p {
+    margin: 0.25rem 0;
+  }
+
+  .error-detail {
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+
+  .spotify-caption {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #495057;
+  }
+
+  .spotify-caption-title {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .spotify-caption-description {
+    display: block;
+    font-style: italic;
+    color: #6c757d;
+  }
+
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .spotify-component {
+      margin: 1.5rem 0;
+    }
+  }
+
+  /* Accessibility */
+  .spotify-iframe:focus {
+    outline: 2px solid #1db954; /* Spotify brand green */
+    outline-offset: 2px;
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .spotify-error {
+      background: #212529;
+      border-color: #495057;
+      color: #adb5bd;
+    }
+
+    .spotify-caption {
+      color: #adb5bd;
+    }
+
+    .spotify-caption-description {
+      color: #868e96;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .spotify-component {
+      transition: none;
+    }
+  }
+</style>
