@@ -165,7 +165,7 @@ const extraContent = getMultilingualContent(event, 'no', 'extraContent') || even
                       </a>
                     </h3>
 
-                    {artist.image?.image && (
+                    {artist.image?.image?.asset && (
                       <div class="artist-image">
                         <picture>
                           <img
@@ -201,7 +201,7 @@ const extraContent = getMultilingualContent(event, 'no', 'extraContent') || even
         </div>
       )}
 
-      {event.image?.image && (
+      {event.image?.image?.asset && (
         <figure class="event-image-bottom">
           <img
             src={getOptimizedImageUrl(event.image.image, 800, 600, IMAGE_QUALITY.CARD)}

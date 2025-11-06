@@ -37,30 +37,72 @@ if (events && events.length > 0) {
   if (eventIds.length > 0) {
     const EVENT_QUERY = `*[_type == "event" && _id in $eventIds]{
       _id,
-      title,
-      slug,
-      "image": image{
-        asset->{
-          _id,
-          url,
-          metadata {
-            dimensions {
-              width,
-              height,
-              aspectRatio
-            },
-            lqip,
-            blurHash
-          }
+      _type,
+      title_no,
+      title_en,
+      "title": coalesce(title_no, title_en),
+      slug_no,
+      slug_en,
+      "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+      excerpt_no,
+      excerpt_en,
+      "excerpt": coalesce(excerpt_no, excerpt_en),
+      "image": {
+        "image": image{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions {
+                width,
+                height,
+                aspectRatio
+              },
+              lqip,
+              blurHash,
+              palette {
+                dominant {
+                  background,
+                  foreground
+                }
+              }
+            }
+          },
+          hotspot,
+          crop
         },
-        hotspot,
-        crop
+        "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
+        "credit": coalesce(imageCredit_no, imageCredit_en)
       },
-      "imageAlt": image.alt,
-      eventDate,
+      eventDate->{
+        _id,
+        date,
+        title_display_no,
+        title_display_en,
+        "title": coalesce(title_display_no, title_display_en)
+      },
       eventTime,
-      venue->{title},
-      artists[]->{name}
+      venue->{
+        _id,
+        title,
+        name,
+        address,
+        city,
+        "slug": slug.current
+      },
+      "artists": artist[]->{
+        _id,
+        name,
+        "slug": slug.current,
+        image,
+        "imageAlt": coalesce(imageAlt_no, imageAlt_en)
+      },
+      ticketType,
+      ticketUrl,
+      ticketInfoText,
+      publishingStatus,
+      scheduledPeriod,
+      seo
     }`
     eventData = await sanityClient.fetch(EVENT_QUERY, { eventIds })
   }
@@ -109,10 +151,10 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         const timeString = stegaClean(event.eventTime || '')
         const venueName = stegaClean(event.venue?.title || '')
         const artistNames = stegaClean(event.artists?.map((artist: any) => artist.name).join(', ') || '')
-        const eventSlug = stegaClean(event.slug?.current || '')
+        const eventSlug = stegaClean(event.slug || '')
 
-        const eventImage = event.image || null
-        const imageAlt = event.imageAlt || event.title || ''
+        const eventImage = event.image?.image || null
+        const imageAlt = event.image?.alt || event.title || ''
 
         // Generate responsive image sources (4:5 aspect ratio)
         const aspectRatio = 4 / 5

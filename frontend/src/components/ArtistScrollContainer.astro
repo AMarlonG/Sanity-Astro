@@ -21,28 +21,53 @@ if (items && items.length > 0) {
   if (artistIds.length > 0) {
     const ARTIST_QUERY = `*[_type == "artist" && _id in $artistIds]{
       _id,
+      _type,
       name,
       "slug": slug.current,
-      "image": image{
-        asset->{
-          _id,
-          url,
-          metadata {
-            dimensions {
-              width,
-              height,
-              aspectRatio
-            },
-            lqip,
-            blurHash
-          }
+      excerpt_no,
+      excerpt_en,
+      "excerpt": coalesce(excerpt_no, excerpt_en),
+      instrument_no,
+      instrument_en,
+      "instrument": coalesce(instrument_no, instrument_en),
+      country,
+      "image": {
+        "image": image{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions {
+                width,
+                height,
+                aspectRatio
+              },
+              lqip,
+              blurHash,
+              palette {
+                dominant {
+                  background,
+                  foreground
+                }
+              }
+            }
+          },
+          hotspot,
+          crop
         },
-        hotspot,
-        crop
+        "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
+        "credit": coalesce(imageCredit_no, imageCredit_en)
       },
-      "imageAlt": image.alt,
-      instrument,
-      country
+      publishingStatus,
+      scheduledPeriod,
+      instagram,
+      facebook,
+      spotify,
+      youtube,
+      websiteUrl,
+      spotifyUrl,
+      instagramUrl,
+      seo
     }`
     artistData = await sanityClient.fetch(ARTIST_QUERY, { artistIds })
   }
@@ -61,8 +86,8 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         if (!artist) return null
 
         const artistName = artist.name || ''
-        const artistImage = artist.image || null
-        const artistImageAlt = artist.imageAlt || artistName || ''
+        const artistImage = artist.image?.image || null
+        const artistImageAlt = artist.image?.alt || artistName || ''
         const artistInstrument = artist.instrument || ''
         const artistCountry = artist.country || ''
         const artistSlug = artist.slug || ''
