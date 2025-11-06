@@ -271,7 +271,7 @@ export const event = defineType({
     defineField({
       name: 'extraContent_no',
       title: 'Ekstra innhold (norsk)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Valgfritt ekstra innhold - video, sitater, etc.',
       group: 'no',
     }),
@@ -338,7 +338,7 @@ export const event = defineType({
     defineField({
       name: 'extraContent_en',
       title: 'Extra content (English)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Optional extra content - videos, quotes, etc.',
       group: 'en',
       components: {

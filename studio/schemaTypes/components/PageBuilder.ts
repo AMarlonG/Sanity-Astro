@@ -21,7 +21,7 @@ export const pageBuilder = defineType({
   title: 'Sideinnhold',
   type: 'array',
   icon: DocumentIcon,
-  description: 'Bygg siden med komponenter og innhold',
+  description: 'Bygg innholdet med komponenter',
   options: {
     insertMenu: {
       filter: true,
