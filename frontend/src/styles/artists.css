@@ -76,7 +76,9 @@
     scroll-margin-inline-start: 0.5rem;
   }
 
-  /* Styled native scrollbar - always visible and functional */
+  /* Styled native scrollbar - always visible and functional
+   * Pattern defined in utilities.css (.scrollbar-styled)
+   * Kept inline here due to container query context */
   .artists-grid {
     scrollbar-width: thin;
     scrollbar-color: var(--color-blue) var(--color-neutral-100);

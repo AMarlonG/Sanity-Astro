@@ -234,7 +234,9 @@
    is shared with artist overview pages.
 */
 
-/* Styled scrollbar - always visible for discoverability */
+/* Styled scrollbar - always visible for discoverability
+ * Pattern defined in utilities.css (.scrollbar-styled)
+ * Kept inline here due to specific context */
 .artists-scroll-wrapper {
   scrollbar-width: thin;
   scrollbar-color: var(--color-blue) var(--color-neutral-100);

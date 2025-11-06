@@ -342,3 +342,46 @@
     padding-inline: var(--space-2);
   }
 }
+
+/* ============================================
+   SCROLLBAR UTILITY
+   ============================================
+
+   Styled scrollbar for horizontal scroll containers.
+   Consistent across program filters, artist grids, and event pages.
+*/
+
+.scrollbar-styled {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-blue) var(--color-neutral-100);
+}
+
+.scrollbar-styled::-webkit-scrollbar {
+  height: 6px;
+  -webkit-appearance: none;
+}
+
+.scrollbar-styled::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+  border-radius: 0;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb {
+  background: var(--color-blue);
+  border-radius: 0;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb:hover {
+  background: var(--color-green);
+}
+
+/* Touch device optimization - larger scrollbar */
+@media (pointer: coarse) {
+  .scrollbar-styled {
+    scrollbar-width: auto;
+  }
+
+  .scrollbar-styled::-webkit-scrollbar {
+    height: 12px;
+  }
+}
