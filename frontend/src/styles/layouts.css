@@ -1,0 +1,142 @@
+/* Layout Styles - Container & Images
+ *
+ * Page-level layout patterns and image handling.
+ * Intrinsic, content-driven layouts with performance optimization.
+ *
+ * Extracted from global.css as part of CSS architecture refactor.
+ */
+
+/* ============================================
+   INTRINSIC CONTAINER
+   ============================================
+
+   Fluid and responsive container without breakpoints.
+   Width adapts naturally based on content and viewport.
+*/
+
+.container {
+  width: min(100% - var(--space-4), var(--container-max-width));
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
+
+  /* Make padding available to children for breakout patterns */
+  --container-padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
+}
+
+/* ============================================
+   GLOBAL IMAGE STYLES
+   ============================================
+
+   Modern image handling with performance and accessibility:
+   - Intrinsic sizing to prevent layout shift
+   - Modern format support (AVIF/WebP/JPG)
+   - Print optimization
+   - Reduced motion support
+   - Dark mode adjustments
+*/
+
+/* Base figure element - semantic container for images */
+figure {
+  margin: 0;
+  display: block;
+}
+
+/* Global image defaults - prevent layout shift and optimize loading */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Image loading states - provide visual feedback */
+img[loading="lazy"] {
+  /* Content-visibility for performance */
+  content-visibility: auto;
+}
+
+/* ============================================
+   PRINT OPTIMIZATION
+   ============================================
+
+   Ensure images print correctly and hide decorative images.
+*/
+
+@media print {
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hide decorative images in print */
+  img[role="presentation"],
+  img[alt=""] {
+    display: none;
+  }
+
+  /* Ensure critical images are visible */
+  img:not([role="presentation"]):not([alt=""]) {
+    display: block;
+  }
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================
+
+   Subtle opacity adjustment for images in dark mode.
+   Exempt logos and sponsor images.
+*/
+
+@media (prefers-color-scheme: dark) {
+  /* Global dark mode image adjustments */
+  img:not([data-no-dark-adjust]) {
+    opacity: 0.9;
+  }
+
+  /* Exempt specific images from dark mode adjustments */
+  img[data-no-dark-adjust],
+  .logo img,
+  .sponsor-logo img {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================
+
+   Ensure images remain visible and distinguishable.
+*/
+
+@media (prefers-contrast: high) {
+  img {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================
+
+   Disable image animations and smooth scrolling.
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  img {
+    animation: none;
+    transition: none;
+  }
+
+  /* Disable smooth scrolling for image containers */
+  .image-scroll-container {
+    scroll-behavior: auto;
+  }
+}
