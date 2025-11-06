@@ -1,0 +1,387 @@
+/* Utility Classes - Spacing, Display, Flexbox, Grid
+ *
+ * Single-purpose utility classes for common layout patterns.
+ * Prefer composition over creation of new component classes.
+ *
+ * Extracted from global.css as part of CSS architecture refactor.
+ */
+
+/* ============================================
+   TEXT ALIGNMENT
+   ============================================ */
+
+/* Text alignment - Using logical properties */
+.text-start { text-align: start; }
+.text-center { text-align: center; }
+.text-end { text-align: end; }
+
+/* Legacy text alignment (fallback) */
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* ============================================
+   TEXT & BACKGROUND COLORS
+   ============================================ */
+
+/* Text colors */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-disabled { color: var(--color-text-disabled); }
+.text-error { color: var(--color-error); }
+.text-success { color: var(--color-success); }
+
+/* Brand color utilities */
+.text-blue { color: var(--color-blue); }
+.text-red { color: var(--color-red); }
+.text-yellow { color: var(--color-yellow); }
+.text-green { color: var(--color-green); }
+
+.bg-blue { background-color: var(--color-blue); }
+.bg-red { background-color: var(--color-red); }
+.bg-yellow { background-color: var(--color-yellow); }
+.bg-green { background-color: var(--color-green); }
+
+/* Light background variants (for subtle accents) */
+.bg-blue-light { background-color: var(--color-blue-50); }
+.bg-red-light { background-color: var(--color-red-50); }
+.bg-yellow-light { background-color: var(--color-yellow-50); }
+.bg-green-light { background-color: var(--color-green-50); }
+
+/* ============================================
+   FONT WEIGHTS
+   ============================================ */
+
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-medium { font-weight: var(--font-weight-medium); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+/* ============================================
+   LOGICAL SPACING UTILITIES
+   ============================================
+
+   Better for internationalization than physical properties.
+   Uses block (vertical) and inline (horizontal) directions.
+*/
+
+/* Margin block start (top in LTR) */
+.mbs-0 { margin-block-start: var(--space-0); }
+.mbs-1 { margin-block-start: var(--space-1); }
+.mbs-2 { margin-block-start: var(--space-2); }
+.mbs-3 { margin-block-start: var(--space-3); }
+.mbs-4 { margin-block-start: var(--space-4); }
+.mbs-5 { margin-block-start: var(--space-5); }
+.mbs-6 { margin-block-start: var(--space-6); }
+
+/* Margin block end (bottom in LTR) */
+.mbe-0 { margin-block-end: var(--space-0); }
+.mbe-1 { margin-block-end: var(--space-1); }
+.mbe-2 { margin-block-end: var(--space-2); }
+.mbe-3 { margin-block-end: var(--space-3); }
+.mbe-4 { margin-block-end: var(--space-4); }
+.mbe-5 { margin-block-end: var(--space-5); }
+.mbe-6 { margin-block-end: var(--space-6); }
+
+/* Margin inline start (left in LTR, right in RTL) */
+.mis-0 { margin-inline-start: var(--space-0); }
+.mis-1 { margin-inline-start: var(--space-1); }
+.mis-2 { margin-inline-start: var(--space-2); }
+.mis-3 { margin-inline-start: var(--space-3); }
+.mis-4 { margin-inline-start: var(--space-4); }
+.mis-auto { margin-inline-start: auto; }
+
+/* Margin inline end (right in LTR, left in RTL) */
+.mie-0 { margin-inline-end: var(--space-0); }
+.mie-1 { margin-inline-end: var(--space-1); }
+.mie-2 { margin-inline-end: var(--space-2); }
+.mie-3 { margin-inline-end: var(--space-3); }
+.mie-4 { margin-inline-end: var(--space-4); }
+.mie-auto { margin-inline-end: auto; }
+
+/* Padding block start (top in LTR) */
+.pbs-0 { padding-block-start: var(--space-0); }
+.pbs-1 { padding-block-start: var(--space-1); }
+.pbs-2 { padding-block-start: var(--space-2); }
+.pbs-3 { padding-block-start: var(--space-3); }
+.pbs-4 { padding-block-start: var(--space-4); }
+
+/* Padding block end (bottom in LTR) */
+.pbe-0 { padding-block-end: var(--space-0); }
+.pbe-1 { padding-block-end: var(--space-1); }
+.pbe-2 { padding-block-end: var(--space-2); }
+.pbe-3 { padding-block-end: var(--space-3); }
+.pbe-4 { padding-block-end: var(--space-4); }
+
+/* Padding inline start (left in LTR, right in RTL) */
+.pis-0 { padding-inline-start: var(--space-0); }
+.pis-1 { padding-inline-start: var(--space-1); }
+.pis-2 { padding-inline-start: var(--space-2); }
+.pis-3 { padding-inline-start: var(--space-3); }
+.pis-4 { padding-inline-start: var(--space-4); }
+
+/* Padding inline end (right in LTR, left in RTL) */
+.pie-0 { padding-inline-end: var(--space-0); }
+.pie-1 { padding-inline-end: var(--space-1); }
+.pie-2 { padding-inline-end: var(--space-2); }
+.pie-3 { padding-inline-end: var(--space-3); }
+.pie-4 { padding-inline-end: var(--space-4); }
+
+/* ============================================
+   LEGACY SPACING UTILITIES
+   ============================================
+
+   Kept for compatibility with existing code.
+   Use logical properties (above) for new code.
+*/
+
+.mt-0 { margin-top: var(--space-0); }
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+
+.mb-0 { margin-bottom: var(--space-0); }
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+.p-0 { padding: var(--space-0); }
+.p-1 { padding: var(--space-1); }
+.p-2 { padding: var(--space-2); }
+.p-3 { padding: var(--space-3); }
+.p-4 { padding: var(--space-4); }
+.p-5 { padding: var(--space-5); }
+.p-6 { padding: var(--space-6); }
+
+/* ============================================
+   DISPLAY UTILITIES
+   ============================================ */
+
+.hidden { display: none; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+
+/* ============================================
+   FLEXBOX UTILITIES
+   ============================================ */
+
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+
+/* Align items (cross axis) */
+.items-start { align-items: flex-start; }
+.items-center { align-items: center; }
+.items-end { align-items: flex-end; }
+
+/* Justify content (main axis) */
+.justify-start { justify-content: flex-start; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+.justify-between { justify-content: space-between; }
+
+/* Gap utilities */
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+
+/* ============================================
+   INTRINSIC GRID UTILITIES
+   ============================================
+
+   Content-driven layouts that adapt naturally
+   without media queries. Based on container size,
+   not viewport size.
+*/
+
+/* Auto-fit grid - Items expand to fill space */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-4);
+}
+
+/* Auto-fill grid - Creates empty tracks, dense packing */
+.auto-grid-dense {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+  gap: var(--space-4);
+  grid-auto-flow: dense;
+}
+
+/* Responsive columns - Fluid sizing with clamp */
+.responsive-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 40vw, 400px), 1fr));
+  gap: clamp(var(--space-3), 3vw, var(--space-6));
+}
+
+/* Card grid - Perfect for event/artist cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, max(280px, 25ch)), 1fr));
+  gap: clamp(var(--space-3), 2.5vw, var(--space-6));
+}
+
+/* Legacy grid utilities (for fallback) */
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* ============================================
+   IMAGE ASPECT RATIO UTILITIES
+   ============================================ */
+
+.aspect-square { aspect-ratio: 1 / 1; }
+.aspect-video { aspect-ratio: 16 / 9; }
+.aspect-portrait { aspect-ratio: 4 / 5; }
+.aspect-tall { aspect-ratio: 9 / 16; }
+
+/* ============================================
+   IMAGE OBJECT FIT UTILITIES
+   ============================================ */
+
+.object-cover { object-fit: cover; }
+.object-contain { object-fit: contain; }
+.object-fill { object-fit: fill; }
+.object-none { object-fit: none; }
+.object-scale-down { object-fit: scale-down; }
+
+/* ============================================
+   IMAGE OBJECT POSITION UTILITIES
+   ============================================ */
+
+.object-center { object-position: center; }
+.object-top { object-position: top; }
+.object-bottom { object-position: bottom; }
+.object-left { object-position: left; }
+.object-right { object-position: right; }
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================
+
+   Layout decisions only, not component styling.
+   Use sparingly - prefer intrinsic CSS.
+*/
+
+@media (max-width: 768px) {
+  .md\:hidden { display: none; }
+}
+
+@media (min-width: 769px) {
+  .md\:flex { display: flex; }
+}
+
+/* ============================================
+   BROWSER FALLBACKS FOR CONTAINER QUERIES
+   ============================================
+
+   Container queries have 93%+ browser support (2024).
+   These fallbacks provide graceful degradation for the ~7%
+   of users on older browsers.
+
+   Strategy: Provide traditional responsive patterns as fallback,
+   then enhance with container queries when supported.
+*/
+
+/* Fallback for browsers without container query support */
+@supports not (container-type: inline-size) {
+  /* Card grid fallback - ensure minimum usable width */
+  .card-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  @media (max-width: 600px) {
+    .card-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Responsive columns fallback */
+  .responsive-columns {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  @media (max-width: 650px) {
+    .responsive-columns {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+/* Container query support is available - use modern patterns */
+@supports (container-type: inline-size) {
+  /* This is the default path for 93%+ of users */
+  /* All container query rules in the file above will work */
+
+  /* Add explicit container-type to ensure components can use container queries */
+  .card-grid,
+  .auto-grid,
+  .responsive-columns {
+    container-type: inline-size;
+  }
+}
+
+/* Container query for responsive containers */
+@container (max-width: 480px) {
+  .container-responsive {
+    padding-inline: var(--space-2);
+  }
+}
+
+/* ============================================
+   SCROLLBAR UTILITY
+   ============================================
+
+   Styled scrollbar for horizontal scroll containers.
+   Consistent across program filters, artist grids, and event pages.
+*/
+
+.scrollbar-styled {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-blue) var(--color-neutral-100);
+}
+
+.scrollbar-styled::-webkit-scrollbar {
+  height: 6px;
+  -webkit-appearance: none;
+}
+
+.scrollbar-styled::-webkit-scrollbar-track {
+  background: var(--color-neutral-100);
+  border-radius: 0;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb {
+  background: var(--color-blue);
+  border-radius: 0;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb:hover {
+  background: var(--color-green);
+}
+
+/* Touch device optimization - larger scrollbar */
+@media (pointer: coarse) {
+  .scrollbar-styled {
+    scrollbar-width: auto;
+  }
+
+  .scrollbar-styled::-webkit-scrollbar {
+    height: 12px;
+  }
+}

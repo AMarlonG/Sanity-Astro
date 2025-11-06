@@ -1,5 +1,46 @@
 /* Design Tokens - Norwegian Events Site */
 
+/* ============================================
+   BROWSER SUPPORT POLICY
+   ============================================
+
+   This CSS is designed for modern browsers with progressive enhancement.
+
+   MODERN FEATURES USED:
+   - CSS Custom Properties (var()) - 97%+ support
+   - CSS Grid - 96%+ support
+   - Flexbox - 99%+ support
+   - clamp() - 93%+ support
+   - Logical Properties (block-size, inline-size) - 95%+ support
+   - Container Queries (@container) - 93%+ support
+
+   TARGET BROWSERS:
+   - Chrome/Edge 105+ (full support including container queries)
+   - Firefox 121+ (full support including container queries)
+   - Safari 15.4+ (full support including container queries)
+   - Modern mobile browsers (iOS 15.4+, Android Chrome 105+)
+
+   UNSUPPORTED BROWSERS:
+   - Internet Explorer (end of life, no support)
+   - Safari < 15.4 (lacks container queries)
+   - Chrome < 105 (lacks container queries)
+
+   FALLBACK STRATEGY:
+   - Core content remains accessible and functional in all browsers
+   - Older browsers receive simplified but usable layouts
+   - Progressive enhancement over graceful degradation
+   - Use @supports queries for modern feature detection
+   - Traditional media queries as fallback for container queries
+
+   TESTING PRIORITY:
+   1. Latest Chrome (primary development)
+   2. Latest Safari (iOS/macOS consistency)
+   3. Latest Firefox (standards compliance)
+   4. Safari iOS 15.4+ (container query baseline)
+
+   See CSS_ARCHITECTURE.md for full browser support documentation.
+*/
+
 :root {
   /* Colors - Using Norwegian/Nordic inspired palette */
   

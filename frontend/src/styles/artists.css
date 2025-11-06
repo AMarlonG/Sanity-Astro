@@ -76,7 +76,9 @@
     scroll-margin-inline-start: 0.5rem;
   }
 
-  /* Styled native scrollbar - always visible and functional */
+  /* Styled native scrollbar - always visible and functional
+   * Pattern defined in utilities.css (.scrollbar-styled)
+   * Kept inline here due to container query context */
   .artists-grid {
     scrollbar-width: thin;
     scrollbar-color: var(--color-blue) var(--color-neutral-100);
@@ -131,177 +133,16 @@
 }
 
 /* ============================================
-   ARTIST CARD - IMAGE WITH OVERLAY DESIGN
+   ARTIST CARD STYLES
    ============================================
 
-   320px fixed width cards with 4:5 image anchored top left
-   and info box overlaid in bottom right corner.
+   Artist card component styles now centralized in:
+   /src/styles/artist-card.css
+
+   This file only contains artist page-specific layout and grid styles.
+   The card component itself (overlay design, hover states, accessibility)
+   is shared with event detail pages.
 */
-
-.artist-card {
-  position: relative; /* Required for stretched link pattern and overlay */
-  container-type: inline-size;
-  overflow: hidden;
-  border: none;
-  background-color: rgba(27, 25, 143, 0.08);
-  box-shadow: none;
-  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Fixed aspect ratio - same as image */
-  aspect-ratio: 4 / 5;
-
-  /* Fixed width - cards always 320px */
-  width: 320px;
-  min-width: 320px;
-  max-width: 320px;
-}
-
-/* Hover effect only for devices with hover capability */
-@media (hover: hover) {
-  .artist-card:hover {
-    transform: translateY(-4px);
-    box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px;
-    background-color: rgba(0, 179, 154, 0.08);
-  }
-
-  .artist-card:hover .artist-info-box {
-    background-color: rgb(235, 249, 247);
-  }
-
-  .artist-card:hover .artist-name {
-    color: var(--color-blue);
-  }
-
-  .artist-card:hover .artist-instrument {
-    color: var(--color-blue);
-  }
-}
-
-/* Artist Title - Hidden but contains the stretched link */
-.artist-title {
-  /* Keep in document flow but hide visually behind other elements */
-  /* NO position property - must stay static for ::before to work */
-  width: 0;
-  height: 0;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-}
-
-/* Artist Name - Visible name in info box */
-.artist-name {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.2;
-  font-weight: 600;
-  font-family: Georgia, 'Times New Roman', serif;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: white;
-  transition: color var(--transition-base);
-
-  /* Natural wrapping for long names */
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  hyphens: manual;
-  text-wrap: balance;
-
-  /* Maximum 2 lines */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Artist Image - 4:5 aspect ratio floating below top and inset from left */
-.artist-image {
-  position: absolute;
-  top: 1rem; /* Float below the top */
-  left: 1rem; /* Inset from the left edge */
-  width: 85%; /* Narrower than full width */
-  aspect-ratio: 4/5;
-  overflow: hidden;
-}
-
-.artist-image picture {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.artist-card-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Artist Info Box - Overlay in bottom right, inset from bottom and right */
-.artist-info-box {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  /* Using --color-blue-600 for WCAG AA compliance (4.5:1 contrast with white) */
-  background-color: var(--color-blue-600);
-  color: white;
-  padding: 1rem;
-  display: grid;
-  gap: 0.25rem;
-  z-index: 2;
-  transition: background-color var(--transition-base);
-
-  /* Width tight to content with wrapping constraint */
-  width: fit-content;
-  max-width: 20ch; /* Wraps at ~20 characters */
-}
-
-.artist-instrument {
-  margin: 0;
-  font-size: 0.75rem;
-  line-height: 1.3;
-  font-weight: var(--font-weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: white;
-  opacity: 0.9;
-  transition: color var(--transition-base);
-}
-
-/* Stretched link pattern - makes entire card clickable */
-.artist-card .artist-title-link {
-  color: white;
-  text-decoration: none;
-  transition: color var(--transition-base);
-}
-
-/* Pseudo-element stretches to cover entire card */
-.artist-title-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 3; /* Above info box (z-index: 2) to make entire card clickable */
-  cursor: pointer;
-}
-
-/* No arrow indicator on card title links */
-.artist-title-link::after {
-  content: none;
-}
-
-/* Hover state - no underline on stretched link */
-@media (hover: hover) {
-  .artist-card .artist-title-link:hover {
-    text-decoration: none;
-  }
-}
-
-/* Focus state - highly visible for keyboard users */
-.artist-card .artist-title-link:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 2px;
-  text-decoration: underline;
-}
 
 /* No Results State */
 .no-artists {

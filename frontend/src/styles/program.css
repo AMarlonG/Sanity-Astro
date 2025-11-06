@@ -127,7 +127,9 @@
     scroll-margin-inline-start: 0.5rem;
   }
 
-  /* Styled native scrollbar - always visible and functional */
+  /* Styled native scrollbar - always visible and functional
+   * Pattern defined in utilities.css (.scrollbar-styled)
+   * Kept inline here due to container query context */
   .date-filter-buttons {
     scrollbar-width: thin;
     scrollbar-color: var(--color-blue) var(--color-neutral-100);
@@ -264,7 +266,9 @@
     scroll-margin-inline-start: 0.5rem;
   }
 
-  /* Styled native scrollbar - always visible and functional */
+  /* Styled native scrollbar - always visible and functional
+   * Pattern defined in utilities.css (.scrollbar-styled)
+   * Kept inline here due to container query context */
   .venue-filter-buttons {
     scrollbar-width: thin;
     scrollbar-color: var(--color-blue) var(--color-neutral-100);
@@ -504,7 +508,9 @@
     scroll-margin-inline-start: 0.5rem;
   }
 
-  /* Styled native scrollbar - always visible and functional */
+  /* Styled native scrollbar - always visible and functional
+   * Pattern defined in utilities.css (.scrollbar-styled)
+   * Kept inline here due to container query context */
   .events-grid {
     scrollbar-width: thin;
     scrollbar-color: var(--color-blue) var(--color-neutral-100);
