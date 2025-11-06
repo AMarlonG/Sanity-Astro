@@ -210,6 +210,9 @@ export const siteSettings = defineType({
       type: 'image',
       group: 'identity',
       description: 'Liten ikon som vises i nettleserens faneblad',
+      options: {
+        hotspot: true,
+      },
     }),
     defineField({
       name: 'email',

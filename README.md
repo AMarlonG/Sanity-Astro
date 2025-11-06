@@ -163,6 +163,14 @@ Currently 8 test files covering:
   - AI assistant guidelines
   - Best practices and conventions
 
+- **IMAGES.md** - Image handling reference guide:
+  - Architecture and core utilities
+  - Fetching images from Sanity (GROQ patterns)
+  - Rendering with Image component
+  - Optimization features and quality presets
+  - Common patterns for artists, events, heroes
+  - Troubleshooting guide
+
 ## Git Workflow
 
 This project uses a two-branch model:

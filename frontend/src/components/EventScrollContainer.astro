@@ -1,7 +1,6 @@
 ---
 import { sanityClient } from "sanity:client";
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY } from '../lib/sanityImage';
 import { detectLanguage } from "../lib/utils/language.js";
 import { stegaClean } from '@sanity/client/stega';
 
@@ -14,7 +13,6 @@ interface Props {
   showVenue?: boolean
   showArtists?: boolean
   sortBy?: 'date-asc' | 'date-desc' | 'title-asc' | 'manual'
-  cardFormat?: '16:9' | '4:5'
 }
 
 const {
@@ -25,20 +23,12 @@ const {
   showTime = true,
   showVenue = true,
   showArtists = true,
-  sortBy = 'date-asc',
-  cardFormat = '16:9'
+  sortBy = 'date-asc'
 } = Astro.props
 
 // Detect current language from URL
 const currentLanguage = detectLanguage(Astro.request)
 const programPath = currentLanguage === 'en' ? '/en/program' : '/program'
-
-// Opprett Sanity Image URL Builder
-const { projectId, dataset } = sanityClient.config();
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null;
 
 // Hent faktiske event-data fra referansene
 let eventData = []
@@ -49,7 +39,23 @@ if (events && events.length > 0) {
       _id,
       title,
       slug,
-      "image": image.image,
+      "image": image{
+        asset->{
+          _id,
+          url,
+          metadata {
+            dimensions {
+              width,
+              height,
+              aspectRatio
+            },
+            lqip,
+            blurHash
+          }
+        },
+        hotspot,
+        crop
+      },
       "imageAlt": image.alt,
       eventDate,
       eventTime,
@@ -59,22 +65,6 @@ if (events && events.length > 0) {
     eventData = await sanityClient.fetch(EVENT_QUERY, { eventIds })
   }
 }
-
-// Hjelpefunksjon for å escape HTML
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
-const getImageUrl = (image: any, width: number, height: number) => {
-  if (!image || !urlFor) return '';
-  return urlFor(image).width(width).height(height).url() || '';
-};
 
 // Sorter arrangementer basert på valgt sortering
 let sortedEvents = [...eventData]
@@ -105,10 +95,9 @@ switch (sortBy) {
 // CSS-klasser basert på props
 const containerClass = 'event-scroll-container'
 const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
-const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 ---
 
-<section class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
+<section class={`${containerClass} ${scrollbarClass}`}>
   {title && <h3 class="event-scroll-title">{title}</h3>}
   <div class="event-scroll-wrapper">
     <ul class="event-list">
@@ -125,10 +114,16 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
         const eventImage = event.image || null
         const imageAlt = event.imageAlt || event.title || ''
 
-        // Beregn høyde basert på cardFormat
-        const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
-        const cardWidth = cardFormat === '16:9' ? 350 : 300
-        const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
+        // Generate responsive image sources (4:5 aspect ratio)
+        const aspectRatio = 4 / 5
+        const responsiveImages = eventImage
+          ? getResponsiveImageSet(eventImage, [240, 300, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
+          : null
+
+        // Fallback URL for browsers without picture support
+        const fallbackUrl = eventImage
+          ? getOptimizedImageUrl(eventImage, 300, 375, IMAGE_QUALITY.CARD)
+          : null
 
         // Kombinert dato og tid for <time> element
         const dateTimeValue = eventDate && timeString
@@ -138,14 +133,26 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
         return (
           <li class="event-item">
             <article class="event-card">
-              {eventImage && (
+              {eventImage && responsiveImages && fallbackUrl && (
                 <div class="event-image">
                   <picture>
+                    {responsiveImages
+                      .filter((format) => format.srcset.length > 0)
+                      .map((format) => (
+                      <source
+                        srcset={format.srcset}
+                        sizes="(max-width: 768px) 240px, 300px"
+                        type={`image/${format.format}`}
+                      />
+                    ))}
                     <img
-                      src={getImageUrl(eventImage, cardWidth, cardHeight)}
+                      src={fallbackUrl}
                       alt={imageAlt}
+                      width="300"
+                      height="375"
                       loading="lazy"
                       decoding="async"
+                      style="aspect-ratio: 4/5; object-fit: cover;"
                     />
                   </picture>
                 </div>
@@ -224,7 +231,7 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     scroll-snap-align: start;
   }
 
-  /* Intrinsic event cards */
+  /* Intrinsic event cards - standardized to 4:5 */
   .event-card {
     position: relative; /* Required for stretched link pattern */
     container-type: inline-size;
@@ -233,15 +240,6 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     overflow: hidden;
     box-shadow: var(--shadow-sm);
     transition: transform var(--transition-base), box-shadow var(--transition-base);
-  }
-
-  /* Content-based card sizing */
-  .card-format-16-9 .event-card {
-    width: clamp(280px, 40vw, 380px);
-    aspect-ratio: 16/9;
-  }
-
-  .card-format-4-5 .event-card {
     width: clamp(240px, 35vw, 320px);
     aspect-ratio: 4/5;
   }

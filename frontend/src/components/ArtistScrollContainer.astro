@@ -1,28 +1,18 @@
 ---
 import { sanityClient } from "sanity:client";
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/sanityImage';
 
 interface Props {
   title?: string
   items?: any[]
   showScrollbar?: boolean
-  cardFormat?: '16:9' | '4:5'
 }
 
 const {
   title,
   items = [],
-  showScrollbar = false,
-  cardFormat = '16:9'
+  showScrollbar = false
 } = Astro.props
-
-// Opprett Sanity Image URL Builder
-const { projectId, dataset } = sanityClient.config();
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null;
 
 // Hent faktiske artist-data fra referansene
 let artistData = []
@@ -33,7 +23,23 @@ if (items && items.length > 0) {
       _id,
       name,
       "slug": slug.current,
-      "image": image.image,
+      "image": image{
+        asset->{
+          _id,
+          url,
+          metadata {
+            dimensions {
+              width,
+              height,
+              aspectRatio
+            },
+            lqip,
+            blurHash
+          }
+        },
+        hotspot,
+        crop
+      },
       "imageAlt": image.alt,
       instrument,
       country
@@ -42,29 +48,12 @@ if (items && items.length > 0) {
   }
 }
 
-// Hjelpefunksjon for å escape HTML
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
-const getImageUrl = (image: any, width: number, height: number) => {
-  if (!image || !urlFor) return '';
-  return urlFor(image).width(width).height(height).url() || '';
-};
-
 // CSS-klasser basert på props
 const containerClass = 'artist-scroll-container'
 const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
-const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 ---
 
-<section class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
+<section class={`${containerClass} ${scrollbarClass}`}>
   {title && <h3 class="artist-scroll-title">{title}</h3>}
   <div class="artist-scroll-wrapper">
     <ul class="artist-list">
@@ -78,23 +67,41 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
         const artistCountry = artist.country || ''
         const artistSlug = artist.slug || ''
 
-        // Beregn høyde basert på cardFormat
-        const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
-        const cardWidth = cardFormat === '16:9' ? 320 : 280
-        const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
+        // Generate responsive image sources (4:5 aspect ratio)
+        const aspectRatio = 4 / 5
+        const responsiveImages = artistImage
+          ? getResponsiveImageSet(artistImage, [240, 280, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
+          : null
+
+        // Fallback URL for browsers without picture support
+        const fallbackUrl = artistImage
+          ? getOptimizedImageUrl(artistImage, 280, 350, IMAGE_QUALITY.CARD)
+          : null
 
         return (
           <li class="artist-item">
             <a href={`/artister/${artistSlug}`} class="artist-card-link">
               <article class="artist-card">
-                {artistImage && (
+                {artistImage && responsiveImages && fallbackUrl && (
                   <div class="artist-image">
                     <picture>
+                      {responsiveImages
+                        .filter((format) => format.srcset.length > 0)
+                        .map((format) => (
+                        <source
+                          srcset={format.srcset}
+                          sizes="(max-width: 768px) 240px, 280px"
+                          type={`image/${format.format}`}
+                        />
+                      ))}
                       <img
-                        src={getImageUrl(artistImage, cardWidth, cardHeight)}
+                        src={fallbackUrl}
                         alt={artistImageAlt}
+                        width="280"
+                        height="350"
                         loading="lazy"
                         decoding="async"
+                        style="aspect-ratio: 4/5; object-fit: cover;"
                       />
                     </picture>
                   </div>
@@ -154,15 +161,6 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
-  }
-
-  /* Format variants */
-  .card-format-16-9 .artist-card {
-    aspect-ratio: 16/9;
-    width: 320px;
-  }
-
-  .card-format-4-5 .artist-card {
     aspect-ratio: 4/5;
     width: 280px;
   }
@@ -219,11 +217,9 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     .artist-scroll-wrapper {
       gap: 0.75rem;
     }
-    
-    .card-size-medium .artist-card,
-    .card-size-large .artist-card,
-    .card-size-xlarge .artist-card {
-      width: 250px;
+
+    .artist-card {
+      width: 240px;
     }
   }
 </style> 

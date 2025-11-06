@@ -2,7 +2,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { createDataService } from '../../lib/sanity/dataService.js';
 import { formatDateWithWeekday } from '../../lib/utils/dates';
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
+import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/sanityImage';
 import { stegaClean } from '@sanity/client/stega';
 import {
   rateLimit,

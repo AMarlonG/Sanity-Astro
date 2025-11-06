@@ -39,63 +39,16 @@ export const buttonComponent = defineType({
       title: 'Stil',
       type: 'string',
       group: 'content',
-      description: 'Visuell stil på knappen',
+      description: 'Velg stil på knappen',
       options: {
         list: [
-          {title: 'Primær', value: 'primary'},
-          {title: 'Sekundær', value: 'secondary'},
-          {title: 'Utkant', value: 'outline'},
-          {title: 'Tekst-lenke', value: 'link'},
+          {title: 'Primær (blå bakgrunn, hvit tekst)', value: 'primary'},
+          {title: 'Sekundær (grå bakgrunn, hvit tekst)', value: 'secondary'},
+          {title: 'Utkant (gjennomsiktig, blå ramme)', value: 'outline'},
         ],
+        layout: 'radio',
       },
       initialValue: 'primary',
-    }),
-    defineField({
-      name: 'size',
-      title: 'Størrelse',
-      type: 'string',
-      group: 'content',
-      description: 'Størrelse på knappen',
-      options: {
-        list: [
-          {title: 'Liten', value: 'small'},
-          {title: 'Medium', value: 'medium'},
-          {title: 'Stor', value: 'large'},
-          {title: 'Ekstra stor', value: 'xl'},
-        ],
-      },
-      initialValue: 'medium',
-    }),
-    defineField({
-      name: 'icon',
-      title: 'Ikon',
-      type: 'string',
-      group: 'content',
-      description: 'Valgfritt ikon som vises ved siden av teksten',
-      options: {
-        list: [
-          {title: 'Ingen', value: 'none'},
-          {title: 'Pil høyre →', value: 'arrow-right'},
-          {title: 'Ekstern lenke ↗', value: 'external-link'},
-          {title: 'Nedlasting ↓', value: 'download'},
-        ],
-      },
-      initialValue: 'none',
-    }),
-    defineField({
-      name: 'iconPosition',
-      title: 'Ikon posisjon',
-      type: 'string',
-      group: 'content',
-      description: 'Hvor ikonet skal plasseres',
-      hidden: ({parent}) => !parent?.icon || parent?.icon === 'none',
-      options: {
-        list: [
-          {title: 'Før tekst', value: 'before'},
-          {title: 'Etter tekst', value: 'after'},
-        ],
-      },
-      initialValue: 'after',
     }),
     defineField({
       name: 'fullWidth',
@@ -118,29 +71,20 @@ export const buttonComponent = defineType({
     select: {
       title: 'text',
       style: 'style',
-      size: 'size',
-      icon: 'icon',
-      theme: 'theme.variant',
+      fullWidth: 'fullWidth',
     },
-    prepare({title, style, size, icon, theme}) {
-      // Lag realistisk beskrivelse av hvordan knappen ser ut
+    prepare({title, style, fullWidth}) {
       const styleDesc = {
-        'primary': 'Blå bakgrunn, hvit tekst',
-        'secondary': 'Grå bakgrunn, hvit tekst',
-        'outline': 'Gjennomsiktig bakgrunn, blå ramme'
-      }[style || 'primary'] || 'Blå bakgrunn, hvit tekst'
+        'primary': 'Primær',
+        'secondary': 'Sekundær',
+        'outline': 'Utkant'
+      }[style || 'primary'] || 'Primær'
 
-      const sizeDesc = {
-        'small': 'liten',
-        'medium': 'medium',
-        'large': 'stor'
-      }[size || 'medium'] || 'medium'
-
-      const iconText = icon && icon !== 'none' ? ` • ${icon}-ikon` : ''
+      const widthText = fullWidth ? ' • Full bredde' : ''
 
       return {
         title: 'Knapp',
-        subtitle: `${title || 'Uten tekst'} • ${styleDesc} • ${sizeDesc} størrelse${iconText}`,
+        subtitle: `${title || 'Uten tekst'} • ${styleDesc}${widthText}`,
         media: BoltIcon,
       }
     },

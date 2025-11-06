@@ -24,20 +24,18 @@ export const heading = defineType({
   title: 'Overskrift',
   type: 'object',
   icon: BlockContentIcon,
-  description: 'Opprett overskrifter (H2-H6) for å strukturere innholdet ditt.',
+  description: 'Opprett overskrifter (H2-H4) for å strukturere innholdet ditt.',
   fields: [
     defineField({
       name: 'level',
       title: 'Nivå',
       type: 'string',
-      description: 'Velg overskriftens nivå (H2-H6)',
+      description: 'Velg overskriftens nivå (H2-H4)',
       options: {
         list: [
           {title: 'H2 - Underskrift', value: 'h2'},
           {title: 'H3 - Mindre underskrift', value: 'h3'},
           {title: 'H4 - Liten overskrift', value: 'h4'},
-          {title: 'H5 - Mindre overskrift', value: 'h5'},
-          {title: 'H6 - Minste overskrift', value: 'h6'},
         ],
       },
       validation: componentValidation.title,

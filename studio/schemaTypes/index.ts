@@ -39,6 +39,7 @@ export const schemaTypes = [
   components.portableTextBlock,
   components.imageComponent,
   components.videoComponent,
+  components.spotifyComponent,
   components.buttonComponent,
   components.linkComponent,
   components.accordionComponent,
@@ -47,6 +48,9 @@ export const schemaTypes = [
   components.pageBuilderWithoutTitle,
   components.columnLayout,
   components.spacer,
+  components.gridComponent,
+  components.twoColumnLayout,
+  components.threeColumnLayout,
   // Seksjoner
   components.contentScrollContainer,
   components.artistScrollContainer,

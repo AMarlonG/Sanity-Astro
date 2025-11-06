@@ -1,10 +1,14 @@
 ---
 import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
-import { 
-  createOptimizedImageUrl,
-  createResponsiveImageSet,
-  createLQIP
-} from '../lib/imageUtils';
+import {
+  getResponsiveImageSet,
+  extractImageMetadata,
+  getLQIPUrl,
+  getOptimizedImageUrl,
+  IMAGE_QUALITY,
+  type ResponsiveImageSource,
+  type ImageMetadata
+} from '../lib/sanityImage';
 
 interface Props {
   image: SanityImageSource;
@@ -26,17 +30,17 @@ interface Props {
   _type?: string;
 }
 
-const { 
-  image, 
-  alt, 
-  caption, 
-  credit, 
-  alignment = 'center', 
+const {
+  image,
+  alt,
+  caption,
+  credit,
+  alignment = 'center',
   size = 'medium',
-  aspectRatio = '16:9',
+  aspectRatio = '4:5',
   className = '',
   loading = 'lazy',
-  quality = 80,
+  quality = IMAGE_QUALITY.CARD,
   formats = ['avif', 'webp', 'jpg'],
   sizes,
   placeholder = 'blur',
@@ -49,7 +53,7 @@ const {
 const getAspectRatioValue = (ratio: string | number): number => {
   if (typeof ratio === 'number') return ratio;
   const [width, height] = ratio.split(':').map(Number);
-  return height / width;
+  return width / height; // Changed: width/height instead of height/width for CSS aspect-ratio
 };
 
 const aspectValue = getAspectRatioValue(aspectRatio);
@@ -80,26 +84,43 @@ const imageWidths = getImageWidths(size);
 const imageSizes = sizes || getAutoSizes(size);
 
 // Generate responsive image sets (only if image exists)
-const responsiveImageSets = image ? createResponsiveImageSet(
-  image, 
-  imageWidths, 
-  formats, 
-  aspectValue, 
+const responsiveImageSets: ResponsiveImageSource[] = image ? getResponsiveImageSet(
+  image,
+  imageWidths,
+  formats,
+  aspectValue,
   quality
 ) : [];
 
-// Generate LQIP for placeholder (only if image exists and placeholder is enabled)
-const lqipUrl = (image && placeholder === 'blur') ? createLQIP(image) : null;
+// Extract metadata for advanced features
+const metadata: ImageMetadata = image ? extractImageMetadata(image) : {};
+
+// Generate placeholder (BlurHash preferred, fallback to LQIP)
+let placeholderUrl: string | null = null;
+if (image && placeholder === 'blur') {
+  // Try BlurHash first (better quality but only works client-side during hydration)
+  if (metadata.blurHash) {
+    // For SSR, we'll use LQIP as initial placeholder
+    // Client-side script can upgrade to BlurHash if needed
+    placeholderUrl = metadata.lqip || getLQIPUrl(image);
+  } else {
+    // Fall back to LQIP
+    placeholderUrl = getLQIPUrl(image);
+  }
+}
+
+// Calculate width and height from largest image in responsive set
+const largestWidth = imageWidths[imageWidths.length - 1];
+const imageWidth = largestWidth;
+const imageHeight = Math.round(largestWidth / aspectValue);
 
 // Generate fallback URL (only if image exists)
-const fallbackUrl = image ? createOptimizedImageUrl(image, {
-  width: imageWidths[0],
-  height: Math.round(imageWidths[0] * aspectValue),
-  format: 'jpg',
-  quality,
-  auto: 'format',
-  fit: 'crop'
-}) : null;
+const fallbackUrl = image ? getOptimizedImageUrl(
+  image,
+  imageWidths[0],
+  Math.round(imageWidths[0] / aspectValue),
+  quality
+) : null;
 
 // Determine loading strategy
 const imageLoading = priority ? 'eager' : loading;
@@ -112,29 +133,42 @@ const fetchPriority = priority ? 'high' : 'auto';
   data-sanity={_key ? `${_type}.${_key}` : _type}
 >
   {image ? (
-    <picture>
-      {responsiveImageSets
-        .filter((format) => format.srcset.length > 0)
-        .map((format) => (
-        <source
-          srcset={format.srcset}
-          sizes={imageSizes}
-          type={`image/${format.format}`}
+    <div
+      class="image-wrapper"
+      style={`--aspect-ratio: ${aspectValue}`}
+    >
+      {placeholderUrl && (
+        <div
+          class="image-placeholder"
+          style={`background-image: url(${placeholderUrl})`}
+          aria-hidden="true"
         />
-      ))}
-      <img
-        src={fallbackUrl || ''}
-        alt={alt}
-        loading={imageLoading}
-        decoding="async"
-        fetchpriority={fetchPriority}
-        sizes={imageSizes}
-        class="image"
-        style={lqipUrl ? `background-image: url(${lqipUrl}); background-size: cover;` : undefined}
-      />
-    </picture>
+      )}
+      <picture>
+        {responsiveImageSets
+          .filter((format) => format.srcset.length > 0)
+          .map((format) => (
+          <source
+            srcset={format.srcset}
+            sizes={imageSizes}
+            type={`image/${format.format}`}
+          />
+        ))}
+        <img
+          src={fallbackUrl || ''}
+          alt={alt}
+          width={imageWidth}
+          height={imageHeight}
+          loading={imageLoading}
+          decoding="async"
+          fetchpriority={fetchPriority}
+          sizes={imageSizes}
+          class="image"
+        />
+      </picture>
+    </div>
   ) : (
-    <div class="image-placeholder">
+    <div class="image-missing">
       <span>Bilde ikke tilgjengelig</span>
     </div>
   )}
@@ -147,64 +181,160 @@ const fetchPriority = priority ? 'high' : 'auto';
   )}
 </figure>
 
+<script>
+  // Client-side image load detection
+  document.addEventListener('astro:page-load', () => {
+    const images = document.querySelectorAll('.image-wrapper .image');
+
+    images.forEach((img) => {
+      const wrapper = img.closest('.image-wrapper');
+      if (!wrapper) return;
+
+      // Check if already loaded
+      if ((img as HTMLImageElement).complete) {
+        wrapper.classList.add('image-loaded');
+      } else {
+        // Listen for load event
+        img.addEventListener('load', () => {
+          wrapper.classList.add('image-loaded');
+        }, { once: true });
+      }
+    });
+  });
+</script>
+
 <style>
   .image-container {
     margin: 2rem 0;
   }
-  
+
   .image-container.image-left {
     text-align: left;
   }
-  
+
   .image-container.image-center {
     text-align: center;
   }
-  
+
   .image-container.image-right {
     text-align: right;
   }
-  
-  .image {
+
+  /* Modern image wrapper with blur-up effect */
+  .image-wrapper {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: var(--aspect-ratio);
+    content-visibility: auto; /* Performance: render only when visible */
+    display: inline-block;
     max-width: 100%;
-    height: auto;
-    object-fit: cover;
   }
-  
-  .image-small .image {
+
+  /* Size constraints */
+  .image-small .image-wrapper {
     max-width: 300px;
   }
-  
-  .image-medium .image {
+
+  .image-medium .image-wrapper {
     max-width: 600px;
   }
-  
-  .image-large .image {
+
+  .image-large .image-wrapper {
     max-width: 800px;
   }
-  
-  .image-full .image {
+
+  .image-full .image-wrapper {
     width: 100%;
   }
-  
+
+  /* LQIP/BlurHash placeholder with blur-up effect */
+  .image-placeholder {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px);
+    transform: scale(1.1); /* Prevent blur edges from showing */
+    transition: opacity 400ms ease-out;
+    z-index: 1;
+  }
+
+  .image-loaded .image-placeholder {
+    opacity: 0;
+  }
+
+  /* Picture element (contains sources) */
+  .image-wrapper picture {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Image element */
+  .image {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 400ms ease-out;
+  }
+
+  .image-loaded .image {
+    opacity: 1;
+  }
+
+  /* Dark mode enhancement */
+  @media (prefers-color-scheme: dark) {
+    .image {
+      filter: brightness(0.8) contrast(1.2);
+    }
+  }
+
+  /* Accessibility: Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .image-placeholder,
+    .image {
+      transition: none;
+    }
+  }
+
+  /* Caption styling */
   .image-caption {
     margin-top: 0.5rem;
     font-size: 0.9rem;
   }
-  
+
   .caption-text {
     display: block;
   }
-  
+
   .credit-text {
     display: block;
     font-style: italic;
     margin-top: 0.25rem;
   }
-  
-  .image-placeholder {
+
+  /* Missing image placeholder */
+  .image-missing {
     background: #f5f5f5;
     border: 2px dashed #ddd;
     padding: 2rem;
     text-align: center;
+    aspect-ratio: 4/5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-</style> 
+
+  @media (prefers-color-scheme: dark) {
+    .image-missing {
+      background: #2a2a2a;
+      border-color: #444;
+      color: #aaa;
+    }
+  }
+</style>

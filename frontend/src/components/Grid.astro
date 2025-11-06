@@ -1,0 +1,152 @@
+---
+import DynamicComponent from './DynamicComponent.astro'
+
+export interface Props {
+  title?: string
+  columns: '2' | '3'
+  items: any[]
+  gap?: 'small' | 'medium' | 'large'
+  className?: string
+  _key?: string
+  _type?: string
+}
+
+const {
+  title,
+  columns = '3',
+  items = [],
+  gap = 'medium',
+  className = '',
+  _key,
+  _type,
+} = Astro.props
+
+// Map gap values to CSS variables
+const gapMap = {
+  small: '1rem',
+  medium: '2rem',
+  large: '3rem',
+}
+
+const gapValue = gapMap[gap] || gapMap.medium
+
+// Sanity Visual Editing attributes
+const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
+---
+
+<section class={`grid-component ${className}`} {...sanityAttributes}>
+  {title && <h2 class="grid-title">{title}</h2>}
+
+  <div
+    class="grid-container"
+    data-columns={columns}
+    style={`--grid-gap: ${gapValue};`}
+  >
+    {items.map((item) => (
+      <div class="grid-item">
+        <DynamicComponent block={item} />
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  .grid-component {
+    margin: 3rem 0;
+    max-width: 100%;
+  }
+
+  .grid-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .grid-container {
+    display: grid;
+    gap: var(--grid-gap, 2rem);
+    width: 100%;
+  }
+
+  /* Desktop: 2 or 3 columns based on data attribute */
+  .grid-container[data-columns='2'] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-container[data-columns='3'] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* All grid items have 4:5 aspect ratio cards */
+  .grid-item {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 8px;
+    position: relative;
+  }
+
+  /* Make child components fill the grid item */
+  .grid-item > :global(*) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Tablet: Reduce to 2 columns for 3-column layouts */
+  @media (max-width: 1024px) {
+    .grid-container[data-columns='3'] {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Mobile: Stack vertically (1 column) */
+  @media (max-width: 768px) {
+    .grid-container[data-columns='2'],
+    .grid-container[data-columns='3'] {
+      grid-template-columns: 1fr;
+    }
+
+    .grid-title {
+      font-size: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-component {
+      margin: 2rem 0;
+    }
+  }
+
+  /* Responsive gap adjustments */
+  @media (max-width: 768px) {
+    .grid-container {
+      --grid-gap: max(1rem, var(--grid-gap) * 0.5);
+    }
+  }
+
+  /* Accessibility */
+  .grid-item:focus-within {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .grid-item {
+      transition: none;
+    }
+  }
+
+  /* Print styles */
+  @media print {
+    .grid-container {
+      display: block;
+    }
+
+    .grid-item {
+      page-break-inside: avoid;
+      margin-bottom: 1rem;
+    }
+  }
+</style>

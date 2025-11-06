@@ -21,10 +21,14 @@ export {
 export {portableTextBlock} from './content/PortableTextBlock'
 export {imageComponent, generateOptimizedImageUrl} from './content/Image'
 export {videoComponent} from './content/Video'
+export {spotifyComponent} from './media/Spotify'
 
 // Layout Components
 export {columnLayout} from './layout/ColumnLayout'
 export {spacer} from './layout/Spacer'
+export {gridComponent} from './layout/Grid'
+export {twoColumnLayout} from './layout/TwoColumn'
+export {threeColumnLayout} from './layout/ThreeColumn'
 
 // Interactive Components
 export {accordionComponent} from './interactive/Accordion'
