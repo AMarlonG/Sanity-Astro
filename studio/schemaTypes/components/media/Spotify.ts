@@ -1,5 +1,5 @@
 import {defineField, defineType} from 'sanity'
-import {PlayIcon} from '@sanity/icons'
+import {PlayIcon, MicrophoneIcon} from '@sanity/icons'
 import {componentValidation} from '../../shared/validation'
 import type {ValidationRule} from '../../shared/types'
 
@@ -98,7 +98,7 @@ export const spotifyComponent = defineType({
         subtitle: subtitle
           ? `${subtitle} (${spotifyType})${displayMode}`
           : `${spotifyType}${displayMode}`,
-        media: MusicIcon,
+        media: MicrophoneIcon,
       }
     },
   },

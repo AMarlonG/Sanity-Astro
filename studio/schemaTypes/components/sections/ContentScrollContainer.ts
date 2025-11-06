@@ -1,11 +1,11 @@
 import {defineField, defineType} from 'sanity'
-import {EllipsisHorizontalIcon} from '@sanity/icons'
+import {InlineElementIcon} from '@sanity/icons'
 
 export const contentScrollContainer = defineType({
   name: 'contentScrollContainer',
   title: 'Innholdskarusell',
   type: 'object',
-  icon: EllipsisHorizontalIcon,
+  icon: InlineElementIcon,
   description: 'Horisontal scrollende karusell med blandet innhold (Instagram-stil)',
   fields: [
     defineField({
@@ -54,7 +54,7 @@ export const contentScrollContainer = defineType({
       return {
         title: title || 'Innholdskarusell',
         subtitle: `${itemCount} elementer (4:5 kort) • ${scrollbarStatus}`,
-        media: EllipsisHorizontalIcon,
+        media: InlineElementIcon,
       }
     },
   },

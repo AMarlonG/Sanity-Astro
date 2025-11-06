@@ -141,9 +141,8 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 
 <section class={`${containerClass} ${scrollbarClass}`}>
   {title && <h3 class="event-scroll-title">{title}</h3>}
-  <div class="event-scroll-wrapper">
-    <ul class="event-list">
-      {sortedEvents.map((event) => {
+  <ul class="event-list">
+    {sortedEvents.map((event) => {
         if (!event) return null
 
         const eventDate = event.eventDate?.date ? new Date(event.eventDate.date) : null
@@ -232,15 +231,15 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
           </li>
         )
       })}
-    </ul>
-  </div>
+  </ul>
 </section>
 
 <style>
   /* Intrinsic Scroll Container */
   .event-scroll-container {
     container-type: inline-size;
-    width: 100%;
+    width: min(100ch, 100% - 4rem);
+    margin-inline: auto;
     margin-block: clamp(var(--space-5), 4vw, var(--space-6));
   }
 
@@ -250,22 +249,18 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
     margin-block-end: var(--space-4);
   }
 
-  /* Fluid scroll wrapper */
-  .event-scroll-wrapper {
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-block: var(--space-2);
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-    touch-action: manipulation; /* Allow both horizontal and vertical scrolling, remove double-tap delay */
-  }
-
+  /* Fluid scroll list */
   .event-list {
     display: flex;
     gap: clamp(var(--space-3), 2.5vw, var(--space-5));
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding-block: var(--space-2);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation; /* Allow both horizontal and vertical scrolling, remove double-tap delay */
   }
 
   .event-item {
@@ -428,12 +423,12 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
   }
 
   /* Scroll snap and accessibility */
-  .hide-scrollbar .event-scroll-wrapper {
+  .hide-scrollbar .event-list {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
 
-  .hide-scrollbar .event-scroll-wrapper::-webkit-scrollbar {
+  .hide-scrollbar .event-list::-webkit-scrollbar {
     display: none;
   }
 
@@ -449,7 +444,7 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
       transform: none; /* Disable lift effect */
     }
 
-    .event-scroll-wrapper {
+    .event-list {
       scroll-behavior: auto;
     }
   }

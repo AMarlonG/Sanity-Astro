@@ -27,16 +27,16 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
 <section
-  class={`two-column-layout ${reverseOnMobile ? 'reverse-mobile' : ''} ${className}`}
+  class={`two-column-layout content-media-narrow ${reverseOnMobile ? 'reverse-mobile' : ''} ${className}`}
   {...sanityAttributes}
 >
-  <div class="column column-left">
-    {leftItem && <DynamicComponent block={leftItem} />}
-  </div>
+    <div class="column column-left">
+      {leftItem && <DynamicComponent block={leftItem} />}
+    </div>
 
-  <div class="column column-right">
-    {rightItem && <DynamicComponent block={rightItem} />}
-  </div>
+    <div class="column column-right">
+      {rightItem && <DynamicComponent block={rightItem} />}
+    </div>
 </section>
 
 <style>
@@ -46,6 +46,10 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     gap: 3rem;
     margin: 3rem 0;
     align-items: start;
+
+    /* Container query context - allows children to adapt to available space */
+    container-type: inline-size;
+    container-name: two-column-layout;
   }
 
   .column {

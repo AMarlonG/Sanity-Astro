@@ -54,19 +54,19 @@ const components = {
 ---
 
 {semanticElement === 'section' ? (
-  <section class={`portable-text ${className}`}>
+  <section class={`portable-text content-narrow ${className}`}>
     {contentToRender && contentToRender.length > 0 && (
       <PortableText value={contentToRender} components={components} />
     )}
   </section>
 ) : semanticElement === 'article' ? (
-  <article class={`portable-text ${className}`}>
+  <article class={`portable-text content-narrow ${className}`}>
     {contentToRender && contentToRender.length > 0 && (
       <PortableText value={contentToRender} components={components} />
     )}
   </article>
 ) : (
-  <div class={`portable-text ${className}`}>
+  <div class={`portable-text content-narrow ${className}`}>
     {contentToRender && contentToRender.length > 0 && (
       <PortableText value={contentToRender} components={components} />
     )}

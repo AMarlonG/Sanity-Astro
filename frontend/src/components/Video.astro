@@ -75,7 +75,7 @@ switch (videoType) {
 }
 ---
 
-<figure class={`video-component ${className}`}>
+<figure class={`video-component content-media-narrow ${className}`}>
   {videoType === 'sanity' && videoSource ? (
     <video
       controls={controls}
@@ -145,7 +145,6 @@ switch (videoType) {
 <style>
   .video-component {
     margin: 2rem 0;
-    max-width: 100%;
   }
 
   .video-title {

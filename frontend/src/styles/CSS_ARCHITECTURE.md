@@ -176,6 +176,253 @@ If performance becomes an issue, focus on these **instead** of CSS async loading
 
 **Until then:** Focus on features and higher-impact optimizations (JS, images, fonts).
 
+## Layout Philosophy: Base Width & Intrinsic Responsiveness
+
+### Core Principle: The Web is Naturally Responsive
+
+**Key Insight:** Websites are responsive by default. We often make them more complicated than they need to be. Text wraps naturally, images shrink, and flexbox/grid layouts adapt - until we force them not to.
+
+### The Base Width Pattern
+
+**Foundation:** All pages use a base width constraint for comfortable layouts:
+
+```css
+.content-wrapper {
+  width: min(100ch, 100% - 4rem);
+  margin-inline: auto;
+}
+```
+
+**What this does:**
+- **At wide viewports:** Content maxes out at 100ch (fits 3×320px cards comfortably)
+- **At narrow viewports:** Content takes `100% - 4rem` (full width with 2rem padding on each side)
+- **The `min()` function:** Automatically picks whichever value is smaller
+- **`margin-inline: auto`:** Centers the content horizontally
+
+**Why this works:**
+- No media queries needed for basic responsive behavior
+- Built-in padding at all sizes (content never touches viewport edges)
+- Self-adapting based on available space
+- Creates predictable, comfortable reading experience
+
+### Six-Level Width System
+
+Components can make width decisions relative to the base. This hierarchical system provides precise control over content width while maintaining visual consistency:
+
+**1. Extra Narrow (40ch)** - Special content blocks
+- Pull quotes, blockquotes
+- Spotify embeds, compact media
+- Callouts, highlighted content
+- Use `.content-extra-narrow` class
+- Centered for visual emphasis and maximum readability
+- Example components: Quote.astro, Spotify.astro
+
+**2. Media Narrow (55ch)** - Media components
+- Accordion components
+- Image components
+- Video components
+- Two-column layouts
+- Use `.content-media-narrow` class
+- Balanced width for media content - wider than text but narrower than full width
+- Example components: Accordion.astro, Image.astro, Video.astro, TwoColumn.astro
+
+**3. Narrow (65ch)** - Body text and paragraphs
+- Body text, descriptions, articles
+- PortableText content
+- Standard prose and reading content
+- Use `.content-narrow` class
+- Optimal line length for comfortable reading (~65 characters per line)
+- Example components: PortableText.astro
+- Used for event excerpts and page excerpts
+
+**4. Base (100ch)** - Default for all content
+- Card grids, mixed content layouts
+- Standard multi-column components
+- Default - inherits from `.content-wrapper` in Layout.astro
+- Fits three 320px cards side-by-side with gaps
+- No extra styling needed (uses base width from Layout.astro)
+
+**5. Wide (95ch)** - Multi-column layouts
+- Grid layouts
+- Three-column layouts
+- Use `.content-wide` class
+- Narrower than base width to create visual distinction for layout containers
+- Example components: Grid.astro, ThreeColumn.astro
+
+**6. Full (100%)** - Breakout for visual elements
+- Hero images, full-bleed galleries
+- Navigation, headers, footers
+- Background sections
+- Use `.content-full` class
+- Escapes all width constraints
+- Uses full available viewport width
+
+### Natural Wrapping Over Forced Scrolling
+
+**Principle:** Trust the web's natural behavior. Let things wrap and stack naturally as the viewport narrows.
+
+**Use horizontal scrolling only when:**
+- It's a deliberate UX pattern (carousel, gallery preview)
+- Content is meant to be browsed quickly (like a magazine rack)
+- You have many items (10+) and want to show a curated preview
+- Vertical stacking would lose the intended experience
+
+**For most content:**
+- Let flex items wrap with `flex-wrap: wrap`
+- Use `grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))`
+- Allow natural stacking on mobile
+- No `overflow-x: scroll` unless truly beneficial
+
+### Container Queries Integration
+
+Container queries let components respond to their container's size, not the viewport. This pairs perfectly with the base width pattern:
+
+**The base width becomes a container:**
+```css
+.content-wrapper {
+  width: min(100ch, 100% - 4rem);
+  margin-inline: auto;
+  container-type: inline-size;
+  container-name: content;
+}
+```
+
+**Components adapt to available space:**
+```css
+.component {
+  /* Stack on narrow containers */
+  grid-template-columns: 1fr;
+
+  /* Side-by-side when container has space */
+  @container content (min-width: 60ch) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+```
+
+**Benefits:**
+- Components are truly modular - work anywhere
+- Respond to actual available space, not viewport assumptions
+- Think component-first, not page-first
+- No arbitrary breakpoints needed
+
+### Layout Parent-Child Width Handling
+
+**The Problem:** Components like Quote (40ch), Image (55ch), and PortableText (65ch) have width wrappers for standalone use. When placed inside layout components (Grid, TwoColumn, ThreeColumn), these children would try to maintain their own width constraints, causing them to break out of their parent columns or appear incorrectly sized.
+
+**The Solution:** Layout components create container query contexts, and we globally override child width constraints when inside these layouts.
+
+#### Implementation
+
+**1. Layout components become container contexts:**
+```css
+.grid-container {
+  container-type: inline-size;
+  container-name: grid-layout;
+}
+
+.two-column-layout {
+  container-type: inline-size;
+  container-name: two-column-layout;
+}
+
+.three-column-layout {
+  container-type: inline-size;
+  container-name: three-column-layout;
+}
+```
+
+**2. Children fill parent column space:**
+```css
+/* Children inside layout containers fill available column space */
+.grid-container > .grid-item > :global(*),
+.two-column-layout > .column > :global(*),
+.three-column-layout > .column > :global(*) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-inline: 0 !important;
+}
+```
+
+#### Design Principles
+
+This approach combines principles from:
+- **Every Layout** by Andy Bell and Heydon Pickering
+- **Kevin Powell's container query patterns**
+
+Key principles applied:
+
+1. **Component Autonomy**: Components work standalone with their own width constraints
+2. **Context Adaptation**: Components automatically adapt when placed inside layouts
+3. **Composability**: No props, variants, or manual configuration needed
+4. **Intrinsic Design**: Layout respects the natural behavior of content
+5. **Container-based Responsiveness**: Components respond to their container, not the viewport
+
+#### Examples
+
+**Standalone Quote Component:**
+```
+Page (100ch base width)
+  └─ Quote (.content-extra-narrow: 40ch)
+     └─ Centered, 40ch wide
+```
+
+**Quote Inside TwoColumn:**
+```
+Page (100ch base width)
+  └─ TwoColumn (.content-media-narrow: 55ch)
+     ├─ Column 1 (~27.5ch available)
+     │  └─ Quote (overridden to 100% of column = ~27.5ch)
+     └─ Column 2 (~27.5ch available)
+        └─ PortableText (overridden to 100% of column = ~27.5ch)
+```
+
+**Quote Inside Grid:**
+```
+Page (100ch base width)
+  └─ Grid (.content-wide: 95ch, 3 columns)
+     ├─ Column 1 (~300px)
+     │  └─ Image (overridden to 100% of column = ~300px)
+     ├─ Column 2 (~300px)
+     │  └─ Quote (overridden to 100% of column = ~300px)
+     └─ Column 3 (~300px)
+        └─ Video (overridden to 100% of column = ~300px)
+```
+
+#### Benefits
+
+- **Zero Configuration**: Components "just work" in any context
+- **Maintainable**: Add new components without updating layout logic
+- **Predictable**: Clear parent-child width relationships
+- **Modern CSS**: Uses container queries and logical properties
+- **Composable**: Mix and nest layouts without conflicts
+
+### Implementation Status
+
+**Current:** Implemented project-wide via Layout.astro
+
+**What's Done:**
+- Base width system added to `layouts.css` with utility classes
+- `Layout.astro` applies 100ch constraint globally via `.content-wrapper`
+- All pages inherit the base width automatically
+- Container queries enabled for responsive components
+
+**Reference:** Based on Kevin Powell's smart layouts with container queries:
+- Article: https://css-tricks.com/smart-layouts-with-container-queries/
+- Approach: Progressive enhancement with intrinsic CSS
+- Philosophy: Simplicity and natural responsiveness first
+
+**How to Use:**
+- Extra narrow: Add `.content-extra-narrow` class for 40ch width (quotes, Spotify)
+- Media narrow: Add `.content-media-narrow` class for 55ch width (accordions, images, videos, two-column)
+- Narrow: Add `.content-narrow` class for 65ch width (body text, paragraphs)
+- Default: Content stays within 100ch (no extra classes needed) - fits 3 cards
+- Wide: Add `.content-wide` class for 95ch width (multi-column layouts like Grid, ThreeColumn)
+- Break out: Add `.content-full` class for full-width sections
+- Components can use container queries to adapt within available space
+
+---
+
 ## Design Patterns
 
 ### CSS Custom Properties (Tokens)
@@ -286,6 +533,49 @@ Older browsers get slightly less optimal layouts but remain fully functional.
 Users on unsupported browsers will get functional but less polished layouts.
 
 ## Best Practices
+
+### Semantic HTML: No Divs Just for Divs
+
+**Core Principle:** Width utility classes should be applied directly to semantic HTML elements, not wrapper divs. Semantics are important.
+
+**Why This Matters:**
+- Cleaner DOM with less nesting
+- Better semantic HTML structure
+- Consistent with web standards
+- Easier to maintain
+- Improved accessibility
+
+**Pattern to Follow:**
+```astro
+<!-- ✅ Good: Utility class on semantic element -->
+<section class="event-description content-narrow">
+  <h2 class="section-title">Om konserten</h2>
+  <p class="description-text">{description}</p>
+</section>
+
+<!-- ❌ Bad: Unnecessary wrapper div -->
+<div class="content-narrow">
+  <section class="event-description">
+    <h2 class="section-title">Om konserten</h2>
+    <p class="description-text">{description}</p>
+  </section>
+</div>
+```
+
+**Component Examples:**
+- Quote.astro: `.content-extra-narrow` on `<blockquote>` (not wrapper div)
+- Spotify.astro: `.content-extra-narrow` on `<figure>` (not wrapper div)
+- Image.astro: `.content-media-narrow` on `<figure>` (not wrapper div)
+- Video.astro: `.content-media-narrow` on `<figure>` (not wrapper div)
+- PortableText.astro: `.content-narrow` on `<section>`/`<article>`/`<div>` (not wrapper div)
+- TwoColumn.astro: `.content-media-narrow` on `<section>` (not wrapper div)
+- ThreeColumn.astro: `.content-wide` on `<section>` (not wrapper div)
+- Grid.astro: `.content-wide` on `<section>` (not wrapper div)
+
+**When Wrapper Divs Are Acceptable:**
+- Only use wrapper divs when structurally necessary for layout (e.g., `.grid-container` inside Grid.astro)
+- Never add a div solely for the purpose of applying a width constraint
+- If you find yourself adding a wrapper div, ask: "Does this serve a structural purpose beyond width?"
 
 ### When to Create New CSS
 

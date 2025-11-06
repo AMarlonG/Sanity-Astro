@@ -1,11 +1,11 @@
 import {defineField, defineType} from 'sanity'
-import {BlockElementIcon} from '@sanity/icons'
+import {ThLargeIcon} from '@sanity/icons'
 
 export const gridComponent = defineType({
   name: 'gridComponent',
   title: 'Rutenett',
   type: 'object',
-  icon: BlockElementIcon,
+  icon: ThLargeIcon,
   description: 'Vis innhold i et rutenett som tilpasser seg skjermstørrelsen',
   fields: [
     defineField({
@@ -77,7 +77,7 @@ export const gridComponent = defineType({
       return {
         title: title || 'Rutenett',
         subtitle: `${columnText} • ${itemCount} elementer • ${gapText} avstand`,
-        media: BlockElementIcon,
+        media: ThLargeIcon,
       }
     },
   },
