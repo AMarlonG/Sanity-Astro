@@ -102,9 +102,23 @@ export interface ResponsiveImageSource {
  * Get Sanity image builder instance
  *
  * @param source - Sanity image source object
- * @returns Image URL builder or null if configuration is missing
+ * @returns Image URL builder or null if configuration is missing or source is invalid
  */
 export function getImageBuilder(source: SanityImageSource) {
+  // Validate source before proceeding
+  if (!source) {
+    return null
+  }
+
+  // Handle nested image objects like {"alt":null,"image":null}
+  // If source has an 'image' property, use that as the actual source
+  const actualSource = (source as any)?.image || source
+
+  // If the actual source is still null/undefined, return null
+  if (!actualSource || actualSource === null) {
+    return null
+  }
+
   const { projectId, dataset } = sanityClient.config()
 
   if (!projectId || !dataset) {
@@ -112,7 +126,7 @@ export function getImageBuilder(source: SanityImageSource) {
     return null
   }
 
-  return imageUrlBuilder({ projectId, dataset }).image(source)
+  return imageUrlBuilder({ projectId, dataset }).image(actualSource)
 }
 
 /**
