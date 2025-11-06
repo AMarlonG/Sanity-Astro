@@ -7,17 +7,13 @@
     "frontend"
   ],
   "scripts": {
-    "dev": "concurrently -c \"blue,green\" -n \"frontend,studio\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=studio\"",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:studio": "npm run dev --workspace=studio",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:studio": "cd studio && npm run dev",
     "build": "npm run build --workspace=frontend && npm run build --workspace=studio",
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2"
   }
 }

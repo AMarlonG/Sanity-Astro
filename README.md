@@ -31,14 +31,17 @@ cd ../frontend && npm run typegen
 
 ### Development
 
-```bash
-# Start all servers (Studio on :3333, Frontend on :4321)
-npm run dev
+**Start servers in separate terminals:**
 
-# Or start individually:
-npm run dev:frontend  # Astro frontend
-npm run dev:studio    # Sanity Studio
+```bash
+# Terminal 1 - Studio
+npm run dev:studio    # http://localhost:3333
+
+# Terminal 2 - Frontend
+npm run dev:frontend  # http://localhost:4321
 ```
+
+**Note:** Due to Vite process management issues, servers must be started separately.
 
 ### Building
 

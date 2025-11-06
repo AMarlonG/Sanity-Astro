@@ -239,18 +239,16 @@ export const POST_QUERY = defineQuery(`*[
 #### Visual Editing
 
 **Requirements:**
-- Requires both servers running: Studio (port 3333) + Frontend (port 4321)
-- Requires preview mode cookie to be set: `sanity-preview-mode=true`
-- Environment variables must be set: `SANITY_API_READ_TOKEN` and `PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true`
+- Both servers running (see Section 3 Server Management)
+- Preview mode cookie: `sanity-preview-mode=true`
+- Environment variables configured (see Section 3 Environment Variables)
 
 **API Configuration:**
 - Use `apiVersion: "2025-01-01"` in Sanity configuration for latest features
 - Set `useCdn: false` in development for real-time content updates
-- Keep `studioUrl: 'http://localhost:3333'` for Visual Editing
 
 **Content Structure:**
-- Support bilingual content with Norwegian as default and English as optional
-- Use proper date formatting for both languages in displays
+- Bilingual content handling (see Section 4 Development Workflow)
 - Keep content schemas simple - avoid complex relationships unless needed
 
 ### 2.2 Astro Framework
@@ -414,8 +412,9 @@ export function initializeSomeFeature(param) {
 
 ### Server Management
 - **Always run both servers**: Studio (3333) + Frontend (4321) for Visual Editing
-- **Use `npm run dev`** from root to start both servers simultaneously
+- **Start servers separately** in different terminals due to Vite process management issues
 - **Check both endpoints** respond before testing Visual Editing
+- See **Section 7 Quick Reference** for startup commands
 
 ### Environment Variables
 
@@ -712,12 +711,9 @@ Before every commit, verify:
 
 **Key Commands:**
 ```bash
-# Start all servers
-npm run dev
-
-# Start individual servers
-npm run dev:frontend
-npm run dev:studio
+# Start servers (must run in separate terminals)
+npm run dev:studio     # Terminal 1 - Studio on :3333
+npm run dev:frontend   # Terminal 2 - Frontend on :4321
 
 # Sanity TypeGen operations (run from studio folder)
 npm run extract-schema  # Extract schema to frontend
