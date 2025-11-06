@@ -226,50 +226,67 @@
   scroll-margin-inline-start: var(--space-2);
 }
 
-/* Artist card - matches filter button styling */
+.artist-card-link {
+  text-decoration: none;
+  display: block;
+}
+
+/* Artist card - 4:5 aspect ratio with image */
 .artist-card {
-  position: relative;
+  background: white;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  padding: var(--space-2) var(--space-4);
-  background-color: rgba(27, 25, 143, 0.08);
-  color: var(--color-blue);
-  border: 1px solid var(--color-blue);
-  text-decoration: none;
-  font-weight: var(--font-weight-normal);
-  font-size: var(--font-size-base);
-  white-space: nowrap;
-  transition: background-color var(--transition-base),
-              color var(--transition-base);
-}
-
-.artist-name {
-  display: block;
-  line-height: 1.2;
-}
-
-.artist-instrument {
-  display: block;
-  font-size: var(--font-size-sm);
-  opacity: 0.85;
-}
-
-/* Remove default link arrow */
-.artist-card::after {
-  content: none;
+  aspect-ratio: 4/5;
+  width: 280px;
 }
 
 @media (hover: hover) {
   .artist-card:hover {
-    background-color: rgba(0, 179, 154, 0.08);
-    color: var(--color-blue);
-    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 }
 
-.artist-card:focus-visible {
-  outline: 2px solid var(--color-blue);
-  outline-offset: 2px;
+.artist-image {
+  flex: 1;
+  overflow: hidden;
+}
+
+.artist-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.artist-content {
+  padding: 0.75rem;
+  background: white;
+}
+
+.artist-name {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+}
+
+.artist-instrument {
+  font-size: 0.85rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.artist-country {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .artist-card {
+    width: 240px;
+  }
 }
 
 /* Styled scrollbar - always visible for discoverability */
@@ -331,21 +348,16 @@
 
 @media (prefers-contrast: high) {
   .artist-card {
-    border-width: 2px;
+    border: 2px solid currentColor;
   }
 
-  .artist-card:focus-visible {
+  .artist-card-link:focus-visible {
     outline-width: 3px;
   }
 }
 
 /* Touch device optimizations */
 @media (pointer: coarse) {
-  .artist-card {
-    min-block-size: 44px;
-    padding-inline: var(--space-5);
-  }
-
   .artists-scroll-wrapper::-webkit-scrollbar {
     height: 8px;
   }
