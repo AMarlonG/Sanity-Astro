@@ -239,9 +239,52 @@ Consistent scrollbar styling defined in `utilities.css` (`.scrollbar-styled`):
 - Chrome/Edge 105+ (container queries)
 - Firefox 121+ (container queries)
 - Safari 15.4+ (container queries)
-- Modern mobile browsers
+- Modern mobile browsers (iOS 15.4+, Android Chrome 105+)
 
 Older browsers get slightly less optimal layouts but remain fully functional.
+
+### Browser Support Philosophy
+
+**Progressive Enhancement Approach:**
+1. **Core Experience (All Browsers)**
+   - Semantic HTML structure
+   - Readable typography
+   - Functional navigation
+   - Accessible content
+   - Works without CSS
+
+2. **Enhanced Experience (Modern Browsers)**
+   - Container queries for responsive components
+   - Intrinsic CSS layouts (clamp, min/max)
+   - CSS custom properties for theming
+   - Logical properties for i18n support
+   - Advanced scrollbar styling
+
+3. **Fallback Strategy**
+   - `@supports not` queries for container queries
+   - Traditional media queries as fallback
+   - Legacy physical properties alongside logical ones
+   - Graceful degradation (not feature parity)
+
+### Testing Browsers
+
+**Priority Testing:**
+- Latest Chrome (primary development browser)
+- Latest Safari (iOS/macOS consistency)
+- Latest Firefox (standards compliance)
+- Safari iOS 15.4+ (container query baseline)
+
+**Occasional Testing:**
+- Edge (Chromium-based, usually same as Chrome)
+- Firefox Android
+- Chrome Android
+
+**No Support:**
+- Internet Explorer (end of life)
+- Safari < 15.4 (lacks container queries)
+- Chrome < 105 (lacks container queries)
+
+Users on unsupported browsers will get functional but less polished layouts.
 
 ## Best Practices
 
