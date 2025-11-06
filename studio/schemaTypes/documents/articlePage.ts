@@ -6,7 +6,7 @@ import {seoFields, seoGroup} from '../objects/seoFields'
 
 export const articlePage = defineType({
   name: 'articlePage',
-  title: 'Artikkelside',
+  title: 'Artikkeloversikt',
   type: 'document',
   icon: DocumentIcon,
   __experimental_formPreviewTitle: false,
@@ -35,7 +35,7 @@ export const articlePage = defineType({
       name: 'title_no',
       title: 'Tittel (norsk)',
       type: 'string',
-      description: 'Tittel på artikkelsiden på norsk',
+      description: 'Tittel på artikkeloversikten på norsk',
       initialValue: 'Artikler',
       validation: componentValidation.title,
       group: 'no',
@@ -44,7 +44,7 @@ export const articlePage = defineType({
       name: 'slug_no',
       title: 'URL (norsk)',
       type: 'slug',
-      description: 'URL for norsk artikkelside (anbefalt: "artikler")',
+      description: 'URL for norsk artikkeloversikt (anbefalt: "artikler")',
       options: {
         source: 'title_no',
         maxLength: 96,
@@ -57,7 +57,7 @@ export const articlePage = defineType({
       name: 'excerpt_no',
       title: 'Ingress (norsk)',
       type: 'text',
-      description: 'Kort beskrivelse av artikkelsiden på norsk',
+      description: 'Kort beskrivelse av artikkeloversikten på norsk',
       rows: 2,
       validation: componentValidation.longDescription,
       group: 'no',
@@ -66,7 +66,7 @@ export const articlePage = defineType({
       name: 'content_no',
       title: 'Sideinnhold (norsk)',
       type: 'pageBuilder',
-      description: 'Bygg norsk artikkelside med komponenter og innhold',
+      description: 'Bygg norsk artikkeloversikt med komponenter og innhold',
       group: 'no',
     }),
 
@@ -75,14 +75,14 @@ export const articlePage = defineType({
       name: 'title_en',
       title: 'Title (English)',
       type: 'string',
-      description: 'Article page title in English',
+      description: 'Article overview title in English',
       group: 'en',
     }),
     defineField({
       name: 'slug_en',
       title: 'URL (English)',
       type: 'slug',
-      description: 'URL for English article page (recommended: "articles")',
+      description: 'URL for English article overview (recommended: "articles")',
       options: {
         source: 'title_en',
         maxLength: 96,
@@ -94,7 +94,7 @@ export const articlePage = defineType({
       name: 'excerpt_en',
       title: 'Excerpt (English)',
       type: 'text',
-      description: 'Short description of the article page in English',
+      description: 'Short description of the article overview in English',
       rows: 2,
       validation: componentValidation.longDescription,
       group: 'en',
@@ -103,7 +103,7 @@ export const articlePage = defineType({
       name: 'content_en',
       title: 'Page content (English)',
       type: 'pageBuilder',
-      description: 'Build English article page with components and content',
+      description: 'Build English article overview with components and content',
       group: 'en',
       components: {
         input: createMirrorPortableTextInput('content_no')
@@ -121,7 +121,7 @@ export const articlePage = defineType({
           to: [{type: 'article'}],
         }
       ],
-      description: 'Velg artikler som skal vises på artikkelsiden, eller la stå tom for å vise alle publiserte artikler (vises på begge språk)',
+      description: 'Velg artikler som skal vises på artikkeloversikten, eller la stå tom for å vise alle publiserte artikler (vises på begge språk)',
       group: 'articles',
     }),
 
@@ -143,7 +143,7 @@ export const articlePage = defineType({
       if (hasEnglish || title_en) languages.push('EN');
       const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
-      const title = title_no || title_en || 'Artikkelside';
+      const title = title_no || title_en || 'Artikkeloversikt';
       const slug = slug_no || slug_en || 'artikler';
 
       return {

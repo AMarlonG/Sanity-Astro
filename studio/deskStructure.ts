@@ -28,15 +28,15 @@ export const structure = (S: StructureBuilder) =>
 
       S.listItem().title('Forsider').icon(EarthGlobeIcon).child(S.documentTypeList('homepage')),
       S.listItem()
-        .title('Programside')
+        .title('Programoversikt')
         .icon(CalendarIcon)
         .child(S.document().schemaType('programPage').documentId('programPage')),
       S.listItem()
-        .title('Artistside')
+        .title('Artistoversikt')
         .icon(UsersIcon)
         .child(S.document().schemaType('artistPage').documentId('artistPage')),
       S.listItem()
-        .title('Artikkelside')
+        .title('Artikkeloversikt')
         .icon(DocumentTextIcon)
         .child(S.document().schemaType('articlePage').documentId('articlePage')),
       S.listItem().title('Faste sider').icon(DocumentsIcon).child(S.documentTypeList('page')),

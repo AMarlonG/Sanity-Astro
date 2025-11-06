@@ -6,7 +6,7 @@ import type {ArtistPageData} from '../shared/types'
 
 export const artistPage = defineType({
   name: 'artistPage',
-  title: 'Artistside',
+  title: 'Artistoversikt',
   type: 'document',
   icon: UsersIcon,
   __experimental_formPreviewTitle: false,
@@ -34,7 +34,7 @@ export const artistPage = defineType({
       name: 'title_no',
       title: 'Tittel (norsk)',
       type: 'string',
-      description: 'Tittel på artistsiden på norsk',
+      description: 'Tittel på artistoversikten på norsk',
       initialValue: 'Artister',
       validation: componentValidation.title,
       group: 'no',
@@ -43,7 +43,7 @@ export const artistPage = defineType({
       name: 'slug_no',
       title: 'URL (norsk)',
       type: 'slug',
-      description: 'URL for norsk artistside (anbefalt: "artister")',
+      description: 'URL for norsk artistoversikt (anbefalt: "artister")',
       options: {
         source: 'title_no',
         maxLength: 96,
@@ -56,7 +56,7 @@ export const artistPage = defineType({
       name: 'excerpt_no',
       title: 'Ingress (norsk)',
       type: 'text',
-      description: 'Kort beskrivelse av artistsiden på norsk',
+      description: 'Kort beskrivelse av artistoversikten på norsk',
       rows: 2,
       validation: componentValidation.longDescription,
       group: 'no',
@@ -65,7 +65,7 @@ export const artistPage = defineType({
       name: 'content_no',
       title: 'Sideinnhold (norsk)',
       type: 'pageBuilder',
-      description: 'Bygg norsk artistside med komponenter og innhold',
+      description: 'Bygg norsk artistoversikt med komponenter og innhold',
       group: 'no',
     }),
 
@@ -74,14 +74,14 @@ export const artistPage = defineType({
       name: 'title_en',
       title: 'Title (English)',
       type: 'string',
-      description: 'Artists page title in English',
+      description: 'Artist overview title in English',
       group: 'en',
     }),
     defineField({
       name: 'slug_en',
       title: 'URL (English)',
       type: 'slug',
-      description: 'URL for English artists page (recommended: "artists")',
+      description: 'URL for English artist overview (recommended: "artists")',
       options: {
         source: 'title_en',
         maxLength: 96,
@@ -93,7 +93,7 @@ export const artistPage = defineType({
       name: 'excerpt_en',
       title: 'Excerpt (English)',
       type: 'text',
-      description: 'Short description of the artists page in English',
+      description: 'Short description of the artist overview in English',
       rows: 2,
       validation: componentValidation.longDescription,
       group: 'en',
@@ -102,7 +102,7 @@ export const artistPage = defineType({
       name: 'content_en',
       title: 'Page content (English)',
       type: 'pageBuilder',
-      description: 'Build English artists page with components and content',
+      description: 'Build English artist overview with components and content',
       group: 'en',
       components: {
         input: createMirrorPortableTextInput('content_no')
@@ -120,7 +120,7 @@ export const artistPage = defineType({
           to: [{type: 'artist'}],
         }
       ],
-      description: 'Velg artister som skal vises på artistsiden (vises på begge språk)',
+      description: 'Velg artister som skal vises på artistoversikten (vises på begge språk)',
       group: 'artists',
     }),
   ],
@@ -140,7 +140,7 @@ export const artistPage = defineType({
       if (hasEnglish || title_en) languages.push('EN');
       const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
-      const title = title_no || title_en || 'Artistside';
+      const title = title_no || title_en || 'Artistoversikt';
       const slug = slug_no || slug_en || 'artister';
 
       return {

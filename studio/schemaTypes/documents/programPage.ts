@@ -6,7 +6,7 @@ import type {ProgramPageData} from '../shared/types'
 
 export const programPage = defineType({
   name: 'programPage',
-  title: 'Programside',
+  title: 'Programoversikt',
   type: 'document',
   icon: CalendarIcon,
   __experimental_formPreviewTitle: false,
@@ -34,7 +34,7 @@ export const programPage = defineType({
       name: 'title_no',
       title: 'Tittel (norsk)',
       type: 'string',
-      description: 'Tittel på programsiden på norsk',
+      description: 'Tittel på programoversikten på norsk',
       initialValue: 'Program',
       validation: componentValidation.title,
       group: 'no',
@@ -43,7 +43,7 @@ export const programPage = defineType({
       name: 'slug_no',
       title: 'URL (norsk)',
       type: 'slug',
-      description: 'URL for norsk programside (anbefalt: "program")',
+      description: 'URL for norsk programoversikt (anbefalt: "program")',
       options: {
         source: 'title_no',
         maxLength: 96,
@@ -56,7 +56,7 @@ export const programPage = defineType({
       name: 'excerpt_no',
       title: 'Ingress (norsk)',
       type: 'text',
-      description: 'Kort beskrivelse av programsiden på norsk',
+      description: 'Kort beskrivelse av programoversikten på norsk',
       rows: 2,
       validation: componentValidation.longDescription,
       group: 'no',
@@ -65,7 +65,7 @@ export const programPage = defineType({
       name: 'content_no',
       title: 'Sideinnhold (norsk)',
       type: 'pageBuilder',
-      description: 'Bygg norsk programside med komponenter og innhold',
+      description: 'Bygg norsk programoversikt med komponenter og innhold',
       group: 'no',
     }),
 
@@ -74,14 +74,14 @@ export const programPage = defineType({
       name: 'title_en',
       title: 'Title (English)',
       type: 'string',
-      description: 'Program page title in English',
+      description: 'Program overview title in English',
       group: 'en',
     }),
     defineField({
       name: 'slug_en',
       title: 'URL (English)',
       type: 'slug',
-      description: 'URL for English program page (recommended: "program")',
+      description: 'URL for English program overview (recommended: "program")',
       options: {
         source: 'title_en',
         maxLength: 96,
@@ -93,7 +93,7 @@ export const programPage = defineType({
       name: 'excerpt_en',
       title: 'Excerpt (English)',
       type: 'text',
-      description: 'Short description of the program page in English',
+      description: 'Short description of the program overview in English',
       rows: 2,
       validation: componentValidation.longDescription,
       group: 'en',
@@ -102,7 +102,7 @@ export const programPage = defineType({
       name: 'content_en',
       title: 'Page content (English)',
       type: 'pageBuilder',
-      description: 'Build English program page with components and content',
+      description: 'Build English program overview with components and content',
       group: 'en',
       components: {
         input: createMirrorPortableTextInput('content_no')
@@ -120,7 +120,7 @@ export const programPage = defineType({
           to: [{type: 'event'}],
         }
       ],
-      description: 'Velg arrangementer som skal vises på programsiden (vises på begge språk)',
+      description: 'Velg arrangementer som skal vises på programoversikten (vises på begge språk)',
       group: 'events',
     }),
   ],
@@ -140,7 +140,7 @@ export const programPage = defineType({
       if (hasEnglish || title_en) languages.push('EN');
       const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
 
-      const title = title_no || title_en || 'Programside';
+      const title = title_no || title_en || 'Programoversikt';
       const slug = slug_no || slug_en || 'program';
 
       return {
