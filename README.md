@@ -163,12 +163,14 @@ Currently 8 test files covering:
   - AI assistant guidelines
   - Best practices and conventions
 
-- **IMAGES.md** - Image handling reference guide:
+- **MEDIA.md** - Media handling reference guide (images and videos):
   - Architecture and core utilities
-  - Fetching images from Sanity (GROQ patterns)
-  - Rendering with Image component
-  - Optimization features and quality presets
-  - Common patterns for artists, events, heroes
+  - Fetching images and videos from Sanity (GROQ patterns)
+  - Rendering with Image and Video components
+  - Optimization features (performance, privacy, security)
+  - Quality presets and aspect ratio handling
+  - Video support in all layout components (Grid, TwoColumn, ThreeColumn, etc.)
+  - Common patterns for artists, events, heroes, promotional videos
   - Troubleshooting guide
 
 ## Git Workflow
