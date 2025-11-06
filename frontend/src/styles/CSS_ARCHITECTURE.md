@@ -17,8 +17,7 @@ frontend/src/styles/
 ├── artist-card.css     # Shared artist card component
 ├── program.css         # Program page specific styles
 ├── event.css           # Event detail page styles
-├── artists.css         # Artist overview page styles
-└── global.css.backup   # Original file (pre-refactor backup)
+└── artists.css         # Artist overview page styles
 ```
 
 ## Load Order
@@ -362,6 +361,14 @@ All CSS follows accessibility guidelines:
 - Documented higher-impact optimization opportunities (JS, images, fonts)
 - Current approach already optimal for this project's needs
 
+### Phase 5: Documentation & Browser Support Policy
+- Added comprehensive browser support policy to `tokens.css` header
+- Documented target browsers (Chrome 105+, Firefox 121+, Safari 15.4+)
+- Documented modern CSS features and fallback strategies
+- Updated CSS_ARCHITECTURE.md with complete refactor history
+- Added migration notes for future developers
+- Completed comprehensive CSS architecture refactor
+
 ## Performance Metrics
 
 Current CSS performance is excellent:
@@ -400,6 +407,149 @@ No further optimization needed unless metrics indicate a problem.
 **Issue:** Layout shift on page load
 - **Solution:** Check if critical styles are inline in Layout.astro
 
+## Migration Notes for Future Developers
+
+### Coming from the Old Structure (Pre-Refactor)
+
+If you're maintaining this project or joining after the refactor, here's what changed:
+
+#### What Happened
+
+**Before (Single File):**
+- `global.css` - 860 lines, everything in one file
+- Duplicated artist card styles in `artists.css` and `event.css`
+- Hard to find specific styles
+- Merge conflicts common
+
+**After (Modular Structure):**
+- `global.css` → Split into 4 focused files:
+  - `base.css` - Typography, links, forms, accessibility
+  - `utilities.css` - Spacing, display, flexbox, grid utilities
+  - `components.css` - Buttons, badges, cards
+  - `layouts.css` - Container patterns, image handling
+- `artist-card.css` - Extracted shared component (eliminated 330+ lines duplication)
+- Page-specific files remain: `program.css`, `event.css`, `artists.css`
+
+#### Why These Changes Were Made
+
+1. **Maintainability** - Find styles faster, reduce duplication
+2. **Performance** - No change (Astro already optimizes)
+3. **Developer Experience** - Clear organization, easier to onboard
+4. **Code Quality** - DRY principles, single source of truth
+
+#### If You Need to Find Old Code
+
+The original `global.css` is preserved in git history (commit da49786 and earlier):
+```bash
+# View the old global.css anytime:
+git show da49786:frontend/src/styles/global.css
+```
+
+**How to find where something moved:**
+
+| Old Location | New Location |
+|-------------|--------------|
+| Typography (h1-h6, p, a) | `base.css` |
+| Utility classes (.flex, .gap-4) | `utilities.css` |
+| Buttons, badges, cards | `components.css` |
+| Container, intrinsic grids | `layouts.css` |
+| Artist card styles | `artist-card.css` |
+| Form styles | `base.css` |
+| Focus indicators | `base.css` |
+
+#### How to Add New Styles
+
+**Decision Tree:**
+
+1. **Is it shared across multiple pages?**
+   - Typography/forms → Add to `base.css`
+   - Utility class → Add to `utilities.css`
+   - UI component → Add to `components.css`
+   - Layout pattern → Add to `layouts.css`
+
+2. **Is it a shared component (used on 2+ pages)?**
+   - Create separate file (e.g., `artist-card.css`)
+   - Import in `Layout.astro`
+
+3. **Is it page-specific?**
+   - Add to page's CSS file (e.g., `program.css`)
+   - Or create new file (e.g., `contact.css`)
+   - Import at page level, not in Layout
+
+#### Common Migration Pitfalls
+
+**Pitfall 1: "I can't find the button styles!"**
+- **Solution:** They're in `components.css` now (lines 1-50)
+
+**Pitfall 2: "My styles aren't loading!"**
+- **Solution:** Check import order in `Layout.astro` (reset → tokens → base → utilities → components → layouts)
+
+**Pitfall 3: "I want to add a new utility class"**
+- **Solution:** Add to `utilities.css`, not inline in components
+
+**Pitfall 4: "Where did `global.css` go?"**
+- **Solution:** It was split into modular files and deleted. View git history if needed: `git show da49786:frontend/src/styles/global.css`
+
+#### What NOT to Do
+
+1. **Don't recreate `global.css`** - The split structure is intentional (original in git history)
+2. **Don't duplicate styles** - Check existing files first
+3. **Don't skip the import order** - Order matters (cascade dependencies)
+4. **Don't inline styles** - Use existing classes or add to appropriate file
+
+#### Quick Reference for Common Tasks
+
+**Task: Add a new button style**
+```css
+/* File: components.css */
+.btn-new-style {
+  /* Add properties */
+}
+```
+
+**Task: Add a new utility class**
+```css
+/* File: utilities.css */
+.new-utility {
+  /* Add properties */
+}
+```
+
+**Task: Style a new page**
+```css
+/* Create: new-page.css */
+/* Import in: pages/new-page.astro */
+```
+
+**Task: Create a shared component**
+```css
+/* Create: component-name.css */
+/* Import in: layouts/Layout.astro */
+```
+
+#### Performance Considerations
+
+**Don't worry about:**
+- File size (Astro optimizes and minifies)
+- Number of files (Astro bundles efficiently)
+- Import order beyond logical cascade (Astro handles it)
+
+**Do worry about:**
+- Duplicating styles (DRY principle)
+- Breaking HTMX dynamic content (keep styles global, not scoped)
+- Container query fallbacks (use `@supports not`)
+
+#### Getting Help
+
+If you're stuck or unsure:
+1. Read this document (CSS_ARCHITECTURE.md)
+2. Check git history to see where old code was: `git log --follow frontend/src/styles/`
+3. Search codebase for similar patterns
+4. Review `tokens.css` for available design tokens
+5. Check Layout.astro for import order
+
+**Philosophy:** Keep it simple, follow existing patterns, don't over-engineer.
+
 ## Resources
 
 - [Astro CSS Docs](https://docs.astro.build/en/guides/styling/)
@@ -409,5 +559,5 @@ No further optimization needed unless metrics indicate a problem.
 
 ---
 
-**Last Updated:** 2025-01-06
+**Last Updated:** 2025-11-06 (Phase 5 Complete)
 **Maintainer:** Development Team
