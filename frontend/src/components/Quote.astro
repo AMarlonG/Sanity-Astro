@@ -18,6 +18,7 @@ const {
 
 <blockquote
   class={`quote-component ${className}`}
+  data-component="quote"
   cite={cite}
 >
   <div class="quote-text">{quote}</div>
@@ -41,6 +42,20 @@ const {
     background: #f8f9fa;
     border-left: 4px solid #0066cc;
     position: relative;
+  }
+
+  /* When inside a layout context, fill parent space */
+  :global([data-layout-context]) .quote-component {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global([data-layout-context]) .quote-text {
+    flex: 1;
+    overflow-y: auto;
   }
 
   .quote-component::before {

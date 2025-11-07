@@ -256,6 +256,18 @@ const fetchPriority = priority ? 'high' : 'auto';
     content-visibility: auto; /* Performance: render only when visible */
   }
 
+  /* When inside a layout context, fill parent space instead of fixed dimensions */
+  :global([data-layout-context]) .image-container {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+
+  :global([data-layout-context]) .image-wrapper {
+    width: 100%;
+    height: 100%;
+  }
+
   /* LQIP/BlurHash placeholder with blur-up effect */
   .image-placeholder {
     position: absolute;

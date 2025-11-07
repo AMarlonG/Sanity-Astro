@@ -75,7 +75,7 @@ switch (videoType) {
 }
 ---
 
-<figure class={`video-component ${className}`}>
+<figure class={`video-component ${className}`} data-component="video">
   {videoType === 'sanity' && videoSource ? (
     <video
       controls={controls}
@@ -152,6 +152,21 @@ switch (videoType) {
   /* Reset margin when inside scroll containers to prevent overflow */
   :global(.scroll-item) .video-component {
     margin: 0;
+  }
+
+  /* When inside a layout context, fill parent space */
+  :global([data-layout-context]) .video-component {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global([data-layout-context]) .video-element {
+    width: 100%;
+    height: 100%;
+    flex: 1;
   }
 
   .video-title {
