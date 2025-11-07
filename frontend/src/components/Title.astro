@@ -24,6 +24,8 @@ const { mainTitle, subtitle, className = '' } = Astro.props;
    * Subtitle uses --fs-lg for clear differentiation while maintaining harmony.
    */
   .title-component {
+    width: min(100ch, 100% - 4rem);
+    margin-inline: auto;
     margin-bottom: 2rem;
   }
 

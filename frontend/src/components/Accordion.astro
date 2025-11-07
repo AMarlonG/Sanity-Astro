@@ -25,7 +25,7 @@ const {
 } = Astro.props
 ---
 
-<div class={`accordion content-media-narrow ${className}`}>
+<div class={`accordion ${className}`}>
   {title && <h2 class="accordion-title">{title}</h2>}
   {description && <p class="accordion-description">{description}</p>}
 
@@ -74,8 +74,12 @@ const {
 
 
 <style>
+  /* CSS Variable-based width control - Kevin Powell method */
   .accordion {
-    margin: 2rem 0;
+    width: var(--component-width, min(55ch, 100% - 4rem));
+    max-width: var(--component-max-width, 100%);
+    margin-inline: auto;
+    margin-block: 2rem;
   }
 
   .accordion-title {

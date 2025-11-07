@@ -17,7 +17,8 @@ const {
 ---
 
 <blockquote
-  class={`quote-component content-extra-narrow ${className}`}
+  class={`quote-component ${className}`}
+  data-component="quote"
   cite={cite}
 >
   <div class="quote-text">{quote}</div>
@@ -31,12 +32,30 @@ const {
 </blockquote>
 
 <style>
+  /* CSS Variable-based width control - Kevin Powell method */
   .quote-component {
-    margin: 2rem 0;
+    width: var(--component-width, min(40ch, 100% - 4rem));
+    max-width: var(--component-max-width, 100%);
+    margin-inline: auto;
+    margin-block: 2rem;
     padding: 1.5rem 2rem;
     background: #f8f9fa;
     border-left: 4px solid #0066cc;
     position: relative;
+  }
+
+  /* When inside a layout context, fill parent space */
+  :global([data-layout-context]) .quote-component {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global([data-layout-context]) .quote-text {
+    flex: 1;
+    overflow-y: auto;
   }
 
   .quote-component::before {

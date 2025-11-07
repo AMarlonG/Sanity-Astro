@@ -20,7 +20,7 @@ function getCSPDirectives(): string {
       "img-src 'self' cdn.sanity.io data: blob:",
       "font-src 'self' data:",
       "connect-src 'self' *.sanity.io wss://*.sanity.io", // WebSocket for Visual Editing
-      "frame-src 'self' http://localhost:3333", // Allow embedding Studio in dev
+      "frame-src 'self' http://localhost:3333 https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com", // Allow embedding Studio in dev + video platforms + Spotify
       "frame-ancestors 'self' http://localhost:3333",
       "worker-src 'self' blob:",
     ].join('; ');
@@ -34,7 +34,7 @@ function getCSPDirectives(): string {
     "img-src 'self' cdn.sanity.io data:",
     "font-src 'self' data:",
     "connect-src 'self' *.sanity.io",
-    "frame-src 'none'", // No iframes in production
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com", // Allow video embeds + Spotify in production
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

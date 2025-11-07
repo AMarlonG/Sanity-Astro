@@ -64,7 +64,7 @@ const actualHeight = compact ? 80 : height
 const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
-<figure class={`spotify-component content-extra-narrow ${className}`} {...sanityAttributes}>
+<figure class={`spotify-component content-extra-narrow ${className}`} data-component="spotify" {...sanityAttributes}>
   {embedUrl ? (
     <div class="spotify-embed-container">
       <iframe
@@ -96,14 +96,34 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
 <style>
   .spotify-component {
-    margin: 2rem 0;
+    margin-block: 2rem;
+    margin-inline: auto;
     max-width: 100%;
+  }
+
+  /* When inside a layout context, fill available space */
+  :global([data-layout-context]) .spotify-component {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global([data-layout-context]) .spotify-embed-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global([data-layout-context]) .spotify-iframe {
+    flex: 1;
+    height: 100%;
   }
 
   .spotify-embed-container {
     position: relative;
     width: 100%;
-    border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
@@ -111,7 +131,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .spotify-iframe {
     display: block;
     border: none;
-    border-radius: 12px;
   }
 
   .spotify-error {

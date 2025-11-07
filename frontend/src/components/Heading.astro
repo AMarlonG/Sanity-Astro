@@ -11,11 +11,11 @@ interface Props {
 const { level, text, id, className = '', _key, _type } = Astro.props;
 ---
 
-{level === 'h2' && <h2 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h2>}
-{level === 'h3' && <h3 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h3>}
-{level === 'h4' && <h4 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h4>}
-{level === 'h5' && <h5 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h5>}
-{level === 'h6' && <h6 id={id} class={`heading-component ${className}`} data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h6>}
+{level === 'h2' && <h2 id={id} class={`heading-component ${className}`} data-component="heading" data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h2>}
+{level === 'h3' && <h3 id={id} class={`heading-component ${className}`} data-component="heading" data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h3>}
+{level === 'h4' && <h4 id={id} class={`heading-component ${className}`} data-component="heading" data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h4>}
+{level === 'h5' && <h5 id={id} class={`heading-component ${className}`} data-component="heading" data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h5>}
+{level === 'h6' && <h6 id={id} class={`heading-component ${className}`} data-component="heading" data-sanity={_key ? `${_type}.${_key}` : _type}>{text}</h6>}
 
 <style>
   /* Heading component - Uses global design tokens for consistency
@@ -28,8 +28,11 @@ const { level, text, id, className = '', _key, _type } = Astro.props;
    * so we only need to override margin and ensure proper spacing here.
    */
   .heading-component {
-    margin: 2rem 0 1rem 0;
+    width: min(100ch, 100% - 4rem);
+    margin-inline: auto;
+    margin-block: 2rem 1rem;
     font-weight: var(--font-weight-semibold);
+    text-align: center;
   }
 
   h2.heading-component {
@@ -52,6 +55,17 @@ const { level, text, id, className = '', _key, _type } = Astro.props;
   h6.heading-component {
     font-size: var(--fs-base);  /* 16-18px - Scales fluidly */
     font-weight: var(--font-weight-medium);
+  }
+
+  /* When inside a layout context, fill parent space and center */
+  :global([data-layout-context]) .heading-component {
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
   }
 
   /* No media queries needed! Fluid typography handles all viewport sizes. */

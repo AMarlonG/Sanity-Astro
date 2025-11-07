@@ -20,8 +20,6 @@ export const twoColumnLayout = defineType({
         {type: 'quoteComponent'},
         {type: 'portableTextBlock'},
         {type: 'headingComponent'},
-        {type: 'buttonComponent'},
-        {type: 'accordionComponent'},
       ],
       validation: (Rule) =>
         Rule.required()
@@ -40,8 +38,6 @@ export const twoColumnLayout = defineType({
         {type: 'quoteComponent'},
         {type: 'portableTextBlock'},
         {type: 'headingComponent'},
-        {type: 'buttonComponent'},
-        {type: 'accordionComponent'},
       ],
       validation: (Rule) =>
         Rule.required()
@@ -55,21 +51,38 @@ export const twoColumnLayout = defineType({
       description: 'Vis høyre kolonne først på mobil',
       initialValue: false,
     }),
+    defineField({
+      name: 'aspectRatio',
+      title: 'Sideforhold',
+      type: 'string',
+      description: 'Velg sideforholdet for kolonnene',
+      options: {
+        list: [
+          {title: '4:5 (portrett)', value: '4:5'},
+          {title: '9:16 (høy portrett)', value: '9:16'},
+          {title: '1:1 (kvadrat)', value: '1:1'},
+        ],
+        layout: 'radio',
+      },
+      initialValue: '4:5',
+    }),
   ],
   preview: {
     select: {
       leftColumn: 'leftColumn',
       rightColumn: 'rightColumn',
       reverseOnMobile: 'reverseOnMobile',
+      aspectRatio: 'aspectRatio',
     },
-    prepare({leftColumn, rightColumn, reverseOnMobile}) {
+    prepare({leftColumn, rightColumn, reverseOnMobile, aspectRatio}) {
       const leftType = leftColumn?.[0]?._type || 'tom'
       const rightType = rightColumn?.[0]?._type || 'tom'
       const reverseText = reverseOnMobile ? ' • Reversert mobil' : ''
+      const aspectText = ` • ${aspectRatio || '4:5'}`
 
       return {
         title: 'To kolonner',
-        subtitle: `Venstre: ${leftType} | Høyre: ${rightType}${reverseText}`,
+        subtitle: `Venstre: ${leftType} | Høyre: ${rightType}${reverseText}${aspectText}`,
         media: SplitHorizontalIcon,
       }
     },

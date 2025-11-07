@@ -2,9 +2,10 @@
 import ContentPageLayout from '../layouts/ContentPageLayout.astro';
 import CardGrid from '../components/CardGrid.astro';
 import ProgramFilters from '../components/ProgramFilters.astro';
+import Image from '../components/Image.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
 import { formatDateWithWeekday } from '../lib/utils/dates';
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/sanityImage';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
 import { stegaClean } from '@sanity/client/stega';
 import '../styles/program.css';
 
@@ -131,37 +132,32 @@ if (dateFilter && venueFilter) {
       {hasEvents ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
-          <h3 class="date-title">{stegaClean(displayTitle)}</h3>
+          <h2 class="date-title">{stegaClean(displayTitle)}</h2>
           <div class="events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <h4 class="event-title">
+                <h3 class="event-title">
                   <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-title-link">
                     {stegaClean(event.title)}
                   </a>
-                </h4>
+                </h3>
 
                 {event.excerpt && (
                   <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
                 )}
 
                 {event.image?.image && (
-                  <figure class="event-image">
-                    <picture>
-                      <source
-                        srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                        type="image/webp"
-                        sizes="(max-width: 768px) 100vw, 400px"
-                      />
-                      <img
-                        src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
-                        alt={event.image.alt || event.title}
-                        loading="lazy"
-                        decoding="async"
-                        class="event-card-image"
-                      />
-                    </picture>
-                  </figure>
+                  <div class="event-image">
+                    <Image
+                      image={event.image.image}
+                      alt={stegaClean(event.image.alt || event.title || '')}
+                      size="medium"
+                      aspectRatio="4:3"
+                      loading="lazy"
+                      quality={IMAGE_QUALITY.CARD}
+                      className="event-card-image"
+                    />
+                  </div>
                 )}
 
                 <dl class="event-meta">
@@ -200,7 +196,7 @@ if (dateFilter && venueFilter) {
     ) : (
       <section class="content-section">
         <div class="no-results">
-          <h3 class="no-results-title">{emptyStateMessage}</h3>
+          <h2 class="no-results-title">{emptyStateMessage}</h2>
           <p class="no-results-text">Prøv en annen kombinasjon, eller:</p>
           <a
             href="/program"

@@ -1,9 +1,9 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
 import DynamicComponent from '../../../components/DynamicComponent.astro';
+import Image from '../../../components/Image.astro';
 import { formatDateForLanguage } from '../../../lib/utils/dates';
 import { getMultilingualContent } from "../../../lib/utils/language.js";
-import { getOptimizedImageUrl } from '../../../lib/sanityImage';
 import { IMAGE_QUALITY } from '../../../lib/sanityImage';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../../lib/sanity/loadQuery.js';
@@ -129,11 +129,14 @@ const content = getMultilingualContent(event, 'en') || event.content_en;
         {event.image?.image && (
           <div class="event-image-column">
             <figure class="event-image">
-              <img
-                src={getOptimizedImageUrl(event.image.image, 400, 300, IMAGE_QUALITY.CARD)}
+              <Image
+                image={event.image.image}
                 alt={stegaClean(event.image.alt || event.title || '')}
+                size="medium"
+                aspectRatio="4:3"
                 loading="eager"
-                decoding="async"
+                quality={IMAGE_QUALITY.HERO}
+                priority={true}
               />
             </figure>
           </div>

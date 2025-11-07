@@ -1,6 +1,7 @@
 ---
 import { sanityClient } from "sanity:client";
-import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/sanityImage';
+import Image from './Image.astro';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
 
 interface Props {
   title?: string
@@ -91,43 +92,21 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         const artistCountry = artist.country || ''
         const artistSlug = artist.slug || ''
 
-        // Generate responsive image sources (4:5 aspect ratio)
-        const aspectRatio = 4 / 5
-        const responsiveImages = artistImage
-          ? getResponsiveImageSet(artistImage, [240, 280, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
-          : null
-
-        // Fallback URL for browsers without picture support
-        const fallbackUrl = artistImage
-          ? getOptimizedImageUrl(artistImage, 280, 350, IMAGE_QUALITY.CARD)
-          : null
-
         return (
           <li class="artist-item">
             <a href={`/artister/${artistSlug}`} class="artist-card-link">
               <article class="artist-card">
-                {artistImage && responsiveImages && fallbackUrl && (
+                {artistImage && (
                   <div class="artist-image">
-                    <picture>
-                      {responsiveImages
-                        .filter((format) => format.srcset.length > 0)
-                        .map((format) => (
-                        <source
-                          srcset={format.srcset}
-                          sizes="(max-width: 768px) 240px, 280px"
-                          type={`image/${format.format}`}
-                        />
-                      ))}
-                      <img
-                        src={fallbackUrl}
-                        alt={artistImageAlt}
-                        width="280"
-                        height="350"
-                        loading="lazy"
-                        decoding="async"
-                        style="aspect-ratio: 4/5; object-fit: cover;"
-                      />
-                    </picture>
+                    <Image
+                      image={artistImage}
+                      alt={artistImageAlt}
+                      size="small"
+                      aspectRatio="4:5"
+                      loading="lazy"
+                      quality={IMAGE_QUALITY.CARD}
+                      className="artist-card-image"
+                    />
                   </div>
                 )}
                 <div class="artist-content">
@@ -193,12 +172,14 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
   .artist-image {
     flex: 1;
     overflow: hidden;
+    aspect-ratio: 4 / 5; /* Parent controls image height */
   }
 
-  .artist-image img {
+  .artist-card-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
   }
 
   .artist-content {

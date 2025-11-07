@@ -5,6 +5,7 @@ export interface Props {
   title?: string
   columns: '2' | '3'
   items: any[]
+  aspectRatio?: '4:5' | '1:1'
   gap?: 'small' | 'medium' | 'large'
   className?: string
   _key?: string
@@ -15,6 +16,7 @@ const {
   title,
   columns = '3',
   items = [],
+  aspectRatio = '4:5',
   gap = 'medium',
   className = '',
   _key,
@@ -30,6 +32,18 @@ const gapMap = {
 
 const gapValue = gapMap[gap] || gapMap.medium
 
+// Convert aspectRatio string to CSS value
+const aspectMap: Record<string, string> = {
+  '4:5': '4 / 5',
+  '1:1': '1 / 1',
+}
+const aspectValue = aspectMap[aspectRatio] || '4 / 5'
+
+// Calculate if we have an odd number of items for centering logic
+const itemCount = items.length
+const columnsNumber = parseInt(columns)
+const isOdd = itemCount % columnsNumber !== 0
+
 // Sanity Visual Editing attributes
 const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
@@ -38,12 +52,13 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   {title && <h2 class="grid-title">{title}</h2>}
 
   <div
-    class="grid-container"
+    class={`grid-container ${isOdd ? 'has-odd-items' : ''}`}
     data-columns={columns}
-    style={`--grid-gap: ${gapValue};`}
+    data-layout-context="grid"
+    style={`--grid-gap: ${gapValue}; --grid-aspect-ratio: ${aspectValue};`}
   >
-    {items.map((item) => (
-      <div class="grid-item">
+    {items.map((item, index) => (
+      <div class={`grid-item ${isOdd && index >= itemCount - (itemCount % columnsNumber) ? 'bottom-row' : ''}`}>
         <DynamicComponent block={item} />
       </div>
     ))}
@@ -67,6 +82,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     display: grid;
     gap: var(--grid-gap, 2rem);
     width: 100%;
+    align-items: stretch;
 
     /* Container query context - allows children to adapt to available space */
     container-type: inline-size;
@@ -82,20 +98,75 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     grid-template-columns: repeat(3, 1fr);
   }
 
-  /* All grid items have 4:5 aspect ratio cards */
+  /* All grid items use configurable aspect ratio */
   .grid-item {
     width: 100%;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: var(--grid-aspect-ratio, 4 / 5);
     overflow: hidden;
     border-radius: 8px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px; /* Prevent tiny boxes */
+
+    /* Performance optimizations */
+    contain: layout style paint;
+    content-visibility: auto;
   }
 
-  /* Make child components fill the grid item */
-  .grid-item > :global(*) {
+  /* Centering logic for odd number of items */
+  /* When we have odd items, the bottom row should be centered and not enlarged */
+  .grid-container.has-odd-items {
+    justify-items: center;
+  }
+
+  /* Bottom row items maintain their size, don't stretch */
+  .grid-container.has-odd-items .grid-item.bottom-row {
+    max-width: 100%;
+  }
+
+  /* Media content: Fill and crop */
+  .grid-item > :global(.image-container),
+  .grid-item > :global(.image-wrapper),
+  .grid-item > :global([data-component="video"]) {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+  }
+
+  .grid-item > :global(.image-wrapper img),
+  .grid-item > :global(.image) {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  /* Components that fill grid space and respect aspect ratio */
+  .grid-item > :global([data-component="quote"]),
+  .grid-item > :global([data-component="video"]) {
+    width: 100%;
+    height: 100%;
+    flex: 1;
+  }
+
+  /* Quote component: Scrollable within fixed height */
+  .grid-item > :global([data-component="quote"]) {
+    overflow-y: auto;
+    height: 100%;
+    padding: 1.5rem;
+
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
+
+  .grid-item > :global([data-component="quote"])::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .grid-item > :global([data-component="quote"])::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
   }
 
   /* Tablet: Reduce to 2 columns for 3-column layouts */
@@ -151,6 +222,15 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     .grid-item {
       page-break-inside: avoid;
       margin-bottom: 1rem;
+      aspect-ratio: auto;
+      overflow: visible;
+      contain: none;
+      min-height: auto;
+    }
+
+    .grid-item > :global([data-component="quote"]) {
+      overflow-y: visible;
+      height: auto;
     }
   }
 </style>

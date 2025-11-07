@@ -43,7 +43,7 @@ export interface ImageUrlOptions {
   width?: number
   height?: number
   quality?: number
-  format?: 'webp' | 'avif' | 'jpg' | 'png'
+  format?: 'webp' | 'jpg' | 'png' // Sanity CDN doesn't support AVIF
   fit?: 'clip' | 'crop' | 'fill' | 'fillmax' | 'max' | 'scale' | 'min'
   blur?: number
 }
@@ -77,17 +77,6 @@ export interface ImageMetadata {
     left: number
     right: number
   }
-}
-
-/**
- * Picture element data structure
- */
-export interface PictureData {
-  avif: string
-  webp: string
-  jpg: string
-  fallback: string
-  lqip: string | null
 }
 
 /**
@@ -132,7 +121,7 @@ export function getImageBuilder(source: SanityImageSource) {
 /**
  * Generate optimized image URL with Sanity CDN
  *
- * Automatically serves AVIF/WebP when supported by the browser.
+ * Automatically serves WebP when supported by the browser, with JPG fallback.
  * Preserves hotspot and crop data from Sanity.
  *
  * @param source - Sanity image source object
@@ -161,7 +150,7 @@ export function getOptimizedImageUrl(
   if (height) url = url.height(height)
 
   return url
-    .auto('format') // Automatically serve AVIF/WebP when supported
+    .auto('format') // Automatically serve WebP/JPG based on browser support
     .quality(quality)
     .url()
 }
@@ -283,110 +272,54 @@ export function getBlurHashPlaceholder(
 }
 
 /**
- * Generate complete picture element data with multiple formats
+ * Generate responsive srcset using Sanity CDN auto-format negotiation
  *
- * Returns srcsets for AVIF, WebP, and JPG formats for maximum browser compatibility.
- * Use with `<picture>` element for optimal format delivery.
+ * Uses auto=format which lets Sanity CDN negotiate the best format (AVIF/WebP/JPG)
+ * based on browser support and CDN cache state. This provides:
+ * - Automatic AVIF support when available (first request may get WebP/JPG while encoding)
+ * - Graceful fallback to WebP or JPG
+ * - Better CDN caching and future format support
+ *
+ * Note: Sanity's AVIF support is on-demand. First few requests may return WebP/JPG
+ * while AVIF encoding completes (~30 seconds). Subsequent requests get AVIF.
+ * See: https://www.sanity.io/docs/help/avif
  *
  * @param source - Sanity image source object
  * @param widths - Array of widths to generate
+ * @param aspectRatio - Optional aspect ratio to maintain
  * @param quality - Image quality (1-100)
- * @returns Object with srcsets for AVIF, WebP, JPG, and fallback URL
+ * @returns Srcset string with auto-format URLs
  *
  * @example
- * ```astro
- * const pictureData = getPictureData(image, RESPONSIVE_WIDTHS.HERO)
- *
- * <picture>
- *   <source srcset={pictureData.avif} type="image/avif" />
- *   <source srcset={pictureData.webp} type="image/webp" />
- *   <source srcset={pictureData.jpg} type="image/jpeg" />
- *   <img src={pictureData.fallback} alt="..." />
- * </picture>
+ * ```typescript
+ * const srcset = getResponsiveImageSet(image, [400, 800, 1200], 0.8, IMAGE_QUALITY.CARD)
+ * // Returns: "https://cdn.sanity.io/...?w=400&auto=format&q=75 400w, ..."
  * ```
- */
-export function getPictureData(
-  source: SanityImageSource,
-  widths: readonly number[] = RESPONSIVE_WIDTHS.MEDIUM,
-  quality: number = IMAGE_QUALITY.CARD
-): PictureData | null {
-  const builder = getImageBuilder(source)
-  if (!builder) return null
-
-  const createSrcSet = (format: string) => {
-    return widths
-      .map(width => {
-        const url = builder
-          .width(width)
-          .format(format as any)
-          .quality(quality)
-          .url()
-        return `${url} ${width}w`
-      })
-      .join(', ')
-  }
-
-  return {
-    avif: createSrcSet('avif'),
-    webp: createSrcSet('webp'),
-    jpg: createSrcSet('jpg'),
-    fallback: builder
-      .width(widths[1] || 800)
-      .format('jpg')
-      .quality(quality)
-      .url(),
-    lqip: getLQIPUrl(source)
-  }
-}
-
-/**
- * Generate responsive image set with multiple formats and sizes
- *
- * Alternative to getPictureData with more flexibility over formats and quality.
- *
- * @param source - Sanity image source object
- * @param widths - Array of widths to generate
- * @param formats - Array of formats to generate (e.g., ['avif', 'webp', 'jpg'])
- * @param aspectRatio - Optional aspect ratio to maintain
- * @param quality - Base image quality (adjusted per format)
- * @returns Array of responsive image sources
  */
 export function getResponsiveImageSet(
   source: SanityImageSource,
   widths: number[] = [400, 800, 1200],
-  formats: string[] = ['avif', 'webp', 'jpg'],
   aspectRatio?: number,
   quality: number = IMAGE_QUALITY.CARD
-): ResponsiveImageSource[] {
+): string {
   const builder = getImageBuilder(source)
-  if (!builder) return []
+  if (!builder) return ''
 
-  return formats.map(format => {
-    const srcset = widths
-      .map(width => {
-        const height = aspectRatio ? Math.round(width / aspectRatio) : undefined
+  return widths
+    .map(width => {
+      const height = aspectRatio ? Math.round(width / aspectRatio) : undefined
 
-        let urlBuilder = builder.width(width)
-        if (height) urlBuilder = urlBuilder.height(height)
+      let urlBuilder = builder.width(width)
+      if (height) urlBuilder = urlBuilder.height(height)
 
-        // Adjust quality per format (AVIF compresses better)
-        const formatQuality =
-          format === 'avif' ? Math.round(quality * 0.7) :
-          format === 'webp' ? Math.round(quality * 0.9) :
-          quality
+      const url = urlBuilder
+        .auto('format') // Let CDN negotiate best format (AVIF/WebP/JPG)
+        .quality(quality)
+        .url()
 
-        const url = urlBuilder
-          .format(format as any)
-          .quality(formatQuality)
-          .fit('crop')
-          .url()
-
-        return `${url} ${width}w`
-      })
-      .join(', ')
-
-    return { format, srcset }
-  })
+      return `${url} ${width}w`
+    })
+    .join(', ')
 }
 
 /**
