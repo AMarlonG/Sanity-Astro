@@ -125,7 +125,7 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
                         height="350"
                         loading="lazy"
                         decoding="async"
-                        style="aspect-ratio: 4/5; object-fit: cover;"
+                        class="artist-card-image"
                       />
                     </picture>
                   </div>
@@ -193,12 +193,20 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
   .artist-image {
     flex: 1;
     overflow: hidden;
+    aspect-ratio: 4 / 5; /* Parent controls image height */
   }
 
-  .artist-image img {
+  .artist-image picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .artist-card-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
   }
 
   .artist-content {

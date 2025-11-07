@@ -1,5 +1,7 @@
 ---
 import DynamicComponent from './DynamicComponent.astro'
+import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY } from '../lib/sanityImage'
+import { stegaClean } from '@sanity/client/stega'
 
 interface Props {
   title?: string
@@ -33,6 +35,61 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     {items.map((item) => {
       if (!item) return null
 
+      // Handle imageComponent items with inline rendering
+      if (item._type === 'imageComponent' && item.image) {
+        const aspectRatio = 4 / 5 // Default 4:5 for scroll containers
+        const imageSource = item.image
+        const imageAlt = stegaClean(item.alt || '')
+        const imageCredit = item.credit ? stegaClean(item.credit) : null
+
+        // Generate responsive image set
+        const responsiveImages = imageSource
+          ? getResponsiveImageSet(imageSource, [200, 240, 280, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
+          : null
+
+        // Fallback URL for browsers without picture support
+        const fallbackUrl = imageSource
+          ? getOptimizedImageUrl(imageSource, 280, 350, IMAGE_QUALITY.CARD)
+          : null
+
+        return (
+          <li class="scroll-item">
+            {imageSource && responsiveImages && fallbackUrl ? (
+              <figure class="scroll-image-figure">
+                <picture>
+                  {responsiveImages
+                    .filter((format) => format.srcset.length > 0)
+                    .map((format) => (
+                    <source
+                      srcset={format.srcset}
+                      sizes="(max-width: 768px) 200px, (max-width: 1024px) 240px, 280px"
+                      type={`image/${format.format}`}
+                    />
+                  ))}
+                  <img
+                    src={fallbackUrl}
+                    alt={imageAlt}
+                    width="280"
+                    height="350"
+                    loading="lazy"
+                    decoding="async"
+                    class="scroll-image"
+                  />
+                </picture>
+                {imageCredit && (
+                  <figcaption class="image-credit">{imageCredit}</figcaption>
+                )}
+              </figure>
+            ) : (
+              <div class="image-placeholder">
+                <span>Bilde ikke tilgjengelig</span>
+              </div>
+            )}
+          </li>
+        )
+      }
+
+      // Handle other component types with DynamicComponent
       return (
         <li class="scroll-item">
           <DynamicComponent block={item} />
@@ -70,14 +127,57 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .scroll-item {
     flex-shrink: 0;
     width: 280px; /* Desktop width */
-    aspect-ratio: 4 / 5; /* All cards are 4:5 */
     border-radius: 8px;
     overflow: hidden;
     position: relative;
   }
 
-  /* Make child components fill the scroll item */
-  .scroll-item > :global(*) {
+  /* Image figure styling */
+  .scroll-image-figure {
+    margin: 0;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    position: relative;
+  }
+
+  .scroll-image-figure picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scroll-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .image-credit {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.5rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    color: white;
+    font-size: 0.75rem;
+    text-align: right;
+  }
+
+  .image-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border: 2px dashed #ddd;
+    color: #666;
+  }
+
+  /* Make other child components (non-images) fill the scroll item */
+  .scroll-item > :global(:not(.scroll-image-figure):not(.image-placeholder)) {
     width: 100%;
     height: 100%;
     object-fit: cover;

@@ -183,7 +183,7 @@ const fetchPriority = priority ? 'high' : 'auto';
 
 <script>
   // Client-side image load detection
-  document.addEventListener('astro:page-load', () => {
+  function initImageLoading() {
     const images = document.querySelectorAll('.image-wrapper .image');
 
     images.forEach((img) => {
@@ -200,7 +200,17 @@ const fetchPriority = priority ? 'high' : 'auto';
         }, { once: true });
       }
     });
-  });
+  }
+
+  // Run on initial page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initImageLoading);
+  } else {
+    initImageLoading();
+  }
+
+  // Run on Astro page transitions
+  document.addEventListener('astro:page-load', initImageLoading);
 </script>
 
 <style>

@@ -39,7 +39,25 @@ const { data: artist } = await loadQuery({
     country,
     "image": {
       "image": image{
-        asset->,
+        asset->{
+          _id,
+          url,
+          metadata {
+            dimensions {
+              width,
+              height,
+              aspectRatio
+            },
+            lqip,
+            blurHash,
+            palette {
+              dominant {
+                background,
+                foreground
+              }
+            }
+          }
+        },
         hotspot,
         crop
       },

@@ -6,71 +6,133 @@ export interface QueryDefinition<P extends Record<string, unknown> = Record<stri
   params: P
 }
 
-const MAX_CONTENT_DEPTH = 2
+// ============================================================================
+// CONTENT PROJECTIONS - Following Sanity Best Practices
+// ============================================================================
+// No MAX_CONTENT_DEPTH or artificial limits
+// Explicit projections for each component type
+// Always use asset-> dereferencing with full metadata (per MEDIA.md)
+// ============================================================================
 
-const buildContentProjection = (depth = 0): string => {
-  if (depth >= MAX_CONTENT_DEPTH) {
-    return '...'
-  }
+// Leaf components (no nesting)
+const IMAGE_COMPONENT = `
+  _type == "imageComponent" => {
+    _type,
+    _key,
+    "image": image{
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height,
+            aspectRatio
+          },
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
+        }
+      },
+      hotspot,
+      crop
+    },
+    "alt": alt,
+    "caption": caption,
+    "credit": credit,
+    aspectRatio,
+    size
+  }`
 
-  const nested = buildContentProjection(depth + 1)
+const VIDEO_COMPONENT = `
+  _type == "videoComponent" => {
+    ...
+  }`
 
-  return `
+const QUOTE_COMPONENT = `
+  _type == "quoteComponent" => {
+    ...
+  }`
+
+const SPOTIFY_COMPONENT = `
+  _type == "spotifyComponent" => {
+    ...
+  }`
+
+const LINK_COMPONENT = `
+  _type == "linkComponent" => {
     ...,
-    _type == "linkComponent" => {
-      ...,
-      "internalLink": select(
-        linkType == "internal" && defined(internalLink) => internalLink->{
-          _type,
-          "slug": coalesce(slug_no.current, slug_en.current, slug.current),
-          "slug_no": slug_no.current,
-          "slug_en": slug_en.current
-        },
-        defined(internalLink) => internalLink
-      )
-    },
-    _type == "columnLayout" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "contentScrollContainer" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "artistScrollContainer" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "eventScrollContainer" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "accordionComponent" => {
-      ...,
-      panels[]{
-        ...,
-        content[]{${nested}}
-      }
-    },
-    _type == "gridComponent" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "twoColumnLayout" => {
-      ...,
-      leftColumn[]{${nested}},
-      rightColumn[]{${nested}}
-    },
-    _type == "threeColumnLayout" => {
-      ...,
-      column1[]{${nested}},
-      column2[]{${nested}},
-      column3[]{${nested}}
-    }
-  `
-}
+    "internalLink": select(
+      linkType == "internal" && defined(internalLink) => internalLink->{
+        _type,
+        "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+        "slug_no": slug_no.current,
+        "slug_en": slug_en.current
+      },
+      defined(internalLink) => internalLink
+    )
+  }`
 
-const PAGE_CONTENT_WITH_LINKS = buildContentProjection()
+// Items that can be nested in containers
+const NESTED_ITEMS = `
+  ...,
+  ${IMAGE_COMPONENT},
+  ${VIDEO_COMPONENT},
+  ${QUOTE_COMPONENT},
+  ${SPOTIFY_COMPONENT},
+  ${LINK_COMPONENT}`
+
+// Full content projection with all component types
+const PAGE_CONTENT_WITH_LINKS = `
+  ...,
+  ${IMAGE_COMPONENT},
+  ${VIDEO_COMPONENT},
+  ${QUOTE_COMPONENT},
+  ${SPOTIFY_COMPONENT},
+  ${LINK_COMPONENT},
+  _type == "columnLayout" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "contentScrollContainer" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "artistScrollContainer" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "eventScrollContainer" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "accordionComponent" => {
+    ...,
+    panels[]{
+      ...,
+      content[]{${NESTED_ITEMS}}
+    }
+  },
+  _type == "gridComponent" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "twoColumnLayout" => {
+    ...,
+    leftColumn[]{${NESTED_ITEMS}},
+    rightColumn[]{${NESTED_ITEMS}}
+  },
+  _type == "threeColumnLayout" => {
+    ...,
+    column1[]{${NESTED_ITEMS}},
+    column2[]{${NESTED_ITEMS}},
+    column3[]{${NESTED_ITEMS}}
+  }`
 
 const EVENT_IMAGE_SELECTION = `
   "image": {
@@ -151,6 +213,12 @@ const EVENT_BASE_FIELDS = `
     ${PAGE_CONTENT_WITH_LINKS}
   },
   content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  extraContent_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  extraContent_en[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
   seo
