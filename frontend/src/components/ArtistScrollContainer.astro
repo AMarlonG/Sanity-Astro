@@ -91,11 +91,11 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         const artistCountry = artist.country || ''
         const artistSlug = artist.slug || ''
 
-        // Generate responsive image sources (4:5 aspect ratio)
+        // Generate responsive srcset with auto-format (AVIF/WebP/JPG)
         const aspectRatio = 4 / 5
-        const responsiveImages = artistImage
-          ? getResponsiveImageSet(artistImage, [240, 280, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
-          : null
+        const responsiveSrcset: string = artistImage
+          ? getResponsiveImageSet(artistImage, [240, 280, 320], aspectRatio, IMAGE_QUALITY.CARD)
+          : ''
 
         // Fallback URL for browsers without picture support
         const fallbackUrl = artistImage
@@ -106,28 +106,19 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
           <li class="artist-item">
             <a href={`/artister/${artistSlug}`} class="artist-card-link">
               <article class="artist-card">
-                {artistImage && responsiveImages && fallbackUrl && (
+                {artistImage && responsiveSrcset && fallbackUrl && (
                   <div class="artist-image">
-                    <picture>
-                      {responsiveImages
-                        .filter((format) => format.srcset.length > 0)
-                        .map((format) => (
-                        <source
-                          srcset={format.srcset}
-                          sizes="(max-width: 768px) 240px, 280px"
-                          type={`image/${format.format}`}
-                        />
-                      ))}
-                      <img
-                        src={fallbackUrl}
-                        alt={artistImageAlt}
-                        width="280"
-                        height="350"
-                        loading="lazy"
-                        decoding="async"
-                        class="artist-card-image"
-                      />
-                    </picture>
+                    <img
+                      src={fallbackUrl}
+                      srcset={responsiveSrcset}
+                      sizes="(max-width: 768px) 240px, 280px"
+                      alt={artistImageAlt}
+                      width="280"
+                      height="350"
+                      loading="lazy"
+                      decoding="async"
+                      class="artist-card-image"
+                    />
                   </div>
                 )}
                 <div class="artist-content">
@@ -194,12 +185,6 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
     flex: 1;
     overflow: hidden;
     aspect-ratio: 4 / 5; /* Parent controls image height */
-  }
-
-  .artist-image picture {
-    display: block;
-    width: 100%;
-    height: 100%;
   }
 
   .artist-card-image {

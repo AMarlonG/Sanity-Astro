@@ -155,11 +155,11 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         const eventImage = event.image?.image || null
         const imageAlt = event.image?.alt || event.title || ''
 
-        // Generate responsive image sources (4:5 aspect ratio)
+        // Generate responsive srcset with auto-format (AVIF/WebP/JPG)
         const aspectRatio = 4 / 5
-        const responsiveImages = eventImage
-          ? getResponsiveImageSet(eventImage, [240, 300, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
-          : null
+        const responsiveSrcset: string = eventImage
+          ? getResponsiveImageSet(eventImage, [240, 300, 320], aspectRatio, IMAGE_QUALITY.CARD)
+          : ''
 
         // Fallback URL for browsers without picture support
         const fallbackUrl = eventImage
@@ -174,28 +174,19 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         return (
           <li class="event-item">
             <article class="event-card">
-              {eventImage && responsiveImages && fallbackUrl && (
+              {eventImage && responsiveSrcset && fallbackUrl && (
                 <div class="event-image">
-                  <picture>
-                    {responsiveImages
-                      .filter((format) => format.srcset.length > 0)
-                      .map((format) => (
-                      <source
-                        srcset={format.srcset}
-                        sizes="(max-width: 768px) 240px, 300px"
-                        type={`image/${format.format}`}
-                      />
-                    ))}
-                    <img
-                      src={fallbackUrl}
-                      alt={imageAlt}
-                      width="300"
-                      height="375"
-                      loading="lazy"
-                      decoding="async"
-                      class="event-card-image"
-                    />
-                  </picture>
+                  <img
+                    src={fallbackUrl}
+                    srcset={responsiveSrcset}
+                    sizes="(max-width: 768px) 240px, 300px"
+                    alt={imageAlt}
+                    width="300"
+                    height="375"
+                    loading="lazy"
+                    decoding="async"
+                    class="event-card-image"
+                  />
                 </div>
               )}
               <div class="event-content">
@@ -291,12 +282,6 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
     flex-shrink: 0;
     overflow: hidden;
     aspect-ratio: 4/5; /* Parent controls image height */
-  }
-
-  .event-image picture {
-    display: block;
-    width: 100%;
-    height: 100%;
   }
 
   .event-card-image {

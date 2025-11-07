@@ -272,50 +272,54 @@ export function getBlurHashPlaceholder(
 }
 
 /**
- * Generate responsive image set with multiple formats and sizes
+ * Generate responsive srcset using Sanity CDN auto-format negotiation
  *
- * Generates srcsets for WebP and JPG formats for optimal browser compatibility.
- * Sanity CDN supports: jpg, pjpg, png, webp, gif, json (AVIF not supported).
+ * Uses auto=format which lets Sanity CDN negotiate the best format (AVIF/WebP/JPG)
+ * based on browser support and CDN cache state. This provides:
+ * - Automatic AVIF support when available (first request may get WebP/JPG while encoding)
+ * - Graceful fallback to WebP or JPG
+ * - Better CDN caching and future format support
+ *
+ * Note: Sanity's AVIF support is on-demand. First few requests may return WebP/JPG
+ * while AVIF encoding completes (~30 seconds). Subsequent requests get AVIF.
+ * See: https://www.sanity.io/docs/help/avif
  *
  * @param source - Sanity image source object
  * @param widths - Array of widths to generate
- * @param formats - Array of formats to generate (e.g., ['webp', 'jpg'])
  * @param aspectRatio - Optional aspect ratio to maintain
- * @param quality - Base image quality (adjusted per format)
- * @returns Array of responsive image sources
+ * @param quality - Image quality (1-100)
+ * @returns Srcset string with auto-format URLs
+ *
+ * @example
+ * ```typescript
+ * const srcset = getResponsiveImageSet(image, [400, 800, 1200], 0.8, IMAGE_QUALITY.CARD)
+ * // Returns: "https://cdn.sanity.io/...?w=400&auto=format&q=75 400w, ..."
+ * ```
  */
 export function getResponsiveImageSet(
   source: SanityImageSource,
   widths: number[] = [400, 800, 1200],
-  formats: string[] = ['webp', 'jpg'], // Sanity CDN only supports: jpg, pjpg, png, webp, gif, json
   aspectRatio?: number,
   quality: number = IMAGE_QUALITY.CARD
-): ResponsiveImageSource[] {
+): string {
   const builder = getImageBuilder(source)
-  if (!builder) return []
+  if (!builder) return ''
 
-  return formats.map(format => {
-    const srcset = widths
-      .map(width => {
-        const height = aspectRatio ? Math.round(width / aspectRatio) : undefined
+  return widths
+    .map(width => {
+      const height = aspectRatio ? Math.round(width / aspectRatio) : undefined
 
-        let urlBuilder = builder.width(width)
-        if (height) urlBuilder = urlBuilder.height(height)
+      let urlBuilder = builder.width(width)
+      if (height) urlBuilder = urlBuilder.height(height)
 
-        // Adjust quality per format (WebP compresses better than JPG)
-        const formatQuality = format === 'webp' ? Math.round(quality * 0.9) : quality
+      const url = urlBuilder
+        .auto('format') // Let CDN negotiate best format (AVIF/WebP/JPG)
+        .quality(quality)
+        .url()
 
-        const url = urlBuilder
-          .format(format as any)
-          .quality(formatQuality)
-          .url()
-
-        return `${url} ${width}w`
-      })
-      .join(', ')
-
-    return { format, srcset }
-  })
+      return `${url} ${width}w`
+    })
+    .join(', ')
 }
 
 /**

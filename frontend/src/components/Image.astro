@@ -6,7 +6,6 @@ import {
   getLQIPUrl,
   getOptimizedImageUrl,
   IMAGE_QUALITY,
-  type ResponsiveImageSource,
   type ImageMetadata
 } from '../lib/sanityImage';
 
@@ -42,7 +41,6 @@ const aspectRatio = (props as any).aspectRatio || '4:5'; // Use CMS value, fallb
 const className = (props as any).className || '';
 const loading = (props as any).loading || 'lazy';
 const quality = (props as any).quality || IMAGE_QUALITY.CARD;
-const formats = (props as any).formats || ['webp', 'jpg']; // Sanity CDN doesn't support AVIF
 const sizes = (props as any).sizes;
 const placeholder = (props as any).placeholder || 'blur';
 const priority = (props as any).priority || false;
@@ -94,14 +92,14 @@ const getAutoSizes = (size: string): string => {
 const imageWidths = getImageWidths(size);
 const imageSizes = sizes || getAutoSizes(size);
 
-// Generate responsive image sets (only if image exists)
-const responsiveImageSets: ResponsiveImageSource[] = image ? getResponsiveImageSet(
+// Generate responsive srcset with auto-format (only if image exists)
+// Uses Sanity CDN content negotiation for AVIF/WebP/JPG
+const responsiveSrcset: string = image ? getResponsiveImageSet(
   image,
   imageWidths,
-  formats,
   aspectValue,
   quality
-) : [];
+) : '';
 
 // Extract metadata for advanced features
 const metadata: ImageMetadata = image ? extractImageMetadata(image) : {};
@@ -156,28 +154,18 @@ const fetchPriority = priority ? 'high' : 'auto';
           aria-hidden="true"
         />
       )}
-      <picture>
-        {responsiveImageSets
-          .filter((format) => format.srcset.length > 0)
-          .map((format) => (
-          <source
-            srcset={format.srcset}
-            sizes={imageSizes}
-            type={`image/${format.format}`}
-          />
-        ))}
-        <img
-          src={fallbackUrl || ''}
-          alt={alt}
-          width={imageWidth}
-          height={imageHeight}
-          loading={imageLoading}
-          decoding="async"
-          fetchpriority={fetchPriority}
-          sizes={imageSizes}
-          class="image"
-        />
-      </picture>
+      <img
+        src={fallbackUrl || ''}
+        srcset={responsiveSrcset}
+        alt={alt}
+        width={imageWidth}
+        height={imageHeight}
+        loading={imageLoading}
+        decoding="async"
+        fetchpriority={fetchPriority}
+        sizes={imageSizes}
+        class="image"
+      />
     </div>
   ) : (
     <div class="image-missing">
@@ -282,15 +270,6 @@ const fetchPriority = priority ? 'high' : 'auto';
 
   .image-loaded .image-placeholder {
     opacity: 0;
-  }
-
-  /* Picture element (contains sources) */
-  .image-wrapper picture {
-    position: relative;
-    z-index: 2;
-    display: block;
-    width: 100%;
-    height: 100%;
   }
 
   /* Image element */

@@ -42,10 +42,10 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
         const imageAlt = stegaClean(item.alt || '')
         const imageCredit = item.credit ? stegaClean(item.credit) : null
 
-        // Generate responsive image set
-        const responsiveImages = imageSource
-          ? getResponsiveImageSet(imageSource, [200, 240, 280, 320], ['webp', 'jpg'], aspectRatio, IMAGE_QUALITY.CARD)
-          : null
+        // Generate responsive srcset with auto-format (AVIF/WebP/JPG)
+        const responsiveSrcset: string = imageSource
+          ? getResponsiveImageSet(imageSource, [200, 240, 280, 320], aspectRatio, IMAGE_QUALITY.CARD)
+          : ''
 
         // Fallback URL for browsers without picture support
         const fallbackUrl = imageSource
@@ -54,28 +54,19 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
         return (
           <li class="scroll-item">
-            {imageSource && responsiveImages && fallbackUrl ? (
+            {imageSource && responsiveSrcset && fallbackUrl ? (
               <figure class="scroll-image-figure">
-                <picture>
-                  {responsiveImages
-                    .filter((format) => format.srcset.length > 0)
-                    .map((format) => (
-                    <source
-                      srcset={format.srcset}
-                      sizes="(max-width: 768px) 200px, (max-width: 1024px) 240px, 280px"
-                      type={`image/${format.format}`}
-                    />
-                  ))}
-                  <img
-                    src={fallbackUrl}
-                    alt={imageAlt}
-                    width="280"
-                    height="350"
-                    loading="lazy"
-                    decoding="async"
-                    class="scroll-image"
-                  />
-                </picture>
+                <img
+                  src={fallbackUrl}
+                  srcset={responsiveSrcset}
+                  sizes="(max-width: 768px) 200px, (max-width: 1024px) 240px, 280px"
+                  alt={imageAlt}
+                  width="280"
+                  height="350"
+                  loading="lazy"
+                  decoding="async"
+                  class="scroll-image"
+                />
                 {imageCredit && (
                   <figcaption class="image-credit">{imageCredit}</figcaption>
                 )}
@@ -137,12 +128,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     width: 280px; /* 350px * 4/5 = 280px for 4:5 aspect ratio */
     height: 350px;
     position: relative;
-  }
-
-  .scroll-image-figure picture {
-    display: block;
-    width: 100%;
-    height: 100%;
   }
 
   .scroll-image {
