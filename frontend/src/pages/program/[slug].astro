@@ -203,19 +203,16 @@ const extraContent = getMultilingualContent(event, 'no', 'extraContent') || even
       )}
 
       {event.image?.image?.asset && (
-        <figure class="event-image-bottom">
-          <Image
-            image={event.image.image}
-            alt={stegaClean(event.image.alt || event.title || '')}
-            size="large"
-            aspectRatio="4:3"
-            loading="lazy"
-            quality={IMAGE_QUALITY.CARD}
-          />
-          {event.image.credit && (
-            <figcaption class="image-credit">{stegaClean(event.image.credit)}</figcaption>
-          )}
-        </figure>
+        <Image
+          image={event.image.image}
+          alt={stegaClean(event.image.alt || event.title || '')}
+          credit={event.image.credit ? stegaClean(event.image.credit) : undefined}
+          size="large"
+          aspectRatio="4:3"
+          loading="lazy"
+          quality={IMAGE_QUALITY.CARD}
+          className="event-image-bottom"
+        />
       )}
     </div>
   </div>

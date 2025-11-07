@@ -98,6 +98,7 @@ const content = getMultilingualContent(artist) || artist.content_no;
             <Image
               image={artist.image.image}
               alt={stegaClean(artist.image.alt || artist.name)}
+              credit={artist.image.credit ? stegaClean(artist.image.credit) : undefined}
               size="large"
               aspectRatio="4:5"
               loading="eager"

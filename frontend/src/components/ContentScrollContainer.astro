@@ -40,25 +40,19 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
       if (item._type === 'imageComponent' && item.image) {
         const imageSource = item.image
         const imageAlt = stegaClean(item.alt || '')
-        const imageCredit = item.credit ? stegaClean(item.credit) : null
 
         return (
           <li class="scroll-item">
             {imageSource ? (
-              <figure class="scroll-image-figure">
-                <Image
-                  image={imageSource}
-                  alt={imageAlt}
-                  size="small"
-                  aspectRatio="4:5"
-                  loading="lazy"
-                  quality={IMAGE_QUALITY.CARD}
-                  className="scroll-image"
-                />
-                {imageCredit && (
-                  <figcaption class="image-credit">{imageCredit}</figcaption>
-                )}
-              </figure>
+              <Image
+                image={imageSource}
+                alt={imageAlt}
+                size="small"
+                aspectRatio="4:5"
+                loading="lazy"
+                quality={IMAGE_QUALITY.CARD}
+                className="scroll-image"
+              />
             ) : (
               <div class="image-placeholder">
                 <span>Bilde ikke tilgjengelig</span>
@@ -94,6 +88,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
   .scroll-list {
     display: flex;
+    align-items: flex-start; /* Parent controls alignment - force top alignment */
     gap: 1.5rem;
     list-style: none;
     margin: 0;
@@ -110,54 +105,27 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     position: relative;
   }
 
-  /* Image figure styling */
-  .scroll-image-figure {
-    margin: 0;
-    width: 280px; /* 350px * 4/5 = 280px for 4:5 aspect ratio */
-    height: 350px;
-    position: relative;
+  /* Parent-controlled layout: All children get uniform sizing */
+  .scroll-item > :global(*) {
+    margin: 0; /* Reset all margins */
+    height: 350px; /* Enforce height */
+    width: 280px; /* Default 4:5 aspect ratio */
   }
 
-  .scroll-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  /* Exception: Images and Videos can exceed 4:5 width (CMS-controlled aspect ratios) */
+  .scroll-item > :global(.image-container),
+  .scroll-item > :global(.video-component) {
+    width: auto; /* Allow aspect ratio to determine width */
   }
 
-  .image-credit {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 0.5rem;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-    color: white;
-    font-size: 0.75rem;
-    text-align: right;
-  }
-
+  /* Image placeholder styling */
   .image-placeholder {
-    width: 280px;
-    height: 350px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f5f5f5;
     border: 2px dashed #ddd;
     color: #666;
-  }
-
-  /* Video components: height is fixed, width calculated from aspect ratio */
-  .scroll-item > :global(.video-component) {
-    height: 350px;
-    width: auto; /* Width calculated from video's aspect ratio */
-  }
-
-  /* Other child components (non-images, non-videos) */
-  .scroll-item > :global(:not(.scroll-image-figure):not(.image-placeholder):not(.video-component)) {
-    height: 350px;
-    width: auto;
   }
 
   /* Hide scrollbar */
@@ -173,25 +141,17 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   /* Tablet: Slightly smaller cards */
   @media (max-width: 1024px) {
     .scroll-item {
-      height: 300px; /* 240px * 5/4 = 300px */
-    }
-
-    .scroll-image-figure {
-      width: 240px;
       height: 300px;
     }
 
-    .image-placeholder {
-      width: 240px;
+    .scroll-item > :global(*) {
       height: 300px;
+      width: 240px; /* 4:5 aspect ratio: 300px * 4/5 = 240px */
     }
 
+    .scroll-item > :global(.image-container),
     .scroll-item > :global(.video-component) {
-      height: 300px;
-    }
-
-    .scroll-item > :global(:not(.scroll-image-figure):not(.image-placeholder):not(.video-component)) {
-      height: 300px;
+      width: auto; /* Allow aspect ratio to determine width */
     }
 
     .scroll-list {
@@ -211,25 +171,17 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     }
 
     .scroll-item {
-      height: 250px; /* 200px * 5/4 = 250px */
-    }
-
-    .scroll-image-figure {
-      width: 200px;
       height: 250px;
     }
 
-    .image-placeholder {
-      width: 200px;
+    .scroll-item > :global(*) {
       height: 250px;
+      width: 200px; /* 4:5 aspect ratio: 250px * 4/5 = 200px */
     }
 
+    .scroll-item > :global(.image-container),
     .scroll-item > :global(.video-component) {
-      height: 250px;
-    }
-
-    .scroll-item > :global(:not(.scroll-image-figure):not(.image-placeholder):not(.video-component)) {
-      height: 250px;
+      width: auto; /* Allow aspect ratio to determine width */
     }
 
     .scroll-list {

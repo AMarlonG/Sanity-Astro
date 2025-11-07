@@ -96,14 +96,17 @@ const content = getMultilingualContent(article, 'no') || article.content_no;
       </header>
 
       {article.image?.image && (
-        <figure class="article-image">
-          <img
-            src={getOptimizedImageUrl(article.image.image, 800, 450, IMAGE_QUALITY.CARD)}
-            alt={stegaClean(article.image.alt || article.title || '')}
-            loading="eager"
-            decoding="async"
-          />
-        </figure>
+        <Image
+          image={article.image.image}
+          alt={stegaClean(article.image.alt || article.title || '')}
+          credit={article.image.credit ? stegaClean(article.image.credit) : undefined}
+          size="large"
+          aspectRatio="16:9"
+          loading="eager"
+          priority={true}
+          quality={IMAGE_QUALITY.HERO}
+          className="article-image"
+        />
       )}
 
       {content && Array.isArray(content) && (
