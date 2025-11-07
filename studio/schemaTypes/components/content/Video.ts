@@ -85,7 +85,7 @@ export const videoComponent = defineType({
       title: 'Video-URL',
       type: 'url',
       group: 'content',
-      description: 'Lim inn direkte lenke til video-fil (f.eks. https://eksempel.no/video.mp4)',
+      description: 'Kun for direkte video-filer (.mp4, .webm osv.)',
       hidden: ({parent}) => parent?.videoType !== 'external',
       validation: (Rule) =>
         Rule.uri({
