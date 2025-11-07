@@ -1,6 +1,7 @@
 ---
 import { sanityClient } from "sanity:client";
-import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY } from '../lib/sanityImage';
+import Image from './Image.astro';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
 import { detectLanguage } from "../lib/utils/language.js";
 import { stegaClean } from '@sanity/client/stega';
 
@@ -155,17 +156,6 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         const eventImage = event.image?.image || null
         const imageAlt = event.image?.alt || event.title || ''
 
-        // Generate responsive srcset with auto-format (AVIF/WebP/JPG)
-        const aspectRatio = 4 / 5
-        const responsiveSrcset: string = eventImage
-          ? getResponsiveImageSet(eventImage, [240, 300, 320], aspectRatio, IMAGE_QUALITY.CARD)
-          : ''
-
-        // Fallback URL for browsers without picture support
-        const fallbackUrl = eventImage
-          ? getOptimizedImageUrl(eventImage, 300, 375, IMAGE_QUALITY.CARD)
-          : null
-
         // Kombinert dato og tid for <time> element
         const dateTimeValue = eventDate && timeString
           ? `${eventDate.toISOString().split('T')[0]}T${timeString}:00`
@@ -174,18 +164,16 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         return (
           <li class="event-item">
             <article class="event-card">
-              {eventImage && responsiveSrcset && fallbackUrl && (
+              {eventImage && (
                 <div class="event-image">
-                  <img
-                    src={fallbackUrl}
-                    srcset={responsiveSrcset}
-                    sizes="(max-width: 768px) 240px, 300px"
+                  <Image
+                    image={eventImage}
                     alt={imageAlt}
-                    width="300"
-                    height="375"
+                    size="small"
+                    aspectRatio="4:5"
                     loading="lazy"
-                    decoding="async"
-                    class="event-card-image"
+                    quality={IMAGE_QUALITY.CARD}
+                    className="event-card-image"
                   />
                 </div>
               )}

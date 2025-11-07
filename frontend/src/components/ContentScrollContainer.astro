@@ -1,6 +1,7 @@
 ---
 import DynamicComponent from './DynamicComponent.astro'
-import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY } from '../lib/sanityImage'
+import Image from './Image.astro'
+import { IMAGE_QUALITY } from '../lib/sanityImage'
 import { stegaClean } from '@sanity/client/stega'
 
 interface Props {
@@ -37,35 +38,22 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
       // Handle imageComponent items with inline rendering
       if (item._type === 'imageComponent' && item.image) {
-        const aspectRatio = 4 / 5 // Default 4:5 for scroll containers
         const imageSource = item.image
         const imageAlt = stegaClean(item.alt || '')
         const imageCredit = item.credit ? stegaClean(item.credit) : null
 
-        // Generate responsive srcset with auto-format (AVIF/WebP/JPG)
-        const responsiveSrcset: string = imageSource
-          ? getResponsiveImageSet(imageSource, [200, 240, 280, 320], aspectRatio, IMAGE_QUALITY.CARD)
-          : ''
-
-        // Fallback URL for browsers without picture support
-        const fallbackUrl = imageSource
-          ? getOptimizedImageUrl(imageSource, 280, 350, IMAGE_QUALITY.CARD)
-          : null
-
         return (
           <li class="scroll-item">
-            {imageSource && responsiveSrcset && fallbackUrl ? (
+            {imageSource ? (
               <figure class="scroll-image-figure">
-                <img
-                  src={fallbackUrl}
-                  srcset={responsiveSrcset}
-                  sizes="(max-width: 768px) 200px, (max-width: 1024px) 240px, 280px"
+                <Image
+                  image={imageSource}
                   alt={imageAlt}
-                  width="280"
-                  height="350"
+                  size="small"
+                  aspectRatio="4:5"
                   loading="lazy"
-                  decoding="async"
-                  class="scroll-image"
+                  quality={IMAGE_QUALITY.CARD}
+                  className="scroll-image"
                 />
                 {imageCredit && (
                   <figcaption class="image-credit">{imageCredit}</figcaption>

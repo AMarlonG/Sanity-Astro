@@ -1,6 +1,7 @@
 ---
 import { sanityClient } from "sanity:client";
-import { getResponsiveImageSet, getOptimizedImageUrl, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/sanityImage';
+import Image from './Image.astro';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
 
 interface Props {
   title?: string
@@ -91,33 +92,20 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
         const artistCountry = artist.country || ''
         const artistSlug = artist.slug || ''
 
-        // Generate responsive srcset with auto-format (AVIF/WebP/JPG)
-        const aspectRatio = 4 / 5
-        const responsiveSrcset: string = artistImage
-          ? getResponsiveImageSet(artistImage, [240, 280, 320], aspectRatio, IMAGE_QUALITY.CARD)
-          : ''
-
-        // Fallback URL for browsers without picture support
-        const fallbackUrl = artistImage
-          ? getOptimizedImageUrl(artistImage, 280, 350, IMAGE_QUALITY.CARD)
-          : null
-
         return (
           <li class="artist-item">
             <a href={`/artister/${artistSlug}`} class="artist-card-link">
               <article class="artist-card">
-                {artistImage && responsiveSrcset && fallbackUrl && (
+                {artistImage && (
                   <div class="artist-image">
-                    <img
-                      src={fallbackUrl}
-                      srcset={responsiveSrcset}
-                      sizes="(max-width: 768px) 240px, 280px"
+                    <Image
+                      image={artistImage}
                       alt={artistImageAlt}
-                      width="280"
-                      height="350"
+                      size="small"
+                      aspectRatio="4:5"
                       loading="lazy"
-                      decoding="async"
-                      class="artist-card-image"
+                      quality={IMAGE_QUALITY.CARD}
+                      className="artist-card-image"
                     />
                   </div>
                 )}
