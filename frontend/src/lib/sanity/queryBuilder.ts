@@ -51,7 +51,26 @@ const IMAGE_COMPONENT = `
 
 const VIDEO_COMPONENT = `
   _type == "videoComponent" => {
-    ...
+    _type,
+    _key,
+    videoType,
+    "video": video{
+      asset->{
+        _id,
+        url,
+        mimeType
+      }
+    },
+    youtubeUrl,
+    vimeoUrl,
+    externalUrl,
+    aspectRatio,
+    title,
+    description,
+    autoplay,
+    muted,
+    controls,
+    loop
   }`
 
 const QUOTE_COMPONENT = `

@@ -38,9 +38,10 @@
 
 /* Button variants */
 .btn-primary,
-a.btn-primary {
+a.btn-primary:link,
+a.btn-primary:visited {
   background-color: var(--color-blue);
-  color: white !important;
+  color: white;
   border-color: transparent;
 }
 
@@ -48,9 +49,15 @@ a.btn-primary {
   .btn-primary:hover,
   a.btn-primary:hover {
     background-color: rgba(0, 179, 154, 0.08);
-    color: var(--color-blue) !important;
+    color: var(--color-blue);
     border-color: var(--color-blue);
   }
+}
+
+/* Ensure active state also maintains button colors */
+.btn-primary:active,
+a.btn-primary:active {
+  color: white;
 }
 
 .btn-secondary {

@@ -27,7 +27,7 @@ const item3 = column3[0]
 const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
-<section class={`three-column-layout content-wide ${className}`} {...sanityAttributes}>
+<section class={`three-column-layout content-wide ${className}`} data-layout-context="three-column" {...sanityAttributes}>
     <div class="column column-1">
       {item1 && <DynamicComponent block={item1} />}
     </div>
@@ -81,28 +81,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     .column-3 {
       grid-column: auto; /* Reset span */
     }
-  }
-
-  /* Ensure child components don't overflow */
-  .column > :global(*) {
-    max-width: 100%;
-  }
-
-  /* Image sizing guidance - parent controls dimensions */
-  .column > :global(figure),
-  .column > :global(.image-container),
-  .column > :global(.image-component) {
-    width: 100%;
-    aspect-ratio: 4 / 5; /* Standard aspect ratio for images */
-  }
-
-  .column > :global(figure img),
-  .column > :global(.image-container img),
-  .column > :global(.image-component img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
   }
 
   /* Accessibility */

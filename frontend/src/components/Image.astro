@@ -30,24 +30,24 @@ interface Props {
   _type?: string;
 }
 
-const {
-  image,
-  alt,
-  caption,
-  credit,
-  alignment = 'center',
-  size = 'medium',
-  aspectRatio = '4:5',
-  className = '',
-  loading = 'lazy',
-  quality = IMAGE_QUALITY.CARD,
-  formats = ['avif', 'webp', 'jpg'],
-  sizes,
-  placeholder = 'blur',
-  priority = false,
-  _key,
-  _type
-} = Astro.props;
+// Extract props - handle both direct image prop and imageComponent structure
+const props = Astro.props;
+const image = (props as any).image?.image || (props as any).image; // Extract nested .image if exists
+const alt = (props as any).alt || '';
+const caption = (props as any).caption;
+const credit = (props as any).credit;
+const alignment = (props as any).alignment || 'center';
+const size = (props as any).size || 'medium';
+const aspectRatio = (props as any).aspectRatio || '4:5'; // Use CMS value, fallback to 4:5
+const className = (props as any).className || '';
+const loading = (props as any).loading || 'lazy';
+const quality = (props as any).quality || IMAGE_QUALITY.CARD;
+const formats = (props as any).formats || ['webp', 'jpg']; // Sanity CDN doesn't support AVIF
+const sizes = (props as any).sizes;
+const placeholder = (props as any).placeholder || 'blur';
+const priority = (props as any).priority || false;
+const _key = (props as any)._key;
+const _type = (props as any)._type;
 
 // Convert aspect ratio to numeric value
 const getAspectRatioValue = (ratio: string | number): number => {
@@ -57,6 +57,17 @@ const getAspectRatioValue = (ratio: string | number): number => {
 };
 
 const aspectValue = getAspectRatioValue(aspectRatio);
+
+// Map size prop to actual display width (matching ch-based widths)
+const getDisplayWidth = (size: string): number => {
+  switch (size) {
+    case 'small': return 320;   // ~40ch (extra-narrow)
+    case 'medium': return 600;  // ~55ch (media-narrow)
+    case 'large': return 800;   // ~65ch (narrow)
+    case 'full': return 1200;   // ~100ch (base)
+    default: return 600;
+  }
+};
 
 // Define responsive breakpoints based on size
 const getImageWidths = (size: string): number[] => {
@@ -109,16 +120,17 @@ if (image && placeholder === 'blur') {
   }
 }
 
-// Calculate width and height from largest image in responsive set
-const largestWidth = imageWidths[imageWidths.length - 1];
-const imageWidth = largestWidth;
-const imageHeight = Math.round(largestWidth / aspectValue);
+// Fixed height matching ContentScrollContainer (350px)
+const fixedHeight = 350;
+const imageHeight = fixedHeight;
+// Calculate width from fixed height and aspect ratio
+const imageWidth = Math.round(fixedHeight * aspectValue);
 
-// Generate fallback URL (only if image exists)
+// Generate fallback URL with fixed height and calculated width (only if image exists)
 const fallbackUrl = image ? getOptimizedImageUrl(
   image,
-  imageWidths[0],
-  Math.round(imageWidths[0] / aspectValue),
+  imageWidth,
+  imageHeight,
   quality
 ) : null;
 
@@ -129,7 +141,7 @@ const fetchPriority = priority ? 'high' : 'auto';
 ---
 
 <figure
-  class={`image-container content-media-narrow image-${alignment} image-${size} ${className}`}
+  class={`image-container image-${alignment} image-${size} ${className}`}
   data-sanity={_key ? `${_type}.${_key}` : _type}
 >
   {image ? (
@@ -214,47 +226,46 @@ const fetchPriority = priority ? 'high' : 'auto';
 </script>
 
 <style>
+  /* CSS Variable-based width control - Kevin Powell method */
   .image-container {
-    margin: 2rem 0;
+    width: fit-content; /* Wrap tightly around wrapper */
+    max-width: 100%;
+    margin-block: 2rem;
   }
 
+  /* Alignment controls container positioning */
   .image-container.image-left {
-    text-align: left;
+    margin-inline: 0 auto;
   }
 
   .image-container.image-center {
-    text-align: center;
+    margin-inline: auto;
   }
 
   .image-container.image-right {
-    text-align: right;
+    margin-inline: auto 0;
   }
 
-  /* Modern image wrapper with blur-up effect */
+  /* Alignment controls wrapper positioning within container */
+  .image-container.image-center .image-wrapper {
+    margin-inline: auto;
+  }
+
+  .image-container.image-left .image-wrapper {
+    margin-inline: 0;
+  }
+
+  .image-container.image-right .image-wrapper {
+    margin-inline: 0 0 0 auto;
+  }
+
+  /* Modern image wrapper with fixed 350px height (matches ContentScrollContainer) */
   .image-wrapper {
     position: relative;
     overflow: hidden;
-    aspect-ratio: var(--aspect-ratio);
+    height: 350px;
+    width: calc(350px * var(--aspect-ratio)); /* Calculate width from aspect ratio */
     content-visibility: auto; /* Performance: render only when visible */
-    display: inline-block;
-    max-width: 100%;
-  }
-
-  /* Size constraints */
-  .image-small .image-wrapper {
-    max-width: 300px;
-  }
-
-  .image-medium .image-wrapper {
-    max-width: 600px;
-  }
-
-  .image-large .image-wrapper {
-    max-width: 800px;
-  }
-
-  .image-full .image-wrapper {
-    width: 100%;
   }
 
   /* LQIP/BlurHash placeholder with blur-up effect */

@@ -28,6 +28,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
 <section
   class={`two-column-layout content-media-narrow ${reverseOnMobile ? 'reverse-mobile' : ''} ${className}`}
+  data-layout-context="two-column"
   {...sanityAttributes}
 >
     <div class="column column-left">
@@ -76,28 +77,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
       display: flex;
       flex-direction: column-reverse;
     }
-  }
-
-  /* Ensure child components don't overflow */
-  .column > :global(*) {
-    max-width: 100%;
-  }
-
-  /* Image sizing guidance - parent controls dimensions */
-  .column > :global(figure),
-  .column > :global(.image-container),
-  .column > :global(.image-component) {
-    width: 100%;
-    aspect-ratio: 4 / 5; /* Standard aspect ratio for images */
-  }
-
-  .column > :global(figure img),
-  .column > :global(.image-container img),
-  .column > :global(.image-component img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
   }
 
   /* Accessibility */

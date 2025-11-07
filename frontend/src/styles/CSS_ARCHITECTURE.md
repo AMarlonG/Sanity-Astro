@@ -140,7 +140,7 @@ If performance becomes an issue, focus on these **instead** of CSS async loading
 - **Current state:** Images likely much larger than CSS
 - **Fix:**
   - Use Astro's `<Picture>` component for responsive images
-  - Implement AVIF/WebP with JPEG fallback
+  - Implement WebP with JPEG fallback (Sanity CDN doesn't support AVIF)
   - Lazy-load below-the-fold images
   - Add explicit width/height to prevent CLS
 - **Expected impact:** 500ms-2s faster LCP

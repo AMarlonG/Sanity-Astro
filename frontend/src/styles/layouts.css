@@ -106,13 +106,42 @@
    - No props or manual configuration needed
 */
 
-/* Children inside layout containers fill available column space */
-.grid-container > .grid-item > :global(*),
-.two-column-layout > .column > :global(*),
-.three-column-layout > .column > :global(*) {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-inline: 0 !important;
+/* Children inside layout containers fill available column space
+
+   Strategy: Higher specificity through data attributes + component targeting
+   No !important needed - specificity handles override naturally
+
+   Specificity calculation:
+   - .grid-container[data-columns] > .grid-item > .image-container = (0,3,0)
+   - .content-media-narrow alone = (0,1,0)
+   - Higher specificity wins naturally without !important
+*/
+
+/* Grid layout children - CSS variable override pattern */
+.grid-container[data-columns] > .grid-item {
+  --component-width: 100%;
+  --component-max-width: 100%;
+}
+.grid-container[data-columns] > .grid-item > :global(*) {
+  margin-inline: 0;
+}
+
+/* Two-column layout children - CSS variable override pattern */
+.two-column-layout[data-layout-context] > .column {
+  --component-width: 100%;
+  --component-max-width: 100%;
+}
+.two-column-layout[data-layout-context] > .column > :global(*) {
+  margin-inline: 0;
+}
+
+/* Three-column layout children - CSS variable override pattern */
+.three-column-layout[data-layout-context] > .column {
+  --component-width: 100%;
+  --component-max-width: 100%;
+}
+.three-column-layout[data-layout-context] > .column > :global(*) {
+  margin-inline: 0;
 }
 
 /* ============================================
@@ -121,7 +150,7 @@
 
    Modern image handling with performance and accessibility:
    - Intrinsic sizing to prevent layout shift
-   - Modern format support (AVIF/WebP/JPG)
+   - Modern format support (WebP/JPG - Sanity CDN doesn't support AVIF)
    - Print optimization
    - Reduced motion support
    - Dark mode adjustments
