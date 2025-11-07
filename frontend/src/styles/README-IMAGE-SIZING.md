@@ -235,10 +235,146 @@ In these cases, use:
 }
 ```
 
+## Image.astro Component - Standard for Sanity Images
+
+### Overview
+
+All Sanity images should be rendered using the centralized `Image.astro` component. This component:
+- Implements LQIP (Low Quality Image Placeholders) with BlurHash
+- Handles auto-format negotiation (AVIF/WebP/fallback)
+- Provides consistent aspect ratio handling
+- Generates proper srcset attributes
+- Follows Sanity best practices
+
+### When to Use Image.astro
+
+✅ **ALWAYS use Image.astro for:**
+- Detail pages (artist pages, event pages)
+- List pages (artist grids, event grids)
+- Scroll containers (artist scrolls, event scrolls, content scrolls)
+- Any Astro component rendering Sanity images
+
+❌ **DO NOT use Image.astro for:**
+- API endpoints returning HTML (e.g., `/api/filter-program.ts`) - use manual `<picture>/<source>/<img>` pattern
+- Article body content (handled by portable text renderer)
+- Non-Sanity images (use standard HTML img tags)
+
+### Usage Pattern
+
+```astro
+---
+import Image from '../components/Image.astro';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
+---
+
+<div class="image-wrapper">
+  <Image
+    image={sanityImageObject}
+    alt="Descriptive alt text"
+    size="medium"
+    aspectRatio="4:5"
+    loading="lazy"
+    quality={IMAGE_QUALITY.CARD}
+    class="custom-class"
+  />
+</div>
+```
+
+### Size Options
+
+- `small` - 320px width (for cards, thumbnails)
+- `medium` - 600px width (for list items, cards)
+- `large` - 800px width (for detail pages, hero sections)
+- `full` - 1200px width (for full-width images)
+
+All sizes maintain a fixed 350px height by default, with aspect ratio adjusting the width accordingly.
+
+### Aspect Ratios
+
+- `4:5` - Portrait (artist cards, portraits)
+- `4:3` - Landscape (event cards, general content)
+- `16:9` - Widescreen (video thumbnails, banners)
+- `1:1` - Square (icons, avatars)
+
+### Migration Pattern
+
+**Before (manual picture/source/img):**
+```astro
+import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/sanityImage';
+
+<picture>
+  <source
+    srcset={getResponsiveSrcSet(image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+    type="image/webp"
+    sizes="(max-width: 768px) 100vw, 400px"
+  />
+  <img
+    src={getOptimizedImageUrl(image, 400, 300, IMAGE_QUALITY.CARD)}
+    alt={alt}
+    loading="lazy"
+    class="image"
+  />
+</picture>
+```
+
+**After (Image.astro):**
+```astro
+import Image from '../components/Image.astro';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
+
+<Image
+  image={image}
+  alt={alt}
+  size="medium"
+  aspectRatio="4:3"
+  loading="lazy"
+  quality={IMAGE_QUALITY.CARD}
+  class="image"
+/>
+```
+
+### Benefits
+
+1. **LQIP Placeholders** - Smooth blur-up loading effect
+2. **Auto-Format** - Sanity CDN negotiates best format (AVIF → WebP → JPEG)
+3. **Consistent Implementation** - One component, one source of truth
+4. **Type Safety** - Generated TypeScript types from Sanity schemas
+5. **Maintainability** - Update once, apply everywhere
+6. **Performance** - Optimized srcset generation
+
+### API Endpoint Exception
+
+The `/api/filter-program.ts` endpoint generates HTML strings for htmx responses. Since it's a TypeScript file (not Astro), it cannot use the Image.astro component.
+
+**Acceptable pattern for API endpoints:**
+
+```typescript
+const imageHtml = `
+  <figure class="event-image">
+    <picture>
+      <source
+        srcset="${getResponsiveSrcSet(image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}"
+        type="image/webp"
+        sizes="(max-width: 768px) 100vw, 400px"
+      />
+      <img
+        src="${getOptimizedImageUrl(image, 400, 300, IMAGE_QUALITY.CARD)}"
+        alt="${alt}"
+        loading="lazy"
+        class="event-card-image"
+      />
+    </picture>
+  </figure>
+`;
+```
+
+This is the **only** acceptable exception to using Image.astro.
+
 ## Questions?
 
 If you're unsure which pattern to use:
 - **Constrained layout** (scroll, grid, flex with fixed dimensions)? → Use parent control pattern
 - **Unconstrained content** (article body, free-flowing text)? → Use natural aspect ratio
+- **Sanity images in Astro components?** → Always use Image.astro component
 
 When in doubt, use the parent control pattern - it's more maintainable and consistent.
