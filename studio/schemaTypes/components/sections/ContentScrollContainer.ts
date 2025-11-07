@@ -23,9 +23,7 @@ export const contentScrollContainer = defineType({
       of: [
         {type: 'imageComponent'},
         {type: 'videoComponent'},
-        {type: 'spotifyComponent'},
         {type: 'quoteComponent'},
-        {type: 'portableTextBlock'},
       ],
       validation: (Rule) =>
         Rule.required()
