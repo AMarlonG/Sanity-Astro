@@ -1,8 +1,9 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
 import DynamicComponent from "../../../components/DynamicComponent.astro";
+import Image from "../../../components/Image.astro";
 import { getMultilingualContent } from "../../../lib/utils/language.js";
-import { getOptimizedImageUrl, IMAGE_QUALITY } from '../../../lib/sanityImage';
+import { IMAGE_QUALITY } from '../../../lib/sanityImage';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../../lib/sanity/loadQuery.js';
 import { stegaClean } from '@sanity/client/stega';
@@ -75,17 +76,18 @@ const content = getMultilingualContent(artist, 'en') || artist.content_en;
       <!-- Artist Card - Centered, same design as list cards -->
       <div class="artist-detail-card">
         {artist.image?.image && (
-          <figure class="artist-detail-image">
-            <picture>
-              <img
-                src={getOptimizedImageUrl(artist.image.image, 640, 800, IMAGE_QUALITY.CARD)}
-                alt={stegaClean(artist.image.alt || artist.name)}
-                loading="eager"
-                decoding="async"
-                class="artist-detail-card-image"
-              />
-            </picture>
-          </figure>
+          <div class="artist-detail-image">
+            <Image
+              image={artist.image.image}
+              alt={stegaClean(artist.image.alt || artist.name)}
+              size="large"
+              aspectRatio="4:5"
+              loading="eager"
+              quality={IMAGE_QUALITY.HERO}
+              priority={true}
+              className="artist-detail-card-image"
+            />
+          </div>
         )}
 
         <div class="artist-detail-info-box">

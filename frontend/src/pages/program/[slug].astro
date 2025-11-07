@@ -1,9 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import DynamicComponent from '../../components/DynamicComponent.astro';
+import Image from '../../components/Image.astro';
 import { formatDateWithWeekday } from '../../lib/utils/dates';
 import { getMultilingualContent } from "../../lib/utils/language.js";
-import { getOptimizedImageUrl, IMAGE_QUALITY } from '../../lib/sanityImage';
+import { IMAGE_QUALITY } from '../../lib/sanityImage';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../lib/sanity/loadQuery.js';
 import { stegaClean } from '@sanity/client/stega';
@@ -167,15 +168,15 @@ const extraContent = getMultilingualContent(event, 'no', 'extraContent') || even
 
                     {artist.image?.image?.asset && (
                       <div class="artist-image">
-                        <picture>
-                          <img
-                            src={getOptimizedImageUrl(artist.image.image, 320, 400, IMAGE_QUALITY.CARD)}
-                            alt={stegaClean(artist.image.alt || artist.name || '')}
-                            loading="lazy"
-                            decoding="async"
-                            class="artist-card-image"
-                          />
-                        </picture>
+                        <Image
+                          image={artist.image.image}
+                          alt={stegaClean(artist.image.alt || artist.name || '')}
+                          size="small"
+                          aspectRatio="4:5"
+                          loading="lazy"
+                          quality={IMAGE_QUALITY.CARD}
+                          className="artist-card-image"
+                        />
                       </div>
                     )}
 
@@ -203,12 +204,13 @@ const extraContent = getMultilingualContent(event, 'no', 'extraContent') || even
 
       {event.image?.image?.asset && (
         <figure class="event-image-bottom">
-          <img
-            src={getOptimizedImageUrl(event.image.image, 800, 600, IMAGE_QUALITY.CARD)}
+          <Image
+            image={event.image.image}
             alt={stegaClean(event.image.alt || event.title || '')}
-            style="aspect-ratio: 4/3; width: 100%; object-fit: cover;"
+            size="large"
+            aspectRatio="4:3"
             loading="lazy"
-            decoding="async"
+            quality={IMAGE_QUALITY.CARD}
           />
           {event.image.credit && (
             <figcaption class="image-credit">{stegaClean(event.image.credit)}</figcaption>
