@@ -132,15 +132,15 @@ if (dateFilter && venueFilter) {
       {hasEvents ? (
         filteredDates.map(({ date, displayTitle, events: dateEvents }) => (
         <section class="content-section date-section" data-date={date}>
-          <h3 class="date-title">{stegaClean(displayTitle)}</h3>
+          <h2 class="date-title">{stegaClean(displayTitle)}</h2>
           <div class="events-grid">
             {dateEvents.map((event) => (
               <article class="event-card card" data-event-date={event.eventDate?.date}>
-                <h4 class="event-title">
+                <h3 class="event-title">
                   <a href={`/program/${stegaClean(event.slug_no?.current || event.slug_en?.current)}`} class="event-title-link">
                     {stegaClean(event.title)}
                   </a>
-                </h4>
+                </h3>
 
                 {event.excerpt && (
                   <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
@@ -196,7 +196,7 @@ if (dateFilter && venueFilter) {
     ) : (
       <section class="content-section">
         <div class="no-results">
-          <h3 class="no-results-title">{emptyStateMessage}</h3>
+          <h2 class="no-results-title">{emptyStateMessage}</h2>
           <p class="no-results-text">Prøv en annen kombinasjon, eller:</p>
           <a
             href="/program"

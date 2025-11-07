@@ -188,10 +188,10 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
                   )}
                 </h4>
                 {(showDate || showTime) && (dateString || timeString) && (
-                  <time class="event-datetime" dateTime={dateTimeValue}>
-                    {showDate && dateString && <span class="event-date">{dateString}</span>}
-                    {showTime && timeString && <span class="event-time">{timeString}</span>}
-                  </time>
+                  <div class="event-datetime">
+                    {showDate && dateString && <time class="event-date" dateTime={eventDate.toISOString().split('T')[0]}>{dateString}</time>}
+                    {showTime && timeString && <time class="event-time" dateTime={`${eventDate.toISOString().split('T')[0]}T${timeString}`}>{timeString}</time>}
+                  </div>
                 )}
                 {showVenue && venueName && <address class="event-venue">{venueName}</address>}
                 {showArtists && artistNames && <p class="event-artists">{artistNames}</p>}
