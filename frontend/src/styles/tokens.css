@@ -235,20 +235,59 @@
   --line-height-normal: 1.6;
   --line-height-relaxed: 1.8;
   
-  /* Spacing - Using 8px base unit */
+  /* ============================================
+     SPACING SYSTEM - Utopia-inspired Fluid Scale
+     ============================================
+
+     ACCESSIBILITY REQUIREMENT (WCAG 1.4.4):
+     Maximum spacing MUST be ≤ 2.5× minimum spacing
+     This ensures proper scaling at 200% browser zoom
+
+     Reference: https://www.smashingmagazine.com/2023/11/addressing-accessibility-concerns-fluid-type/
+
+     Fluid breakpoints: 320px → 1240px
+     All values use rem units for zoom accessibility
+     Combines rem + vw for smooth, accessible scaling
+  */
+
+  /* Fluid spacing scale - Primary tokens */
+  --space-3xs: clamp(0.125rem, 0.109rem + 0.07vw, 0.1875rem);  /* 2-3px   | Ratio: 1.5x  ✓ */
+  --space-2xs: clamp(0.25rem, 0.228rem + 0.11vw, 0.3125rem);   /* 4-5px   | Ratio: 1.25x ✓ */
+  --space-xs: clamp(0.5rem, 0.457rem + 0.22vw, 0.625rem);      /* 8-10px  | Ratio: 1.25x ✓ */
+  --space-s: clamp(0.75rem, 0.685rem + 0.33vw, 0.9375rem);     /* 12-15px | Ratio: 1.25x ✓ */
+  --space-m: clamp(1rem, 0.913rem + 0.43vw, 1.25rem);          /* 16-20px | Ratio: 1.25x ✓ */
+  --space-l: clamp(1.5rem, 1.37rem + 0.65vw, 1.875rem);        /* 24-30px | Ratio: 1.25x ✓ */
+  --space-xl: clamp(2rem, 1.826rem + 0.87vw, 2.5rem);          /* 32-40px | Ratio: 1.25x ✓ */
+  --space-2xl: clamp(3rem, 2.739rem + 1.3vw, 3.75rem);         /* 48-60px | Ratio: 1.25x ✓ */
+  --space-3xl: clamp(4rem, 3.652rem + 1.74vw, 5rem);           /* 64-80px | Ratio: 1.25x ✓ */
+
+  /* Space pairs - For components needing more dramatic responsive variation */
+  --space-3xs-2xs: clamp(0.125rem, 0.054rem + 0.36vw, 0.3125rem);  /* 2px → 5px   */
+  --space-2xs-xs: clamp(0.25rem, 0.163rem + 0.43vw, 0.625rem);     /* 4px → 10px  */
+  --space-xs-s: clamp(0.5rem, 0.37rem + 0.65vw, 0.9375rem);        /* 8px → 15px  */
+  --space-s-m: clamp(0.75rem, 0.598rem + 0.76vw, 1.25rem);         /* 12px → 20px */
+  --space-m-l: clamp(1rem, 0.739rem + 1.3vw, 1.875rem);            /* 16px → 30px */
+  --space-l-xl: clamp(1.5rem, 1.109rem + 1.96vw, 2.5rem);          /* 24px → 40px */
+  --space-xl-2xl: clamp(2rem, 1.304rem + 3.48vw, 3.75rem);         /* 32px → 60px */
+  --space-2xl-3xl: clamp(3rem, 2.217rem + 3.91vw, 5rem);           /* 48px → 80px */
+
+  /* Legacy fixed spacing - Maintained for backward compatibility */
   --space-0: 0;
-  --space-1: 0.25rem;  /* 4px */
-  --space-2: 0.5rem;   /* 8px */
-  --space-3: 0.75rem;  /* 12px */
-  --space-4: 1rem;     /* 16px */
-  --space-5: 1.5rem;   /* 24px */
-  --space-6: 2rem;     /* 32px */
-  --space-7: 2.5rem;   /* 40px */
-  --space-8: 3rem;     /* 48px */
-  --space-9: 4rem;     /* 64px */
-  --space-10: 5rem;    /* 80px */
-  --space-11: 6rem;    /* 96px */
-  --space-12: 8rem;    /* 128px */
+  --space-1: var(--space-3xs);   /* 2-3px   - Maps to new fluid scale */
+  --space-2: var(--space-2xs);   /* 4-5px   - Maps to new fluid scale */
+  --space-3: var(--space-xs);    /* 8-10px  - Maps to new fluid scale */
+  --space-4: var(--space-s);     /* 12-15px - Maps to new fluid scale */
+  --space-5: var(--space-m);     /* 16-20px - Maps to new fluid scale */
+  --space-6: var(--space-l);     /* 24-30px - Maps to new fluid scale */
+  --space-7: var(--space-xl);    /* 32-40px - Maps to new fluid scale */
+  --space-8: var(--space-2xl);   /* 48-60px - Maps to new fluid scale */
+  --space-9: var(--space-3xl);   /* 64-80px - Maps to new fluid scale */
+
+  /* Fixed spacing for precision contexts (borders, shadows, micro-adjustments) */
+  --space-fixed-1: 0.25rem;  /* 4px  - Use for borders, small gaps */
+  --space-fixed-2: 0.5rem;   /* 8px  - Use for tight padding */
+  --space-fixed-3: 0.75rem;  /* 12px - Use for form inputs */
+  --space-fixed-4: 1rem;     /* 16px - Use for consistent padding */
   
   /* Shadows */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -282,21 +321,21 @@
   --grid-columns: 12;
   --grid-gap: var(--space-5);
 
-  /* Navigation */
-  --nav-height-mobile: clamp(3.5rem, 15vw, 4.5rem);
-  --nav-height-desktop: clamp(4rem, 8vw, 5rem);
+  /* Navigation - Using accessible fluid values (rem + vw for zoom support) */
+  --nav-height-mobile: clamp(3.5rem, 3.5rem + 1vw, 4.5rem);
+  --nav-height-desktop: clamp(4rem, 4rem + 1vw, 5rem);
   --nav-z-index: var(--z-sticky);
-  --nav-gap: clamp(0.5rem, 2vw, 1.5rem);
-  --nav-padding-inline: clamp(1rem, 4vw, 2rem);
-  --nav-padding-block: clamp(0.75rem, 2vw, 1.25rem);
+  --nav-gap: var(--space-xs-s);              /* Responsive 8px → 15px */
+  --nav-padding-inline: var(--space-m-l);    /* Responsive 16px → 30px */
+  --nav-padding-block: var(--space-s-m);     /* Responsive 12px → 20px */
 
-  /* Fluid spacing variants for intrinsic layouts */
-  --space-fluid-xs: clamp(0.25rem, 0.5vw, 0.5rem);
-  --space-fluid-sm: clamp(0.5rem, 1vw, 1rem);
-  --space-fluid-md: clamp(1rem, 2vw + 0.5rem, 2rem);
-  --space-fluid-lg: clamp(1.5rem, 3vw + 0.5rem, 3rem);
-  --space-fluid-xl: clamp(2rem, 4vw + 1rem, 4rem);
-  --space-fluid-2xl: clamp(3rem, 6vw + 1.5rem, 6rem);
+  /* Legacy fluid spacing - Maps to new system for backward compatibility */
+  --space-fluid-xs: var(--space-2xs-xs);   /* 4px → 10px  */
+  --space-fluid-sm: var(--space-xs-s);     /* 8px → 15px  */
+  --space-fluid-md: var(--space-s-m);      /* 12px → 20px */
+  --space-fluid-lg: var(--space-m-l);      /* 16px → 30px */
+  --space-fluid-xl: var(--space-l-xl);     /* 24px → 40px */
+  --space-fluid-2xl: var(--space-xl-2xl);  /* 32px → 60px */
 
   /* Page layout spacing - Controls top spacing for all pages */
   --page-top-spacing: clamp(

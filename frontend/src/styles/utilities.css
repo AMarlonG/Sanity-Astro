@@ -189,13 +189,85 @@
 .justify-end { justify-content: flex-end; }
 .justify-between { justify-content: space-between; }
 
-/* Gap utilities */
+/* Gap utilities - Legacy fixed spacing */
 .gap-1 { gap: var(--space-1); }
 .gap-2 { gap: var(--space-2); }
 .gap-3 { gap: var(--space-3); }
 .gap-4 { gap: var(--space-4); }
 .gap-5 { gap: var(--space-5); }
 .gap-6 { gap: var(--space-6); }
+
+/* ============================================
+   FLUID SPACING COMPOSITION UTILITIES
+   ============================================
+
+   Based on Utopia fluid spacing system.
+   These utilities create responsive spacing patterns
+   without media queries.
+
+   Usage:
+   - .stack-* for vertical spacing (flex-direction: column)
+   - .cluster-* for horizontal spacing (flex-direction: row)
+   - .region-* for large section spacing
+*/
+
+/* Stack pattern - Vertical spacing */
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.stack-3xs { gap: var(--space-3xs); }       /* 2-3px fluid */
+.stack-2xs { gap: var(--space-2xs); }       /* 4-5px fluid */
+.stack-xs { gap: var(--space-xs); }         /* 8-10px fluid */
+.stack-s { gap: var(--space-s); }           /* 12-15px fluid */
+.stack-m { gap: var(--space-m); }           /* 16-20px fluid */
+.stack-l { gap: var(--space-l); }           /* 24-30px fluid */
+.stack-xl { gap: var(--space-xl); }         /* 32-40px fluid */
+.stack-2xl { gap: var(--space-2xl); }       /* 48-60px fluid */
+.stack-3xl { gap: var(--space-3xl); }       /* 64-80px fluid */
+
+/* Stack with space pairs - More dramatic responsive scaling */
+.stack-xs-s { gap: var(--space-xs-s); }     /* 8px → 15px */
+.stack-s-m { gap: var(--space-s-m); }       /* 12px → 20px */
+.stack-m-l { gap: var(--space-m-l); }       /* 16px → 30px */
+.stack-l-xl { gap: var(--space-l-xl); }     /* 24px → 40px */
+.stack-xl-2xl { gap: var(--space-xl-2xl); } /* 32px → 60px */
+
+/* Cluster pattern - Horizontal spacing */
+.cluster {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.cluster-3xs { gap: var(--space-3xs); }       /* 2-3px fluid */
+.cluster-2xs { gap: var(--space-2xs); }       /* 4-5px fluid */
+.cluster-xs { gap: var(--space-xs); }         /* 8-10px fluid */
+.cluster-s { gap: var(--space-s); }           /* 12-15px fluid */
+.cluster-m { gap: var(--space-m); }           /* 16-20px fluid */
+.cluster-l { gap: var(--space-l); }           /* 24-30px fluid */
+.cluster-xl { gap: var(--space-xl); }         /* 32-40px fluid */
+.cluster-2xl { gap: var(--space-2xl); }       /* 48-60px fluid */
+
+/* Cluster with space pairs */
+.cluster-xs-s { gap: var(--space-xs-s); }     /* 8px → 15px */
+.cluster-s-m { gap: var(--space-s-m); }       /* 12px → 20px */
+.cluster-m-l { gap: var(--space-m-l); }       /* 16px → 30px */
+.cluster-l-xl { gap: var(--space-l-xl); }     /* 24px → 40px */
+
+/* Region spacing - For page sections and major divisions */
+.region-s {
+  margin-block: var(--space-l-xl);      /* 24px → 40px */
+}
+
+.region-m {
+  margin-block: var(--space-xl-2xl);    /* 32px → 60px */
+}
+
+.region-l {
+  margin-block: var(--space-2xl-3xl);   /* 48px → 80px */
+}
 
 /* ============================================
    INTRINSIC GRID UTILITIES

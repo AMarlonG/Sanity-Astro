@@ -76,23 +76,22 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .content-scroll-container {
     width: min(100ch, 100% - 4rem);
     margin-inline: auto;
-    margin-block: 3rem;
+    margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px */
   }
 
   .scroll-container-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-xl);
     font-weight: 600;
-    margin-bottom: 1.5rem;
-    text-align: center;
+    margin-block-end: var(--space-m-l); /* Fluid 16px → 30px */
   }
 
   .scroll-list {
     display: flex;
     align-items: flex-start; /* Parent controls alignment - force top alignment */
-    gap: 1.5rem;
+    gap: var(--space-m-l); /* Fluid 16px → 30px */
     list-style: none;
     margin: 0;
-    padding: 0.5rem 0 1rem 0;
+    padding-block: var(--space-xs) var(--space-m);
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
@@ -153,23 +152,10 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     .scroll-item > :global(.video-component) {
       width: auto; /* Allow aspect ratio to determine width */
     }
-
-    .scroll-list {
-      gap: 1.25rem;
-    }
   }
 
   /* Mobile: Smaller cards */
   @media (max-width: 768px) {
-    .content-scroll-container {
-      margin: 2rem 0;
-    }
-
-    .scroll-container-title {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-    }
-
     .scroll-item {
       height: 250px;
     }
@@ -183,11 +169,9 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     .scroll-item > :global(.video-component) {
       width: auto; /* Allow aspect ratio to determine width */
     }
-
-    .scroll-list {
-      gap: 1rem;
-    }
   }
+
+  /* Note: Spacing (margin, gap, padding) uses fluid tokens and adjusts automatically */
 
   /* Accessibility */
   .scroll-item:focus-within {

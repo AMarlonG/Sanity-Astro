@@ -9,6 +9,13 @@ export const threeColumnLayout = defineType({
   description: 'Plasser tre komponenter side ved side (stabler vertikalt på mobil)',
   fields: [
     defineField({
+      name: 'title',
+      title: 'Tittel',
+      type: 'string',
+      description: 'Valgfri tittel over kolonnene',
+      validation: (Rule) => Rule.max(100),
+    }),
+    defineField({
       name: 'column1',
       title: 'Kolonne 1',
       type: 'array',
@@ -71,19 +78,20 @@ export const threeColumnLayout = defineType({
   ],
   preview: {
     select: {
+      title: 'title',
       column1: 'column1',
       column2: 'column2',
       column3: 'column3',
       aspectRatio: 'aspectRatio',
     },
-    prepare({column1, column2, column3, aspectRatio}) {
+    prepare({title, column1, column2, column3, aspectRatio}) {
       const col1Type = column1?.[0]?._type || 'tom'
       const col2Type = column2?.[0]?._type || 'tom'
       const col3Type = column3?.[0]?._type || 'tom'
       const aspectText = ` • ${aspectRatio || '4:5'}`
 
       return {
-        title: 'Tre kolonner',
+        title: title || 'Tre kolonner',
         subtitle: `${col1Type} | ${col2Type} | ${col3Type}${aspectText}`,
         media: DashboardIcon,
       }

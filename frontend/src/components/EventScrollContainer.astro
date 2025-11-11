@@ -141,7 +141,7 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 ---
 
 <section class={`${containerClass} ${scrollbarClass}`}>
-  {title && <h3 class="event-scroll-title">{title}</h3>}
+  {title && <h2 class="event-scroll-title">{title}</h2>}
   <ul class="event-list">
     {sortedEvents.map((event) => {
         if (!event) return null
@@ -219,13 +219,13 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
     container-type: inline-size;
     width: min(100ch, 100% - 4rem);
     margin-inline: auto;
-    margin-block: clamp(var(--space-5), 4vw, var(--space-6));
+    margin-block: var(--space-m-l); /* Fluid 16px → 30px */
   }
 
   .event-scroll-title {
-    font-size: clamp(var(--font-size-xl), 3vw, var(--font-size-2xl));
-    font-weight: var(--font-weight-semibold);
-    margin-block-end: var(--space-4);
+    font-size: var(--fs-xl);
+    font-weight: 600;
+    margin-block-end: var(--space-m);
   }
 
   /* Fluid scroll list */

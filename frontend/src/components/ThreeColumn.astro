@@ -2,6 +2,7 @@
 import DynamicComponent from './DynamicComponent.astro'
 
 export interface Props {
+  title?: string
   column1: any[]
   column2: any[]
   column3: any[]
@@ -12,6 +13,7 @@ export interface Props {
 }
 
 const {
+  title,
   column1 = [],
   column2 = [],
   column3 = [],
@@ -37,6 +39,8 @@ const aspectValue = aspectMap[aspectRatio] || '4 / 5'
 const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
+{title && <h2 class="section-title">{title}</h2>}
+
 <section
   class={`three-column-layout content-wide ${className}`}
   data-layout-context="three-column"
@@ -57,11 +61,17 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 </section>
 
 <style>
+  .section-title {
+    margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
+    font-size: var(--fs-xl);
+    font-weight: 600;
+  }
+
   .three-column-layout {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 2rem;
-    margin: 3rem 0;
+    gap: var(--space-l-xl); /* Fluid 24px → 40px */
+    margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px section spacing */
     align-items: start;
 
     /* Container query context - allows children to adapt to available space */
@@ -113,7 +123,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .column > :global(.portable-text) {
     overflow-y: auto;
     height: 100%;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
 
     /* Custom scrollbar styling */
     scrollbar-width: thin;
@@ -145,7 +155,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   @media (max-width: 1024px) {
     .three-column-layout {
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
     }
 
     .column-3 {
@@ -157,14 +166,14 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   @media (max-width: 768px) {
     .three-column-layout {
       grid-template-columns: 1fr;
-      gap: 2rem;
-      margin: 2rem 0;
     }
 
     .column-3 {
       grid-column: auto; /* Reset span */
     }
   }
+
+  /* Note: No need for manual gap/margin adjustments - fluid spacing handles this automatically */
 
   /* Accessibility */
   .column:focus-within {
@@ -180,7 +189,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
     .column {
       page-break-inside: avoid;
-      margin-bottom: 1rem;
+      margin-block-end: var(--space-m);
       aspect-ratio: auto;
       overflow: visible;
       contain: none;
