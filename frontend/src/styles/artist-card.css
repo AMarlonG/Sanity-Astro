@@ -75,7 +75,8 @@
 /* Artist Name - Visible name in info box */
 .artist-name {
   margin: 0;
-  font-size: 1.25rem;
+  /* Migrated to fluid token: --fs-lg (20-23px responsive) */
+  font-size: var(--fs-lg);
   line-height: 1.2;
   font-weight: 600;
   font-family: Georgia, 'Times New Roman', serif;
@@ -141,7 +142,8 @@
 
 .artist-instrument {
   margin: 0;
-  font-size: 0.75rem;
+  /* Migrated to fluid token: --fs-xs (12-14px responsive) */
+  font-size: var(--fs-xs);
   line-height: 1.3;
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;

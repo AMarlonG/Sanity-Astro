@@ -53,7 +53,7 @@
 
 .back-button::before {
   content: '←';
-  font-size: var(--font-size-lg);
+  font-size: var(--fs-lg);
 }
 
 .back-button::after {
@@ -98,7 +98,8 @@
 
 .event-title {
   margin: 0 0 var(--space-4) 0;
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  /* Fixed: Converted pure vw to rem + vw for WCAG 1.4.4 accessibility (200% zoom support) */
+  font-size: clamp(2.5rem, 2.5rem + 0.5vw, 3.5rem);
   word-wrap: break-word;
   overflow-wrap: break-word;
   hyphens: auto;
@@ -106,7 +107,9 @@
 
 .event-excerpt {
   margin: 0;
-  font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+  /* Fixed: Converted pure vw to rem + vw for WCAG 1.4.4 accessibility (200% zoom support) */
+  /* Consider using --fs-lg for consistency: clamp(1.25rem, 1.18rem + 0.33vw, 1.41rem) */
+  font-size: clamp(1.25rem, 1.25rem + 0.125vw, 1.5rem);
   line-height: var(--line-height-normal);
   text-wrap: balance;
   max-inline-size: 65ch;
@@ -118,7 +121,7 @@
   flex-direction: column;
   gap: var(--space-1);
   margin: 0;
-  font-size: var(--font-size-base);
+  font-size: var(--fs-base);
   line-height: var(--line-height-tight);
 }
 
@@ -132,7 +135,7 @@
 }
 
 .ticket-info {
-  font-size: var(--font-size-base);
+  font-size: var(--fs-base);
   font-style: italic;
   color: var(--color-blue);
   opacity: 0.85;
@@ -195,7 +198,7 @@
 
 .artists-title {
   margin: 0 0 var(--space-4) 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--fs-2xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-blue);
 }
@@ -276,14 +279,14 @@
 
 .section-title {
   margin: 0 0 var(--space-3) 0;
-  font-size: var(--font-size-xl);
+  font-size: var(--fs-2xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-blue);
 }
 
 .description-text {
   margin: 0;
-  font-size: var(--font-size-base);
+  font-size: var(--fs-base);
   line-height: var(--line-height-relaxed);
 }
 

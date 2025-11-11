@@ -186,7 +186,8 @@
    * visual harmony and clear hierarchy. Each size is 1.25× the previous size.
    *
    * USAGE GUIDELINES:
-   * --fs-sm:   Small text, captions, labels, metadata
+   * --fs-xs:   Extra small text, micro UI, dense data, filter labels (12-14px)
+   * --fs-sm:   Small text, captions, labels, metadata (13-14px)
    * --fs-base: Body text, paragraphs (default for most content)
    * --fs-lg:   H4, emphasized text, large buttons
    * --fs-xl:   H3, section headings, card titles
@@ -201,7 +202,9 @@
    * ACCESSIBILITY:
    * All sizes use rem units to respect user browser font-size preferences.
    * The base size ensures minimum 16px for readability and WCAG compliance.
+   * Even --fs-xs maintains readability while providing compact UI options.
    */
+  --fs-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.875rem);       /* 12-14px */
   --fs-sm: clamp(0.8rem, 0.77rem + 0.15vw, 0.875rem);        /* ~13-14px */
   --fs-base: clamp(1rem, 0.95rem + 0.24vw, 1.125rem);        /* 16-18px */
   --fs-lg: clamp(1.25rem, 1.18rem + 0.33vw, 1.41rem);        /* 20-23px */
@@ -211,9 +214,15 @@
 
   /* Legacy aliases - Kept for backward compatibility with existing code
    * These map to the new scale to prevent breaking changes.
-   * Gradually migrate to the new --fs-* naming convention.
+   *
+   * DEPRECATION NOTICE:
+   * The --font-size-* naming convention is being phased out in favor of --fs-*
+   * All new code should use --fs-* tokens. Existing --font-size-* usage will
+   * continue to work but should be migrated to --fs-* during maintenance.
+   *
+   * Gradually migrate to the new --fs-* naming convention for consistency.
    */
-  --font-size-xs: var(--fs-sm);
+  --font-size-xs: var(--fs-xs);
   --font-size-sm: var(--fs-sm);
   --font-size-base: var(--fs-base);
   --font-size-lg: var(--fs-lg);
