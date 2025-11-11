@@ -297,7 +297,12 @@
   --space-fixed-2: 0.5rem;   /* 8px  - Use for tight padding */
   --space-fixed-3: 0.75rem;  /* 12px - Use for form inputs */
   --space-fixed-4: 1rem;     /* 16px - Use for consistent padding */
-  
+
+  /* Legacy/Alias Tokens - For backward compatibility */
+  --space-10: var(--space-3xl);           /* 64-80px - Maps to largest fluid value */
+  --space-fluid-md: var(--space-m-l);     /* 16px → 30px - Moderate fluid scaling */
+  --space-fluid-lg: var(--space-l-xl);    /* 24px → 40px - Large fluid scaling */
+
   /* Shadows */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
