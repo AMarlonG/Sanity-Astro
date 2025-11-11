@@ -7,6 +7,7 @@ import Image from '../components/Image.astro';
 import Video from '../components/Video.astro';
 import Spotify from '../components/Spotify.astro';
 import Button from '../components/Button.astro';
+import Link from '../components/Link.astro';
 import Quote from '../components/Quote.astro';
 import Accordion from '../components/Accordion.astro';
 import ContentScrollContainer from '../components/ContentScrollContainer.astro';
@@ -25,6 +26,7 @@ export const componentRegistry: Record<string, AstroComponentFactory> = {
   videoComponent: Video,
   spotifyComponent: Spotify,
   buttonComponent: Button,
+  linkComponent: Link,
   quoteComponent: Quote,
   accordionComponent: Accordion,
   contentScrollContainer: ContentScrollContainer,

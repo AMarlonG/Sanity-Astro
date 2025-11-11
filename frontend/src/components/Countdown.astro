@@ -120,7 +120,7 @@ const eventId = targetEvent?._id;
 <style>
   .countdown {
     text-align: center;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 1px solid #dee2e6;
   }
@@ -182,7 +182,7 @@ const eventId = targetEvent?._id;
   }
 
   .countdown--minimal {
-    padding: 1rem;
+    padding: var(--space-m); /* Fluid 16px → 20px */
     background: none;
     border: none;
   }
@@ -212,10 +212,6 @@ const eventId = targetEvent?._id;
    * Font sizes now scale automatically via design tokens.
    * Only layout-specific adjustments remain. */
   @media (max-width: 768px) {
-    .countdown {
-      padding: 1rem;
-    }
-
     .countdown__sentence {
       gap: 0.25rem;
     }

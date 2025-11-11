@@ -146,7 +146,7 @@ switch (videoType) {
     width: var(--component-width, min(55ch, 100% - 4rem));
     max-width: var(--component-max-width, 100%);
     margin-inline: auto;
-    margin-block: 2rem;
+    margin-block: var(--space-l); /* Fluid 24px → 30px */
   }
 
   /* Reset margin when inside scroll containers to prevent overflow */
@@ -211,13 +211,7 @@ switch (videoType) {
     background: #f8f9fa;
   }
 
-  /* Responsive design - Simplified after fluid typography migration
-   * Font sizes now scale automatically via design tokens. */
-  @media (max-width: 768px) {
-    .video-component {
-      margin: 1.5rem 0;
-    }
-  }
+  /* Note: Removed viewport media query for margin - now uses fluid spacing token that adapts automatically */
 
   .video-caption {
     margin-top: 0.75rem;

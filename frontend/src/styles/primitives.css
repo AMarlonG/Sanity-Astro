@@ -1,0 +1,129 @@
+/* ============================================
+   LAYOUT PRIMITIVES
+   Based on Every Layout, adapted for this project
+   ============================================
+
+   These primitives provide the foundation for intrinsic,
+   responsive layouts without media queries.
+
+   Core principles:
+   - Content-driven layouts
+   - Composable patterns
+   - CSS variable configuration
+   - Works with fluid spacing system
+   ============================================ */
+
+/* ============================================
+   CENTER - Max-width constraint + centering
+   ============================================
+
+   Creates a horizontal content constraint and centers it.
+   Use with measure utilities to control max-width.
+
+   Usage:
+   <div class="center measure-lg">Content</div>
+
+   CSS Variables:
+   --measure: Max inline size (default: 60ch)
+   --gutter: Padding on sides (default: 1rem)
+   ============================================ */
+.center {
+  box-sizing: content-box;
+  margin-inline: auto;
+  max-inline-size: var(--measure, 60ch);
+  padding-inline: var(--gutter, 1rem);
+}
+
+/* ============================================
+   STACK - Vertical rhythm with consistent spacing
+   ============================================
+
+   Applies consistent spacing between child elements
+   vertically using the lobotomized owl selector.
+
+   Usage:
+   <div class="stack" style="--space: var(--space-m)">
+     <p>Item 1</p>
+     <p>Item 2</p>
+   </div>
+
+   CSS Variables:
+   --space: Gap between children (default: var(--space-m))
+   ============================================ */
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.stack > * {
+  margin-block: 0;
+}
+
+.stack > * + * {
+  margin-block-start: var(--space, var(--space-m));
+}
+
+/* ============================================
+   CLUSTER - Horizontal wrapping with gaps
+   ============================================
+
+   Groups items horizontally with wrapping.
+   Perfect for navigation, tags, button groups.
+
+   Usage:
+   <div class="cluster" style="--space: var(--space-s)">
+     <button>Button 1</button>
+     <button>Button 2</button>
+   </div>
+
+   CSS Variables:
+   --space: Gap between items (default: var(--space-s))
+   --align: Vertical alignment (default: center)
+   --justify: Horizontal alignment (default: flex-start)
+   ============================================ */
+.cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space, var(--space-s));
+  align-items: var(--align, center);
+  justify-content: var(--justify, flex-start);
+}
+
+/* ============================================
+   WIDTH CONSTRAINT UTILITIES
+   ============================================
+
+   Use with .center to control max-width.
+   Based on character units (ch) for accessible,
+   font-size-relative widths.
+
+   Usage:
+   <div class="center measure-lg">Page content</div>
+   <div class="center measure-md">Body text</div>
+   <div class="center measure-xs">Quote</div>
+   ============================================ */
+
+/* Extra narrow - Quotes, pull quotes, narrow content */
+.measure-xs {
+  --measure: 40ch;
+}
+
+/* Media narrow - Images, videos, media-heavy content */
+.measure-sm {
+  --measure: 55ch;
+}
+
+/* Body text - Optimal reading width */
+.measure-md {
+  --measure: 65ch;
+}
+
+/* Standard page content - Default for most pages */
+.measure-lg {
+  --measure: 100ch;
+}
+
+/* Full width - Hero sections, full-bleed content */
+.measure-full {
+  --measure: none;
+}

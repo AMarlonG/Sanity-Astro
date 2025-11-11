@@ -63,13 +63,14 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 <style>
   .section-title {
     margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
-    font-size: var(--fs-xl);
+    font-size: var(--fs-2xl);
     font-weight: 600;
   }
 
   .three-column-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    /* Intrinsic: creates up to 3 columns when space allows, stacks when narrow */
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
     gap: var(--space-l-xl); /* Fluid 24px → 40px */
     margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px section spacing */
     align-items: start;
@@ -151,29 +152,15 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     contain: none;
   }
 
-  /* Tablet: Reduce to 2 columns, stack third */
-  @media (max-width: 1024px) {
+  /* Container query: Adjust gap when columns reduce */
+  @container three-column-layout (max-width: 900px) {
     .three-column-layout {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .column-3 {
-      grid-column: 1 / -1; /* Span full width */
+      gap: var(--space-m-l); /* Slightly smaller gap when fewer columns */
     }
   }
 
-  /* Mobile: Stack vertically */
-  @media (max-width: 768px) {
-    .three-column-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .column-3 {
-      grid-column: auto; /* Reset span */
-    }
-  }
-
-  /* Note: No need for manual gap/margin adjustments - fluid spacing handles this automatically */
+  /* Note: No viewport media queries needed! Columns automatically reflow based on 280px minimum width */
+  /* Grid intrinsically adapts: 3 columns → 2 columns → 1 column based on available space */
 
   /* Accessibility */
   .column:focus-within {

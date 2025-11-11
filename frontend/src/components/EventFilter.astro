@@ -149,14 +149,14 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
 
 <style>
   .event-filter {
-    margin-bottom: 2rem;
-    padding: 1rem;
+    margin-bottom: var(--space-l); /* Fluid 24px → 30px */
+    padding: var(--space-m); /* Fluid 16px → 20px */
     background: #f8f9fa;
     border: 1px solid #e9ecef;
   }
 
   .tabs-container {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-m); /* Fluid 16px → 20px */
   }
 
   .tabs-container:last-of-type {
@@ -237,8 +237,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   }
 
   .active-filters {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: var(--space-m); /* Fluid 16px → 20px */
+    padding: var(--space-m); /* Fluid 16px → 20px */
     background: #e8f5e8;
     border: 1px solid #d4edda;
   }
@@ -284,23 +284,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
    * Font sizes now scale automatically via --fs-xs design token.
    * Only layout-specific adjustments remain. */
   @media (max-width: 768px) {
-    .tabs-scroll {
-      gap: 0.25rem;
-    }
-
-    .tab-button {
-      padding: 0.5rem 1rem;
-    }
-
     .active-filters-list {
       flex-direction: column;
-      gap: 0.25rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .tab-button {
-      padding: 0.5rem 0.75rem;
     }
   }
 </style>

@@ -41,6 +41,7 @@ export const schemaTypes = [
   components.videoComponent,
   components.spotifyComponent,
   components.buttonComponent,
+  components.linkComponent,
   components.accordionComponent,
   components.countdownComponent,
   components.pageBuilder,

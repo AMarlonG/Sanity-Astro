@@ -39,7 +39,7 @@ export const pageBuilder = defineType({
         {
           name: 'interactive',
           title: 'Interaktiv',
-          of: ['buttonComponent', 'accordionComponent', 'countdownComponent'],
+          of: ['buttonComponent', 'linkComponent', 'accordionComponent', 'countdownComponent'],
         },
         {
           name: 'layout',
@@ -207,6 +207,32 @@ export const pageBuilder = defineType({
             title: title || 'Knapp uten tekst',
             subtitle: `${style || 'primary'}${widthText}`,
             media: BoltIcon,
+          }
+        },
+      },
+    },
+    {
+      type: 'linkComponent',
+      title: 'Lenker',
+      icon: LinkIcon,
+      preview: {
+        select: {
+          links: 'links',
+          description: 'description',
+          layout: 'layout',
+        },
+        prepare({links, description, layout}) {
+          const linkCount = links?.length || 0
+          const layoutText = {
+            'vertical': 'Vertikal',
+            'horizontal': 'Horisontal',
+            'grid': 'Rutenett'
+          }[layout || 'vertical'] || 'Vertikal'
+          const descText = description ? ' • Med beskrivelse' : ''
+          return {
+            title: `Lenker (${linkCount})`,
+            subtitle: `${layoutText}${descText}`,
+            media: LinkIcon,
           }
         },
       },

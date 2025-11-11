@@ -72,7 +72,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   }
 
   .grid-title {
-    font-size: var(--fs-xl);
+    font-size: var(--fs-2xl);
     font-weight: 600;
     margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
   }
@@ -86,15 +86,26 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     /* Container query context - allows children to adapt to available space */
     container-type: inline-size;
     container-name: grid-layout;
+
+    /* Intrinsic grid - columns adapt to available space automatically */
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(var(--grid-min-width), 100%), 1fr)
+    );
+
+    /* Default minimum width for grid items */
+    --grid-min-width: 250px;
   }
 
-  /* Desktop: 2 or 3 columns based on data attribute */
+  /* Control minimum item width via data attribute */
+  /* 2-column grid: larger minimum = max 2 columns */
   .grid-container[data-columns='2'] {
-    grid-template-columns: repeat(2, 1fr);
+    --grid-min-width: 45%;
   }
 
+  /* 3-column grid: smaller minimum = allows up to 3 columns */
   .grid-container[data-columns='3'] {
-    grid-template-columns: repeat(3, 1fr);
+    --grid-min-width: 280px;
   }
 
   /* All grid items use configurable aspect ratio */
@@ -167,22 +178,15 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     border-radius: 4px;
   }
 
-  /* Tablet: Reduce to 2 columns for 3-column layouts */
-  @media (max-width: 1024px) {
-    .grid-container[data-columns='3'] {
-      grid-template-columns: repeat(2, 1fr);
+  /* Container query: Adjust gap in narrow containers */
+  @container grid-layout (max-width: 600px) {
+    .grid-container {
+      gap: var(--space-m-l); /* Slightly smaller gap when narrow */
     }
   }
 
-  /* Mobile: Stack vertically (1 column) */
-  @media (max-width: 768px) {
-    .grid-container[data-columns='2'],
-    .grid-container[data-columns='3'] {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* Note: No need for manual responsive adjustments - fluid spacing handles this automatically */
+  /* Note: No viewport media queries needed! Grid automatically adapts to container size */
+  /* Columns reflow based on available space using intrinsic auto-fit pattern */
 
   /* Accessibility */
   .grid-item:focus-within {

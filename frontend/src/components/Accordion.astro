@@ -8,7 +8,6 @@ import Heading from './Heading.astro'
 import PortableText from './PortableText.astro'
 
 export interface Props {
-  title?: string
   description?: string
   panels?: Array<{
     title: string
@@ -18,15 +17,13 @@ export interface Props {
 }
 
 const {
-  title,
   description,
   panels = [],
   className = ''
 } = Astro.props
 ---
 
-<div class={`accordion ${className}`}>
-  {title && <h2 class="accordion-title">{title}</h2>}
+<div class={`accordion content-media-narrow ${className}`}>
   {description && <p class="accordion-description">{description}</p>}
 
   <div class="accordion-panels">
@@ -74,18 +71,8 @@ const {
 
 
 <style>
-  /* CSS Variable-based width control - Kevin Powell method */
   .accordion {
-    width: var(--component-width, min(55ch, 100% - 4rem));
-    max-width: var(--component-max-width, 100%);
-    margin-inline: auto;
     margin-block: 2rem;
-  }
-
-  .accordion-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
   }
 
   .accordion-description {
@@ -107,7 +94,7 @@ const {
   }
 
   .accordion-summary {
-    padding: 1rem 1.5rem;
+    padding: var(--space-m) var(--space-m-l); /* Fluid padding */
     background: #f8f9fa;
     cursor: pointer;
     font-weight: 500;
@@ -148,13 +135,13 @@ const {
   }
 
   .accordion-content {
-    padding: 1rem 1.5rem;
+    padding: var(--space-m) var(--space-m-l); /* Fluid padding */
     background: white;
     line-height: 1.6;
   }
 
   .no-panels {
-    padding: 1rem 1.5rem;
+    padding: var(--space-m) var(--space-m-l); /* Fluid padding */
     text-align: center;
   }
 </style> 

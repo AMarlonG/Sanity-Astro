@@ -48,13 +48,14 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 <style>
   .section-title {
     margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
-    font-size: var(--fs-xl);
+    font-size: var(--fs-2xl);
     font-weight: 600;
   }
 
   .two-column-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    /* Intrinsic: creates 2 columns when space allows, stacks when narrow */
+    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
     gap: var(--space-l-xl); /* Fluid 24px → 40px */
     margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px section spacing */
     align-items: stretch; /* Columns stretch to match height */
@@ -136,27 +137,22 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   }
 
 
-  /* Tablet: Reduce gap */
-  @media (max-width: 1024px) {
+  /* Container query: Adjust gap when columns stack */
+  @container two-column-layout (max-width: 600px) {
     .two-column-layout {
-      gap: var(--space-m-l); /* Fluid 16px → 30px */
-    }
-  }
-
-  /* Mobile: Stack vertically */
-  @media (max-width: 768px) {
-    .two-column-layout {
-      grid-template-columns: 1fr;
       gap: var(--space-m-l); /* Fluid 16px → 30px */
       margin-block: var(--space-l-xl); /* Fluid 24px → 40px */
     }
 
-    /* Reverse column order on mobile if specified */
+    /* Reverse column order when stacked if specified */
     .two-column-layout.reverse-mobile {
       display: flex;
       flex-direction: column-reverse;
     }
   }
+
+  /* Note: No viewport media queries needed! Columns automatically stack when container is narrow */
+  /* Grid intrinsically adapts based on 400px minimum column width */
 
   /* Accessibility */
   .column:focus-within {
