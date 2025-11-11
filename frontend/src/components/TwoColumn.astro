@@ -47,16 +47,16 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
 <style>
   .section-title {
-    margin: 0 0 2rem 0;
-    font-size: 2rem;
+    margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
+    font-size: var(--fs-xl);
     font-weight: 600;
   }
 
   .two-column-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    margin: 3rem 0;
+    gap: var(--space-l-xl); /* Fluid 24px → 40px */
+    margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px section spacing */
     align-items: stretch; /* Columns stretch to match height */
 
     /* Container query context - allows children to adapt to available space */
@@ -108,7 +108,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .column > :global(.portable-text) {
     overflow-y: auto;
     height: 100%;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
 
     /* Custom scrollbar styling */
     scrollbar-width: thin;
@@ -139,7 +139,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   /* Tablet: Reduce gap */
   @media (max-width: 1024px) {
     .two-column-layout {
-      gap: 2rem;
+      gap: var(--space-m-l); /* Fluid 16px → 30px */
     }
   }
 
@@ -147,8 +147,8 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   @media (max-width: 768px) {
     .two-column-layout {
       grid-template-columns: 1fr;
-      gap: 2rem;
-      margin: 2rem 0;
+      gap: var(--space-m-l); /* Fluid 16px → 30px */
+      margin-block: var(--space-l-xl); /* Fluid 24px → 40px */
     }
 
     /* Reverse column order on mobile if specified */
