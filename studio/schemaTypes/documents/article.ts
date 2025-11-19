@@ -6,6 +6,8 @@ import {seoFields, seoGroup} from '../objects/seoFields'
 import {componentValidation, crossFieldValidation} from '../shared/validation'
 import {articleSlugValidation} from '../../lib/slugValidation'
 import type {ArticleData, ValidationRule, MultilingualDocument} from '../shared/types'
+import {getPublishingStatusText, getLanguageStatus} from '../shared/previewHelpers'
+import {publishingFields, publishingGroup} from '../shared/publishingFields'
 
 export const article = defineType({
   name: 'article',
@@ -29,11 +31,7 @@ export const article = defineType({
       icon: ComposeIcon,
     },
     imageGroup,
-    {
-      name: 'publishing',
-      title: 'Publisering',
-      icon: CogIcon,
-    },
+    publishingGroup,
     seoGroup,
   ],
   fieldsets: [
@@ -81,7 +79,7 @@ export const article = defineType({
     defineField({
       name: 'content_no',
       title: 'Artikkelinnhold (norsk)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Bygg norsk artikkel med komponenter og innhold (artikkeltittel er allerede H1)',
       group: 'no',
     }),
@@ -140,7 +138,7 @@ export const article = defineType({
     defineField({
       name: 'content_en',
       title: 'Article content (English)',
-      type: 'pageBuilderWithoutTitle',
+      type: 'pageBuilder',
       description: 'Build English article with components and content (article title is already H1)',
       group: 'en',
       components: {
@@ -150,53 +148,7 @@ export const article = defineType({
 
     // HOVEDBILDE
     ...multilingualImageFields('image'),
-    defineField({
-      name: 'publishingStatus',
-      title: 'Publiseringsstatus',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Synlig på nett umiddelbart', value: 'published' },
-          { title: 'Lagre uten å bli synlig på nett', value: 'draft' },
-          { title: 'Planlegg periode', value: 'scheduled' }
-        ],
-        layout: 'radio'
-      },
-      initialValue: 'published',
-      validation: componentValidation.title,
-      group: 'publishing',
-    }),
-    defineField({
-      name: 'scheduledPeriod',
-      title: 'Planlagt periode',
-      type: 'object',
-      hidden: ({document}) => document?.publishingStatus !== 'scheduled',
-      group: 'publishing',
-      fieldsets: [
-        {
-          name: 'timing',
-          options: {columns: 2},
-        },
-      ],
-      fields: [
-        {
-          name: 'startDate',
-          title: 'Startdato',
-          type: 'datetime',
-          description: 'Når denne artikkelen blir synlig på nettsiden',
-          fieldset: 'timing',
-          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
-        },
-        {
-          name: 'endDate',
-          title: 'Sluttdato',
-          type: 'datetime',
-          description: 'Når denne artikkelen slutter å være synlig på nettsiden',
-          fieldset: 'timing',
-          validation: crossFieldValidation.requiredWhen('publishingStatus', 'scheduled'),
-        },
-      ],
-    }),
+    ...publishingFields('publishing', 'artikkelen'),
     ...seoFields,
   ],
   preview: {
@@ -214,37 +166,24 @@ export const article = defineType({
       _id: '_id',
     },
     prepare({title_no, title_en, excerpt_no, excerpt_en, content_no, content_en, publishingStatus, scheduledStart, scheduledEnd, media, _id}) {
-      // Publication status logic
-      const isPublished = _id && !_id.startsWith('drafts.')
-      let statusText = isPublished ? 'Publisert' : 'Utkast';
+      // Use shared helper functions for consistent status display
+      const statusText = getPublishingStatusText(_id, publishingStatus, scheduledStart, scheduledEnd)
+      const langStatus = getLanguageStatus({
+        title_no,
+        title_en,
+        excerpt_no,
+        excerpt_en,
+        content_no,
+        content_en,
+      })
 
-      if (publishingStatus === 'scheduled' && scheduledStart && scheduledEnd) {
-        const now = new Date();
-        const start = new Date(scheduledStart);
-        const end = new Date(scheduledEnd);
-
-        if (now >= start && now <= end) {
-          statusText = 'Live';
-        } else if (now < start) {
-          statusText = 'Venter';
-        } else {
-          statusText = 'Utløpt';
-        }
-      }
-
-      // Language status
-      const languages: string[] = [];
-      if (title_no || excerpt_no || content_no) languages.push('NO');
-      if (title_en || excerpt_en || content_en) languages.push('EN');
-      const langStatus = languages.length > 0 ? languages.join(' ') : 'Ingen språk valgt';
-
-      const title = title_no || title_en || 'Uten tittel';
+      const title = title_no || title_en || 'Uten tittel'
 
       return {
         title: title,
         subtitle: `${statusText} • ${langStatus}`,
         media: media || DocumentIcon,
-      };
+      }
     },
   },
 })

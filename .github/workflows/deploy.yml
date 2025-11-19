@@ -23,14 +23,8 @@ jobs:
           node-version: 20.x
           cache: 'npm'
 
-      - name: Install dependencies in each workspace
-        run: |
-          cd shared && npm install --legacy-peer-deps
-          cd ../studio && npm install --legacy-peer-deps
-          cd ../frontend && npm install --legacy-peer-deps
-
-      - name: Build shared package
-        run: cd shared && npm run build
+      - name: Install dependencies in frontend
+        run: cd frontend && npm install --legacy-peer-deps
 
       - name: Build frontend
         run: cd frontend && npm run build
@@ -73,14 +67,8 @@ jobs:
           node-version: 20.x
           cache: 'npm'
 
-      - name: Install dependencies in each workspace
-        run: |
-          cd shared && npm install --legacy-peer-deps
-          cd ../studio && npm install --legacy-peer-deps
-          cd ../frontend && npm install --legacy-peer-deps
-
-      - name: Build shared package
-        run: cd shared && npm run build
+      - name: Install dependencies in studio
+        run: cd studio && npm install --legacy-peer-deps
 
       - name: Build studio
         run: cd studio && npm run build

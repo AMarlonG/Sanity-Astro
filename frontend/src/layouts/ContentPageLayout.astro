@@ -28,7 +28,7 @@ const slugEn = pageDocument?.slug_en;
 ---
 
 <Layout title={`${title} - Sanity + Astro`} slugNo={slugNo} slugEn={slugEn}>
-  <main class="container page-layout">
+  <div class="stack page-layout" style="--space: var(--space-m-l)">
     <header class="page-header">
       <h1 class="page-title">
         {title}
@@ -40,7 +40,7 @@ const slugEn = pageDocument?.slug_en;
 
     <!-- Page content from schema -->
     {content && Array.isArray(content) && content.length > 0 && (
-      <div class="page-content">
+      <div class="stack page-content" style="--space: var(--space-l-xl)">
         {content.map((block) => (
           <DynamicComponent key={block._key || block._id} block={block} />
         ))}
@@ -49,16 +49,31 @@ const slugEn = pageDocument?.slug_en;
 
     <!-- Main content slot (for listings, etc.) -->
     <slot />
-  </main>
+  </div>
 </Layout>
 
 <style>
-  /* Page Layout - Stack Pattern with Flexbox Gap */
+  /* ============================================
+     INTRINSIC CONTENT PAGE LAYOUT
+     ============================================
+
+     Uses layout primitives (center, stack) for consistent,
+     intrinsic responsive behavior.
+
+     Key features:
+     - Center primitive: Max-width constraint + centering
+     - Stack primitive: Vertical rhythm with fluid spacing
+     - Container query support for children
+     - No media queries needed
+  */
+
   .page-layout {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(var(--space-4), 4vw, var(--space-6));
-    padding-block-start: clamp(calc(var(--space-6) * 2.5), 15vw, calc(var(--space-9) * 2.5));
+    /* Enable container queries for child components */
+    container-type: inline-size;
+    container-name: page-layout;
+
+    /* Ensure content doesn't get too narrow on small screens */
+    min-inline-size: min(100%, 280px);
   }
 
   .page-header {
@@ -66,16 +81,35 @@ const slugEn = pageDocument?.slug_en;
   }
 
   .page-title {
-    margin: 0 0 var(--space-2) 0;
+    margin: 0 0 var(--space-4) 0;
+    /* Use global h1 token for consistency across all h1 elements */
+    font-size: var(--fs-3xl); /* Fluid 39-44px - matches global base.css h1 */
+    /* Ensure title wraps gracefully with Norwegian/English text */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
 
   .page-excerpt {
-    margin: var(--space-3) 0 0 0;
-    font-size: var(--font-size-lg);
+    margin: 0 0 var(--space-3) 0;
+    /* Accessible fluid typography: combines rem + vw for zoom support (WCAG 1.4.4) */
+    font-size: clamp(1.25rem, 1.25rem + 0.25vw, 1.5rem);
     line-height: var(--line-height-relaxed);
+    /* Better text balance for excerpts */
+    text-wrap: balance;
+    max-inline-size: 65ch; /* Optimal reading width */
   }
 
   .page-content {
     margin: 0;
+    /* Stack pattern now handled by primitive class */
+  }
+
+  /* Fallback for browsers without container query support */
+  @supports not (container-type: inline-size) {
+    .page-layout {
+      /* Traditional max-width pattern */
+      max-inline-size: var(--container-max-width);
+    }
   }
 </style>

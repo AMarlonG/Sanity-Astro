@@ -54,19 +54,19 @@ const components = {
 ---
 
 {semanticElement === 'section' ? (
-  <section class={`portable-text ${className}`}>
+  <section class={`portable-text content-narrow ${className}`}>
     {contentToRender && contentToRender.length > 0 && (
       <PortableText value={contentToRender} components={components} />
     )}
   </section>
 ) : semanticElement === 'article' ? (
-  <article class={`portable-text ${className}`}>
+  <article class={`portable-text content-narrow ${className}`}>
     {contentToRender && contentToRender.length > 0 && (
       <PortableText value={contentToRender} components={components} />
     )}
   </article>
 ) : (
-  <div class={`portable-text ${className}`}>
+  <div class={`portable-text content-narrow ${className}`}>
     {contentToRender && contentToRender.length > 0 && (
       <PortableText value={contentToRender} components={components} />
     )}
@@ -79,38 +79,41 @@ const components = {
   }
   
   .portable-text h2 {
-    font-size: 1.8rem;
+    /* Aligned with base.css: --fs-2xl (31-35px responsive) */
+    font-size: var(--fs-2xl);
     font-weight: 600;
-    margin: 2rem 0 1rem 0;
+    margin-block: var(--space-l) var(--space-m); /* Fluid spacing */
   }
-  
+
   .portable-text h3 {
-    font-size: 1.5rem;
+    /* Aligned with base.css: --fs-xl (25-28px responsive) */
+    font-size: var(--fs-xl);
     font-weight: 600;
-    margin: 1.5rem 0 0.75rem 0;
+    margin-block: var(--space-m-l) var(--space-s-m); /* Fluid spacing */
   }
-  
+
   .portable-text h4 {
-    font-size: 1.25rem;
+    /* Aligned with base.css: --fs-lg (20-23px responsive) */
+    font-size: var(--fs-lg);
     font-weight: 600;
-    margin: 1.25rem 0 0.5rem 0;
+    margin-block: var(--space-s-m) var(--space-xs-s); /* Fluid spacing */
   }
   
   .portable-text p {
-    margin: 1rem 0;
+    margin-block: var(--space-m); /* Fluid spacing */
   }
-  
+
   .portable-text blockquote {
     border-left: 4px solid #e5e5e5;
-    padding-left: 1rem;
-    margin: 1.5rem 0;
+    padding-left: var(--space-m); /* Fluid spacing */
+    margin-block: var(--space-m-l); /* Fluid spacing */
     font-style: italic;
   }
-  
+
   .portable-text ul,
   .portable-text ol {
-    margin: 1rem 0;
-    padding-left: 1.5rem;
+    margin-block: var(--space-m); /* Fluid spacing */
+    padding-left: var(--space-m-l); /* Fluid spacing */
   }
   
   .portable-text li {

@@ -1,0 +1,263 @@
+/* Layout Styles - Container & Images
+ *
+ * Page-level layout patterns and image handling.
+ * Intrinsic, content-driven layouts with performance optimization.
+ *
+ * Extracted from global.css as part of CSS architecture refactor.
+ */
+
+/* ============================================
+   INTRINSIC CONTAINER
+   ============================================
+
+   Fluid and responsive container without breakpoints.
+   Width adapts naturally based on content and viewport.
+*/
+
+.container {
+  width: min(100% - var(--space-4), var(--container-max-width));
+  margin-inline: auto;
+  padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
+
+  /* Make padding available to children for breakout patterns */
+  --container-padding-inline: clamp(var(--space-3), 4vw, var(--space-6));
+}
+
+/* ============================================
+   BASE WIDTH SYSTEM
+   ============================================
+
+   Project-wide content width constraint for comfortable layouts.
+   Based on Kevin Powell's smart layouts with container queries.
+
+   Pattern: min(100ch, 100% - 4rem)
+   - At wide viewports: maxes out at 100ch (fits 3×320px cards comfortably)
+   - At narrow viewports: 100% - 4rem (2rem padding on each side)
+   - Automatically centers with margin-inline: auto
+
+   Six-level width system:
+   1. Extra narrow (40ch) - Quotes, Spotify embeds, special content
+   2. Media narrow (55ch) - Accordion, Image, Video, TwoColumn components
+   3. Narrow (65ch) - Body text, paragraphs, enhanced readability
+   4. Base (100ch) - Default for all content, inherits from Layout.astro
+   5. Wide (95ch) - Grid, ThreeColumn, multi-column layouts
+   6. Full (100%) - Breakout for visual elements, hero images, galleries
+*/
+
+/* Base width wrapper - Applied in Layout.astro to <slot /> */
+.content-wrapper {
+  width: min(100ch, 100% - 4rem);
+  margin-inline: auto;
+
+  /* Enable container queries for responsive components */
+  container-type: inline-size;
+  container-name: content;
+}
+
+/* Utility: Extra narrow width for quotes and special content */
+.content-extra-narrow {
+  width: min(40ch, 100% - 4rem);
+  margin-inline: auto;
+}
+
+/* Utility: Media narrow width for images, videos, accordions, two-column */
+.content-media-narrow {
+  width: min(55ch, 100% - 4rem);
+  margin-inline: auto;
+}
+
+/* Utility: Narrower width for enhanced text readability */
+.content-narrow {
+  width: min(65ch, 100% - 4rem);
+  margin-inline: auto;
+}
+
+/* Utility: Wide width for multi-column layouts (Grid, ThreeColumn) */
+.content-wide {
+  width: min(95ch, 100% - 4rem);
+  margin-inline: auto;
+}
+
+/* Utility: Full-width breakout for visual elements */
+.content-full {
+  width: 100%;
+  max-width: none;
+}
+
+/* ============================================
+   LAYOUT PARENT-CHILD WIDTH HANDLING
+   ============================================
+
+   Components like Quote (50ch), Image (60ch), and PortableText (70ch)
+   have width wrappers for standalone use. When placed inside layout
+   components (Grid, TwoColumn, ThreeColumn), children must fill the
+   available parent column width instead of maintaining their own constraints.
+
+   Solution: Layout components create container query contexts, and we
+   override child width constraints to fill the parent column.
+
+   Based on principles from:
+   - Every Layout by Andy Bell & Heydon Pickering
+   - Kevin Powell's container query patterns
+
+   Core principles:
+   - Components are autonomous (work standalone with their widths)
+   - Components adapt to context (fill parent when inside layouts)
+   - No props or manual configuration needed
+*/
+
+/* Children inside layout containers fill available column space
+
+   Strategy: Higher specificity through data attributes + component targeting
+   No !important needed - specificity handles override naturally
+
+   Specificity calculation:
+   - .grid-container[data-columns] > .grid-item > .image-container = (0,3,0)
+   - .content-media-narrow alone = (0,1,0)
+   - Higher specificity wins naturally without !important
+*/
+
+/* Grid layout children - CSS variable override pattern */
+.grid-container[data-columns] > .grid-item {
+  --component-width: 100%;
+  --component-max-width: 100%;
+}
+.grid-container[data-columns] > .grid-item > :global(*) {
+  margin-inline: 0;
+}
+
+/* Two-column layout children - CSS variable override pattern */
+.two-column-layout[data-layout-context] > .column {
+  --component-width: 100%;
+  --component-max-width: 100%;
+}
+.two-column-layout[data-layout-context] > .column > :global(*) {
+  margin-inline: 0;
+}
+
+/* Three-column layout children - CSS variable override pattern */
+.three-column-layout[data-layout-context] > .column {
+  --component-width: 100%;
+  --component-max-width: 100%;
+}
+.three-column-layout[data-layout-context] > .column > :global(*) {
+  margin-inline: 0;
+}
+
+/* ============================================
+   GLOBAL IMAGE STYLES
+   ============================================
+
+   Modern image handling with performance and accessibility:
+   - Intrinsic sizing to prevent layout shift
+   - Modern format support (WebP/JPG - Sanity CDN doesn't support AVIF)
+   - Print optimization
+   - Reduced motion support
+   - Dark mode adjustments
+*/
+
+/* Base figure element - semantic container for images */
+figure {
+  margin: 0;
+  display: block;
+}
+
+/* Global image defaults - prevent layout shift and optimize loading */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Image loading states - provide visual feedback */
+img[loading="lazy"] {
+  /* Content-visibility for performance */
+  content-visibility: auto;
+}
+
+/* ============================================
+   PRINT OPTIMIZATION
+   ============================================
+
+   Ensure images print correctly and hide decorative images.
+*/
+
+@media print {
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  figure {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Hide decorative images in print */
+  img[role="presentation"],
+  img[alt=""] {
+    display: none;
+  }
+
+  /* Ensure critical images are visible */
+  img:not([role="presentation"]):not([alt=""]) {
+    display: block;
+  }
+}
+
+/* ============================================
+   DARK MODE ADJUSTMENTS
+   ============================================
+
+   Subtle opacity adjustment for images in dark mode.
+   Exempt logos and sponsor images.
+*/
+
+@media (prefers-color-scheme: dark) {
+  /* Global dark mode image adjustments */
+  img:not([data-no-dark-adjust]) {
+    opacity: 0.9;
+  }
+
+  /* Exempt specific images from dark mode adjustments */
+  img[data-no-dark-adjust],
+  .logo img,
+  .sponsor-logo img {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================
+
+   Ensure images remain visible and distinguishable.
+*/
+
+@media (prefers-contrast: high) {
+  img {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================
+
+   Disable image animations and smooth scrolling.
+*/
+
+@media (prefers-reduced-motion: reduce) {
+  img {
+    animation: none;
+    transition: none;
+  }
+
+  /* Disable smooth scrolling for image containers */
+  .image-scroll-container {
+    scroll-behavior: auto;
+  }
+}

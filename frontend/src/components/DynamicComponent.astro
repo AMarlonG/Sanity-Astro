@@ -28,23 +28,23 @@ const isKnownComponent = isRegisteredComponent(block._type);
   .unknown-component {
     background: #fff3cd;
     border: 1px solid #ffeaa7;
-    padding: 1rem;
-    margin: 1rem 0;
+    padding: var(--space-m); /* Fluid 16px → 20px */
+    margin-block: var(--space-m); /* Fluid 16px → 20px */
   }
 
   .unknown-component code {
     background: #f8f9fa;
-    padding: 0.2rem 0.4rem;
+    padding: var(--space-3xs) var(--space-2xs); /* Fluid precision spacing */
     font-family: monospace;
   }
 
   .unknown-component details {
-    margin-top: 0.5rem;
+    margin-top: var(--space-xs); /* Fluid 8px → 10px */
   }
 
   .unknown-component pre {
     background: #f8f9fa;
-    padding: 0.5rem;
+    padding: var(--space-xs); /* Fluid 8px → 10px */
     overflow-x: auto;
     font-size: 0.8rem;
   }

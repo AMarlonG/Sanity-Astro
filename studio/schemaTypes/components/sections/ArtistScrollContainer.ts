@@ -31,31 +31,17 @@ export const artistScrollContainer = defineType({
       description: 'Om scrollbaren skal være synlig eller skjult',
       initialValue: false,
     }),
-    defineField({
-      name: 'cardFormat',
-      title: 'Kortformat',
-      type: 'string',
-      description: 'Velg format for artist-kortene (bredde:høyde)',
-      options: {
-        list: [
-          {title: 'Landskap (16:9)', value: '16:9'},
-          {title: 'Portrett (4:5)', value: '4:5'},
-        ],
-      },
-      initialValue: '16:9',
-    }),
   ],
   preview: {
     select: {
       title: 'title',
       items: 'items',
-      cardFormat: 'cardFormat',
     },
-    prepare({title, items, cardFormat}) {
+    prepare({title, items}) {
       const itemCount = items?.length || 0
       return {
         title: 'Artister',
-        subtitle: `${title || 'Scroll Container'} • ${itemCount} artister • ${cardFormat}`,
+        subtitle: `${title || 'Scroll Container'} • ${itemCount} artister (4:5 kort)`,
         media: DocumentIcon,
       }
     },
@@ -70,9 +56,6 @@ export const generateArtistScrollHtml: ComponentHTMLGenerator<ArtistScrollContai
 
   const containerClass = 'artist-scroll-container'
   const scrollbarClass = data.showScrollbar ? '' : 'hide-scrollbar'
-  const cardFormatClass = data.cardFormat
-    ? `card-format-${data.cardFormat.replace(':', '-')}`
-    : 'card-format-16-9'
 
   const itemsHtml = data.items
     .map((artist) => {
@@ -104,7 +87,7 @@ export const generateArtistScrollHtml: ComponentHTMLGenerator<ArtistScrollContai
     : ''
 
   return `
-    <div class="${containerClass} ${scrollbarClass} ${cardFormatClass}">
+    <div class="${containerClass} ${scrollbarClass}">
       ${titleHtml}
       <div class="artist-scroll-wrapper">
         ${itemsHtml}
@@ -146,18 +129,7 @@ export function generateArtistScrollClasses(data: ArtistScrollContainerData): st
     classes.push('hide-scrollbar')
   }
 
-  if (data.cardFormat) {
-    classes.push(`card-format-${data.cardFormat.replace(':', '-')}`)
-  } else {
-    classes.push('card-format-16-9')
-  }
-
   return classes
-}
-
-// Utility function to check if format is valid
-export function isValidCardFormat(format: string): boolean {
-  return ['16:9', '4:5'].includes(format)
 }
 
 // Utility function to generate scroll container CSS
@@ -203,7 +175,7 @@ export function generateArtistScrollCSS(): string {
 
     .artist-image {
       width: 100%;
-      aspect-ratio: var(--card-aspect-ratio, 16/9);
+      aspect-ratio: 4/5;
       overflow: hidden;
     }
 
@@ -211,14 +183,6 @@ export function generateArtistScrollCSS(): string {
       width: 100%;
       height: 100%;
       object-fit: cover;
-    }
-
-    .card-format-16-9 .artist-image {
-      --card-aspect-ratio: 16/9;
-    }
-
-    .card-format-4-5 .artist-image {
-      --card-aspect-ratio: 4/5;
     }
 
     .artist-content {

@@ -6,56 +6,152 @@ export interface QueryDefinition<P extends Record<string, unknown> = Record<stri
   params: P
 }
 
-const MAX_CONTENT_DEPTH = 2
+// ============================================================================
+// CONTENT PROJECTIONS - Following Sanity Best Practices
+// ============================================================================
+// No MAX_CONTENT_DEPTH or artificial limits
+// Explicit projections for each component type
+// Always use asset-> dereferencing with full metadata (per MEDIA.md)
+// ============================================================================
 
-const buildContentProjection = (depth = 0): string => {
-  if (depth >= MAX_CONTENT_DEPTH) {
-    return '...'
-  }
+// Leaf components (no nesting)
+const IMAGE_COMPONENT = `
+  _type == "imageComponent" => {
+    _type,
+    _key,
+    "image": image{
+      asset->{
+        _id,
+        url,
+        metadata {
+          dimensions {
+            width,
+            height,
+            aspectRatio
+          },
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
+        }
+      },
+      hotspot,
+      crop
+    },
+    "alt": alt,
+    "caption": caption,
+    "credit": credit,
+    aspectRatio,
+    size
+  }`
 
-  const nested = buildContentProjection(depth + 1)
-
-  return `
-    ...,
-    _type == "linkComponent" => {
-      ...,
-      "internalLink": select(
-        linkType == "internal" && defined(internalLink) => internalLink->{
-          _type,
-          "slug": coalesce(slug_no.current, slug_en.current, slug.current),
-          "slug_no": slug_no.current,
-          "slug_en": slug_en.current
-        },
-        defined(internalLink) => internalLink
-      )
-    },
-    _type == "columnLayout" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "contentScrollContainer" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "artistScrollContainer" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "eventScrollContainer" => {
-      ...,
-      items[]{${nested}}
-    },
-    _type == "accordionComponent" => {
-      ...,
-      panels[]{
-        ...,
-        content[]{${nested}}
+const VIDEO_COMPONENT = `
+  _type == "videoComponent" => {
+    _type,
+    _key,
+    videoType,
+    "video": video{
+      asset->{
+        _id,
+        url,
+        mimeType
       }
-    }
-  `
-}
+    },
+    youtubeUrl,
+    vimeoUrl,
+    externalUrl,
+    aspectRatio,
+    title,
+    description,
+    autoplay,
+    muted,
+    controls,
+    loop
+  }`
 
-const PAGE_CONTENT_WITH_LINKS = buildContentProjection()
+const QUOTE_COMPONENT = `
+  _type == "quoteComponent" => {
+    ...
+  }`
+
+const SPOTIFY_COMPONENT = `
+  _type == "spotifyComponent" => {
+    ...
+  }`
+
+const LINK_COMPONENT = `
+  _type == "linkComponent" => {
+    ...,
+    "internalLink": select(
+      linkType == "internal" && defined(internalLink) => internalLink->{
+        _type,
+        "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+        "slug_no": slug_no.current,
+        "slug_en": slug_en.current
+      },
+      defined(internalLink) => internalLink
+    )
+  }`
+
+// Items that can be nested in containers
+const NESTED_ITEMS = `
+  ...,
+  ${IMAGE_COMPONENT},
+  ${VIDEO_COMPONENT},
+  ${QUOTE_COMPONENT},
+  ${SPOTIFY_COMPONENT},
+  ${LINK_COMPONENT}`
+
+// Full content projection with all component types
+const PAGE_CONTENT_WITH_LINKS = `
+  ...,
+  ${IMAGE_COMPONENT},
+  ${VIDEO_COMPONENT},
+  ${QUOTE_COMPONENT},
+  ${SPOTIFY_COMPONENT},
+  ${LINK_COMPONENT},
+  _type == "columnLayout" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "contentScrollContainer" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "artistScrollContainer" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "eventScrollContainer" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "accordionComponent" => {
+    ...,
+    panels[]{
+      ...,
+      content[]{${NESTED_ITEMS}}
+    }
+  },
+  _type == "gridComponent" => {
+    ...,
+    items[]{${NESTED_ITEMS}}
+  },
+  _type == "twoColumnLayout" => {
+    ...,
+    leftColumn[]{${NESTED_ITEMS}},
+    rightColumn[]{${NESTED_ITEMS}}
+  },
+  _type == "threeColumnLayout" => {
+    ...,
+    column1[]{${NESTED_ITEMS}},
+    column2[]{${NESTED_ITEMS}},
+    column3[]{${NESTED_ITEMS}}
+  }`
 
 const EVENT_IMAGE_SELECTION = `
   "image": {
@@ -69,7 +165,14 @@ const EVENT_IMAGE_SELECTION = `
             height,
             aspectRatio
           },
-          lqip
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
         }
       },
       hotspot,
@@ -120,11 +223,6 @@ const EVENT_BASE_FIELDS = `
     image,
     "imageAlt": coalesce(imageAlt_no, imageAlt_en)
   },
-  "genre": genre->{
-    _id,
-    title,
-    slug
-  },
   ticketType,
   ticketUrl,
   ticketInfoText,
@@ -134,6 +232,12 @@ const EVENT_BASE_FIELDS = `
     ${PAGE_CONTENT_WITH_LINKS}
   },
   content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  extraContent_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  extraContent_en[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
   seo
@@ -151,7 +255,14 @@ const ARTIST_IMAGE_SELECTION = `
             height,
             aspectRatio
           },
-          lqip
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
         }
       },
       hotspot,
@@ -196,7 +307,14 @@ const ARTICLE_IMAGE_SELECTION = `
             height,
             aspectRatio
           },
-          lqip
+          lqip,
+          blurHash,
+          palette {
+            dominant {
+              background,
+              foreground
+            }
+          }
         }
       },
       hotspot,
@@ -239,10 +357,10 @@ const ARTICLE_BASE_FIELDS = `
 const buildSlugMatch = (language: Language = 'no'): string => {
   if (language === 'en') {
     // For English: prioritize slug_en, fallback to slug_no and legacy slug
-    return `[$slug in [slug_en.current, slug_no.current, slug.current]]`
+    return `$slug in [slug_en.current, slug_no.current, slug.current]`
   }
   // For Norwegian (default): prioritize slug_no, fallback to slug_en and legacy slug
-  return `[$slug in [slug_no.current, slug_en.current, slug.current]]`
+  return `$slug in [slug_no.current, slug_en.current, slug.current]`
 }
 
 // Helper to get correct slug projection based on language
@@ -283,6 +401,7 @@ const buildPageBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type
   ${buildSlugProjection(language)},
   "slug_no": slug_no.current,
   "slug_en": slug_en.current,
+  publishingStatus,
   content_no[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
@@ -292,7 +411,7 @@ const buildPageBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type
   seo
 }`)
 
-const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
+const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage" && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   _id,
   _type,
   ${createMultilingualField('title')},
@@ -310,12 +429,12 @@ const PROGRAM_PAGE_QUERY = defineQuery(`*[_type == "programPage"][0]{
   }
 }`)
 
-const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
+const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage" && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   _id,
   _type,
-  title,
+  ${createMultilingualField('title')},
   "slug": slug.current,
-  excerpt,
+  ${createMultilingualField('excerpt')},
   content_no[]{
     ${PAGE_CONTENT_WITH_LINKS}
   },
@@ -324,20 +443,34 @@ const ARTIST_PAGE_QUERY = defineQuery(`*[_type == "artistPage"][0]{
   },
   seo,
   selectedArtists[]->{
-    ${ARTIST_BASE_FIELDS},
-    genres[]->{
-      _id,
-      title,
-      slug
-    }
+    ${ARTIST_BASE_FIELDS}
   }
+}`)
+
+const ARTICLE_PAGE_QUERY = defineQuery(`*[_type == "articlePage" && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
+  _id,
+  _type,
+  ${createMultilingualField('title')},
+  "slug": slug.current,
+  ${createMultilingualField('excerpt')},
+  content_no[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  content_en[]{
+    ${PAGE_CONTENT_WITH_LINKS}
+  },
+  seo,
+  "articles": select(
+    count(selectedArticles) > 0 => selectedArticles[]->{${ARTICLE_BASE_FIELDS}},
+    *[_type == "article" && publishingStatus != "draft"] | order(publishedAt desc){${ARTICLE_BASE_FIELDS}}
+  )
 }`)
 
 const buildEventBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "event" && ${buildSlugMatch(language)}][0]{
   ${EVENT_BASE_FIELDS}
 }`)
 
-const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && slug.current == $slug][0]{
+const buildArtistBySlugQuery = (language: Language = 'no') => defineQuery(`*[_type == "artist" && slug.current == $slug && (publishingStatus != "draft" || !defined(publishingStatus))][0]{
   ${ARTIST_BASE_FIELDS},
   instagram,
   facebook,
@@ -398,6 +531,37 @@ const SEARCH_CONTENT_QUERY = defineQuery(`*[_type in $types && (
   "slug": coalesce(slug_no.current, slug_en.current, slug.current)
 }`)
 
+const SITE_SETTINGS_MENU_QUERY = defineQuery(`*[_id == "siteSettings"][0]{
+  menuItems[]->{
+    _id,
+    _type,
+    "title_no": select(
+      _type == "homepage" => coalesce(title_no, "Hjem"),
+      _type in ["programPage", "artistPage", "articlePage"] => coalesce(title_no, title),
+      _type == "page" => coalesce(title_no, title_en, "Page")
+    ),
+    "title_en": select(
+      _type == "homepage" => coalesce(title_en, "Home"),
+      _type in ["programPage", "artistPage", "articlePage"] => coalesce(title_en, title),
+      _type == "page" => coalesce(title_en, title_no, "Page")
+    ),
+    "slug_no": select(
+      _type == "homepage" => "/",
+      _type == "programPage" => "/program",
+      _type == "artistPage" => "/artister",
+      _type == "articlePage" => "/artikler",
+      _type == "page" => "/" + coalesce(slug_no.current, slug_en.current, "")
+    ),
+    "slug_en": select(
+      _type == "homepage" => "/en",
+      _type == "programPage" => "/en/program",
+      _type == "artistPage" => "/en/artists",
+      _type == "articlePage" => "/en/articles",
+      _type == "page" => "/en/" + coalesce(slug_en.current, slug_no.current, "")
+    )
+  }
+}`)
+
 export const QueryBuilder = {
   homepage(): QueryDefinition {
     return {query: HOMEPAGE_QUERY, params: {}}
@@ -410,6 +574,9 @@ export const QueryBuilder = {
   },
   artistPage(): QueryDefinition {
     return {query: ARTIST_PAGE_QUERY, params: {}}
+  },
+  articlePage(): QueryDefinition {
+    return {query: ARTICLE_PAGE_QUERY, params: {}}
   },
   eventBySlug(slug: string, language: Language = 'no'): QueryDefinition<{slug: string}> {
     return {query: buildEventBySlugQuery(language), params: {slug}}
@@ -440,6 +607,9 @@ export const QueryBuilder = {
   },
   searchContent(searchTerm: string, types: string[]): QueryDefinition<{search: string; types: string[]}> {
     return {query: SEARCH_CONTENT_QUERY, params: {search: `*${searchTerm}*`, types}}
+  },
+  siteSettingsMenu(): QueryDefinition {
+    return {query: SITE_SETTINGS_MENU_QUERY, params: {}}
   }
 } as const
 

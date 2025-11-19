@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-
 jobs:
   build:
     name: Build and Test
@@ -29,19 +25,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies in each workspace
-        run: |
-          cd shared && npm install --legacy-peer-deps
-          cd ../studio && npm install --legacy-peer-deps
-          cd ../frontend && npm install --legacy-peer-deps
+      - name: Install dependencies in studio
+        run: cd studio && npm install --legacy-peer-deps
 
-      - name: Build shared package
-        run: cd shared && npm run build
+      - name: Install dependencies in frontend
+        run: cd frontend && npm install --legacy-peer-deps
 
       - name: Build studio package
         run: cd studio && npm run build
 
-      - name: Build frontend package  
+      - name: Build frontend package
         run: cd frontend && npm run build
         env:
           PUBLIC_SANITY_PROJECT_ID: ${{ secrets.PUBLIC_SANITY_PROJECT_ID || 'i952bgb1' }}
@@ -59,7 +52,6 @@ jobs:
           path: |
             frontend/dist
             studio/dist
-            shared/dist
 
   # Temporarily disabled release job - focus on getting build working first
   # release:

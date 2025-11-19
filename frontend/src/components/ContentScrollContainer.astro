@@ -1,131 +1,188 @@
 ---
+import DynamicComponent from './DynamicComponent.astro'
 import Image from './Image.astro'
-import Video from './Video.astro'
-import Quote from './Quote.astro'
-import PortableText from './PortableText.astro'
+import { IMAGE_QUALITY } from '../lib/sanityImage'
+import { stegaClean } from '@sanity/client/stega'
 
 interface Props {
   title?: string
   items?: any[]
   showScrollbar?: boolean
-  format?: '4:5' | '1:1' | '16:9' | '9:16'
+  className?: string
+  _key?: string
+  _type?: string
 }
 
 const {
   title,
   items = [],
   showScrollbar = false,
-  format = '16:9'
+  className = '',
+  _key,
+  _type,
 } = Astro.props
 
-// CSS-klasser basert på props
-const containerClass = 'content-scroll-container'
+// CSS classes
 const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
-const formatClass = `format-${format.replace(':', '-')}`
+
+// Sanity Visual Editing attributes
+const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
-<section class={`${containerClass} ${scrollbarClass} ${formatClass}`}>
-  {title && <h3 class="scroll-container-title">{title}</h3>}
-  <div class="scroll-wrapper">
-    <ul class="scroll-list">
-      {items.map((item) => {
-        if (!item) return null
+<section class={`content-scroll-container ${scrollbarClass} ${className}`} {...sanityAttributes}>
+  {title && <h2 class="scroll-container-title">{title}</h2>}
+
+  <ul class="scroll-list">
+    {items.map((item) => {
+      if (!item) return null
+
+      // Handle imageComponent items with inline rendering
+      if (item._type === 'imageComponent' && item.image) {
+        const imageSource = item.image
+        const imageAlt = stegaClean(item.alt || '')
 
         return (
           <li class="scroll-item">
-            {item._type === 'imageComponent' && <Image {...item} />}
-            {item._type === 'videoComponent' && <Video {...item} />}
-            {item._type === 'quoteComponent' && <Quote {...item} />}
-            {item._type === 'portableTextBlock' && <PortableText content={item.content} semantic="div" />}
+            {imageSource ? (
+              <Image
+                image={imageSource}
+                alt={imageAlt}
+                size="small"
+                aspectRatio="4:5"
+                loading="lazy"
+                quality={IMAGE_QUALITY.CARD}
+                className="scroll-image"
+              />
+            ) : (
+              <div class="image-placeholder">
+                <span>Bilde ikke tilgjengelig</span>
+              </div>
+            )}
           </li>
         )
-      })}
-    </ul>
-  </div>
+      }
+
+      // Handle other component types with DynamicComponent
+      return (
+        <li class="scroll-item">
+          <DynamicComponent block={item} />
+        </li>
+      )
+    })}
+  </ul>
 </section>
 
 <style>
   .content-scroll-container {
-    width: 100%;
-    margin: 2rem 0;
+    width: min(100ch, 100% - 4rem);
+    margin-inline: auto;
+    margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px */
   }
 
   .scroll-container-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-2xl);
     font-weight: 600;
-    margin-bottom: 1rem;
-  }
-
-  .scroll-wrapper {
-    overflow-x: auto;
-    padding: 0.5rem 0;
+    margin-block-end: var(--space-m-l); /* Fluid 16px → 30px */
   }
 
   .scroll-list {
     display: flex;
-    gap: 1rem;
+    align-items: flex-start; /* Parent controls alignment - force top alignment */
+    gap: var(--space-m-l); /* Fluid 16px → 30px */
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding-block: var(--space-xs) var(--space-m);
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
 
   .scroll-item {
     flex-shrink: 0;
+    height: 350px; /* Height is king - all items share this height */
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Parent-controlled layout: All children get uniform sizing */
+  .scroll-item > :global(*) {
+    margin: 0; /* Reset all margins */
+    height: 350px; /* Enforce height */
+    width: 280px; /* Default 4:5 aspect ratio */
+  }
+
+  /* Exception: Images and Videos can exceed 4:5 width (CMS-controlled aspect ratios) */
+  .scroll-item > :global(.image-container),
+  .scroll-item > :global(.video-component) {
+    width: auto; /* Allow aspect ratio to determine width */
+  }
+
+  /* Image placeholder styling */
+  .image-placeholder {
     display: flex;
-    flex-direction: column;
-  }
-
-  /* Format variants */
-  .format-4-5 .scroll-item {
-    width: 200px;
-    aspect-ratio: 4/5;
-  }
-
-  .format-1-1 .scroll-item {
-    width: 250px;
-    aspect-ratio: 1/1;
-  }
-
-  .format-16-9 .scroll-item {
-    width: 300px;
-    aspect-ratio: 16/9;
-  }
-
-  .format-9-16 .scroll-item {
-    width: 150px;
-    aspect-ratio: 9/16;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    border: 2px dashed #ddd;
+    color: #666;
   }
 
   /* Hide scrollbar */
-  .hide-scrollbar .scroll-wrapper {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+  .hide-scrollbar .scroll-list {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
   }
 
-  .hide-scrollbar .scroll-wrapper::-webkit-scrollbar {
-    display: none;
+  .hide-scrollbar .scroll-list::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
   }
 
-  /* Responsive design */
+  /* Tablet: Slightly smaller cards */
+  @media (max-width: 1024px) {
+    .scroll-item {
+      height: 300px;
+    }
+
+    .scroll-item > :global(*) {
+      height: 300px;
+      width: 240px; /* 4:5 aspect ratio: 300px * 4/5 = 240px */
+    }
+
+    .scroll-item > :global(.image-container),
+    .scroll-item > :global(.video-component) {
+      width: auto; /* Allow aspect ratio to determine width */
+    }
+  }
+
+  /* Mobile: Smaller cards */
   @media (max-width: 768px) {
-    .scroll-wrapper {
-      gap: 0.75rem;
+    .scroll-item {
+      height: 250px;
     }
-    
-    .format-16-9 .scroll-item {
-      width: 250px;
+
+    .scroll-item > :global(*) {
+      height: 250px;
+      width: 200px; /* 4:5 aspect ratio: 250px * 4/5 = 200px */
     }
-    
-    .format-1-1 .scroll-item {
-      width: 200px;
+
+    .scroll-item > :global(.image-container),
+    .scroll-item > :global(.video-component) {
+      width: auto; /* Allow aspect ratio to determine width */
     }
-    
-    .format-4-5 .scroll-item {
-      width: 150px;
-    }
-    
-    .format-9-16 .scroll-item {
-      width: 120px;
+  }
+
+  /* Note: Spacing (margin, gap, padding) uses fluid tokens and adjusts automatically */
+
+  /* Accessibility */
+  .scroll-item:focus-within {
+    outline: 2px solid #0066cc;
+    outline-offset: 2px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-list {
+      scroll-behavior: auto;
     }
   }
 </style> 

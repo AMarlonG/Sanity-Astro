@@ -1,0 +1,363 @@
+/* Base Styles - Typography, Links, Forms, Accessibility
+ *
+ * Foundation styles for text, links, form elements, and accessibility patterns.
+ * These styles are applied globally to establish consistent base styling.
+ *
+ * Extracted from global.css as part of CSS architecture refactor.
+ */
+
+/* ============================================
+   BASE TYPOGRAPHY
+   ============================================ */
+
+/* Body defaults */
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-blue);
+  background-color: var(--color-background);
+}
+
+/* Set default text color for all elements */
+* {
+  color: inherit;
+}
+
+/* Headings - Using refined modular scale
+ *
+ * Font sizes follow Major Third (1.250) ratio for visual harmony.
+ * Sizes are appropriate for a festival website - not too large, clear hierarchy.
+ *
+ * Line height is tighter (1.2) for headings to maintain visual cohesion.
+ * Font weight differentiates H5/H6 from body text at the same size.
+ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+h1 {
+  font-size: var(--fs-3xl);  /* 39-44px - Page titles, hero headlines */
+  font-weight: var(--font-weight-bold);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* All event titles and artist names use serif font */
+.event-title,
+.artist-name {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+h2 {
+  font-size: var(--fs-2xl);  /* 31-35px - Major sections, page subtitles */
+}
+
+h3 {
+  font-size: var(--fs-xl);  /* 25-28px - Section headings, card titles */
+}
+
+h4 {
+  font-size: var(--fs-lg);  /* 20-23px - Subsection headings */
+}
+
+h5 {
+  font-size: var(--fs-base);  /* 16-18px - Minor headings */
+  font-weight: var(--font-weight-semibold);  /* Differentiate from body */
+}
+
+h6 {
+  font-size: var(--fs-base);  /* 16-18px - Smallest headings */
+  font-weight: var(--font-weight-medium);  /* Slightly lighter than H5 */
+}
+
+/* Reset heading margins when first child */
+h1:first-child, h2:first-child, h3:first-child,
+h4:first-child, h5:first-child, h6:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+p {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+p:first-child {
+  margin-top: 0;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists */
+ul, ol {
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding-left: var(--space-6);
+}
+
+ul ul, ol ol, ul ol, ol ul {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+li {
+  margin-bottom: var(--space-2);
+}
+
+/* ============================================
+   HOVER PATTERN SYSTEM
+   ============================================
+
+   Three distinct hover patterns based on semantic HTML:
+
+   CATEGORY 1: TEXT LINKS (Navigation)
+   - Semantic: <a> elements that navigate to pages
+   - Default: Primary color, no underline
+   - Hover: Darker color + underline appears
+   - Examples: Navigation menu, "Les mer her", content links
+   - Rule: a:hover { color: darker; text-decoration: underline; }
+
+   CATEGORY 2: BUTTONS (Actions)
+   - Semantic: <button> elements or button-styled links
+   - Default: Background + border + padding
+   - Hover: Background darkens/lightens, NO underline ever
+   - Examples: Date filters, language switcher, submit buttons
+   - Rule: button:hover { background: darker; }
+   - Special class: .link-button for <a> that look like buttons
+
+   CATEGORY 3: CARDS (Containers)
+   - Semantic: Clickable containers
+   - Default: Shadow + border
+   - Hover: Increased shadow ± lift effect
+   - Examples: Event cards, artist cards
+   - Rule: .card:hover { box-shadow: larger; transform: translateY(); }
+
+   BEST PRACTICE: Always wrap hover states in @media (hover: hover)
+   to prevent sticky hover states on touch devices.
+
+   Example:
+   @media (hover: hover) {
+     .element:hover { ... }
+   }
+*/
+
+/* ============================================
+   LINKS - ACCESSIBILITY-FIRST APPROACH
+   ============================================ */
+
+a {
+  color: var(--color-link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition:
+    color var(--transition-fast),
+    text-decoration-thickness var(--transition-fast);
+}
+
+/* Arrow indicator */
+a::after {
+  content: ' →';
+  display: inline;
+  text-decoration: none;
+}
+
+/* Hover state - Multiple visual cues */
+@media (hover: hover) {
+  a:hover {
+    color: var(--color-link-hover);
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* Focus state - WCAG compliance */
+a:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+  background-color: var(--color-link-focus-bg);
+}
+
+/* Active state - Immediate feedback */
+a:active {
+  color: var(--color-link-active);
+}
+
+/* Visited state - User orientation */
+a:visited {
+  color: var(--color-link-visited);
+}
+
+@media (hover: hover) {
+  a:visited:hover {
+    color: var(--color-link-visited-hover);
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* External links get special indicator */
+a[target="_blank"]::after,
+a[rel~="external"]::after {
+  content: ' ↗';
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  a {
+    text-decoration-thickness: 2px;
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  a {
+    transition: none;
+  }
+}
+
+/* Exception: Links styled as buttons (for CTAs and navigation that looks like actions) */
+a.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-5);
+  background-color: rgba(27, 25, 143, 0.08);
+  color: var(--color-blue);
+  border: 1px solid var(--color-blue);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+}
+
+/* Remove underlines and arrows from non-text links */
+a.link-button,
+a.btn,
+a.btn-primary,
+a.btn-secondary,
+a.btn-ghost,
+a.card,
+.event-card a,
+.artist-card a,
+.card-grid a,
+nav a,
+[role="navigation"] a {
+  text-decoration: none;
+}
+
+a.link-button::after,
+a.btn::after,
+a.btn-primary::after,
+a.btn-secondary::after,
+a.btn-ghost::after,
+a.card::after,
+.event-card a::after,
+.artist-card a::after,
+.card-grid a::after,
+nav a::after,
+[role="navigation"] a::after {
+  content: none;
+}
+
+/* Navigation hovers get underline */
+@media (hover: hover) {
+  nav a:hover,
+  [role="navigation"] a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+}
+
+@media (hover: hover) {
+  a.link-button:hover {
+    background-color: rgba(0, 179, 154, 0.08);
+    color: var(--color-blue);
+    text-decoration: none;
+  }
+}
+
+a.link-button:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+a.link-button.active {
+  background-color: var(--color-blue);
+  color: white;
+  border-color: var(--color-blue);
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  transition: border-color var(--transition-fast);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px rgba(27, 25, 143, 0.1);
+}
+
+/* ============================================
+   GLOBAL ACCESSIBILITY & UX PATTERNS
+   ============================================ */
+
+/* Note: prefers-reduced-motion is handled globally in reset.css */
+
+/* Keyboard navigation - consistent focus styles for interactive elements */
+a:focus-visible,
+button:focus-visible,
+.card:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--color-blue);
+  outline-offset: 2px;
+}
+
+/* Visually hidden - Accessible to screen readers but hidden visually */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

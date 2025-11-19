@@ -1,12 +1,14 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import DynamicComponent from '../../components/DynamicComponent.astro';
-import { createDataService } from '../../lib/sanity/dataService.js';
-import { formatDateForLanguage } from '../../lib/utils/dates';
+import Image from '../../components/Image.astro';
+import { formatDateWithWeekday } from '../../lib/utils/dates';
 import { getMultilingualContent } from "../../lib/utils/language.js";
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
+import { IMAGE_QUALITY } from '../../lib/sanityImage';
 import type { SanityDocument } from '@sanity/client';
 import { loadQuery } from '../../lib/sanity/loadQuery.js';
+import { stegaClean } from '@sanity/client/stega';
+import '../../styles/event.css';
 
 // Generate static paths for all events
 export async function getStaticPaths() {
@@ -34,6 +36,9 @@ const { data: event } = await loadQuery({
     "title": title_no,
     slug_no,
     excerpt_no,
+    "excerpt": excerpt_no,
+    description_no,
+    "description": description_no,
     "image": {
       "image": image{
         asset->,
@@ -62,13 +67,34 @@ const { data: event } = await loadQuery({
       _id,
       name,
       "slug": slug.current,
-      image,
-      "imageAlt": coalesce(imageAlt_no, imageAlt_en)
+      "image": {
+        "image": image{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions {
+                width,
+                height,
+                aspectRatio
+              },
+              lqip
+            }
+          },
+          hotspot,
+          crop
+        },
+        "alt": coalesce(imageAlt_no, imageAlt_en, image.alt)
+      },
+      instrument_no,
+      "instrument": instrument_no,
+      country
     },
     ticketType,
     ticketUrl,
     ticketInfoText,
-    content_no,
+    extraContent_no,
+    extraContent_en,
     seo
   }`,
   params,
@@ -78,306 +104,117 @@ if (!event) {
   return Astro.redirect('/404');
 }
 
-// Get appropriate content array
-const content = getMultilingualContent(event) || event.content_no;
+// Get appropriate content arrays
+const description = getMultilingualContent(event, 'no', 'description') || event.description_no;
+const extraContent = getMultilingualContent(event, 'no', 'extraContent') || event.extraContent_no;
 ---
 
-<Layout title={`${event.title} - Event`}>
-  <main>
-    <nav class="breadcrumb">
-      <button type="button" onclick="history.back()" class="back-button">← Tilbake til program</button>
-      <noscript>
-        <a href="/program">← Tilbake til program</a>
-      </noscript>
-    </nav>
-
-    <article>
-      <header>
-        <h1>{event.title}</h1>
-
-        {event.image?.image && (
-          <figure class="event-image">
-            <picture>
-              <source
-                srcset={getResponsiveSrcSet(event.image.image, RESPONSIVE_WIDTHS.HERO, IMAGE_QUALITY.HERO)}
-                type="image/webp"
-                sizes="(max-width: 768px) 100vw, 800px"
-              />
-              <img
-                src={getOptimizedImageUrl(event.image.image, 800, null, IMAGE_QUALITY.HERO)}
-                alt={event.image.alt || event.title}
-                loading="eager"
-                decoding="async"
-              />
-            </picture>
-          </figure>
-        )}
-
-        <div class="event-info">
-          {event.eventDate && (
-            <div class="event-detail">
-              <strong>📅 Dato:</strong>
-              <span>{formatDateForLanguage(event.eventDate.date, 'no')}</span>
-            </div>
-          )}
-
-          {event.eventTime && (
-            <div class="event-detail">
-              <strong>🕰️ Klokkeslett:</strong>
-              <span>{event.eventTime}</span>
-            </div>
-          )}
-
-          {event.venue && (
-            <div class="event-detail">
-              <strong>🎭 Sted:</strong>
-              <span>
-                {event.venue.name}
-                {event.venue.address && (
-                  <span class="address">, {event.venue.address}</span>
-                )}
-                {event.venue.city && (
-                  <span class="city">, {event.venue.city}</span>
-                )}
-              </span>
-            </div>
-          )}
-
-          {event.artists && event.artists.length > 0 && (
-            <div class="event-detail artists">
-              <strong>🎤 Artister:</strong>
-              <ul>
-                {event.artists.map((artist) => (
-                  <li>
-                    <span class="artist-name">{artist.name}</span>
-                    {artist.image?.image && (
-                      <picture>
-                        <img
-                          src={getOptimizedImageUrl(artist.image.image, 64, 64, IMAGE_QUALITY.THUMBNAIL)}
-                          alt={artist.imageAlt || artist.name}
-                          class="artist-avatar"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </picture>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {event.price && (
-            <div class="event-detail price">
-              <strong>🎫 Pris:</strong>
-              <span>{event.price}</span>
-            </div>
-          )}
-        </div>
-
-        {event.ticketType === 'info' ? (
-          <div class="ticket-section">
-            <p class="ticket-info-text">{event.ticketInfoText || 'Gratis inngang'}</p>
-          </div>
-        ) : (
-          <div class="ticket-section">
-            <a
-              href={event.ticketUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="ticket-button"
-            >
-              Kjøp billetter her
-            </a>
-          </div>
+<Layout
+  title={`${stegaClean(event.title || '')} - Sanity + Astro`}
+  slugNo={event.slug_no}
+  slugEn={event.slug_en}
+>
+  <div class="container">
+    <div class="event-page">
+      <header class="event-header">
+        <h1 class="event-title">{stegaClean(event.title || '')}</h1>
+        {event.excerpt && (
+          <p class="event-excerpt">{stegaClean(event.excerpt)}</p>
         )}
       </header>
 
-      {event.description && (
-        <div class="event-description">
-          <p>{event.description}</p>
-        </div>
+      <div class="event-meta">
+        {event.eventDate?.date && (
+          <div class="event-meta-item">{stegaClean(formatDateWithWeekday(event.eventDate.date, 'no'))}</div>
+        )}
+        {event.eventTime && (
+          <div class="event-meta-item">kl. {stegaClean(event.eventTime.startTime)}–{stegaClean(event.eventTime.endTime)}</div>
+        )}
+        {event.venue?.title && (
+          <div class="event-meta-item">{stegaClean(event.venue.title)}</div>
+        )}
+      </div>
+
+      <div class="ticket-section">
+        {stegaClean(event.ticketType) === 'info' ? (
+          <p class="ticket-info">{stegaClean(event.ticketInfoText) || 'Gratis'}</p>
+        ) : (
+          <a href={stegaClean(event.ticketUrl)} class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+            Kjøp billetter her
+          </a>
+        )}
+      </div>
+
+      {description && (
+        <section class="event-description content-narrow">
+          <h2 class="section-title">Om konserten</h2>
+          <p class="description-text">{stegaClean(description)}</p>
+        </section>
       )}
 
-      {/* PageBuilder content from CMS */}
-      {content && Array.isArray(content) && content.length > 0 && (
-        <div class="event-content">
-          {content.map((block) => (
+      {event.artists && event.artists.length > 0 && (
+        <section class="artists-section">
+          <h2 class="artists-title">Artister</h2>
+          <div class="artists-scroll-wrapper">
+            <ul class="artists-list">
+              {event.artists.map((artist) => (
+                <li class="artist-item">
+                  <article class="artist-card">
+                    <h3 class="artist-title">
+                      <a href={`/artister/${stegaClean(artist.slug)}`} class="artist-title-link">
+                        {stegaClean(artist.name)}
+                      </a>
+                    </h3>
+
+                    {artist.image?.image?.asset && (
+                      <div class="artist-image">
+                        <Image
+                          image={artist.image.image}
+                          alt={stegaClean(artist.image.alt || artist.name || '')}
+                          size="small"
+                          aspectRatio="4:5"
+                          loading="lazy"
+                          quality={IMAGE_QUALITY.CARD}
+                          className="artist-card-image"
+                        />
+                      </div>
+                    )}
+
+                    <div class="artist-info-box">
+                      <p class="artist-name">{stegaClean(artist.name)}</p>
+                      {artist.instrument && (
+                        <p class="artist-instrument">{stegaClean(artist.instrument)}</p>
+                      )}
+                    </div>
+                  </article>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {extraContent && Array.isArray(extraContent) && extraContent.length > 0 && (
+        <div class="event-extra-content">
+          {extraContent.map((block) => (
             <DynamicComponent key={block._key || block._id} block={block} />
           ))}
         </div>
       )}
-    </article>
-  </main>
+
+      {event.image?.image?.asset && (
+        <Image
+          image={event.image.image}
+          alt={stegaClean(event.image.alt || event.title || '')}
+          credit={event.image.credit ? stegaClean(event.image.credit) : undefined}
+          size="large"
+          aspectRatio="4:3"
+          loading="lazy"
+          quality={IMAGE_QUALITY.CARD}
+          className="event-image-bottom"
+        />
+      )}
+    </div>
+  </div>
 </Layout>
-
-<style>
-  main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
-
-  .breadcrumb {
-    margin-bottom: 2rem;
-  }
-
-  .breadcrumb a,
-  .breadcrumb .back-button {
-    text-decoration: none;
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-    display: inline;
-  }
-
-  .breadcrumb .back-button:hover {
-    text-decoration: underline;
-  }
-
-  article header {
-    margin-bottom: 3rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    line-height: 1.2;
-    margin-bottom: 2rem;
-  }
-
-  .event-image {
-    margin-bottom: 2rem;
-  }
-
-  .event-image img {
-    width: 100%;
-    height: auto;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  }
-
-  .event-info {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid #dee2e6;
-  }
-
-  .event-detail {
-    display: flex;
-    margin-bottom: 1rem;
-    align-items: flex-start;
-  }
-
-  .event-detail:last-child {
-    margin-bottom: 0;
-  }
-
-  .event-detail strong {
-    min-width: 140px;
-    margin-right: 1rem;
-  }
-
-  .address,
-  .city {
-  }
-
-  .artists ul {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .artists li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.5);
-  }
-
-  .artist-name {
-    font-weight: 500;
-  }
-
-  .artist-avatar {
-    width: 32px;
-    height: 32px;
-    margin-left: auto;
-    object-fit: cover;
-  }
-
-  .price {
-    font-size: 1.1rem;
-  }
-
-  .price span {
-    font-weight: 600;
-  }
-
-  .ticket-section {
-    text-align: center;
-    margin: 2rem 0;
-  }
-
-  .ticket-button {
-    display: inline-block;
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-    padding: 1rem 2rem;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 1.1rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  }
-
-  .ticket-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-  }
-
-  .ticket-info-text {
-    display: inline-block;
-    padding: 1rem 2rem;
-    font-weight: 500;
-    font-size: 1.1rem;
-    font-style: italic;
-  }
-
-  .event-description {
-    line-height: 1.6;
-    font-size: 1.1rem;
-  }
-
-  @media (max-width: 768px) {
-    main {
-      padding: 1rem;
-    }
-
-    h1 {
-      font-size: 2rem;
-    }
-
-    .event-info {
-      padding: 1.5rem;
-    }
-
-    .event-detail {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .event-detail strong {
-      margin-bottom: 0.25rem;
-      margin-right: 0;
-    }
-
-    .ticket-button {
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-    }
-  }
-</style>
 

@@ -40,26 +40,6 @@ export interface TitleData extends GlobalComponentData {
   subtitle?: string
 }
 
-export interface LinkComponentData extends GlobalComponentData {
-  text: string
-  linkType: 'internal' | 'anchor' | 'url' | 'email' | 'phone'
-  internalLink?: {
-    _type?: string
-    slug?: {
-      current: string
-    } | string
-  }
-  anchorId?: string
-  url?: string
-  email?: string
-  phone?: string
-  linkTarget?: '_self' | '_blank'
-  accessibility?: {
-    ariaLabel?: string
-    ariaDescribedBy?: string
-  }
-}
-
 export interface HeadingData extends GlobalComponentData {
   level: 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
   text: string
@@ -152,34 +132,7 @@ export interface PortableTextMarkDefinition {
 }
 
 // Layout component interfaces
-export interface ResponsiveLayoutData extends GlobalComponentData {
-  layoutType: 'columns' | 'flexbox' | 'stack'
-  desktopColumns?: string
-  tabletColumns?: string
-  mobileColumns?: string
-  flexDirection?: 'row' | 'column' | 'row-reverse' | 'column-reverse'
-  flexWrap?: boolean
-  gap?: {
-    desktop: string
-    mobile: string
-  }
-  alignment?: {
-    horizontal: string
-    vertical: string
-  }
-  containerWidth?: 'full' | 'container' | 'narrow' | 'wide'
-  items: GlobalComponentData[]
-}
-
-export interface SpacerData extends GlobalComponentData {
-  type: 'vertical' | 'horizontal' | 'section'
-  size: {
-    desktop: string
-    mobile: string
-  }
-  showDivider?: boolean
-  dividerStyle?: 'solid' | 'dashed' | 'dotted'
-}
+// (Grid, TwoColumn, and ThreeColumn don't use shared types)
 
 // Section component interfaces
 export interface ScrollContainerData extends GlobalComponentData {
@@ -434,10 +387,10 @@ export type ComponentType =
   | 'videoComponent'
   | 'buttonComponent'
   | 'enhancedButtonComponent'
-  | 'linkComponent'
   | 'accordionComponent'
-  | 'columnLayout'
-  | 'spacer'
+  | 'gridComponent'
+  | 'twoColumnLayout'
+  | 'threeColumnLayout'
   | 'contentScrollContainer'
   | 'artistScrollContainer'
   | 'eventScrollContainer'
@@ -453,10 +406,10 @@ export type PageBuilderComponent =
   | (ImageData & { _type: 'imageComponent' })
   | (VideoData & { _type: 'videoComponent' })
   | (ButtonData & { _type: 'buttonComponent' | 'enhancedButtonComponent' })
-  | (LinkComponentData & { _type: 'linkComponent' })
   | (AccordionData & { _type: 'accordionComponent' })
-  | (ResponsiveLayoutData & { _type: 'columnLayout' })
-  | (SpacerData & { _type: 'spacer' })
+  | (GlobalComponentData & { _type: 'gridComponent' })
+  | (GlobalComponentData & { _type: 'twoColumnLayout' })
+  | (GlobalComponentData & { _type: 'threeColumnLayout' })
   | (ScrollContainerData & { _type: 'contentScrollContainer' })
   | (ArtistScrollContainerData & { _type: 'artistScrollContainer' })
   | (EventScrollContainerData & { _type: 'eventScrollContainer' })
@@ -512,10 +465,10 @@ export const isValidComponentType = (type: string): type is ComponentType => {
     'videoComponent',
     'buttonComponent',
     'enhancedButtonComponent',
-    'linkComponent',
     'accordionComponent',
-    'columnLayout',
-    'spacer',
+    'gridComponent',
+    'twoColumnLayout',
+    'threeColumnLayout',
     'contentScrollContainer',
     'artistScrollContainer',
     'eventScrollContainer',

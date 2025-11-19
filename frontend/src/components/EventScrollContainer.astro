@@ -1,7 +1,7 @@
 ---
 import { sanityClient } from "sanity:client";
-import imageUrlBuilder from "@sanity/image-url";
-import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
+import Image from './Image.astro';
+import { IMAGE_QUALITY } from '../lib/sanityImage';
 import { detectLanguage } from "../lib/utils/language.js";
 import { stegaClean } from '@sanity/client/stega';
 
@@ -14,7 +14,6 @@ interface Props {
   showVenue?: boolean
   showArtists?: boolean
   sortBy?: 'date-asc' | 'date-desc' | 'title-asc' | 'manual'
-  cardFormat?: '16:9' | '4:5'
 }
 
 const {
@@ -25,20 +24,12 @@ const {
   showTime = true,
   showVenue = true,
   showArtists = true,
-  sortBy = 'date-asc',
-  cardFormat = '16:9'
+  sortBy = 'date-asc'
 } = Astro.props
 
 // Detect current language from URL
 const currentLanguage = detectLanguage(Astro.request)
 const programPath = currentLanguage === 'en' ? '/en/program' : '/program'
-
-// Opprett Sanity Image URL Builder
-const { projectId, dataset } = sanityClient.config();
-const urlFor = (source: SanityImageSource) =>
-  projectId && dataset
-    ? imageUrlBuilder({ projectId, dataset }).image(source)
-    : null;
 
 // Hent faktiske event-data fra referansene
 let eventData = []
@@ -47,34 +38,76 @@ if (events && events.length > 0) {
   if (eventIds.length > 0) {
     const EVENT_QUERY = `*[_type == "event" && _id in $eventIds]{
       _id,
-      title,
-      slug,
-      "image": image.image,
-      "imageAlt": image.alt,
-      eventDate,
+      _type,
+      title_no,
+      title_en,
+      "title": coalesce(title_no, title_en),
+      slug_no,
+      slug_en,
+      "slug": coalesce(slug_no.current, slug_en.current, slug.current),
+      excerpt_no,
+      excerpt_en,
+      "excerpt": coalesce(excerpt_no, excerpt_en),
+      "image": {
+        "image": image{
+          asset->{
+            _id,
+            url,
+            metadata {
+              dimensions {
+                width,
+                height,
+                aspectRatio
+              },
+              lqip,
+              blurHash,
+              palette {
+                dominant {
+                  background,
+                  foreground
+                }
+              }
+            }
+          },
+          hotspot,
+          crop
+        },
+        "alt": coalesce(imageAlt_no, imageAlt_en, image.alt),
+        "credit": coalesce(imageCredit_no, imageCredit_en)
+      },
+      eventDate->{
+        _id,
+        date,
+        title_display_no,
+        title_display_en,
+        "title": coalesce(title_display_no, title_display_en)
+      },
       eventTime,
-      venue->{title},
-      artists[]->{name}
+      venue->{
+        _id,
+        title,
+        name,
+        address,
+        city,
+        "slug": slug.current
+      },
+      "artists": artist[]->{
+        _id,
+        name,
+        "slug": slug.current,
+        image,
+        "imageAlt": coalesce(imageAlt_no, imageAlt_en)
+      },
+      ticketType,
+      ticketUrl,
+      ticketInfoText,
+      publishingStatus,
+      scheduledPeriod,
+      seo
     }`
     eventData = await sanityClient.fetch(EVENT_QUERY, { eventIds })
   }
 }
-
-// Hjelpefunksjon for å escape HTML
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
-}
-
-// Generer bilde-URL med Sanity's automatiske hotspot-håndtering
-const getImageUrl = (image: any, width: number, height: number) => {
-  if (!image || !urlFor) return '';
-  return urlFor(image).width(width).height(height).url() || '';
-};
 
 // Sorter arrangementer basert på valgt sortering
 let sortedEvents = [...eventData]
@@ -105,14 +138,12 @@ switch (sortBy) {
 // CSS-klasser basert på props
 const containerClass = 'event-scroll-container'
 const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
-const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 ---
 
-<section class={`${containerClass} ${scrollbarClass} ${cardFormatClass}`}>
-  {title && <h3 class="event-scroll-title">{title}</h3>}
-  <div class="event-scroll-wrapper">
-    <ul class="event-list">
-      {sortedEvents.map((event) => {
+<section class={`${containerClass} ${scrollbarClass}`}>
+  {title && <h2 class="event-scroll-title">{title}</h2>}
+  <ul class="event-list">
+    {sortedEvents.map((event) => {
         if (!event) return null
 
         const eventDate = event.eventDate?.date ? new Date(event.eventDate.date) : null
@@ -120,15 +151,10 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
         const timeString = stegaClean(event.eventTime || '')
         const venueName = stegaClean(event.venue?.title || '')
         const artistNames = stegaClean(event.artists?.map((artist: any) => artist.name).join(', ') || '')
-        const eventSlug = stegaClean(event.slug?.current || '')
+        const eventSlug = stegaClean(event.slug || '')
 
-        const eventImage = event.image || null
-        const imageAlt = event.imageAlt || event.title || ''
-
-        // Beregn høyde basert på cardFormat
-        const [widthRatio, heightRatio] = cardFormat.split(':').map(Number)
-        const cardWidth = cardFormat === '16:9' ? 350 : 300
-        const cardHeight = Math.round((cardWidth * heightRatio) / widthRatio)
+        const eventImage = event.image?.image || null
+        const imageAlt = event.image?.alt || event.title || ''
 
         // Kombinert dato og tid for <time> element
         const dateTimeValue = eventDate && timeString
@@ -140,14 +166,15 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
             <article class="event-card">
               {eventImage && (
                 <div class="event-image">
-                  <picture>
-                    <img
-                      src={getImageUrl(eventImage, cardWidth, cardHeight)}
-                      alt={imageAlt}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </picture>
+                  <Image
+                    image={eventImage}
+                    alt={imageAlt}
+                    size="small"
+                    aspectRatio="4:5"
+                    loading="lazy"
+                    quality={IMAGE_QUALITY.CARD}
+                    className="event-card-image"
+                  />
                 </div>
               )}
               <div class="event-content">
@@ -161,10 +188,10 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
                   )}
                 </h4>
                 {(showDate || showTime) && (dateString || timeString) && (
-                  <time class="event-datetime" dateTime={dateTimeValue}>
-                    {showDate && dateString && <span class="event-date">{dateString}</span>}
-                    {showTime && timeString && <span class="event-time">{timeString}</span>}
-                  </time>
+                  <div class="event-datetime">
+                    {showDate && dateString && <time class="event-date" dateTime={eventDate.toISOString().split('T')[0]}>{dateString}</time>}
+                    {showTime && timeString && <time class="event-time" dateTime={`${eventDate.toISOString().split('T')[0]}T${timeString}`}>{timeString}</time>}
+                  </div>
                 )}
                 {showVenue && venueName && <address class="event-venue">{venueName}</address>}
                 {showArtists && artistNames && <p class="event-artists">{artistNames}</p>}
@@ -183,37 +210,36 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
           </li>
         )
       })}
-    </ul>
-  </div>
+  </ul>
 </section>
 
 <style>
   /* Intrinsic Scroll Container */
   .event-scroll-container {
     container-type: inline-size;
-    width: 100%;
-    margin-block: clamp(var(--space-5), 4vw, var(--space-6));
+    width: min(100ch, 100% - 4rem);
+    margin-inline: auto;
+    margin-block: var(--space-m-l); /* Fluid 16px → 30px */
   }
 
   .event-scroll-title {
-    font-size: clamp(var(--font-size-xl), 3vw, var(--font-size-2xl));
-    font-weight: var(--font-weight-semibold);
-    margin-block-end: var(--space-4);
+    font-size: var(--fs-2xl);
+    font-weight: 600;
+    margin-block-end: var(--space-m);
   }
 
-  /* Fluid scroll wrapper */
-  .event-scroll-wrapper {
-    overflow-x: auto;
-    padding-block: var(--space-2);
-    scroll-snap-type: x mandatory;
-  }
-
+  /* Fluid scroll list */
   .event-list {
     display: flex;
     gap: clamp(var(--space-3), 2.5vw, var(--space-5));
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding-block: var(--space-2);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation; /* Allow both horizontal and vertical scrolling, remove double-tap delay */
   }
 
   .event-item {
@@ -221,7 +247,7 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     scroll-snap-align: start;
   }
 
-  /* Intrinsic event cards */
+  /* Intrinsic event cards - standardized to 4:5 */
   .event-card {
     position: relative; /* Required for stretched link pattern */
     container-type: inline-size;
@@ -230,15 +256,6 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     overflow: hidden;
     box-shadow: var(--shadow-sm);
     transition: transform var(--transition-base), box-shadow var(--transition-base);
-  }
-
-  /* Content-based card sizing */
-  .card-format-16-9 .event-card {
-    width: clamp(280px, 40vw, 380px);
-    aspect-ratio: 16/9;
-  }
-
-  .card-format-4-5 .event-card {
     width: clamp(240px, 35vw, 320px);
     aspect-ratio: 4/5;
   }
@@ -250,15 +267,16 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
 
   .event-image {
     width: 100%;
-    height: clamp(120px, 15cqw, 200px);
+    flex-shrink: 0;
     overflow: hidden;
-    aspect-ratio: 16/9;
+    aspect-ratio: 4/5; /* Parent controls image height */
   }
 
-  .event-image img {
+  .event-card-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
   }
 
   /* Intrinsic content padding */
@@ -378,19 +396,15 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
     .event-content {
       padding: var(--space-5);
     }
-    
-    .event-image {
-      height: 180px;
-    }
   }
 
   /* Scroll snap and accessibility */
-  .hide-scrollbar .event-scroll-wrapper {
+  .hide-scrollbar .event-list {
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
 
-  .hide-scrollbar .event-scroll-wrapper::-webkit-scrollbar {
+  .hide-scrollbar .event-list::-webkit-scrollbar {
     display: none;
   }
 
@@ -406,7 +420,7 @@ const cardFormatClass = `card-format-${cardFormat.replace(':', '-')}`
       transform: none; /* Disable lift effect */
     }
 
-    .event-scroll-wrapper {
+    .event-list {
       scroll-behavior: auto;
     }
   }

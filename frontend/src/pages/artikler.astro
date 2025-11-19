@@ -1,123 +1,220 @@
 ---
 import ContentPageLayout from '../layouts/ContentPageLayout.astro';
-import CardGrid from '../components/CardGrid.astro';
-import Image from '../components/Image.astro';
 import { createDataService } from '../lib/sanity/dataService.js';
-import { formatDateForLanguage } from '../../../shared/utils/dates';
+import { formatDateForLanguage } from '../lib/utils/dates';
+import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../lib/sanityImage';
+import { stegaClean } from '@sanity/client/stega';
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
 
-// Hent artikler-siden innhold fra "Faste sider"
-const articlesPage = await dataService.getPageBySlug('artikler');
+// Hent artikkelside-siden innhold
+const articlePage = await dataService.getArticlePage();
 
-// Hent alle publiserte artikler
-const articles = await dataService.getPublishedArticles();
+// Get articles from articlePage and filter out null/undefined
+const articles = (articlePage?.articles || []).filter(article => article != null);
 
 // Fallback values
-const pageTitle = articlesPage?.title || 'Artikler';
+const pageTitle = articlePage?.title || 'Artikler';
+
+// Check if we have any articles
+const hasArticles = articles.length > 0;
 ---
 
 <ContentPageLayout
   title={pageTitle}
-  pageContent={articlesPage?.content}
+  excerpt={articlePage?.excerpt}
+  pageDocument={articlePage}
 >
-  <CardGrid
-    title="Alle artikler"
-    items={articles}
-    gridType="articles"
-    noResultsTitle="Ingen artikler publisert"
-  >
-    {articles.map((article) => (
-      <article class="article-card card">
-        <a href={`/artikler/${article.slug}`} class="article-link">
-          {article.image && (
-            <div class="article-image">
-              <Image
-                image={article.image.image}
-                alt={article.image.alt || article.title}
-                caption=""
-                credit=""
-                size="full"
-                aspectRatio="16:9"
-                alignment="center"
-                className="article-card-image"
-              />
+  {hasArticles ? (
+    <div class="articles-grid">
+      {articles.map((article) => (
+        <article class="article-card card">
+          <h3 class="article-title">
+            <a href={`/artikler/${stegaClean(article.slug_no?.current || article.slug_en?.current)}`} class="article-title-link">
+              {stegaClean(article.title)}
+            </a>
+          </h3>
+
+          {article.excerpt && (
+            <p class="article-excerpt">{stegaClean(article.excerpt)}</p>
+          )}
+
+          {article.image?.image && (
+            <figure class="article-image">
+              <picture>
+                <source
+                  srcset={getResponsiveSrcSet(article.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
+                  type="image/webp"
+                  sizes="(max-width: 768px) 100vw, 400px"
+                />
+                <img
+                  src={getOptimizedImageUrl(article.image.image, 400, 225, IMAGE_QUALITY.CARD)}
+                  alt={article.image.alt || article.title}
+                  loading="lazy"
+                  decoding="async"
+                  class="article-card-image"
+                />
+              </picture>
+            </figure>
+          )}
+
+          {article.publishedAt && (
+            <div class="article-meta">
+              <span class="article-date">
+                {formatDateForLanguage(article.publishedAt, 'no')}
+              </span>
             </div>
           )}
-          <div class="article-content">
-            <h3 class="article-title">{article.title}</h3>
-
-            {article.subtitle && (
-              <p class="article-subtitle">{article.subtitle}</p>
-            )}
-
-            {article.publishedAt && (
-              <div class="article-meta">
-                <span class="article-date">
-                  {formatDateForLanguage(article.publishedAt, 'no')}
-                </span>
-              </div>
-            )}
-          </div>
-        </a>
-      </article>
-    ))}
-  </CardGrid>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="no-articles">
+      <h3 class="no-articles-title">Ingen artikler publisert</h3>
+      <p class="no-articles-text">Kom tilbake senere for å se våre artikler.</p>
+    </div>
+  )}
 
   <style>
+    /* Articles Grid - Intrinsic responsive layout */
+    .articles-grid {
+      container-type: inline-size;
+      display: grid;
+      gap: clamp(var(--space-4), 3vw, var(--space-6));
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, max(350px, 30ch)), 1fr));
+    }
+
+    @container (min-width: 700px) {
+      .articles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 40ch), 1fr));
+      }
+    }
+
+    @container (min-width: 1000px) {
+      .articles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 45ch), 1fr));
+      }
+    }
+
     /* Article Card Specific Styles */
     .article-card {
-      container-type: inline-size;
-      overflow: hidden;
-      transition: box-shadow var(--transition-base);
-    }
-
-    .article-link {
-      text-decoration: none;
-      display: block;
-    }
-
-    .article-image {
       position: relative;
-      height: clamp(180px, 20cqw, 240px);
+      container-type: inline-size;
+      display: grid;
+      grid-template-rows: auto auto minmax(120px, 1fr) auto;
       overflow: hidden;
-      aspect-ratio: 16/9;
+      border: none;
+      background-color: rgba(27, 25, 143, 0.08);
+      box-shadow: none;
+      transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
+                  background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      padding: var(--space-4);
+      gap: var(--space-3);
     }
 
-    .article-card-image .image-container {
-      margin: 0;
-      height: 100%;
-    }
+    /* Hover effect only for devices with hover capability */
+    @media (hover: hover) {
+      .article-card:hover {
+        transform: translateY(-4px);
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+        background-color: rgba(0, 179, 154, 0.08);
+      }
 
-    .article-card-image .image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .article-card-image .image-caption {
-      display: none;
-    }
-
-    .article-content {
-      padding: 0;
+      .article-card:hover .article-title-link {
+        color: var(--color-blue);
+      }
     }
 
     .article-title {
-      margin: 0 0 var(--space-2) 0;
+      margin: 0;
       font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
       line-height: var(--line-height-tight);
+      font-weight: 400;
+      font-family: Georgia, 'Times New Roman', serif;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
-    .article-subtitle {
-      margin: 0 0 var(--space-3) 0;
+    .article-excerpt {
+      margin: 0;
       font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
       line-height: var(--line-height-normal);
+      opacity: 0.85;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      hyphens: auto;
+    }
+
+    figure.article-image {
+      position: relative;
+      width: 100%;
+      max-height: 100%;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      align-self: center;
+      justify-self: center;
+      margin: 0;
+    }
+
+    figure.article-image picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .article-card-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Stretched link pattern - makes entire card clickable */
+    .article-card .article-title-link {
+      color: var(--color-blue);
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+
+    /* Pseudo-element stretches to cover entire card */
+    .article-title-link::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Remove arrow indicator from card title links */
+    .article-title-link::after {
+      content: none;
+    }
+
+    /* Remove arrow from all links inside article cards */
+    .article-card a::after {
+      content: none;
+    }
+
+    /* Hover state - no underline, color change handled above */
+    @media (hover: hover) {
+      .article-card .article-title-link:hover {
+        text-decoration: none;
+      }
+    }
+
+    /* Focus state - highly visible for keyboard users */
+    .article-card .article-title-link:focus-visible {
+      outline: 2px solid var(--color-blue);
+      outline-offset: 2px;
+      text-decoration: underline;
     }
 
     .article-meta {
       font-size: var(--font-size-sm);
+      margin: 0;
+      position: relative;
+      z-index: 0;
     }
 
     .article-date {
@@ -132,15 +229,24 @@ const pageTitle = articlesPage?.title || 'Artikler';
         font-size: var(--font-size-xl);
       }
 
-      .article-subtitle {
+      .article-excerpt {
         font-size: var(--font-size-base);
       }
     }
 
-    @container (min-width: 400px) {
-      .article-image {
-        height: 200px;
-      }
+    /* No Articles Empty State */
+    .no-articles {
+      text-align: center;
+      padding: clamp(var(--space-6), 8vw, var(--space-9));
+    }
+
+    .no-articles-title {
+      margin: 0 0 var(--space-4) 0;
+    }
+
+    .no-articles-text {
+      margin: 0;
+      font-size: var(--font-size-lg);
     }
   </style>
 

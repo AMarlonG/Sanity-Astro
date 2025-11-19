@@ -74,31 +74,17 @@ export const eventScrollContainer = defineType({
       },
       initialValue: 'date-asc',
     }),
-    defineField({
-      name: 'cardFormat',
-      title: 'Kortformat',
-      type: 'string',
-      description: 'Velg format for event-kortene (bredde:høyde)',
-      options: {
-        list: [
-          {title: 'Landskap (16:9)', value: '16:9'},
-          {title: 'Portrett (4:5)', value: '4:5'},
-        ],
-      },
-      initialValue: '16:9',
-    }),
   ],
   preview: {
     select: {
       title: 'title',
       items: 'items',
-      cardFormat: 'cardFormat',
     },
-    prepare({title, items, cardFormat}) {
+    prepare({title, items}) {
       const eventCount = items?.length || 0
       return {
         title: 'Arrangementer',
-        subtitle: `${title || 'Scroll Container'} • ${eventCount} arrangementer • ${cardFormat}`,
+        subtitle: `${title || 'Scroll Container'} • ${eventCount} arrangementer (4:5 kort)`,
         media: CalendarIcon,
       }
     },

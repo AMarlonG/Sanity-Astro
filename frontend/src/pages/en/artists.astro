@@ -1,8 +1,10 @@
 ---
 import ContentPageLayout from '../../layouts/ContentPageLayout.astro';
-import CardGrid from '../../components/CardGrid.astro';
 import { createDataService } from '../../lib/sanity/dataService.js';
-import { getOptimizedImageUrl, getResponsiveSrcSet, IMAGE_QUALITY, RESPONSIVE_WIDTHS } from '../../lib/imageHelpers';
+import { IMAGE_QUALITY } from '../../lib/sanityImage';
+import Image from '../../components/Image.astro';
+import { stegaClean } from '@sanity/client/stega';
+import '../../styles/artists.css';
 
 // Create data service with Visual Editing support
 const dataService = createDataService(Astro.request);
@@ -15,144 +17,53 @@ const artists = artistsPage?.selectedArtists || [];
 
 // Fallback values
 const pageTitle = artistsPage?.title || 'Artists';
+
+// Check if we have any artists
+const hasArtists = artists.length > 0;
 ---
 
 <ContentPageLayout
   title={pageTitle}
+  excerpt={artistsPage?.excerpt}
   pageDocument={artistsPage}
 >
-  <CardGrid
-    title="All artists"
-    items={artists}
-    gridType="artists"
-    noResultsTitle="No artists published"
-  >
-    {artists.map((artist) => (
-      <article class="artist-card card">
-        <a href={`/en/artists/${artist.slug}`} class="artist-link">
+  {hasArtists ? (
+    <div class="artists-grid">
+      {artists.map((artist) => (
+        <article class="artist-card">
+          <h3 class="artist-title">
+            <a href={`/en/artists/${stegaClean(artist.slug)}`} class="artist-title-link">
+              {stegaClean(artist.name)}
+            </a>
+          </h3>
+
           {artist.image?.image && (
             <div class="artist-image">
-              <picture>
-                <source
-                  srcset={getResponsiveSrcSet(artist.image.image, RESPONSIVE_WIDTHS.MEDIUM, IMAGE_QUALITY.CARD)}
-                  type="image/webp"
-                  sizes="(max-width: 768px) 100vw, 400px"
-                />
-                <img
-                  src={getOptimizedImageUrl(artist.image.image, 400, 400, IMAGE_QUALITY.CARD)}
-                  alt={artist.image.alt || artist.name}
-                  loading="lazy"
-                  decoding="async"
-                  class="artist-card-image"
-                />
-              </picture>
+              <Image
+                image={artist.image.image}
+                alt={artist.image.alt || artist.name}
+                size="small"
+                aspectRatio="4:5"
+                loading="lazy"
+                quality={IMAGE_QUALITY.CARD}
+                class="artist-card-image"
+              />
             </div>
           )}
-          <div class="artist-content">
-            <h3 class="artist-name">{artist.name}</h3>
 
-            {artist.bio && (
-              <p class="artist-bio">
-                {artist.bio.length > 150 ? `${artist.bio.substring(0, 150)}...` : artist.bio}
-              </p>
-            )}
-
-            {artist.genres && artist.genres.length > 0 && (
-              <div class="artist-genres">
-                {artist.genres.map((genre: any) => (
-                  <span class="genre-tag">{genre.title}</span>
-                ))}
-              </div>
+          <div class="artist-info-box">
+            <p class="artist-name">{stegaClean(artist.name)}</p>
+            {artist.instrument && (
+              <p class="artist-instrument">{stegaClean(artist.instrument)}</p>
             )}
           </div>
-        </a>
-      </article>
-    ))}
-  </CardGrid>
-
-  <style>
-    /* Artist Card Specific Styles */
-    .artist-card {
-      container-type: inline-size;
-      overflow: hidden;
-      transition: box-shadow var(--transition-base);
-      display: grid;
-      gap: var(--space-3);
-    }
-
-    .artist-link {
-      text-decoration: none;
-      display: grid;
-      gap: var(--space-3);
-    }
-
-    .artist-image {
-      position: relative;
-      height: clamp(250px, 30cqw, 400px);
-      overflow: hidden;
-      aspect-ratio: 4/5;
-    }
-
-    .artist-image picture {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .artist-card-image {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .artist-content {
-      padding: 0;
-      display: grid;
-      gap: var(--space-2);
-    }
-
-    .artist-name {
-      margin: 0;
-      font-size: clamp(var(--font-size-lg), 4cqw, var(--font-size-xl));
-      line-height: var(--line-height-tight);
-    }
-
-    .artist-bio {
-      margin: 0;
-      font-size: clamp(var(--font-size-sm), 3cqw, var(--font-size-base));
-      line-height: var(--line-height-normal);
-    }
-
-    .artist-genres {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
-    }
-
-    .genre-tag {
-      padding: var(--space-1) var(--space-2);
-      background: var(--color-surface);
-      font-size: var(--font-size-xs);
-      border: 1px solid var(--color-border);
-    }
-
-    /* Container Query Enhancements */
-    @container (min-width: 300px) {
-      .artist-name {
-        font-size: var(--font-size-xl);
-      }
-
-      .artist-bio {
-        font-size: var(--font-size-base);
-      }
-    }
-
-    @container (min-width: 350px) {
-      .artist-image {
-        height: 250px;
-      }
-    }
-  </style>
-
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="no-artists">
+      <h3 class="no-artists-title">No artists published</h3>
+      <p class="no-artists-text">Check back later to see our artists.</p>
+    </div>
+  )}
 </ContentPageLayout>

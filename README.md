@@ -1,51 +1,47 @@
-# Sanity + Astro Modern Monorepo 🚀
+# Sanity + Astro Festival Website
 
-A modern, production-ready monorepo featuring Astro 5 frontend, Sanity CMS, and shared utilities. Built with 2025 best practices including Turborepo, TypeScript, and comprehensive testing.
+A simple, bilingual (Norwegian/English) festival website built with Astro and Sanity CMS. Features event listings, artist profiles, venue information, and Visual Editing support.
 
-## 📦 Packages
-
-- **`frontend/`** - Astro 5 SSR application with HTMX, View Transitions, and Content Layer API
-- **`studio/`** - Sanity Studio v3 with custom schemas and validation
-- **`shared/`** - Shared TypeScript types, utilities, and constants
-
-## 🏗️ Architecture
-
-```
-├── .changeset/          # Changeset configuration for versioning
-├── .github/             # GitHub Actions CI/CD workflows
-├── frontend/            # Astro frontend application
-├── shared/              # Shared code and types
-├── studio/              # Sanity CMS studio
-├── turbo.json           # Turborepo configuration
-└── package.json         # Root workspace configuration
-```
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Node.js 20+ (recommended)
+- Node.js v20.19.0 (recommended)
 - npm 10+
 
 ### Installation
 
 ```bash
-# Install dependencies
-npm install
-
-# Build shared package first
-npm run build --workspace=@sanity-astro/shared
+# Install dependencies (use legacy-peer-deps for compatibility)
+npm install --legacy-peer-deps
 ```
+
+### First-Time Setup
+
+After cloning, generate Sanity types:
+
+```bash
+# Extract schema from Studio
+cd studio && npm run extract-schema
+
+# Generate TypeScript types for frontend
+cd ../frontend && npm run typegen
+```
+
+**Note**: Generated files (`extract.json`, `sanity.types.ts`) are not tracked in git. Regenerate after pulling schema changes.
 
 ### Development
 
-```bash
-# Run all packages in development mode
-npm run dev
+**Start servers in separate terminals:**
 
-# Run specific package
-npm run dev:frontend
-npm run dev:studio
+```bash
+# Terminal 1 - Studio
+npm run dev:studio    # http://localhost:3333
+
+# Terminal 2 - Frontend
+npm run dev:frontend  # http://localhost:4321
 ```
+
+**Note:** Due to Vite process management issues, servers must be started separately.
 
 ### Building
 
@@ -53,146 +49,178 @@ npm run dev:studio
 # Build all packages
 npm run build
 
-# Build specific package
-npm run build:frontend
-npm run build:studio
+# Or build individually:
+npm run build --workspace=frontend
+npm run build --workspace=studio
 ```
 
-### Testing
+### Sanity TypeGen Workflow
+
+After modifying Sanity schemas, regenerate TypeScript types:
 
 ```bash
-# Run all tests
+# Extract schema from Studio
+cd studio && npm run extract-schema
+
+# Generate TypeScript types for frontend
+cd ../frontend && npm run typegen
+```
+
+This ensures type safety across the entire stack when working with Sanity content.
+
+## Project Structure
+
+```
+├── frontend/          # Astro 5 application
+│   ├── src/
+│   │   ├── components/   # Reusable components
+│   │   ├── layouts/      # Page layouts
+│   │   ├── pages/        # Routes and pages
+│   │   ├── scripts/      # Client-side JavaScript
+│   │   └── styles/       # CSS files
+│   ├── sanity/         # Generated Sanity types
+│   │   ├── extract.json    # Extracted schema
+│   │   └── sanity.types.ts # Generated TypeScript types
+│   └── package.json
+├── studio/            # Sanity Studio v3
+│   ├── schemaTypes/
+│   │   ├── documents/    # Document schemas (artist, article, event, etc.)
+│   │   ├── components/   # Component schemas (page builder blocks)
+│   │   ├── objects/      # Object schemas (SEO fields, etc.)
+│   │   └── shared/       # Shared utilities (validation, fields, helpers)
+│   ├── lib/            # Utility functions
+│   ├── actions/        # Custom Studio actions
+│   ├── components/     # Custom UI components
+│   └── package.json
+└── PROJECT_GUIDE.md   # Comprehensive documentation
+```
+
+## Tech Stack
+
+### Frontend (Astro)
+- **Astro 5** - Static site generation with SSR support
+- **HTMX** - Dynamic interactions without heavy JavaScript
+- **TypeScript** - Type-safe component development
+- **React** - Available for complex interactive components (use sparingly)
+
+### CMS (Sanity)
+- **Sanity Studio v3** - Content management
+- **GROQ** - Powerful query language
+- **Visual Editing** - Real-time preview while editing
+- **Norwegian localization** - NBLocale support
+
+### Features
+- Bilingual support (Norwegian default, English optional)
+- Event filtering with HTMX
+- Responsive design
+- Visual Editing workflow
+- Workspace-based monorepo structure
+
+## Configuration
+
+### Environment Variables
+
+Create `frontend/.env.local`:
+
+```env
+PUBLIC_SANITY_PROJECT_ID=i952bgb1
+PUBLIC_SANITY_DATASET=production
+PUBLIC_SANITY_VISUAL_EDITING_ENABLED=true
+SANITY_API_READ_TOKEN=your-token-here
+SITE_URL=http://localhost:4321
+```
+
+See `frontend/.env.example` for all available options.
+
+### Sanity Project Settings
+- Project ID: `i952bgb1`
+- Dataset: `production`
+- Studio URL: `http://localhost:3333`
+- Frontend URL: `http://localhost:4321`
+
+## Testing
+
+```bash
+# Run tests in all packages
 npm run test
 
 # Watch mode
 npm run test:watch
 ```
 
-## 🛠️ Modern Stack
+Currently 8 test files covering:
+- Sanity schemas and configuration
+- Frontend components and utilities
+- Security helpers and image utilities
 
-### Frontend (Astro)
-- **Astro 5.11** with SSR and View Transitions
-- **Content Layer API** for optimal content loading
-- **HTMX** for dynamic interactions
-- **Modern Image Optimization** (AVIF, WebP, LQIP)
-- **Enhanced Security** (CSP, rate limiting)
-- **Vitest** for testing
+## Documentation
 
-### Studio (Sanity)
-- **Sanity v3** with TypeScript schemas
-- **Custom validation** and slug generation
-- **Scheduled content** support
-- **Norwegian localization**
-- **Comprehensive testing**
+- **PROJECT_GUIDE.md** - Comprehensive project documentation covering:
+  - Philosophy and architecture
+  - Core technologies (Sanity, Astro, HTMX, TypeScript)
+  - Development workflow
+  - Git workflow (two-branch model)
+  - AI assistant guidelines
+  - Best practices and conventions
 
-### Monorepo Tooling
-- **Turborepo** for build orchestration and caching
-- **Changesets** for version management
-- **Shared TypeScript** configurations
-- **Centralized ESLint & Prettier**
-- **GitHub Actions** CI/CD
+- **MEDIA.md** - Media handling reference guide (images and videos):
+  - Architecture and core utilities
+  - Fetching images and videos from Sanity (GROQ patterns)
+  - Rendering with Image and Video components
+  - Optimization features (performance, privacy, security)
+  - Quality presets and aspect ratio handling
+  - Video support in all layout components (Grid, TwoColumn, ThreeColumn, etc.)
+  - Common patterns for artists, events, heroes, promotional videos
+  - Troubleshooting guide
 
-## 📝 Available Scripts
+## Git Workflow
 
-| Script | Description |
-|--------|------------|
-| `npm run dev` | Start all packages in development mode |
-| `npm run build` | Build all packages |
-| `npm run test` | Run all tests |
-| `npm run lint` | Lint all packages |
-| `npm run typecheck` | Type check all packages |
-| `npm run clean` | Clean all build outputs |
-| `npm run changeset` | Create a changeset for versioning |
-| `npm run version` | Version packages based on changesets |
-| `npm run release` | Build and publish packages |
+This project uses a two-branch model:
 
-## 🔧 Configuration
+- `main` - Production branch (deploys to live URL)
+- `staging` - Testing/preview branch (deploys to test URL)
 
-### Environment Variables
+**Always work in feature branches:**
+1. Create from `staging`: `git checkout -b feature/your-feature`
+2. Develop and commit
+3. Push and open PR to `staging`
+4. Test on staging URL
+5. When ready, merge `staging` to `main` for production
 
-Create `.env.local` files in respective packages:
+See PROJECT_GUIDE.md section 5 for detailed workflow.
 
-#### Frontend (`frontend/.env.local`)
-```env
-PUBLIC_SANITY_PROJECT_ID=your-project-id
-PUBLIC_SANITY_DATASET=production
-SITE_URL=https://your-site.com
-```
+## Deployment
 
-#### Studio (`studio/.env.local`)
-```env
-SANITY_STUDIO_PROJECT_ID=your-project-id
-SANITY_STUDIO_DATASET=production
-```
+GitHub Actions workflows handle CI/CD:
+- **CI** (`.github/workflows/ci.yml`) - Build and test on push/PR
+- **Deploy** (`.github/workflows/deploy.yml`) - Deploy after successful CI
 
-### Turborepo Remote Caching
-
-To enable Turborepo remote caching:
-
-1. Create an account at [turbo.build](https://turbo.build)
-2. Get your token and team
-3. Add to environment:
+Manual deployment:
 ```bash
-export TURBO_TOKEN=your-token
-export TURBO_TEAM=your-team
-```
-
-## 🧪 Testing
-
-The monorepo includes comprehensive testing:
-
-- **Unit Tests** - Component and utility testing
-- **Integration Tests** - API and data flow testing
-- **59+ tests** across all packages
-- **Vitest** with Happy DOM for fast testing
-
-## 🚢 Deployment
-
-### GitHub Actions
-
-The repository includes two workflows:
-
-1. **CI Workflow** (`ci.yml`) - Runs on every push/PR
-   - Builds all packages
-   - Runs tests and linting
-   - Type checking
-   - Creates changesets
-
-2. **Deploy Workflow** (`deploy.yml`) - Runs after successful CI
-   - Deploys frontend to hosting provider
-   - Deploys Sanity Studio
-
-### Manual Deployment
-
-```bash
-# Build for production
-npm run build
-
-# Deploy frontend (example with Vercel)
+# Frontend (example with Vercel)
 cd frontend && vercel --prod
 
-# Deploy studio
+# Sanity Studio
 cd studio && npx sanity deploy
 ```
 
-## 📚 Documentation
+## Philosophy
 
-- [Astro Documentation](https://docs.astro.build)
-- [Sanity Documentation](https://www.sanity.io/docs)
-- [Turborepo Documentation](https://turbo.build/repo/docs)
-- [Changesets Documentation](https://github.com/changesets/changesets)
+This is a **professional festival website** following production-ready standards:
 
-## 🤝 Contributing
+- **Security & Quality First** - Never compromise on security, testing, or code quality
+- **Then Simplicity** - Avoid over-engineering and unnecessary complexity
+- **Focused Architecture** - Build what's needed for a festival website, nothing more
+- **Professional Standards** - Follow web best practices, even in a simple project
 
-1. Create a feature branch
-2. Make your changes
-3. Run `npm run changeset` to create a changeset
-4. Submit a pull request
+Simple means **focused and maintainable**, not amateur or shortcuts.
 
-## 📄 License
+See PROJECT_GUIDE.md section 1 for the complete philosophy and decision framework.
+
+## License
 
 MIT
 
 ---
 
-Built with ❤️ using modern web technologies for 2025 and beyond.
+For comprehensive documentation, troubleshooting, and best practices, see **PROJECT_GUIDE.md**.

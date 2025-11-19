@@ -1,55 +1,36 @@
 ---
 interface Props {
   text: string;
-  url?: string;
+  url: string;
   style?: 'primary' | 'secondary' | 'outline';
-  size?: 'small' | 'medium' | 'large';
-  action?: 'link' | 'form' | 'modal';
-  disabled?: boolean;
+  fullWidth?: boolean;
+  openInNewTab?: boolean;
   className?: string;
 }
 
 const {
   text,
-  url = '#',
+  url,
   style = 'primary',
-  size = 'medium',
-  action = 'link',
-  disabled = false,
+  fullWidth = false,
+  openInNewTab = false,
   className = ''
 } = Astro.props;
 
-// Auto-detect if it's really a link based on URL
-const hasValidUrl = url && url !== '#' && !url.startsWith('javascript:');
-const isRealLink = action === 'link' && hasValidUrl;
+const target = openInNewTab ? '_blank' : undefined;
+const rel = openInNewTab ? 'noopener noreferrer' : undefined;
 
-const isExternal = url?.startsWith('http');
-const target = isExternal ? '_blank' : undefined;
-const rel = isExternal ? 'noopener noreferrer' : undefined;
-
-const classes = `btn btn-${style} btn-${size} ${disabled ? 'btn-disabled' : ''} ${className}`;
+const classes = `btn btn-${style} ${fullWidth ? 'btn-full-width' : ''} ${className}`.trim();
 ---
 
-{isRealLink ? (
-  <a
-    href={url}
-    class={classes}
-    target={target}
-    rel={rel}
-    aria-disabled={disabled}
-  >
-    {text}
-  </a>
-) : (
-  <button
-    type={action === 'form' ? 'submit' : 'button'}
-    class={classes}
-    disabled={disabled}
-    onclick={action === 'modal' ? `window.open('${url}', '_blank')` : undefined}
-  >
-    {text}
-  </button>
-)}
+<a
+  href={url}
+  class={classes}
+  target={target}
+  rel={rel}
+>
+  {text}
+</a>
 
 <!--
   Styles for buttons are now centralized in /src/styles/global.css

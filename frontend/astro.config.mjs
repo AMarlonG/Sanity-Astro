@@ -4,7 +4,6 @@ import node from '@astrojs/node';
 import react from '@astrojs/react';
 
 import sanity from '@sanity/astro';
-import htmx from 'astro-htmx';
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,6 +21,12 @@ export default defineConfig({
   experimental: {
     // Disable CSP for Visual Editing development
     // csp: true,
+  },
+
+  // Dev server configuration
+  server: {
+    host: true,  // Allow connections from other devices (like your iPhone)
+    port: 4321   // Your desired port
   },
 
   // Output configuration for server rendering
@@ -51,18 +56,6 @@ export default defineConfig({
 
   build: {
     assets: 'assets',
-    // Enhanced build optimization for images
-    assetsInlineLimit: 0, // Don't inline any assets, use CDN
-    // Bundle optimization
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Separate vendor chunks for better caching
-          'sanity': ['@sanity/client', '@sanity/image-url'],
-          'htmx': ['htmx.org']
-        }
-      }
-    }
   },
 
   vite: {
@@ -105,6 +98,5 @@ export default defineConfig({
         studioUrl: 'http://localhost:3333'
       },
     }),
-    htmx(),
   ],
 });

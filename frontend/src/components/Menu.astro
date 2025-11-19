@@ -1,0 +1,470 @@
+---
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import type { Language } from '../lib/utils/language.js';
+
+export interface MenuItem {
+  _id: string;
+  _type: string;
+  title_no: string;
+  title_en: string;
+  slug_no: string;
+  slug_en: string;
+}
+
+interface Props {
+  currentLang: Language;
+  currentPath: string;
+  slugNo?: string;
+  slugEn?: string;
+  menuItems?: MenuItem[];
+}
+
+const { currentLang, currentPath, slugNo, slugEn, menuItems = [] } = Astro.props;
+
+// Transform CMS menu items into navigation format
+const navItems = menuItems.map((item) => {
+  const slug = currentLang === 'no' ? item.slug_no : item.slug_en;
+  return {
+    href: slug.startsWith('/') ? slug : `/${slug}`,
+    labelNo: item.title_no,
+    labelEn: item.title_en,
+  };
+});
+
+// Helper to check if link is active
+const isActive = (href: string) => {
+  // Remove trailing slashes for comparison
+  const cleanPath = currentPath.replace(/\/$/, '') || '/';
+  const cleanHref = href.replace(/\/$/, '') || '/';
+
+  // Exact match for homepage - must be exactly '/'
+  if (cleanHref === '/') {
+    return cleanPath === '/';
+  }
+
+  // For other pages, match exact path or if current path is a sub-path
+  // e.g., /program matches /program and /program/some-event
+  return cleanPath === cleanHref || cleanPath.startsWith(cleanHref + '/');
+};
+---
+
+<!-- Menu Toggle Button (Logo) -->
+<button
+  id="menu-toggle"
+  class="menu-toggle"
+  type="button"
+  aria-expanded="false"
+  aria-controls="navigation-menu"
+  aria-label={currentLang === 'no' ? 'Åpne meny' : 'Open menu'}
+>
+  <svg viewBox="0 0 850.39 850.39" class="logo-svg" aria-hidden="true">
+    <polygon points="738.52 358.88 635.73 256.09 530.46 361.36 425.2 256.09 319.93 361.36 214.66 256.09 111.87 358.89 111.87 419.14 214.66 316.35 319.93 421.62 425.2 316.35 530.46 421.62 635.73 316.35 738.52 419.14 738.52 358.88"/>
+    <rect x="111.87" y="498.81" width="626.65" height="41.61"/>
+    <path d="M425.2,704.18c28.67,0,41.16-13.69,63.86-36.41,21.3-21.32,45.85-43.82,92.8-43.82s71.5,22.5,92.8,43.82c22.7,22.72,35.19,36.41,63.86,36.41v42.18c-47.09,0-69.74-24.29-89.61-43.89-22.84-22.51-35.01-36.34-67.05-36.34s-44.2,13.83-67.05,36.34c-19.88,19.59-42.53,43.89-89.61,43.89s-69.74-24.29-89.61-43.89c-22.84-22.51-35.01-36.34-67.05-36.34s-44.2,13.83-67.05,36.34c-19.88,19.59-42.53,43.89-89.61,43.89v-42.18c28.67,0,41.16-13.69,63.86-36.41,21.3-21.32,45.85-43.82,92.8-43.82s71.5,22.5,92.8,43.82c22.7,22.72,35.19,36.41,63.86,36.41Z"/>
+    <path d="M738.52,117.1c-21.88-7.53-48.47-13.07-85.36-13.07-61.15,0-94.08,15.17-123.95,29.5-27.38,13.14-51.19,24.71-104.02,24.71s-76.64-11.57-104.02-24.71c-29.86-14.33-62.8-29.5-123.95-29.5-36.9,0-63.49,5.54-85.36,13.07v45.14c21.15-9.19,44.42-16.03,85.36-16.03,52.83,0,76.25,11.37,103.63,24.51,29.86,14.33,63.18,29.7,124.33,29.7s94.47-15.37,124.33-29.7c27.38-13.14,50.8-24.51,103.63-24.51,40.94,0,64.22,6.84,85.36,16.03v-45.14h.02Z"/>
+  </svg>
+</button>
+
+<!-- Backdrop Overlay -->
+<div id="menu-backdrop" class="menu-backdrop" aria-hidden="true"></div>
+
+<!-- Navigation Menu Panel -->
+<nav
+  id="navigation-menu"
+  class="navigation-menu"
+  role="navigation"
+  aria-label={currentLang === 'no' ? 'Hovednavigasjon' : 'Main navigation'}
+  aria-hidden="true"
+>
+  <div class="menu-content">
+    <!-- Navigation Links -->
+    <ul class="nav-list" role="list">
+      {navItems.map((item) => (
+        <li class="nav-item">
+          <a
+            href={item.href}
+            class:list={['nav-link', { 'active': isActive(item.href) }]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {currentLang === 'no' ? item.labelNo : item.labelEn}
+          </a>
+        </li>
+      ))}
+      <!-- Homepage link at the bottom -->
+      <li class="nav-item">
+        <a
+          href="/"
+          class:list={['nav-link', { 'active': isActive('/') }]}
+          aria-current={isActive('/') ? 'page' : undefined}
+        >
+          {currentLang === 'no' ? 'Hjem' : 'Home'}
+        </a>
+      </li>
+    </ul>
+
+    <!-- Language Switcher -->
+    <div class="menu-language">
+      <LanguageSwitcher
+        currentLang={currentLang}
+        currentPath={currentPath}
+        slugNo={slugNo}
+        slugEn={slugEn}
+      />
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* ============================================
+     MENU TOGGLE BUTTON (LOGO)
+     ============================================ */
+
+  .menu-toggle {
+    /* Fixed positioning in top-left */
+    position: fixed;
+    top: var(--space-3);
+    /* Position with extra spacing to avoid interfering with text when scrolling */
+    /* Container left edge + container padding - button width - extra gap */
+    left: calc((100% - min(100% - var(--space-4), var(--container-max-width))) / 2 + clamp(var(--space-3), 4vw, var(--space-6)) - 60px - var(--space-3));
+    z-index: var(--z-modal);
+
+    /* Size and appearance */
+    width: 60px;
+    height: 60px;
+    padding: var(--space-half);
+    background-color: var(--color-blue);
+    border: none;
+    cursor: pointer;
+
+    /* Ensure minimum touch target */
+    min-width: 44px;
+    min-height: 44px;
+
+    /* Smooth transitions */
+    transition:
+      background-color var(--transition-fast),
+      transform var(--transition-fast);
+
+    /* Shadow for depth */
+    box-shadow: var(--shadow-md);
+  }
+
+  .logo-svg {
+    width: 100%;
+    height: 100%;
+    fill: white;
+    display: block;
+  }
+
+  @media (hover: hover) {
+    .menu-toggle:hover {
+      background-color: var(--color-blue-600);
+      transform: scale(1.05);
+    }
+  }
+
+  .menu-toggle:focus-visible {
+    outline: 3px solid var(--color-green);
+    outline-offset: 3px;
+  }
+
+  .menu-toggle:active {
+    transform: scale(0.98);
+  }
+
+  /* ============================================
+     BACKDROP OVERLAY
+     ============================================ */
+
+  .menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: calc(var(--z-modal) - 1);
+
+    /* Hidden by default */
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity var(--transition-base);
+  }
+
+  .menu-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ============================================
+     NAVIGATION MENU PANEL
+     ============================================ */
+
+  .navigation-menu {
+    /* Fixed positioning - positioned relative to button */
+    position: fixed;
+    /* Position below and aligned with the button */
+    top: calc(var(--space-3) + 60px + var(--space-2));
+    left: calc((100% - min(100% - var(--space-4), var(--container-max-width))) / 2 + clamp(var(--space-3), 4vw, var(--space-6)) - 60px - var(--space-3));
+    z-index: var(--z-modal);
+
+    /* Size determined by content */
+    width: max-content;
+    min-width: 200px;
+    max-width: min(320px, 85vw);
+
+    /* Appearance */
+    background-color: var(--color-background);
+    box-shadow: var(--shadow-xl);
+
+    /* Hidden by default - completely removed from layout */
+    display: none;
+    transform-origin: top left;
+
+    /* Ensure content doesn't overflow */
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100vh - var(--space-3) - 60px - var(--space-4));
+  }
+
+  .navigation-menu.active {
+    /* Show and animate in */
+    display: block;
+    animation: menuAppear var(--transition-base) ease-out;
+  }
+
+  /* Menu appear animation */
+  @keyframes menuAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ============================================
+     MENU CONTENT
+     ============================================ */
+
+  .menu-content {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-3);
+  }
+
+  /* ============================================
+     NAVIGATION LINKS
+     ============================================ */
+
+  .nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    flex: 1;
+  }
+
+  .nav-item {
+    display: block;
+  }
+
+  .nav-link {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--fs-base);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-blue);
+    text-decoration: none;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast);
+
+    /* Minimum touch target */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  @media (hover: hover) {
+    .nav-link:hover {
+      background-color: rgba(0, 179, 154, 0.08);
+      color: var(--color-blue);
+    }
+  }
+
+  .nav-link:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+
+  /* Active page indicator */
+  .nav-link.active {
+    background-color: var(--color-blue);
+    color: white;
+    font-weight: var(--font-weight-bold);
+  }
+
+  /* ============================================
+     LANGUAGE SWITCHER SECTION
+     ============================================ */
+
+  .menu-language {
+    margin-top: auto;
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* ============================================
+     ACCESSIBILITY ENHANCEMENTS
+     ============================================ */
+
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .menu-toggle {
+      border: 2px solid white;
+    }
+
+    .nav-link {
+      border: 1px solid transparent;
+    }
+
+    .nav-link:focus-visible {
+      border-color: var(--color-blue);
+      outline-width: 3px;
+    }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .menu-toggle,
+    .nav-link {
+      transition: none;
+    }
+
+    .menu-toggle:hover {
+      transform: none;
+    }
+
+    .navigation-menu.active {
+      animation: none;
+    }
+
+    @keyframes menuAppear {
+      from, to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
+
+  /* ============================================
+     PREVENT BODY SCROLL WHEN MENU OPEN
+     ============================================ */
+
+  :global(body.menu-open) {
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  // Self-contained menu module
+  (function() {
+    const toggleButton = document.getElementById('menu-toggle') as HTMLButtonElement;
+    const menu = document.getElementById('navigation-menu') as HTMLElement;
+    const backdrop = document.getElementById('menu-backdrop') as HTMLElement;
+    const menuLinks = menu.querySelectorAll('.nav-link');
+
+    let isOpen = false;
+
+    // Get all focusable elements in the menu
+    function getFocusableElements(): HTMLElement[] {
+      const selector = 'a[href], button:not([disabled])';
+      return Array.from(menu.querySelectorAll(selector));
+    }
+
+    // Open menu
+    function openMenu() {
+      isOpen = true;
+
+      // Update DOM
+      menu.classList.add('active');
+      backdrop.classList.add('active');
+      document.body.classList.add('menu-open');
+
+      // Update ARIA attributes
+      toggleButton.setAttribute('aria-expanded', 'true');
+      toggleButton.setAttribute('aria-label', toggleButton.getAttribute('aria-label')?.includes('Open') ? 'Close menu' : 'Lukk meny');
+      menu.setAttribute('aria-hidden', 'false');
+      backdrop.setAttribute('aria-hidden', 'false');
+
+      // Focus first menu item
+      const focusableElements = getFocusableElements();
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+      }
+    }
+
+    // Close menu
+    function closeMenu() {
+      isOpen = false;
+
+      // Update DOM
+      menu.classList.remove('active');
+      backdrop.classList.remove('active');
+      document.body.classList.remove('menu-open');
+
+      // Update ARIA attributes
+      toggleButton.setAttribute('aria-expanded', 'false');
+      toggleButton.setAttribute('aria-label', toggleButton.getAttribute('aria-label')?.includes('Close') || toggleButton.getAttribute('aria-label')?.includes('Lukk') ? 'Open menu' : 'Åpne meny');
+      menu.setAttribute('aria-hidden', 'true');
+      backdrop.setAttribute('aria-hidden', 'true');
+
+      // Return focus to toggle button
+      toggleButton.focus();
+    }
+
+    // Toggle menu
+    function toggleMenu() {
+      if (isOpen) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    }
+
+    // Handle Escape key
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape' && isOpen) {
+        closeMenu();
+      }
+
+      // Focus trap
+      if (e.key === 'Tab' && isOpen) {
+        const focusableElements = getFocusableElements();
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    }
+
+    // Event listeners
+    toggleButton.addEventListener('click', toggleMenu);
+    backdrop.addEventListener('click', closeMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    // Auto-close when navigation link is clicked
+    menuLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+  })();
+</script>

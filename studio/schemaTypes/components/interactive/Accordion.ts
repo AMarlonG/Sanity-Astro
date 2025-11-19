@@ -11,13 +11,6 @@ export const accordionComponent = defineType({
   icon: DocumentIcon,
   fields: [
     defineField({
-      name: 'title',
-      title: 'Tittel',
-      type: 'string',
-      description: 'Hovedtittel for nedtrekksmenyen',
-      validation: componentValidation.title,
-    }),
-    defineField({
       name: 'description',
       title: 'Beskrivelse',
       type: 'text',
@@ -95,14 +88,13 @@ export const accordionComponent = defineType({
   ],
   preview: {
     select: {
-      title: 'title',
       panelCount: 'panels',
     },
-    prepare({title, panelCount}) {
+    prepare({panelCount}) {
       const count = panelCount?.length || 0
       return {
         title: 'Nedtrekksmeny',
-        subtitle: `${title || 'Uten tittel'} • ${count} panel${count !== 1 ? 'er' : ''}`,
+        subtitle: `${count} panel${count !== 1 ? 'er' : ''}`,
         media: TiersIcon,
       }
     },
@@ -111,13 +103,12 @@ export const accordionComponent = defineType({
 
 // Type-safe validation functions
 export const accordionValidationRules = {
-  title: componentValidation.title as ValidationRule,
   panels: contentValidation.accordionPanels as ValidationRule,
 } as const
 
 // Utility function to validate accordion has required content
 export function hasValidAccordionContent(data: AccordionData): boolean {
-  return !!(data.title && data.panels && data.panels.length > 0)
+  return !!(data.panels && data.panels.length > 0)
 }
 
 // Utility function to get accordion panel count

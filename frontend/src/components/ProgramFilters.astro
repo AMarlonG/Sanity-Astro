@@ -1,0 +1,121 @@
+---
+import { formatDateWithWeekday } from '../lib/utils/dates';
+
+interface Props {
+  availableDates: Array<{ date: string; title?: string }>;
+  availableVenues: Array<{ slug: string; title: string }>;
+  language: 'no' | 'en';
+}
+
+const { availableDates, availableVenues, language } = Astro.props;
+
+// Extract unique dates from events and sort
+const uniqueDates = Array.from(
+  new Set(availableDates.map(d => d.date))
+).sort();
+
+// Get current filter state from URL for active state detection
+const currentDate = Astro.url.searchParams.get('date') || '';
+const currentVenue = Astro.url.searchParams.get('venue') || '';
+
+// Base paths for href fallbacks
+const basePath = language === 'no' ? '/program' : '/en/program';
+const apiPath = '/api/filter-program';
+---
+
+<section id="filter-container" role="search" aria-label={language === 'no' ? 'Filter arrangementer' : 'Filter events'}>
+  <!-- DATE FILTER SECTION -->
+  {uniqueDates.length > 0 && (
+    <div class="date-filter">
+      <div
+        class="date-filter-buttons"
+        role="region"
+        aria-label={language === 'no' ? 'Filtrer etter dato' : 'Filter by date'}
+        tabindex="0"
+      >
+        <a
+          href={`${basePath}?date=&venue=${currentVenue}`}
+          class:list={['link-button', { active: !currentDate }]}
+          data-filter-type="date"
+          data-filter-value=""
+          hx-get={apiPath}
+          hx-vals={JSON.stringify({ lang: language, date: '', venue: currentVenue })}
+          hx-target="#event-results"
+          hx-swap="innerHTML show:none"
+          hx-push-url="true"
+          hx-indicator="#filter-loading"
+        >
+          {language === 'no' ? 'Alle datoer' : 'All dates'}
+        </a>
+
+        {uniqueDates.map(date => (
+            <a
+              href={`${basePath}?date=${date}&venue=${currentVenue}`}
+              class:list={['link-button', { active: currentDate === date }]}
+              data-filter-type="date"
+              data-filter-value={date}
+              hx-get={apiPath}
+              hx-vals={JSON.stringify({ lang: language, date: date, venue: currentVenue })}
+              hx-target="#event-results"
+              hx-swap="innerHTML show:none"
+              hx-push-url="true"
+              hx-indicator="#filter-loading"
+            >
+              {formatDateWithWeekday(date, language)}
+            </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <!-- VENUE FILTER SECTION -->
+  {availableVenues.length > 0 && (
+    <div class="venue-filter">
+      <div
+        class="venue-filter-buttons"
+        role="region"
+        aria-label={language === 'no' ? 'Filtrer etter sted' : 'Filter by venue'}
+        tabindex="0"
+      >
+        <a
+          href={`${basePath}?date=${currentDate}&venue=`}
+          class:list={['link-button', { active: !currentVenue }]}
+          data-filter-type="venue"
+          data-filter-value=""
+          hx-get={apiPath}
+          hx-vals={JSON.stringify({ lang: language, date: currentDate, venue: '' })}
+          hx-target="#event-results"
+          hx-swap="innerHTML show:none"
+          hx-push-url="true"
+          hx-indicator="#filter-loading"
+        >
+          {language === 'no' ? 'Alle steder' : 'All venues'}
+        </a>
+
+        {availableVenues.map(venue => {
+          return (
+            <a
+              href={`${basePath}?date=${currentDate}&venue=${venue.slug}`}
+              class:list={['link-button', { active: currentVenue === venue.slug }]}
+              data-filter-type="venue"
+              data-filter-value={venue.slug}
+              hx-get={apiPath}
+              hx-vals={JSON.stringify({ lang: language, date: currentDate, venue: venue.slug })}
+              hx-target="#event-results"
+              hx-swap="innerHTML show:none"
+              hx-push-url="true"
+              hx-indicator="#filter-loading"
+            >
+              {venue.title}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  )}
+
+  <!-- Loading indicator for htmx requests -->
+  <div id="filter-loading" class="htmx-indicator" aria-live="polite" aria-busy="false">
+    {language === 'no' ? 'Laster arrangementer...' : 'Loading events...'}
+  </div>
+</section>

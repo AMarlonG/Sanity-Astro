@@ -1,274 +1,97 @@
-import {defineField, defineType} from 'sanity'
-import {DocumentIcon} from '@sanity/icons'
-import {externalURLValidation} from '../../../lib/urlValidation'
+import {defineField, defineType, defineArrayMember} from 'sanity'
+import {LinkIcon} from '@sanity/icons'
+import {buttonURLValidation} from '../../../lib/urlValidation'
 import {componentSpecificValidation} from '../../shared/validation'
-import type {ComponentHTMLGenerator, ValidationRule} from '../../shared/types'
 
 export const linkComponent = defineType({
   name: 'linkComponent',
-  title: 'Lenke',
+  title: 'Lenker',
   type: 'object',
-  icon: DocumentIcon,
+  icon: LinkIcon,
+  description: 'Lag en gruppe med lenker med valgfri beskrivelsestekst',
+  groups: [
+    {
+      name: 'content',
+      title: 'Innhold',
+      default: true,
+    },
+  ],
   fields: [
     defineField({
-      name: 'text',
-      title: 'Lenketekst',
-      type: 'string',
-      description: 'Teksten som vises som lenke',
-      validation: componentSpecificValidation.linkText,
-    }),
-    defineField({
-      name: 'linkType',
-      title: 'Lenketype',
-      type: 'string',
-      description: 'Velg hva slags lenke du vil lage: til en side i løsningen, en bestemt seksjon på siden, eller en ekstern adresse.',
-      options: {
-        list: [
-          {title: 'Intern lenke', value: 'internal'},
-          {title: 'Seksjon på denne siden', value: 'anchor'},
-          {title: 'Ekstern nettside', value: 'url'},
-          {title: 'E-postadresse', value: 'email'},
-          {title: 'Telefonnummer', value: 'phone'},
-        ],
-      },
-      initialValue: 'internal',
-    }),
-    defineField({
-      name: 'internalLink',
-      title: 'Intern lenke',
-      type: 'reference',
-      description: 'Søk frem siden du vil lenke til (f.eks. Program, Artistsiden, artikler eller arrangementer).',
-      hidden: ({parent}) => parent?.linkType !== 'internal',
-      to: [
-        {type: 'homepage'},
-        {type: 'page'},
-        {type: 'programPage'},
-        {type: 'artistPage'},
-        {type: 'article'},
-        {type: 'event'}
-      ],
-    }),
-    defineField({
-      name: 'anchorId',
-      title: 'Seksjons-ID (anker)',
-      type: 'string',
-      description: 'Skriv inn ID-en til seksjonen du vil hoppe til (uten #-tegn). Eksempel: "programdetaljer" gir lenke til #programdetaljer.',
-      hidden: ({parent}) => parent?.linkType !== 'anchor',
-      validation: (Rule) =>
-        Rule.custom((value, context) => {
-          const linkType = context?.parent?.linkType
-
-          if (linkType !== 'anchor') {
-            return true
-          }
-
-          if (!value) {
-            return 'Seksjons-ID må fylles ut'
-          }
-
-          if (value.length > 80) {
-            return 'Seksjons-ID må være under 80 tegn'
-          }
-
-          if (!/^[A-Za-z][A-Za-z0-9_\-:.]*$/.test(value)) {
-            return 'Bruk bokstaver eller tall, og eventuelt bindestrek, understrek, kolon eller punktum. Ikke ta med #-tegnet.'
-          }
-
-          return true
+      name: 'links',
+      title: 'Lenker',
+      type: 'array',
+      group: 'content',
+      description: 'Legg til én eller flere lenker',
+      validation: (Rule) => Rule.min(1).max(10).error('Du må ha mellom 1 og 10 lenker'),
+      of: [
+        defineArrayMember({
+          type: 'object',
+          name: 'link',
+          title: 'Lenke',
+          icon: LinkIcon,
+          fields: [
+            defineField({
+              name: 'text',
+              title: 'Lenketekst',
+              type: 'string',
+              description: 'Synlig tekst for lenken',
+              validation: componentSpecificValidation.linkText,
+            }),
+            defineField({
+              name: 'url',
+              title: 'URL',
+              type: 'url',
+              description: 'Hvor lenken skal gå (https://, mailto:, eller tel:)',
+              validation: (Rule) => Rule.required().custom(buttonURLValidation),
+            }),
+            defineField({
+              name: 'description',
+              title: 'Beskrivelse',
+              type: 'string',
+              description: 'Valgfri kort tekst under lenken (én linje)',
+              validation: (Rule) => Rule.max(150).warning('Beskrivelsen bør være under 150 tegn'),
+            }),
+            defineField({
+              name: 'openInNewTab',
+              title: 'Åpne i ny fane',
+              type: 'boolean',
+              description: 'Åpne lenken i en ny fane (kun for eksterne lenker)',
+              initialValue: false,
+            }),
+          ],
+          preview: {
+            select: {
+              title: 'text',
+              url: 'url',
+              openInNewTab: 'openInNewTab',
+            },
+            prepare({title, url, openInNewTab}) {
+              const newTabText = openInNewTab ? ' • Ny fane' : ''
+              return {
+                title: title || 'Uten tekst',
+                subtitle: `${url || 'Ingen URL'}${newTabText}`,
+                media: LinkIcon,
+              }
+            },
+          },
         }),
-    }),
-    defineField({
-      name: 'url',
-      title: 'URL',
-      type: 'url',
-      description: 'For eksterne nettsteder. Husk https:// i starten.',
-      hidden: ({parent}) => parent?.linkType !== 'url',
-      validation: (Rule) => Rule.custom(externalURLValidation),
-    }),
-    defineField({
-      name: 'email',
-      title: 'E-postadresse',
-      type: 'email',
-      description: 'F.eks. kontakt@example.com',
-      hidden: ({parent}) => parent?.linkType !== 'email',
-    }),
-    defineField({
-      name: 'phone',
-      title: 'Telefonnummer',
-      type: 'string',
-      description: 'F.eks. +47 123 45 678',
-      hidden: ({parent}) => parent?.linkType !== 'phone',
-    }),
-    defineField({
-      name: 'linkTarget',
-      title: 'Lenke-mål',
-      type: 'string',
-      description: 'Hvordan lenken skal åpnes',
-      options: {
-        list: [
-          { title: 'Samme fane', value: '_self' },
-          { title: 'Ny fane (anbefalt)', value: '_blank' }
-        ],
-        layout: 'radio'
-      },
-      initialValue: '_self',
-      hidden: ({parent}) => parent?.linkType !== 'url',
-    }),
-    defineField({
-      name: 'accessibility',
-      title: 'Tilgjengelighet',
-      type: 'object',
-      hidden: true, // Skjul fra brukergrensesnittet
-      fields: [
-        {
-          name: 'ariaLabel',
-          title: 'ARIA Label',
-          type: 'string',
-          description:
-            'Beskrivende tekst for skjermlesere (hvis lenketeksten ikke er tilstrekkelig)',
-        },
-        {
-          name: 'ariaDescribedBy',
-          title: 'ARIA Described By',
-          type: 'string',
-          description: 'ID til element som beskriver lenken',
-        },
       ],
     }),
   ],
   preview: {
     select: {
-      title: 'text',
-      linkType: 'linkType',
-      linkTarget: 'linkTarget',
-      url: 'url',
-      email: 'email',
-      phone: 'phone',
-      internalLinkType: 'internalLink->_type',
-      internalLinkSlug: 'internalLink->slug.current',
-      internalLinkSlugNo: 'internalLink->slug_no.current',
-      internalLinkSlugEn: 'internalLink->slug_en.current',
-      anchorId: 'anchorId',
+      links: 'links',
     },
-    prepare({
-      title,
-      linkType,
-      linkTarget,
-      url,
-      email,
-      phone,
-      internalLinkType,
-      internalLinkSlug,
-      internalLinkSlugNo,
-      internalLinkSlugEn,
-      anchorId
-    }) {
-      // Bestem hvilken URL/lenke som skal vises
-      let linkDisplay = linkType || 'ingen lenke'
-
-      if (linkType === 'url' && url) {
-        linkDisplay = url.length > 30 ? `${url.substring(0, 30)}...` : url
-      } else if (linkType === 'email' && email) {
-        linkDisplay = email
-      } else if (linkType === 'phone' && phone) {
-        linkDisplay = phone
-      } else if (linkType === 'anchor' && anchorId) {
-        linkDisplay = `#${anchorId}`
-      } else if (linkType === 'internal') {
-        const previewLink: LinkComponentData['internalLink'] | undefined = internalLinkType
-          ? {
-              _type: internalLinkType,
-              slug: internalLinkSlug
-                ? {current: internalLinkSlug}
-                : internalLinkSlugNo
-                  ? {current: internalLinkSlugNo}
-                  : internalLinkSlugEn
-                    ? {current: internalLinkSlugEn}
-                    : undefined
-            }
-          : undefined
-
-        const resolved = resolveInternalHref(previewLink)
-        linkDisplay = resolved || 'Intern lenke'
-      }
+    prepare({links}) {
+      const linkCount = links?.length || 0
+      const firstLinkText = links?.[0]?.text || 'Ingen lenker'
 
       return {
-        title: 'Lenke',
-        subtitle: `${title || 'Uten tekst'} • ${linkDisplay}${linkTarget === '_blank' ? ' (ny fane)' : ''}`,
-        media: DocumentIcon,
+        title: 'Lenker',
+        subtitle: `${linkCount} lenke${linkCount !== 1 ? 'r' : ''} • ${firstLinkText}${linkCount > 1 ? '...' : ''}`,
+        media: LinkIcon,
       }
     },
   },
 })
-
-// TypeScript interface for Link component data
-export interface LinkComponentData {
-  text: string
-  linkType: 'internal' | 'anchor' | 'url' | 'email' | 'phone'
-  internalLink?: {
-    _type?: string
-    slug?: {
-      current: string
-    } | string
-  }
-  anchorId?: string
-  url?: string
-  email?: string
-  phone?: string
-  linkTarget?: '_self' | '_blank'
-  accessibility?: {
-    ariaLabel?: string
-    ariaDescribedBy?: string
-  }
-}
-
-const getSlugValue = (link?: LinkComponentData['internalLink']): string | undefined => {
-  if (!link) return undefined
-  if (typeof link.slug === 'string') return link.slug
-  return link.slug?.current
-}
-
-const resolveInternalHref = (link?: LinkComponentData['internalLink']): string | undefined => {
-  if (!link) return undefined
-  const slugValue = getSlugValue(link) || ''
-
-  switch (link._type) {
-    case 'homepage':
-      return '/'
-    case 'programPage':
-      return '/program'
-    case 'artistPage':
-      return '/artister'
-    case 'article':
-      return slugValue ? `/artikler/${slugValue}` : undefined
-    case 'event':
-      return slugValue ? `/program/${slugValue}` : undefined
-    case 'page':
-    default:
-      return slugValue ? `/${slugValue}` : undefined
-  }
-}
-
-// Type-safe validation functions
-export const linkValidationRules = {
-  text: componentSpecificValidation.linkText as ValidationRule,
-  url: (Rule: any) => Rule.custom(externalURLValidation) as ValidationRule,
-} as const
-
-// Utility function to build href from link data
-export function buildLinkHref(data: LinkComponentData): string {
-  switch (data.linkType) {
-    case 'internal':
-      return resolveInternalHref(data.internalLink) || '#'
-    case 'anchor':
-      return data.anchorId ? (data.anchorId.startsWith('#') ? data.anchorId : `#${data.anchorId}`) : '#'
-    case 'url':
-      return data.url || '#'
-    case 'email':
-      return data.email ? `mailto:${data.email}` : '#'
-    case 'phone':
-      return data.phone ? `tel:${data.phone}` : '#'
-    default:
-      return '#'
-  }
-}

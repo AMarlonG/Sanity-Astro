@@ -1,6 +1,7 @@
 import {homepage} from './documents/homepage'
 import {programPage} from './documents/programPage'
 import {artistPage} from './documents/artistPage'
+import {articlePage} from './documents/articlePage'
 import {artist} from './documents/artist'
 import {composer} from './documents/composer'
 import {siteSettings} from './documents/siteSettings'
@@ -19,6 +20,7 @@ export const schemaTypes = [
   homepage,
   programPage,
   artistPage,
+  articlePage,
   artist,
   composer,
   siteSettings,
@@ -37,14 +39,15 @@ export const schemaTypes = [
   components.portableTextBlock,
   components.imageComponent,
   components.videoComponent,
+  components.spotifyComponent,
   components.buttonComponent,
   components.linkComponent,
   components.accordionComponent,
   components.countdownComponent,
   components.pageBuilder,
-  components.pageBuilderWithoutTitle,
-  components.columnLayout,
-  components.spacer,
+  components.gridComponent,
+  components.twoColumnLayout,
+  components.threeColumnLayout,
   // Seksjoner
   components.contentScrollContainer,
   components.artistScrollContainer,
