@@ -28,7 +28,7 @@ const slugEn = pageDocument?.slug_en;
 ---
 
 <Layout title={`${title} - Sanity + Astro`} slugNo={slugNo} slugEn={slugEn}>
-  <div class="container page-layout">
+  <div class="stack page-layout" style="--space: var(--space-m-l)">
     <header class="page-header">
       <h1 class="page-title">
         {title}
@@ -40,7 +40,7 @@ const slugEn = pageDocument?.slug_en;
 
     <!-- Page content from schema -->
     {content && Array.isArray(content) && content.length > 0 && (
-      <div class="page-content">
+      <div class="stack page-content" style="--space: var(--space-l-xl)">
         {content.map((block) => (
           <DynamicComponent key={block._key || block._id} block={block} />
         ))}
@@ -57,13 +57,13 @@ const slugEn = pageDocument?.slug_en;
      INTRINSIC CONTENT PAGE LAYOUT
      ============================================
 
-     Container-based layout that allows child components
-     to use container queries for responsive styling.
+     Uses layout primitives (center, stack) for consistent,
+     intrinsic responsive behavior.
 
      Key features:
+     - Center primitive: Max-width constraint + centering
+     - Stack primitive: Vertical rhythm with fluid spacing
      - Container query support for children
-     - Fluid spacing that scales naturally
-     - Stack pattern with intrinsic gap
      - No media queries needed
   */
 
@@ -71,13 +71,6 @@ const slugEn = pageDocument?.slug_en;
     /* Enable container queries for child components */
     container-type: inline-size;
     container-name: page-layout;
-
-    /* Stack pattern with flexible gap */
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-fluid-md); /* Uses new fluid spacing tokens */
-
-    /* Note: Top spacing is provided by Layout.astro via --page-top-spacing token */
 
     /* Ensure content doesn't get too narrow on small screens */
     min-inline-size: min(100%, 280px);
@@ -89,7 +82,8 @@ const slugEn = pageDocument?.slug_en;
 
   .page-title {
     margin: 0 0 var(--space-4) 0;
-    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    /* Use global h1 token for consistency across all h1 elements */
+    font-size: var(--fs-3xl); /* Fluid 39-44px - matches global base.css h1 */
     /* Ensure title wraps gracefully with Norwegian/English text */
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -98,7 +92,8 @@ const slugEn = pageDocument?.slug_en;
 
   .page-excerpt {
     margin: 0 0 var(--space-3) 0;
-    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    /* Accessible fluid typography: combines rem + vw for zoom support (WCAG 1.4.4) */
+    font-size: clamp(1.25rem, 1.25rem + 0.25vw, 1.5rem);
     line-height: var(--line-height-relaxed);
     /* Better text balance for excerpts */
     text-wrap: balance;
@@ -107,10 +102,7 @@ const slugEn = pageDocument?.slug_en;
 
   .page-content {
     margin: 0;
-    /* Stack children with consistent gap */
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-fluid-lg);
+    /* Stack pattern now handled by primitive class */
   }
 
   /* Fallback for browsers without container query support */

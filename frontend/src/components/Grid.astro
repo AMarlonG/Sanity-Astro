@@ -23,11 +23,11 @@ const {
   _type,
 } = Astro.props
 
-// Map gap values to CSS variables
+// Map gap values to fluid spacing tokens
 const gapMap = {
-  small: '1rem',
-  medium: '2rem',
-  large: '3rem',
+  small: 'var(--space-s-m)',      /* 12px → 20px fluid */
+  medium: 'var(--space-l-xl)',    /* 24px → 40px fluid */
+  large: 'var(--space-xl-2xl)',   /* 32px → 60px fluid */
 }
 
 const gapValue = gapMap[gap] || gapMap.medium
@@ -67,35 +67,45 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
 <style>
   .grid-component {
-    margin: 3rem 0;
+    margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px section spacing */
     max-width: 100%;
   }
 
   .grid-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-2xl);
     font-weight: 600;
-    margin-bottom: 2rem;
-    text-align: center;
+    margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
   }
 
   .grid-container {
     display: grid;
-    gap: var(--grid-gap, 2rem);
+    gap: var(--grid-gap, var(--space-l-xl)); /* Default fluid gap: 24px → 40px */
     width: 100%;
     align-items: stretch;
 
     /* Container query context - allows children to adapt to available space */
     container-type: inline-size;
     container-name: grid-layout;
+
+    /* Intrinsic grid - columns adapt to available space automatically */
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(var(--grid-min-width), 100%), 1fr)
+    );
+
+    /* Default minimum width for grid items */
+    --grid-min-width: 250px;
   }
 
-  /* Desktop: 2 or 3 columns based on data attribute */
+  /* Control minimum item width via data attribute */
+  /* 2-column grid: larger minimum = max 2 columns */
   .grid-container[data-columns='2'] {
-    grid-template-columns: repeat(2, 1fr);
+    --grid-min-width: 45%;
   }
 
+  /* 3-column grid: smaller minimum = allows up to 3 columns */
   .grid-container[data-columns='3'] {
-    grid-template-columns: repeat(3, 1fr);
+    --grid-min-width: 280px;
   }
 
   /* All grid items use configurable aspect ratio */
@@ -103,7 +113,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     width: 100%;
     aspect-ratio: var(--grid-aspect-ratio, 4 / 5);
     overflow: hidden;
-    border-radius: 8px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -153,7 +162,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .grid-item > :global([data-component="quote"]) {
     overflow-y: auto;
     height: 100%;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
 
     /* Custom scrollbar styling */
     scrollbar-width: thin;
@@ -169,36 +178,15 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     border-radius: 4px;
   }
 
-  /* Tablet: Reduce to 2 columns for 3-column layouts */
-  @media (max-width: 1024px) {
-    .grid-container[data-columns='3'] {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  /* Mobile: Stack vertically (1 column) */
-  @media (max-width: 768px) {
-    .grid-container[data-columns='2'],
-    .grid-container[data-columns='3'] {
-      grid-template-columns: 1fr;
-    }
-
-    .grid-title {
-      font-size: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .grid-component {
-      margin: 2rem 0;
-    }
-  }
-
-  /* Responsive gap adjustments */
-  @media (max-width: 768px) {
+  /* Container query: Adjust gap in narrow containers */
+  @container grid-layout (max-width: 600px) {
     .grid-container {
-      --grid-gap: max(1rem, var(--grid-gap) * 0.5);
+      gap: var(--space-m-l); /* Slightly smaller gap when narrow */
     }
   }
+
+  /* Note: No viewport media queries needed! Grid automatically adapts to container size */
+  /* Columns reflow based on available space using intrinsic auto-fit pattern */
 
   /* Accessibility */
   .grid-item:focus-within {
@@ -221,7 +209,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
     .grid-item {
       page-break-inside: avoid;
-      margin-bottom: 1rem;
+      margin-block-end: var(--space-m);
       aspect-ratio: auto;
       overflow: visible;
       contain: none;

@@ -2,20 +2,20 @@
 import DynamicComponent from './DynamicComponent.astro'
 
 export interface Props {
+  title?: string
   leftColumn: any[]
   rightColumn: any[]
   reverseOnMobile?: boolean
-  aspectRatio?: '4:5' | '9:16' | '1:1'
   className?: string
   _key?: string
   _type?: string
 }
 
 const {
+  title,
   leftColumn = [],
   rightColumn = [],
   reverseOnMobile = false,
-  aspectRatio = '4:5',
   className = '',
   _key,
   _type,
@@ -24,22 +24,16 @@ const {
 const leftItem = leftColumn[0]
 const rightItem = rightColumn[0]
 
-// Convert aspectRatio string to CSS value
-const aspectMap: Record<string, string> = {
-  '4:5': '4 / 5',
-  '9:16': '9 / 16',
-  '1:1': '1 / 1',
-}
-const aspectValue = aspectMap[aspectRatio] || '4 / 5'
-
 // Sanity Visual Editing attributes
 const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 ---
 
+{title && <h2 class="section-title">{title}</h2>}
+
 <section
   class={`two-column-layout content-wide ${reverseOnMobile ? 'reverse-mobile' : ''} ${className}`}
   data-layout-context="two-column"
-  style={`--column-aspect-ratio: ${aspectValue}`}
+  style="--column-aspect-ratio: 4 / 3"
   {...sanityAttributes}
 >
     <div class="column column-left">
@@ -52,11 +46,18 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 </section>
 
 <style>
+  .section-title {
+    margin-block-end: var(--space-l-xl); /* Fluid 24px → 40px */
+    font-size: var(--fs-2xl);
+    font-weight: 600;
+  }
+
   .two-column-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
-    margin: 3rem 0;
+    /* Intrinsic: creates 2 columns when space allows, stacks when narrow */
+    grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+    gap: var(--space-l-xl); /* Fluid 24px → 40px */
+    margin-block: var(--space-xl-2xl); /* Fluid 32px → 60px section spacing */
     align-items: stretch; /* Columns stretch to match height */
 
     /* Container query context - allows children to adapt to available space */
@@ -66,7 +67,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
   .column {
     width: 100%;
-    aspect-ratio: var(--column-aspect-ratio, 4 / 5);
+    aspect-ratio: var(--column-aspect-ratio, 4 / 3);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -108,7 +109,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   .column > :global(.portable-text) {
     overflow-y: auto;
     height: 100%;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
 
     /* Custom scrollbar styling */
     scrollbar-width: thin;
@@ -136,27 +137,22 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   }
 
 
-  /* Tablet: Reduce gap */
-  @media (max-width: 1024px) {
+  /* Container query: Adjust gap when columns stack */
+  @container two-column-layout (max-width: 600px) {
     .two-column-layout {
-      gap: 2rem;
-    }
-  }
-
-  /* Mobile: Stack vertically */
-  @media (max-width: 768px) {
-    .two-column-layout {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-      margin: 2rem 0;
+      gap: var(--space-m-l); /* Fluid 16px → 30px */
+      margin-block: var(--space-l-xl); /* Fluid 24px → 40px */
     }
 
-    /* Reverse column order on mobile if specified */
+    /* Reverse column order when stacked if specified */
     .two-column-layout.reverse-mobile {
       display: flex;
       flex-direction: column-reverse;
     }
   }
+
+  /* Note: No viewport media queries needed! Columns automatically stack when container is narrow */
+  /* Grid intrinsically adapts based on 400px minimum column width */
 
   /* Accessibility */
   .column:focus-within {

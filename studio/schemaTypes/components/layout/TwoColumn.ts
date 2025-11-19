@@ -9,6 +9,13 @@ export const twoColumnLayout = defineType({
   description: 'Plasser to komponenter side ved side (stabler vertikalt på mobil)',
   fields: [
     defineField({
+      name: 'title',
+      title: 'Tittel',
+      type: 'string',
+      description: 'Valgfri tittel over kolonnene',
+      validation: (Rule) => Rule.max(100),
+    }),
+    defineField({
       name: 'leftColumn',
       title: 'Venstre kolonne',
       type: 'array',
@@ -69,19 +76,20 @@ export const twoColumnLayout = defineType({
   ],
   preview: {
     select: {
+      title: 'title',
       leftColumn: 'leftColumn',
       rightColumn: 'rightColumn',
       reverseOnMobile: 'reverseOnMobile',
       aspectRatio: 'aspectRatio',
     },
-    prepare({leftColumn, rightColumn, reverseOnMobile, aspectRatio}) {
+    prepare({title, leftColumn, rightColumn, reverseOnMobile, aspectRatio}) {
       const leftType = leftColumn?.[0]?._type || 'tom'
       const rightType = rightColumn?.[0]?._type || 'tom'
       const reverseText = reverseOnMobile ? ' • Reversert mobil' : ''
       const aspectText = ` • ${aspectRatio || '4:5'}`
 
       return {
-        title: 'To kolonner',
+        title: title || 'To kolonner',
         subtitle: `Venstre: ${leftType} | Høyre: ${rightType}${reverseText}${aspectText}`,
         media: SplitHorizontalIcon,
       }

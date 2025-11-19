@@ -80,7 +80,7 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 ---
 
 <section class={`${containerClass} ${scrollbarClass}`}>
-  {title && <h3 class="artist-scroll-title">{title}</h3>}
+  {title && <h2 class="artist-scroll-title">{title}</h2>}
   <ul class="artist-list">
     {artistData.map((artist) => {
         if (!artist) return null
@@ -126,21 +126,21 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
   .artist-scroll-container {
     width: min(100ch, 100% - 4rem);
     margin-inline: auto;
-    margin-block: 2rem;
+    margin-block: var(--space-l-xl); /* Fluid 24px → 40px */
   }
 
   .artist-scroll-title {
-    font-size: 1.5rem;
+    font-size: var(--fs-2xl);
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-block-end: var(--space-m);
   }
 
   .artist-list {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-s-m); /* Fluid 12px → 20px */
     list-style: none;
     margin: 0;
-    padding: 0.5rem 0;
+    padding-block: var(--space-xs);
     overflow-x: auto;
   }
 
@@ -183,24 +183,24 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
   }
 
   .artist-content {
-    padding: 0.75rem;
+    padding: var(--space-s);
     background: white;
   }
 
   .artist-name {
-    font-size: 1rem;
+    font-size: var(--fs-base);
     font-weight: 600;
-    margin: 0 0 0.25rem 0;
+    margin-block-end: var(--space-3xs);
     line-height: 1.2;
   }
 
   .artist-instrument {
-    font-size: 0.85rem;
-    margin-bottom: 0.25rem;
+    font-size: var(--fs-sm);
+    margin-block-end: var(--space-3xs);
   }
 
   .artist-country {
-    font-size: 0.85rem;
+    font-size: var(--fs-sm);
   }
 
   /* Hide scrollbar */
@@ -215,12 +215,10 @@ const scrollbarClass = showScrollbar ? '' : 'hide-scrollbar'
 
   /* Responsive design */
   @media (max-width: 768px) {
-    .artist-list {
-      gap: 0.75rem;
-    }
-
     .artist-card {
       width: 240px;
     }
+
+    /* Note: Gap is fluid and adjusts automatically */
   }
 </style> 

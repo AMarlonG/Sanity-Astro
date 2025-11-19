@@ -149,14 +149,14 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
 
 <style>
   .event-filter {
-    margin-bottom: 2rem;
-    padding: 1rem;
+    margin-bottom: var(--space-l); /* Fluid 24px → 30px */
+    padding: var(--space-m); /* Fluid 16px → 20px */
     background: #f8f9fa;
     border: 1px solid #e9ecef;
   }
 
   .tabs-container {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-m); /* Fluid 16px → 20px */
   }
 
   .tabs-container:last-of-type {
@@ -195,7 +195,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
     padding: 0.75rem 1.25rem;
     border: 2px solid #ced4da;
     background: white;
-    font-size: 0.9rem;
+    /* Migrated to fluid token: --fs-xs (12-14px responsive) */
+    font-size: var(--fs-xs);
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -236,8 +237,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   }
 
   .active-filters {
-    margin-top: 1rem;
-    padding: 1rem;
+    margin-top: var(--space-m); /* Fluid 16px → 20px */
+    padding: var(--space-m); /* Fluid 16px → 20px */
     background: #e8f5e8;
     border: 1px solid #d4edda;
   }
@@ -245,7 +246,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   .active-filters-title {
     font-weight: 600;
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    /* Migrated to fluid token: --fs-xs (12-14px responsive) */
+    font-size: var(--fs-xs);
   }
 
   .active-filters-list {
@@ -259,7 +261,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
     align-items: center;
     padding: 0.25rem 0.75rem;
     background: #28a745;
-    font-size: 0.8rem;
+    /* Migrated to fluid token: --fs-xs (12-14px responsive) */
+    font-size: var(--fs-xs);
     font-weight: 500;
     white-space: nowrap;
   }
@@ -267,7 +270,8 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
   .htmx-indicator {
     display: none;
     font-style: italic;
-    font-size: 0.9rem;
+    /* Migrated to fluid token: --fs-xs (12-14px responsive) */
+    font-size: var(--fs-xs);
     text-align: center;
     margin-top: 0.5rem;
   }
@@ -276,31 +280,12 @@ function getActiveFilterName(filterType: string, filterValue: string, filterOpti
     display: block;
   }
 
-  /* Responsive design */
+  /* Responsive design - Simplified after fluid typography migration
+   * Font sizes now scale automatically via --fs-xs design token.
+   * Only layout-specific adjustments remain. */
   @media (max-width: 768px) {
-    .tabs-scroll {
-      gap: 0.25rem;
-    }
-    
-    .tab-button {
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-    }
-
     .active-filters-list {
       flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .active-filter-tag {
-      font-size: 0.75rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .tab-button {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.8rem;
     }
   }
 </style>

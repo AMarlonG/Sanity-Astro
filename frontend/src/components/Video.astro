@@ -146,7 +146,7 @@ switch (videoType) {
     width: var(--component-width, min(55ch, 100% - 4rem));
     max-width: var(--component-max-width, 100%);
     margin-inline: auto;
-    margin-block: 2rem;
+    margin-block: var(--space-l); /* Fluid 24px → 30px */
   }
 
   /* Reset margin when inside scroll containers to prevent overflow */
@@ -170,7 +170,8 @@ switch (videoType) {
   }
 
   .video-title {
-    font-size: 1.25rem;
+    /* Migrated to fluid token: --fs-lg (20-23px responsive) */
+    font-size: var(--fs-lg);
     font-weight: 600;
     margin-bottom: 0.5rem;
   }
@@ -210,20 +211,12 @@ switch (videoType) {
     background: #f8f9fa;
   }
 
-  /* Responsivt design */
-  @media (max-width: 768px) {
-    .video-component {
-      margin: 1.5rem 0;
-    }
-
-    .video-title {
-      font-size: 1.1rem;
-    }
-  }
+  /* Note: Removed viewport media query for margin - now uses fluid spacing token that adapts automatically */
 
   .video-caption {
     margin-top: 0.75rem;
-    font-size: 0.9rem;
+    /* Migrated to fluid token: --fs-sm (13-14px responsive) */
+    font-size: var(--fs-sm);
     line-height: 1.5;
   }
 

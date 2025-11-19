@@ -31,6 +31,7 @@ export {threeColumnLayout} from './layout/ThreeColumn'
 // Interactive Components
 export {accordionComponent} from './interactive/Accordion'
 export {buttonComponent} from './interactive/Button'
+export {linkComponent} from './interactive/Link'
 export {countdownComponent} from './interactive/Countdown'
 
 // Section Components

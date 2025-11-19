@@ -61,7 +61,7 @@ const { level, text, id, className = '', _key, _type } = Astro.props;
   :global([data-layout-context]) .heading-component {
     width: 100%;
     margin: 0;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
     display: flex;
     align-items: center;
     justify-content: center;

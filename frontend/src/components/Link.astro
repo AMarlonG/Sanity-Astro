@@ -1,0 +1,132 @@
+---
+interface LinkItem {
+  text: string;
+  url: string;
+  description?: string;
+  openInNewTab?: boolean;
+}
+
+interface Props {
+  links: LinkItem[];
+}
+
+const {
+  links = []
+} = Astro.props;
+
+// Don't render if no links
+if (!links || links.length === 0) {
+  return null;
+}
+---
+
+<div class="link-component content-media-narrow">
+  <nav aria-label="Lenker">
+    <ul class="link-list" role="list">
+      {links.map((link) => {
+        const target = link.openInNewTab ? '_blank' : undefined;
+        const rel = link.openInNewTab ? 'noopener noreferrer' : undefined;
+
+        return (
+          <li class="link-item">
+            <a
+              href={link.url}
+              class="link"
+              target={target}
+              rel={rel}
+            >
+              {link.text}
+              {link.openInNewTab && (
+                <span class="visually-hidden"> (åpnes i ny fane)</span>
+              )}
+            </a>
+            {link.description && (
+              <p class="link-description">{link.description}</p>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+</div>
+
+<style>
+  .link-component {
+    margin-block: var(--space-m-l);
+  }
+
+  .link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s-m);
+  }
+
+  .link-item {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .link {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-2xs) var(--space-xs);
+    color: var(--color-blue);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    transition: all var(--transition-fast);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--fs-2xl);
+  }
+
+  .link::after {
+    content: '\00a0→';
+  }
+
+  .link:hover {
+    color: var(--color-blue);
+    text-decoration-thickness: 2px;
+    background-color: rgba(0, 179, 154, 0.08);
+  }
+
+  .link:focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+    text-decoration: none;
+  }
+
+  /* Visited state - slightly different color to indicate visited links */
+  .link:visited {
+    color: rgb(0, 100, 87);
+  }
+
+  .link:visited:hover {
+    color: var(--color-blue);
+  }
+
+  .link-description {
+    margin: 0;
+    font-size: var(--fs-base);
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    padding-inline-start: calc(var(--space-xs) + var(--space-s));
+  }
+
+  /* Visually hidden utility for screen readers */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>

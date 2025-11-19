@@ -218,7 +218,7 @@ const fetchPriority = priority ? 'high' : 'auto';
   .image-container {
     width: fit-content; /* Wrap tightly around wrapper */
     max-width: 100%;
-    margin-block: 2rem;
+    margin-block: var(--space-l); /* Fluid 24px → 30px */
   }
 
   /* Alignment controls container positioning */
@@ -327,7 +327,7 @@ const fetchPriority = priority ? 'high' : 'auto';
   .image-missing {
     background: #f5f5f5;
     border: 2px dashed #ddd;
-    padding: 2rem;
+    padding: var(--space-l); /* Fluid 24px → 30px */
     text-align: center;
     aspect-ratio: 4/5;
     display: flex;

@@ -9,12 +9,6 @@ export const countdownComponent = defineType({
   icon: ClockIcon,
   fields: [
     defineField({
-      name: 'title',
-      title: 'Overskrift',
-      type: 'string',
-      description: 'Valgfri overskrift over nedtellingen (f.eks. "Festivalen starter om")',
-    }),
-    defineField({
       name: 'targetEvent',
       title: 'Arrangement',
       type: 'reference',
@@ -53,21 +47,19 @@ export const countdownComponent = defineType({
   ],
   preview: {
     select: {
-      title: 'title',
       eventTitle: 'targetEvent.title',
       eventDate: 'targetEvent.eventDate.date',
       eventTime: 'targetEvent.eventTime.startTime',
       style: 'style',
     },
-    prepare({title, eventTitle, eventDate, eventTime, style}) {
-      const displayTitle = title || 'Nedtelling'
-      const eventInfo = eventTitle 
+    prepare({eventTitle, eventDate, eventTime, style}) {
+      const eventInfo = eventTitle
         ? `til ${eventTitle} (${new Date(eventDate).toLocaleDateString('nb-NO')} kl. ${eventTime})`
         : 'Ingen arrangement valgt'
-      
+
       return {
         title: 'Nedtelling',
-        subtitle: `${displayTitle} • ${eventInfo} • ${style} stil`,
+        subtitle: `${eventInfo} • ${style} stil`,
         media: ClockIcon,
       }
     },

@@ -1,18 +1,16 @@
 ---
 export interface Props {
   targetEvent: any;
-  title?: string;
   style?: 'large' | 'compact' | 'minimal';
   completedMessage?: string;
   hideWhenComplete?: boolean;
 }
 
-const { 
-  targetEvent, 
-  title, 
-  style = 'compact', 
+const {
+  targetEvent,
+  style = 'compact',
   completedMessage = 'Arrangementet har startet!',
-  hideWhenComplete = false 
+  hideWhenComplete = false
 } = Astro.props;
 
 // Calculate time remaining server-side for initial render
@@ -73,9 +71,7 @@ if (timeRemaining.expired && hideWhenComplete) {
 const eventId = targetEvent?._id;
 ---
 
-<section class={`countdown countdown--${style}`} aria-labelledby={title ? "countdown-title" : undefined}>
-  {title && <h3 id="countdown-title" class="countdown__title">{title}</h3>}
-
+<section class={`countdown countdown--${style}`}>
   <div
     class="countdown__display"
     role={timeRemaining.expired ? "status" : "timer"}
@@ -124,15 +120,9 @@ const eventId = targetEvent?._id;
 <style>
   .countdown {
     text-align: center;
-    padding: 1.5rem;
+    padding: var(--space-m-l); /* Fluid 16px → 30px */
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 1px solid #dee2e6;
-  }
-
-  .countdown__title {
-    margin: 0 0 1rem 0;
-    font-size: 1.25rem;
-    font-weight: 600;
   }
 
   .countdown__display {
@@ -141,7 +131,8 @@ const eventId = targetEvent?._id;
 
   .countdown__sentence {
     margin: 0;
-    font-size: 1.5rem;
+    /* Migrated to fluid token: responsive 20-23px */
+    font-size: var(--fs-lg);
     line-height: 1.4;
     display: flex;
     justify-content: center;
@@ -158,50 +149,58 @@ const eventId = targetEvent?._id;
   }
 
   .countdown__number {
-    font-size: 2rem;
+    /* Migrated to fluid token: responsive 31-35px */
+    font-size: var(--fs-2xl);
     font-weight: 700;
     display: block;
   }
 
   .countdown__label {
-    font-size: 0.875rem;
+    /* Migrated to fluid token: responsive 13-14px */
+    font-size: var(--fs-sm);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-top: 0.25rem;
   }
 
   .countdown__readable {
-    font-size: 1rem;
+    /* Migrated to fluid token: responsive 16-18px */
+    font-size: var(--fs-base);
     margin: 0.5rem 0 0 0;
     font-style: italic;
   }
 
   /* Style variations */
   .countdown--large .countdown__sentence {
-    font-size: 2rem;
+    /* Migrated to fluid token: responsive 31-35px */
+    font-size: var(--fs-2xl);
   }
 
   .countdown--large .countdown__number {
-    font-size: 3rem;
+    /* Migrated to fluid token: responsive 39-44px */
+    font-size: var(--fs-3xl);
   }
 
   .countdown--minimal {
-    padding: 1rem;
+    padding: var(--space-m); /* Fluid 16px → 20px */
     background: none;
     border: none;
   }
 
   .countdown--minimal .countdown__sentence {
-    font-size: 1.25rem;
+    /* Migrated to fluid token: responsive 16-18px */
+    font-size: var(--fs-base);
   }
 
   .countdown--minimal .countdown__number {
-    font-size: 1.5rem;
+    /* Migrated to fluid token: responsive 20-23px */
+    font-size: var(--fs-lg);
   }
 
   .countdown__expired {
     margin: 0;
-    font-size: 1.5rem;
+    /* Migrated to fluid token: responsive 20-23px */
+    font-size: var(--fs-lg);
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -209,31 +208,16 @@ const eventId = targetEvent?._id;
     gap: 0.5rem;
   }
 
-  /* Responsivt design */
+  /* Responsive design - Simplified after fluid typography migration
+   * Font sizes now scale automatically via design tokens.
+   * Only layout-specific adjustments remain. */
   @media (max-width: 768px) {
-    .countdown {
-      padding: 1rem;
-    }
-
     .countdown__sentence {
-      font-size: 1.25rem;
       gap: 0.25rem;
-    }
-
-    .countdown__number {
-      font-size: 1.5rem;
     }
 
     .countdown__unit {
       min-width: 50px;
-    }
-
-    .countdown--large .countdown__sentence {
-      font-size: 1.5rem;
-    }
-
-    .countdown--large .countdown__number {
-      font-size: 2rem;
     }
   }
 

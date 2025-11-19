@@ -10,6 +10,7 @@ import { QueryBuilder } from '../lib/sanity/queryBuilder.js';
 // Import CSS files in order
 import '../styles/reset.css';
 import '../styles/tokens.css';
+import '../styles/primitives.css'; // Layout primitives (Center, Stack, Cluster)
 import '../styles/base.css';
 import '../styles/utilities.css';
 import '../styles/components.css';
@@ -86,15 +87,24 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
         grid-template-rows: auto 1fr auto;
         grid-template-columns: 100%;
         min-block-size: 100vh; /* Logical property for height */
+        /* Pure white background */
+        background-color: #ffffff;
       }
 
       /* Main content - Flexible, fills available space */
       .main-content {
         display: flex;
         flex-direction: column;
+        /* Kevin Powell pattern: Fluid on mobile, capped on desktop */
+        width: min(100ch, 100% - 4rem);
+        margin-inline: auto;
         /* Intrinsic padding using fluid values */
         padding-block-start: var(--page-top-spacing);
         padding-block-end: clamp(var(--space-6), 6vw, var(--space-10));
+
+        /* Enable container queries for child components */
+        container-type: inline-size;
+        container-name: content;
       }
 
       /* Footer - Intrinsic size with centered content */
@@ -276,9 +286,7 @@ const enableVisualEditing = visualEditingEnabled && hasPreviewMode;
     />
 
     <main id="main-content" class="main-content" tabindex="-1">
-      <div class="content-wrapper">
-        <slot />
-      </div>
+      <slot />
     </main>
 
     <!-- Footer -->

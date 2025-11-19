@@ -8,7 +8,6 @@ import Heading from './Heading.astro'
 import PortableText from './PortableText.astro'
 
 export interface Props {
-  title?: string
   description?: string
   panels?: Array<{
     title: string
@@ -18,7 +17,6 @@ export interface Props {
 }
 
 const {
-  title,
   description,
   panels = [],
   className = ''
@@ -26,10 +24,8 @@ const {
 ---
 
 <div class={`accordion ${className}`}>
-  {title && <h2 class="accordion-title">{title}</h2>}
   {description && <p class="accordion-description">{description}</p>}
 
-  <div class="accordion-panels">
   {panels && panels.length > 0 ? (
     panels.map((panel) => (
       <details class="accordion-panel">
@@ -70,47 +66,39 @@ const {
     </div>
   )}
 </div>
-</div>
 
 
 <style>
-  /* CSS Variable-based width control - Kevin Powell method */
   .accordion {
-    width: var(--component-width, min(55ch, 100% - 4rem));
-    max-width: var(--component-max-width, 100%);
-    margin-inline: auto;
-    margin-block: 2rem;
-  }
-
-  .accordion-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+    width: min(65ch, 100% - 4rem); /* Same width as Quote component */
+    max-width: 100%;
+    margin-inline: auto; /* Center it */
+    margin-block: var(--space-xl-2xl); /* Fluid section spacing */
+    background: var(--color-yellow-50); /* Light yellow background for entire component */
+    padding: var(--space-m-l); /* Padding around entire accordion */
   }
 
   .accordion-description {
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-  }
-
-  .accordion-panels {
-    border: 1px solid #e0e0e0;
-    overflow: hidden;
+    margin-bottom: var(--space-l);
+    line-height: var(--line-height-normal);
+    color: var(--color-yellow-900); /* Dark yellow text to match theme */
   }
 
   .accordion-panel {
-    border-bottom: 1px solid #e0e0e0;
+    border: 2px solid var(--color-yellow-200); /* Visible border around each panel */
+    margin-bottom: var(--space-s); /* Space between panels */
   }
 
   .accordion-panel:last-child {
-    border-bottom: none;
+    margin-bottom: 0; /* No margin on last panel */
   }
 
   .accordion-summary {
-    padding: 1rem 1.5rem;
-    background: #f8f9fa;
+    padding: var(--space-m) var(--space-m-l); /* Fluid padding */
+    background: var(--color-yellow-100); /* Light yellow tint */
+    color: var(--color-yellow-900); /* Dark yellow text */
     cursor: pointer;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium); /* 500 */
     transition: background-color 0.2s ease;
     list-style: none;
     position: relative;
@@ -129,8 +117,8 @@ const {
     transform: translateY(-50%) rotate(45deg);
     width: 8px;
     height: 8px;
-    border-right: 2px solid #666;
-    border-bottom: 2px solid #666;
+    border-right: 2px solid var(--color-yellow-900);
+    border-bottom: 2px solid var(--color-yellow-900);
     transition: transform 0.2s ease;
   }
 
@@ -139,22 +127,31 @@ const {
   }
 
   .accordion-summary:hover {
-    background: #e9ecef;
+    background: var(--color-yellow-200); /* Slightly darker on hover */
+  }
+
+  .accordion-summary:active {
+    background: var(--color-yellow-100); /* Keep yellow during click */
   }
 
   .accordion-summary:focus {
-    outline: 2px solid #0066cc;
+    outline: 2px solid var(--color-yellow-900);
     outline-offset: -2px;
   }
 
+  .accordion-panel {
+    background: var(--color-yellow-50); /* Fill entire panel with yellow to prevent green flash */
+  }
+
   .accordion-content {
-    padding: 1rem 1.5rem;
-    background: white;
-    line-height: 1.6;
+    padding: var(--space-m) var(--space-m-l); /* Fluid padding */
+    background: var(--color-yellow-50); /* Very light yellow background */
+    color: var(--color-yellow-900); /* Dark yellow text */
+    line-height: var(--line-height-normal);
   }
 
   .no-panels {
-    padding: 1rem 1.5rem;
+    padding: var(--space-m) var(--space-m-l); /* Fluid padding */
     text-align: center;
   }
 </style> 

@@ -96,7 +96,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
 
 <style>
   .spotify-component {
-    margin-block: 2rem;
+    margin-block: var(--space-l); /* Fluid 24px → 30px */
     margin-inline: auto;
     max-width: 100%;
   }
@@ -125,7 +125,6 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     position: relative;
     width: 100%;
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
 
   .spotify-iframe {
@@ -134,10 +133,9 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
   }
 
   .spotify-error {
-    padding: 2rem;
+    padding: var(--space-l); /* Fluid 24px → 30px */
     background: #f8f9fa;
     border: 1px dashed #dee2e6;
-    border-radius: 8px;
     text-align: center;
     color: #6c757d;
   }
@@ -170,12 +168,7 @@ const sanityAttributes = _key ? { 'data-sanity': `${_type}.${_key}` } : {}
     color: #6c757d;
   }
 
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .spotify-component {
-      margin: 1.5rem 0;
-    }
-  }
+  /* Note: Removed viewport media query for margin - now uses fluid spacing token that adapts automatically */
 
   /* Accessibility */
   .spotify-iframe:focus {
